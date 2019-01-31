@@ -1,0 +1,37 @@
+#pragma once
+
+enum IndexRParam
+{
+	RPARAM_A = 0,
+	RPARAM_B,
+	RPARAM_C,
+	RPARAM_X,
+	RPARAM_Y,
+	RPARAM_Z,
+	RPARAM_D,
+	RPARAM_E,
+	RPARAM_F,
+	RPARAM_F,
+	RPARAM_I,
+	RPARAM_J,
+	RPARAM_K,
+	RPARAM_P,
+	RPARAM_Q,
+	RPARAM_R,
+	RPARAM_S,
+	RPARAM_U,
+	RPARAM_V,
+	RPARAM_W,
+	RPARAM_MAX
+};
+
+enum IndexIParam
+{
+	IPARAM_L = 0,
+	IPARAM_H,
+	IPARAM_T,
+	IPARAM_MAX
+};
+
+	
+

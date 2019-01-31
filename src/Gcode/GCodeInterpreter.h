@@ -138,6 +138,8 @@ namespace Interpreter
 	//здесь переменные для чтения команд
 	class  CmdParser
 	{
+		int n_number; // N - value
+		std::string comment;
 	public:
 		CmdParser() { }
 		std::vector<GKey> codes;
@@ -157,33 +159,7 @@ namespace Interpreter
 		mutable InterError  state;
 	};
 
-	enum BitPos
-	{
-		BitPos_ERR = -1,
-		BitPos_X = 0, BitPos_Y, BitPos_Z,
-		BitPos_A, BitPos_B, BitPos_C,
-		BitPos_I, BitPos_J, BitPos_K,
-		BitPos_F, BitPos_P, BitPos_Q, BitPos_S, BitPos_R, BitPos_D, BitPos_L,
-	};
-
-	struct Flags
-	{
-		unsigned int flags;
-		Flags() : flags(0) { }
-		void reset() { flags = 0; }
-		bool get(int pos)
-		{
-			return (flags & (1 << pos)) != 0;
-		}
-		void set(int pos, bool value)
-		{
-			if (value)
-				flags |= (1 << pos);
-			else
-				flags &= ~(1 << pos);
-		}
-	};
-
+	
 	class GCodeInterpreter  //несомненно, это интерпретатор г-кода )
 	{
 	public:
