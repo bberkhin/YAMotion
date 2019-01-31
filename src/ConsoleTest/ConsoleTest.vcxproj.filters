@@ -15,48 +15,39 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="pch.h">
-      <Filter>Файлы заголовков</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Gcode\config_defines.h">
-      <Filter>Файлы заголовков</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Gcode\GCodeInterpreter.h">
-      <Filter>Файлы заголовков</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\Gcode\ienvironment.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Gcode\Iexecutor.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Gcode\log.h">
+    <ClInclude Include="..\Gcode\ilogger.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\test\environmentsimple.h">
+    <ClInclude Include="logconsole.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\test\executorlog.h">
+    <ClInclude Include="..\Gcode\GCodeInterpreter.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Gcode\environmentsimple.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="pch.cpp">
-      <Filter>Исходные файлы</Filter>
-    </ClCompile>
     <ClCompile Include="ConsoleTest.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\Gcode\GCodeInterpreter.cpp">
+    <ClCompile Include="..\Gcode\ilogger.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\Gcode\log.cpp">
+    <ClCompile Include="logconsole.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\test\environmentsimple.cpp">
+    <ClCompile Include="..\Gcode\GCodeInterpreter.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\test\executorlog.cpp">
+    <ClCompile Include="..\Gcode\environmentsimple.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
   </ItemGroup>

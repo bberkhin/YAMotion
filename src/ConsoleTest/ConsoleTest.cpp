@@ -1,11 +1,13 @@
 ﻿// ConsoleTest.cpp : Этот файл содержит функцию "main". Здесь начинается и заканчивается выполнение программы.
 //
 
-#include "pch.h"
 #include <iostream>
 #include "environmentsimple.h"
-#include "executorlog.h"
+#include "logconsole.h"
 #include "GCodeInterpreter.h"
+#include <string>
+#include <iostream>
+#include <fstream>
 
 
 
@@ -13,15 +15,17 @@ using namespace Interpreter;
 
 int main(int argc, char *argv[] )
 {
-    std::cout << "Hello World!\n"; 
+    
 	ExecutorLog exec;
 	EnvironmentSimple env;
-	GCodeInterpreter ipret(&env, &exec);
+	LoggerConsole logger;
+	GCodeInterpreter ipret(&env, &exec,&logger);
 	if (argc == 2)
 	{
 		ipret.read_file(argv[1]);
 		ipret.execute_file(&exec);
 	}
+	getchar();
 	return 0;
 }
 

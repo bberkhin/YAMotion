@@ -1,6 +1,6 @@
 #ifndef ENVIRONMENTSIMPLE_H
 #define ENVIRONMENTSIMPLE_H
-#include "..\Gcode\ienvironment.h"
+#include "ienvironment.h"
 
 class EnvironmentSimple : public IEnvironment
 {
