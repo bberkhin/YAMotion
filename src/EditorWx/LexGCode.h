@@ -1,0 +1,15 @@
+#pragma once
+
+#define SCE_GCODE_DEFAULT 0
+#define SCE_GCODE_COMMENT 1
+#define SCE_GCODE_COMMENT_ML 2
+#define SCE_GCODE_G 3
+#define SCE_GCODE_M 4
+#define SCE_GCODE_PARAM 5
+#define SCE_GCODE_VAR 6 
+#define SCE_GCODE_NUMBER 7 
+#define SCE_GCODE_COORDINATE 8
+#define SCE_GCODE_WORD1 9 
+
+#define SCLEX_GCODE 200
+
