@@ -110,6 +110,7 @@
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <AdditionalIncludeDirectories>$(SolutionDir)Gcode;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -149,6 +150,7 @@
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <AdditionalIncludeDirectories>$(SolutionDir)Gcode;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -158,11 +160,11 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\Gcode\ienvironment.h" />
-    <ClInclude Include="..\..\Gcode\Iexecutor.h" />
     <ClInclude Include="..\Gcode\environmentsimple.h" />
     <ClInclude Include="..\Gcode\GCodeInterpreter.h" />
     <ClInclude Include="..\Gcode\cmdparser.h" />
+    <ClInclude Include="..\Gcode\ienvironment.h" />
+    <ClInclude Include="..\Gcode\Iexecutor.h" />
     <ClInclude Include="..\Gcode\ilogger.h" />
     <ClInclude Include="logconsole.h" />
   </ItemGroup>

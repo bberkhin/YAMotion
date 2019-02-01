@@ -2,9 +2,8 @@
 #include <list>
 #include <queue>
 #include <memory>
-//#include <QObject>
-#include <optional>
 #include "stdint.h"
+#include <optional>
 
 
 //#define NUM_AXES   4 //сколько осей используем (координаты плюс подчиненные им оси)

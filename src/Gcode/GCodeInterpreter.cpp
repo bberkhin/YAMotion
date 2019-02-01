@@ -8,7 +8,7 @@
 
 using namespace Interpreter;
 
-#pragma warning(disable:4996)
+//#pragma warning(disable:4996)
 
 //====================================================================================================
 GCodeInterpreter::GCodeInterpreter(IEnvironment *penv, IExecutor *ix, ILogger *log) :
@@ -129,7 +129,7 @@ InterError GCodeInterpreter::execute_frame(const char *str)
 {
 	CmdParser parser;                              //парсер команд
 
-	if (!parser.parse_codes(str))
+	if (!parser.parse(str))
 		return parser.get_state();
 	
 // выполняем команды в нужной последовательности 

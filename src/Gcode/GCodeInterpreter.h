@@ -6,9 +6,13 @@
 #include "iexecutor.h"
 #include "ienvironment.h"
 #include "ilogger.h"
+#include "cmdparser.h"
+
+#define MAX_GCODE_LINELEN 512
 
 namespace Interpreter
 {
+
 
 	enum Plane
 	{
@@ -56,46 +60,7 @@ namespace Interpreter
 		CannedLevel_HIGH,   //отвод к исходной плоскости, G98
 		CannedLevel_LOW,    //отвод к плоскости обработки, G99
 	};
-	enum ModalGroup //некоторые операторы не могут одновременно содержаться в одном фрейме
-	{
-		ModalGroup_NONE = 0, //g4,g10,g28,g30,g53,g92.[0-3]
-		ModalGroup_MOVE,                 //g0..g3 //G38.2, G80..G89
-		ModalGroup_INCREMENTAL, //g90..g91
-		ModalGroup_UNITS, //g20..g21
-		//ModalGroup_CYCLE, //g80..g85
-		ModalGroup_COORD_SYSTEM, //g54..g58
-		ModalGroup_TOOL_LENGTH_CORRECTION, //g43,g44,g49
-		ModalGroup_TOOL_RADIUS_CORRECTION, //g40..g42
-		ModalGroup_CYCLE_RETURN, //g98, g99
-		ModalGroup_ACTIVE_PLANE, //g17..g19
-		ModalGroup_STOP, //M0, M1, M2, M30, M60
-		ModalGroup_TOOL_CHANGE, //M6
-		ModalGroup_TURN_TOOL, //M3, M4, M5
-		ModalGroup_GREASER, //M7, M8, M9
-		ModalGroup_FEEDMODE,  // g93, g94, g95
-		ModalGroup_SPINDLEMODE  //G96 G97 spindle
-	};
-
-
-	struct InterError
-	{
-		enum Code
-		{
-			ALL_OK = 0,
-			INVALID_STATEMENT, //неизвестная буква
-			DOUBLE_DEFINITION, //буква повторилась
-			WRONG_PLANE,       //задана неправильная плоскость
-			WRONG_LETTER,
-			WRONG_VALUE,
-			NO_VALUE,
-		};
-
-		Code code;
-		std::string description;
-		InterError() :code(ALL_OK) { }
-		InterError(Code code, std::string description) : code(code), description(description) {}
-	};
-
+	
 	//=================================================================================================
 	//интерпретатор работает следующим образом
 	//читается вся строка, выбираются команды и для них ищутся параметры
@@ -126,38 +91,6 @@ namespace Interpreter
 
 	};
 
-
-
-	struct GKey
-	{
-		char letter;
-		double value;
-		int position;
-	};
-
-	//здесь переменные для чтения команд
-	class  CmdParser
-	{
-		int n_number; // N - value
-		std::string comment;
-	public:
-		CmdParser() { }
-		std::vector<GKey> codes;
-		bool parse_codes(const char *frame); //читает коды и значения параметров
-		bool check_modal_group() const;
-		bool contain_cmd(ModalGroup group) const;
-		bool contain_cmd(char letter, int ival) const;
-		InterError get_state() const;
-		bool getRValue(char ch, double *pr) const;
-		bool getIValue(char ch, int *pi) const;
-	private:
-		bool parse_code(const char *string, int &position, GKey &key); //следующий код
-		void find_significal_symbol(const char *string, int &position) const; //пропускает комментарии, пробелы
-		bool parse_value(const char *string, int &position, double &value) const; //считывает число
-		ModalGroup get_modal_group(const GKey &key) const;
-	private:
-		mutable InterError  state;
-	};
 
 	
 	class GCodeInterpreter  //несомненно, это интерпретатор г-кода )
