@@ -6,9 +6,8 @@
 #include "iexecutor.h"
 #include "ienvironment.h"
 #include "ilogger.h"
-#include "cmdparser.h"
+#include "gcodedefs.h"
 
-#define MAX_GCODE_LINELEN 512
 
 namespace Interpreter
 {
@@ -76,7 +75,7 @@ namespace Interpreter
 		MotionMode motionMode;   //режим перемещения (линейная интерполяция и т.п.)
 		Plane plane;             //текущая плоскость интерполяции
 		double feed;             //подача в мм/мин
-		int spindlespeed; // обороты шпиндля
+		double spindlespeed; // обороты шпиндля
 		Coords origin;            //параметры команд G54..G58
 		CannedCycle cycle;       //текущий цикл
 	//    bool   cycleUseLowLevel; //использовать R вместо стартовой точки
@@ -92,7 +91,8 @@ namespace Interpreter
 	};
 
 
-	
+	class CmdParser;
+
 	class GCodeInterpreter  //несомненно, это интерпретатор г-кода )
 	{
 	public:
@@ -100,12 +100,13 @@ namespace Interpreter
 		~GCodeInterpreter(void);
 
 		bool read_file(const char *name);             //запоминает строки текстового файла
-		void execute_file(IExecutor *executor);                    //исполняет файл
+		void execute_file();
 		void execute_file(const char *data);
 		void execute_line(const  char *line, int lineNumber = 1);    //исполняет одну строку
 
 	private:
 		void init();                            //инициализация для нового файла
+		const char *cpy_close_and_downcase(char *line, const char *src, int lineNumber);
 		InterError execute_frame(const char *frame);    //выполнение строки
 	//  void set_move_mode(MoveMode mode);      //изменение режима перемещения
 		void local_deform(Coords &coords);      //преобразование масштаба, поворот в локальной системе координат
@@ -123,13 +124,13 @@ namespace Interpreter
 		bool run_tool_cmd(const CmdParser &parser);
 		bool run_mcode(const CmdParser &parser);
 		bool run_gcode(const CmdParser &parser);
-		bool run_stop(const CmdParser &parser);
-		void setopionalcoordinate(Coords &newpos, optdouble *pvalss);
-		Coords  get_new_coordinate(Coords &oldLocal, optdouble *pvalss);
+		bool run_stop(const CmdParser &parser);		
+		void setcoordinates(Coords &newpos, const CmdParser &parser) const; 
+		Coords get_new_coordinate(Coords &oldLocal, const CmdParser &parser);
 
-		InterError get_state() { return error_; }
+		InterError get_state() { return state; }
 	private:
-		InterError error_;
+		InterError state;
 		std::list<std::string> inputFile;     //строки входного файла
 		RunnerData  runner;                    //текущее состояние
 		ILogger *logger;

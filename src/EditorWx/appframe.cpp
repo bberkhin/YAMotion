@@ -627,8 +627,11 @@ void AppFrame::OnThreadCompletion(wxThreadEvent&)
 
 void AppFrame::OnThreadUpdate(wxThreadEvent &ev)
 {
-	if(m_hlbox)
+	if (m_hlbox)
+	{
 		m_hlbox->Append(ev.GetString());
+		m_hlbox->Update();
+	}
 
 }
 

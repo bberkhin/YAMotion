@@ -8,6 +8,9 @@
 #include <string>
 #include <iostream>
 #include <fstream>
+#include <filesystem>
+#include <stdio.h>
+namespace fs = std::filesystem;
 
 
 
@@ -23,7 +26,26 @@ int main(int argc, char *argv[] )
 	if (argc == 2)
 	{
 		ipret.read_file(argv[1]);
-		ipret.execute_file(&exec);
+		ipret.execute_file();
+	}
+	else
+	{
+		//setup converter//setup converter
+
+		std::string path;
+		for (const auto & entry : fs::directory_iterator(path))
+		{
+			std::cout << "Start file: " << entry.path() << "\n";
+			//use converter (.to_bytes: wstr->str, .from_bytes: str->wstr)
+			std::string csFile = entry.path().string();			
+			ipret.read_file( csFile.c_str() );
+			ipret.execute_file();
+			std::cout << "End file: " << entry.path() << "\n" << "\n";
+
+			getchar();
+		}
+			
+
 	}
 	getchar();
 	return 0;

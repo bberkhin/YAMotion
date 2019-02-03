@@ -70,7 +70,7 @@ public:
 	virtual ~IExecutor() { }
 	virtual void set_current_line(int nu_of_line) = 0;
 	virtual void set_feed_rate(double feed) = 0;
-	virtual void set_spindle_speed(int speed) = 0;
+	virtual void set_spindle_speed(double speed) = 0;
 	virtual void set_tool_change(int toolid) = 0;
 	virtual void straight_feed(const Coords &position) = 0;
 	virtual void straight_traverce(const Coords &position) = 0;

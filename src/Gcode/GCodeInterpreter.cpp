@@ -2,13 +2,13 @@
 #include <string>
 #include <iostream>
 #include <fstream>
-
 #include "GCodeInterpreter.h"
+#include "cmdparser.h"
 
 
 using namespace Interpreter;
 
-//#pragma warning(disable:4996)
+#pragma warning(disable:4996)
 
 //====================================================================================================
 GCodeInterpreter::GCodeInterpreter(IEnvironment *penv, IExecutor *ix, ILogger *log) :
@@ -51,41 +51,97 @@ void GCodeInterpreter::execute_file(const char *data)
 {
 
 	char line[MAX_GCODE_LINELEN];
-	const char *p = data;
-	int  i = 0;
+	const char *p ;
+	const char *pEnd = data;
 	int lineNumber = 1;
 	do
 	{
-		//_sleep(200);
-		const char *pEnd = strchr(p, '\n');
-		if (pEnd != NULL)
-			i = pEnd - p + 1;
-		else
-			i = -1;
+		p = pEnd;
+		pEnd = cpy_close_and_downcase(line, p, lineNumber);
+		if (line[0] != 0 )
+		{
+			execute_line(line, lineNumber);
+		}
+		++lineNumber;	
+	} while (pEnd);
+}
 
-		if (i >= MAX_GCODE_LINELEN)
+const char *GCodeInterpreter::cpy_close_and_downcase(char *line, const char *src, int lineNumber)       //!< string: one line of NC code
+{
+	int m;
+	int n;
+	bool comment, semicomment;
+	char item;
+	comment = semicomment = false;
+	for (n = 0, m = 0; src[m] != '\0' && src[m] != '\n'; m++)
+	{
+		item = src[m];
+		if (n >= MAX_GCODE_LINELEN - 1)
 		{
 			logger->log(LOG_WARNING, "Line %d is very long\n", lineNumber);
+			break;
 		}
-		else if (i >= 0)
+
+		if ((item == ';' || (item == '/' && src[m+1] == '/')  ) && !comment)
+			semicomment = 1;
+
+		if (semicomment) 
 		{
-			strncpy(line, p, i);
-			line[i] = 0;
-			execute_line(line, ++lineNumber);
-			p = pEnd+1;
+			line[n++] = item; // pass literally
+			continue;
 		}
-	} while (i >= 0);
+		else if (comment) 
+		{
+			line[n++] = item;
+			if (item == ')')
+			{
+				comment = 0;
+			}
+			else if (item == '(')
+			{
+				logger->log(LOG_WARNING, "Line %d  '(' inside comment", lineNumber);
+			}
+		}
+		else if ((item == ' ') || (item == '\t') || (item == '\r')) /* don't copy blank or tab or CR */
+		{
+			; 
+		}
+		else if ((64 < item) && (item < 91))   /* downcase upper case letters */
+		{   
+			line[n++] = (32 + item);
+		}
+		else if ((item == '(') && !semicomment) {   /* (comment is starting */
+			comment = 1;
+			line[n++] = item;
+		}
+		else {
+			line[n++] = item;         /* copy anything else */
+		}		
+	}
+	if ( comment )
+		logger->log(LOG_WARNING, "Line %d  unclosed comment found", lineNumber);
+	
+	line[n] = 0;
+
+	if (src[m] != '\0' && src[m] == '\n')//need skip long string
+	{
+		for (;  src[m] != '\0' && src[m] != '\n'; m++);
+	}
+	
+	if (src[m] == '\n')
+		return src + m + 1; // next symvol
+	else
+		return NULL;
+
 }
 
 //====================================================================================================
 //читает строки в список
-void GCodeInterpreter::execute_file(IExecutor *ix)
+void GCodeInterpreter::execute_file()
 {
 	RunnerData  runnerDump;
 	runnerDump = runner;
-
-	if (executor)
-		executor = ix;
+	
 	if (!executor)
 	{
 		logger->log(LOG_ERROR,"Executor not defined");
@@ -93,9 +149,11 @@ void GCodeInterpreter::execute_file(IExecutor *ix)
 	}
 
 	int lineNumber = 0;
+	char line[MAX_GCODE_LINELEN];
 	for (auto iter = inputFile.begin(); iter != inputFile.end(); ++iter)
 	{
-		execute_line(iter->c_str(), ++lineNumber);
+		cpy_close_and_downcase(line, iter->c_str(), lineNumber);
+		execute_line(line, ++lineNumber);
 	};
 	// restore ???
 	runner = runnerDump;
@@ -107,7 +165,10 @@ void GCodeInterpreter::execute_line(const char *line, int lineNumber)
 {
 	if (executor)
 		executor->set_current_line(lineNumber);
+	
+	state.clear();
 	auto result = execute_frame(line);
+	
 	if (result.code)
 		logger->log(LOG_ERROR, "Error line %d %s\n", lineNumber, result.description.c_str());
 }
@@ -127,11 +188,14 @@ void GCodeInterpreter::execute_line(const char *line, int lineNumber)
 
 InterError GCodeInterpreter::execute_frame(const char *str)
 {
-	CmdParser parser;                              //парсер команд
+	CmdParser parser(env);                              //парсер команд
 
 	if (!parser.parse(str))
 		return parser.get_state();
 	
+	if (!parser.neead_execute())
+		return InterError();
+
 // выполняем команды в нужной последовательности 
 	if (!run_feed_mode(parser))
 		return get_state();
@@ -154,13 +218,10 @@ InterError GCodeInterpreter::execute_frame(const char *str)
 }
 
 
-bool GCodeInterpreter::run_feed_mode(const CmdParser &parser)
+bool GCodeInterpreter::run_feed_mode( const CmdParser &parser )
 {
 	if (parser.contain_cmd(ModalGroup_FEEDMODE))
-	{
-		error_ = InterError(InterError::Code::INVALID_STATEMENT, "FEEDMODE not suppoted");
-		return false;
-	}
+		RET_F_SETSTATE(NOTSUPPORTEDYET, "FEEDMODE not suppoted");
 	else
 		return true;
 }
@@ -168,13 +229,10 @@ bool GCodeInterpreter::run_feed_mode(const CmdParser &parser)
 bool GCodeInterpreter::run_feed_rate(const  CmdParser &parser)
 {
 	double feed;
-	if (parser.getRValue('F', &feed))
+	if (parser.getRParam(PARAM_F, &feed))
 	{
 		if (feed <= 0. || feed > MAX_FEED_RATE)
-		{
-			error_ = InterError(InterError::Code::WRONG_VALUE, "feed value is incorrect ");
-			return false;
-		}
+			RET_F_SETSTATE(WRONG_VALUE, "feed value is incorrect ");
 		runner.feed = feed;
 		if (executor)
 			executor->set_feed_rate(feed);
@@ -186,24 +244,18 @@ bool GCodeInterpreter::run_feed_rate(const  CmdParser &parser)
 bool GCodeInterpreter::run_spindle_mode(const  CmdParser &parser)
 {
 	if (parser.contain_cmd(ModalGroup_SPINDLEMODE))
-	{
-		error_ = InterError(InterError::Code::INVALID_STATEMENT, "SPINDLE mode not suppoted");
-		return false;
-	}
+		RET_F_SETSTATE(NOTSUPPORTEDYET, "SPINDLE mode not suppoted");
 	return true;
 }
 
 
 bool GCodeInterpreter::run_speed(const CmdParser &parser)
 {
-	int speed;
-	if (parser.getIValue('S', &speed))
+	double speed;
+	if (parser.getRParam(PARAM_S, &speed))
 	{
 		if (speed <= 0. || speed > MAX_SPINDELSPEED)
-		{
-			error_ = InterError(InterError::Code::WRONG_VALUE, "spindle speed  is incorrect ");
-			return false;
-		}
+			RET_F_SETSTATE(WRONG_VALUE, "spindle speed  is incorrect ");
 		runner.spindlespeed = speed;
 		if (executor)
 			executor->set_spindle_speed(speed);
@@ -214,10 +266,10 @@ bool GCodeInterpreter::run_speed(const CmdParser &parser)
 // M06
 bool GCodeInterpreter::run_tool_cmd(const CmdParser &parser)
 {
-	if (parser.contain_cmd(ModalGroup_TOOL_CHANGE))
+	if (parser.contain_m(6))
 	{
 		int tool = 0;
-		if (parser.getIValue('T', &tool))
+		if (parser.getIParam(PARAM_T, &tool))
 		{
 			if (tool > 0. || tool <= 15)
 			{
@@ -230,11 +282,10 @@ bool GCodeInterpreter::run_tool_cmd(const CmdParser &parser)
 				return true;
 			}
 			else
-				error_ = InterError(InterError::Code::WRONG_VALUE, "invalid tool number");
+				RET_F_SETSTATE(WRONG_VALUE, "invalid tool number");
 		}
 		else
-			error_ = InterError(InterError::Code::WRONG_VALUE, " tool number is not spesified");
-		return false;
+			RET_F_SETSTATE(WRONG_VALUE, "tool number is not spesified");
 	}
 	return true;
 }
@@ -257,34 +308,21 @@ bool GCodeInterpreter::run_tool_cmd(const CmdParser &parser)
 
 bool GCodeInterpreter::run_mcode(const  CmdParser &parser)
 {
-	for (auto iter = parser.codes.begin(); iter != parser.codes.end(); ++iter)
+	const m_container &mcodes = parser.getMCodes();
+	for (auto iter = mcodes.begin(); iter != mcodes.end(); ++iter)
 	{
-		int intValue = int(iter->value);
-		if (iter->letter != 'M')
-			continue;
-		switch (intValue)
+		switch (*iter)
 		{
 		case 2:
 		case 6:
 			return true;
 		case 98:
 		case 99:
-			error_ = InterError(InterError::Code::WRONG_VALUE, "subroutines don't not support yet");
-			return false;
+			RET_F_SETSTATE(WRONG_VALUE, "subroutines don't not support yet");			
 		}
-		executor->run_mcode(intValue);
+		executor->run_mcode(*iter);
 	}
 	return true;
-}
-
-
-void GCodeInterpreter::setopionalcoordinate(Coords &newpos, optdouble *pvalss)
-{
-	for (int i = 0; i < MAX_AXES; ++i)
-	{
-		if (pvalss[i])
-			newpos.r[i] = to_mm(pvalss[i].value());
-	}
 }
 
 
@@ -292,112 +330,78 @@ bool GCodeInterpreter::run_gcode(const CmdParser &parser)
 {
 
 	Coords newpos;
-	optdouble i, j, k, r;
-	optdouble valcc[MAX_AXES];
-	MotionMode newMove = MotionMode_NONE;
+	MotionMode newMove = runner.motionMode;
+
 	// current coordinate is in the local system
 	Coords  currentLocal = runner.position;
 	to_local(currentLocal);
 
+	const g_container &gcodes = parser.getGCodes();
+
 	bool  g52 = false, g53 = false;
 
-	for (auto iter = parser.codes.begin(); iter != parser.codes.end(); ++iter)
+
+	for (auto iter = gcodes.begin(); iter != gcodes.end(); ++iter)
 	{
-
-		switch (iter->letter)
+		int num = *iter;
+		switch (*iter)
 		{
-		case 'A': valcc[3] = iter->value; break;
-		case 'B': valcc[4] = iter->value; break;
-		case 'C': valcc[5] = iter->value; break;
-		case 'X': valcc[0] = iter->value; break;
-		case 'Y': valcc[1] = iter->value; break;
-		case 'Z': valcc[2] = iter->value; break;
+			case G_0:   newMove = MotionMode_FAST;   break;
+			case G_1:   newMove = MotionMode_LINEAR; break;
+			case G_2:   newMove = MotionMode_CW_ARC; break;
+			case G_3:   newMove = MotionMode_CCW_ARC; break;
+			case G_17: runner.plane = Plane_XY; break;
+			case G_18: runner.plane = Plane_XZ; break;
+			case G_19: runner.plane = Plane_YZ; break;
+			case G_20: runner.units = UnitSystem_INCHES; break;
+			case G_21: runner.units = UnitSystem_MM; break;
+			//case G_40://	Cutter Diameter Compensation
+			case G_53:  g53 = true;  break;  //move to position in Global coordinate system
+			case G_52:  g52 = true; break; // offset of current coordinats system 
+			case G_54:  case 55: case 56: case 57: case 58:
+				runner.origin = env->GetG54G58(*iter - 54);
+				break;
 
-		case 'I': i = iter->value; break;
-		case 'J': j = iter->value; break;
-		case 'K':k = iter->value; break;
-		case 'R': r = iter->value; break;
-			// как-то очень криво - нужно как-то метить необработанные команды и на них ругаться
-		case 'P':
-		case 'Q':
-		case 'D':
-		case 'L':
-			error_ = InterError(InterError::INVALID_STATEMENT, std::string("unknown code: ") + std::to_string(iter->letter));
-			return false;
-		default:
-			break;
-		}
-		if (iter->letter != 'G')
-			continue;
+			case G_80: runner.cycle = CannedCycle_RESET; newMove = MotionMode_NONE;  break;
+			case G_81: runner.cycle = CannedCycle_SINGLE_DRILL; break;
+			case G_82: runner.cycle = CannedCycle_DRILL_AND_PAUSE; break;
+			case G_83: runner.cycle = CannedCycle_DEEP_DRILL; break;
 
-		int intValue = static_cast<int>(iter->value);
-		switch (intValue)
-		{
-		case 0:   newMove = MotionMode_FAST;          break;
-		case 1:   newMove = MotionMode_LINEAR;      break;
-		case 2:   newMove = MotionMode_CW_ARC;    break;
-		case 3:   newMove = MotionMode_CCW_ARC;  break;
-		case 17: runner.plane = Plane_XY; break;
-		case 18: runner.plane = Plane_XZ; break;
-		case 19: runner.plane = Plane_YZ; break;
-		case 20: runner.units = UnitSystem_INCHES; break;
-		case 21: runner.units = UnitSystem_MM; break;
-		case 53:  g53 = true;  break;  //move to position in Global coordinate system
-		case 52:  g52 = true; break; // offset of current coordinats system do offset latter
-		case 54:  case 55: case 56: case 57: case 58:
-			runner.origin = env->GetG54G58(intValue - 54);
-			break;
-
-		case 80: runner.cycle = CannedCycle_RESET; break;
-		case 81: runner.cycle = CannedCycle_SINGLE_DRILL; break;
-		case 82: runner.cycle = CannedCycle_DRILL_AND_PAUSE; break;
-		case 83: runner.cycle = CannedCycle_DEEP_DRILL; break;
-
-		case 90: runner.incremental = false; break;
-		case 91: runner.incremental = true; break;
-
+			case G_90: runner.incremental = false; break;
+			case G_91: runner.incremental = true; break;
 			//case 98: runner.cycleLevel = CannedLevel_HIGH; break;
 			//case 99: runner.cycleLevel = CannedLevel_LOW; break;
 
 		default:
-			error_ = InterError(InterError::INVALID_STATEMENT,
-				std::string("unknown code: G") + std::to_string(intValue));
-			return false;
+			RET_F_SETSTATE(INVALID_STATEMENT, "Unknown code: G%d", (*iter)/10 );
 		}
 	}
+
 	if (g52)
 	{
-		setopionalcoordinate(runner.origin, valcc);
+		setcoordinates( runner.origin, parser);
 		if (newMove != MotionMode_NONE)
-		{
-
-			error_ = InterError(InterError::INVALID_STATEMENT,
-				std::string("G52 and movement command can not be in one frame"));
-			return false;
-		}
+			RET_F_SETSTATE(INVALID_STATEMENT, "G52 and movement command can not be in one frame" );
 	}
 	if (g53)
-	{
-		error_ = InterError(InterError::INVALID_STATEMENT,
-			std::string("G53 does not suppered yet, sorry"));
-		return false;
-	}
+		RET_F_SETSTATE(INVALID_STATEMENT, "G53 does not suppered yet");
+
 
 	// check if need not move just return
 	if (newMove != MotionMode_NONE)
 	{
 
-		Coords newPos = get_new_coordinate(currentLocal, valcc);
+		Coords newPos = get_new_coordinate(currentLocal, parser );
 
 		switch (newMove)
 		{
-		case MotionMode_FAST: move_to(newPos, true); break;
-		case MotionMode_LINEAR: move_to(newPos, false);   break;
-		case MotionMode_CW_ARC:   arc_to(newPos, true); break;
-		case MotionMode_CCW_ARC: arc_to(newPos, false); break;
-		case MotionMode_NONE:  break; // ta avoid compiler warning
+			case MotionMode_FAST: move_to(newPos, true); break;
+			case MotionMode_LINEAR: move_to(newPos, false);   break;
+			case MotionMode_CW_ARC:   arc_to(newPos, true); break;
+			case MotionMode_CCW_ARC: arc_to(newPos, false); break;
+			case MotionMode_NONE:  break; // ta avoid compiler warning
 		}
-		if (error_.code)
+		if (state.code)
 			return false;
 		runner.motionMode = newMove;
 	}
@@ -407,22 +411,36 @@ bool GCodeInterpreter::run_gcode(const CmdParser &parser)
 
 //====================================================================================================
 //чтение новых координат с учётом модальных кодов
-Coords GCodeInterpreter::get_new_coordinate(Coords &oldLocal, optdouble *pvalss)
+
+void GCodeInterpreter::setcoordinates(Coords &newpos, const CmdParser &parser) const
+{
+	parser.getRParam(PARAM_X, &(newpos.x));
+	parser.getRParam(PARAM_Y, &(newpos.y));
+	parser.getRParam(PARAM_Z, &(newpos.z));
+	parser.getRParam(PARAM_A, &(newpos.a));
+	parser.getRParam(PARAM_B, &(newpos.b));
+	parser.getRParam(PARAM_C, &(newpos.c));	
+}
+
+
+Coords GCodeInterpreter::get_new_coordinate(Coords &oldLocal, const CmdParser &parser)
 {
 	Coords  newpos;
 	if (runner.incremental)
 	{
 		newpos = runner.position;
-		for (int i = 0; i < MAX_AXES; ++i)
-		{
-			if (pvalss[i])
-				newpos.r[i] += to_mm(pvalss[i].value());
-		}
+		double v;
+		if (parser.getRParam(PARAM_X, &v)) newpos.x += to_mm(v);
+		if (parser.getRParam(PARAM_Y, &v)) newpos.y += to_mm(v);
+		if (parser.getRParam(PARAM_Z, &v)) newpos.z += to_mm(v);
+		if (parser.getRParam(PARAM_A, &v)) newpos.a += to_mm(v);
+		if (parser.getRParam(PARAM_B, &v)) newpos.b += to_mm(v);
+		if (parser.getRParam(PARAM_C, &v)) newpos.c += to_mm(v);
 	}
 	else
 	{
 		newpos = oldLocal;
-		setopionalcoordinate(newpos, pvalss);
+		setcoordinates(newpos, parser);
 		to_global(newpos);
 	}
 	return newpos;
@@ -447,7 +465,7 @@ void GCodeInterpreter::to_local(Coords &coords)
 bool GCodeInterpreter::run_stop(const CmdParser &parser)
 {
 	//           M02	Конец программы	M02;
-	if (parser.contain_cmd('M', 2))
+	if ( parser.contain_m(2) )
 	{
 		executor->set_end_programm();
 	}
@@ -500,5 +518,4 @@ Coords GCodeInterpreter::to_mm(Coords value)
 		value.r[i] = to_mm(value.r[i]);
 	return value;
 }
-
 

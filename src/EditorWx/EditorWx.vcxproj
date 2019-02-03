@@ -19,12 +19,14 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\Gcode\cmdparser.cpp" />
+    <ClCompile Include="..\Gcode\environmentsimple.cpp" />
     <ClCompile Include="..\Gcode\GCodeInterpreter.cpp" />
     <ClCompile Include="..\Gcode\ilogger.cpp" />
+    <ClCompile Include="..\Gcode\macrob.cpp" />
     <ClCompile Include="about.cpp" />
     <ClCompile Include="app.cpp" />
     <ClCompile Include="edit.cpp" />
-    <ClCompile Include="environmentsimple.cpp" />
     <ClCompile Include="executorlog.cpp" />
     <ClCompile Include="executorview.cpp" />
     <ClCompile Include="LexGCode.cxx" />
@@ -34,6 +36,9 @@
     <ClCompile Include="ViewGCode.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\Gcode\cmdparser.h" />
+    <ClInclude Include="..\Gcode\environmentsimple.h" />
+    <ClInclude Include="..\Gcode\gcodedefs.h" />
     <ClInclude Include="..\Gcode\GCodeInterpreter.h" />
     <ClInclude Include="..\Gcode\ienvironment.h" />
     <ClInclude Include="..\Gcode\Iexecutor.h" />
@@ -43,7 +48,6 @@
     <ClInclude Include="appframe.h" />
     <ClInclude Include="defsext.h" />
     <ClInclude Include="edit.h" />
-    <ClInclude Include="environmentsimple.h" />
     <ClInclude Include="executorlog.h" />
     <ClInclude Include="executorview.h" />
     <ClInclude Include="LexGCode.h" />

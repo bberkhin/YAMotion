@@ -15,3 +15,17 @@ Coords EnvironmentSimple::GetG54G58 ( int i  )
         return Coords(0,0,0);
 
 }
+
+void EnvironmentSimple::SetVariable(int index, double &value)
+{
+	vars[index] = value;
+}
+
+double EnvironmentSimple::GetVariable(int index)
+{
+	auto iter = vars.find(index);
+	if (iter == vars.end())
+		return 0;
+	else
+		return iter->second;
+}

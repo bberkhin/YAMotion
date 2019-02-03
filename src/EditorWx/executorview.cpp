@@ -24,9 +24,9 @@ void ExecutorView::output(const std::string &str)
 	wxString label = wxString::Format("LINE: %d <font color=#FF00FF>"
 		"%s</font>", nline, str.c_str());
 
-	wxThreadEvent *ev = new wxThreadEvent(wxEVT_THREAD, CHECK_SIMULATE_UPDATE);
-	ev->SetString(label);
-	wxQueueEvent(logger, ev);
+//	wxThreadEvent *ev = new wxThreadEvent(wxEVT_THREAD, CHECK_SIMULATE_UPDATE);
+//	ev->SetString(label);
+	//wxQueueEvent(logger, ev);
 }
 
  void ExecutorView::set_current_line( int num_of_line )
@@ -39,7 +39,7 @@ void ExecutorView::output(const std::string &str)
     output( std::string("set_feed_rate ") + std::to_string(feed) );
  }
 
- void ExecutorView::set_spindle_speed(int speed)
+ void ExecutorView::set_spindle_speed(double speed)
  {
     output( std::string("set_spindle_speed ") + std::to_string(speed) );
  }

@@ -36,6 +36,9 @@
     <ClInclude Include="..\Gcode\Iexecutor.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
+    <ClInclude Include="..\Gcode\gcodedefs.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ConsoleTest.cpp">
@@ -54,6 +57,9 @@
       <Filter>Исходные файлы</Filter>
     </ClCompile>
     <ClCompile Include="..\Gcode\cmdparser.cpp">
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Gcode\macrob.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
   </ItemGroup>

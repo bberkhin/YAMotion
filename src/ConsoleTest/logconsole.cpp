@@ -13,13 +13,13 @@ ExecutorLog::ExecutorLog()
 
 void ExecutorLog::output(const std::string &str )
 {
-    cout << nline << " " << str << "\n" ;
+    //cout << nline << " " << str << "\n" ;
 }
 
 void ExecutorLog::output(const std::string &str, const Coords &position )
 {
-    cout << nline << " " << str << " ";
-    cout << position.x << " " << position.y << " " <<position.z << "\n";
+    //cout << nline << " " << str << " ";
+   // cout << position.x << " " << position.y << " " <<position.z << "\n";
 }
 
  void ExecutorLog::set_current_line( int num_of_line )
@@ -31,7 +31,7 @@ void ExecutorLog::output(const std::string &str, const Coords &position )
  {
     output( std::string("set_feed_rate ") + std::to_string(feed) );
  }
- void ExecutorLog::set_spindle_speed(int speed)
+ void ExecutorLog::set_spindle_speed(double speed)
  {
     output( std::string("set_spindle_speed ") + std::to_string(speed) );
  }

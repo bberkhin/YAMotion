@@ -161,6 +161,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="..\Gcode\environmentsimple.h" />
+    <ClInclude Include="..\Gcode\gcodedefs.h" />
     <ClInclude Include="..\Gcode\GCodeInterpreter.h" />
     <ClInclude Include="..\Gcode\cmdparser.h" />
     <ClInclude Include="..\Gcode\ienvironment.h" />
@@ -173,6 +174,7 @@
     <ClCompile Include="..\Gcode\environmentsimple.cpp" />
     <ClCompile Include="..\Gcode\GCodeInterpreter.cpp" />
     <ClCompile Include="..\Gcode\ilogger.cpp" />
+    <ClCompile Include="..\Gcode\macrob.cpp" />
     <ClCompile Include="ConsoleTest.cpp" />
     <ClCompile Include="logconsole.cpp" />
   </ItemGroup>

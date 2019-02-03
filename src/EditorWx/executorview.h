@@ -23,7 +23,7 @@ public:
 	ExecutorView(wxEvtHandler *_logger);
     void set_current_line( int num_of_line );
     void set_feed_rate(double feed);
-    void set_spindle_speed(int speed);
+    void set_spindle_speed(double speed);
     void set_tool_change( int toolid);
     void straight_feed(const Coords &position );
     void straight_traverce(const Coords &position );

@@ -35,7 +35,7 @@ void ExecutorLog::output(const std::string &str, const Coords &position )
  {
     output( std::string("set_feed_rate ") + std::to_string(feed) );
  }
- void ExecutorLog::set_spindle_speed(int speed)
+ void ExecutorLog::set_spindle_speed(double speed)
  {
     output( std::string("set_spindle_speed ") + std::to_string(speed) );
  }
@@ -71,13 +71,14 @@ void ExecutorLog::output(const std::string &str, const Coords &position )
  {	 
 	 if (!handler)
 		 return;
-
+	 /*
 	 wxString label = wxString::Format("LINE: %d <font color=#FF00FF>"
 		 "%s</font>", nline, str.c_str());
 
 	 wxThreadEvent *ev = new wxThreadEvent(wxEVT_THREAD, CHECK_GCODE_UPDATE);
 	 ev->SetString(label);
-	 wxQueueEvent(handler, ev);	 
+	 wxQueueEvent(handler, ev);	
+*/ 
 	 
  }
 
@@ -85,7 +86,7 @@ void ExecutorLog::output(const std::string &str, const Coords &position )
  {
 	if (!handler)
 		 return;
-
+	/*
 	 wxString label = wxString::Format("LINE: %d <font color=#FF00FF>"
 		 "%s %f %f %f </font>", nline, str.c_str(), position.x ,position.y, position.z);
 
@@ -93,7 +94,7 @@ void ExecutorLog::output(const std::string &str, const Coords &position )
 	 ev->SetString(label);
 	 wxQueueEvent(handler, ev);
 	 
-//	 lbox_->Append(label);
+*/
  }
 
  void LoggerWnd::log_string(int type, const char *s)
@@ -108,7 +109,7 @@ void ExecutorLog::output(const std::string &str, const Coords &position )
 		label = wxString::Format("<font color=#0000FF> %s </font>", s);
 
 	 
-	 wxThreadEvent *ev = new wxThreadEvent(wxEVT_THREAD, CHECK_GCODE_UPDATE);
-	 ev->SetString(label);
-	 wxQueueEvent(handler, ev);
+	wxThreadEvent *ev = new wxThreadEvent(wxEVT_THREAD, CHECK_GCODE_UPDATE);
+	ev->SetString(label);
+	wxQueueEvent(handler, ev);
  }

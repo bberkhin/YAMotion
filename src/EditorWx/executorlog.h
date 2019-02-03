@@ -11,7 +11,7 @@ public:
     ExecutorLog();
     void set_current_line( int nu_of_line );
     void set_feed_rate(double feed);
-    void set_spindle_speed(int speed);
+    void set_spindle_speed(double speed);
     void set_tool_change( int toolid);
     void straight_feed(const Coords &position );
     void straight_traverce(const Coords &position );

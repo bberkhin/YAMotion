@@ -42,9 +42,6 @@
     <ClCompile Include="..\Gcode\GCodeInterpreter.cpp">
       <Filter>GCode</Filter>
     </ClCompile>
-    <ClCompile Include="environmentsimple.cpp">
-      <Filter>Исходные файлы</Filter>
-    </ClCompile>
     <ClCompile Include="executorlog.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
@@ -55,6 +52,15 @@
       <Filter>Исходные файлы</Filter>
     </ClCompile>
     <ClCompile Include="executorview.cpp">
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Gcode\cmdparser.cpp">
+      <Filter>GCode</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Gcode\environmentsimple.cpp">
+      <Filter>GCode</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Gcode\macrob.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
   </ItemGroup>
@@ -95,9 +101,6 @@
     <ClInclude Include="..\Gcode\Iexecutor.h">
       <Filter>GCode</Filter>
     </ClInclude>
-    <ClInclude Include="environmentsimple.h">
-      <Filter>Файлы заголовков</Filter>
-    </ClInclude>
     <ClInclude Include="executorlog.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
@@ -109,6 +112,15 @@
     </ClInclude>
     <ClInclude Include="executorview.h">
       <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Gcode\cmdparser.h">
+      <Filter>GCode</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Gcode\gcodedefs.h">
+      <Filter>GCode</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Gcode\environmentsimple.h">
+      <Filter>GCode</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
