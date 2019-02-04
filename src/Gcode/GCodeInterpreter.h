@@ -7,7 +7,7 @@
 #include "ienvironment.h"
 #include "ilogger.h"
 #include "gcodedefs.h"
-
+#include <stack>
 
 namespace Interpreter
 {
@@ -91,6 +91,18 @@ namespace Interpreter
 	};
 
 
+	struct SubratinInfo
+	{
+		std::string name;
+		unsigned int startpos;
+		unsigned int endpos;
+		int level;
+		int type;
+		SubratinInfo() : startpos(0), endpos(0), level(0), type(O_none) { }
+	};
+
+	typedef std::stack<SubratinInfo> substack;
+	
 	class CmdParser;
 
 	class GCodeInterpreter  //несомненно, это интерпретатор г-кода )
@@ -136,6 +148,7 @@ namespace Interpreter
 		ILogger *logger;
 		IEnvironment *env;
 		IExecutor *executor; //устройство, которое исполняет команды   
+		substack sstack; // 
 	};
 
 };

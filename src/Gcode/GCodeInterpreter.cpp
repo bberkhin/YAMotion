@@ -43,7 +43,6 @@ bool GCodeInterpreter::read_file(const char *name)
 		std::getline(file, str); //читаем строку
 		inputFile.push_back(str); //добавляем в конец списка
 	}
-
 	return true;
 }
 
@@ -64,75 +63,6 @@ void GCodeInterpreter::execute_file(const char *data)
 		}
 		++lineNumber;	
 	} while (pEnd);
-}
-
-const char *GCodeInterpreter::cpy_close_and_downcase(char *line, const char *src, int lineNumber)       //!< string: one line of NC code
-{
-	int m;
-	int n;
-	bool comment, semicomment;
-	char item;
-	comment = semicomment = false;
-	for (n = 0, m = 0; src[m] != '\0' && src[m] != '\n'; m++)
-	{
-		item = src[m];
-		if (n >= MAX_GCODE_LINELEN - 1)
-		{
-			logger->log(LOG_WARNING, "Line %d is very long\n", lineNumber);
-			break;
-		}
-
-		if ((item == ';' || (item == '/' && src[m+1] == '/')  ) && !comment)
-			semicomment = 1;
-
-		if (semicomment) 
-		{
-			line[n++] = item; // pass literally
-			continue;
-		}
-		else if (comment) 
-		{
-			line[n++] = item;
-			if (item == ')')
-			{
-				comment = 0;
-			}
-			else if (item == '(')
-			{
-				logger->log(LOG_WARNING, "Line %d  '(' inside comment", lineNumber);
-			}
-		}
-		else if ((item == ' ') || (item == '\t') || (item == '\r')) /* don't copy blank or tab or CR */
-		{
-			; 
-		}
-		else if ((64 < item) && (item < 91))   /* downcase upper case letters */
-		{   
-			line[n++] = (32 + item);
-		}
-		else if ((item == '(') && !semicomment) {   /* (comment is starting */
-			comment = 1;
-			line[n++] = item;
-		}
-		else {
-			line[n++] = item;         /* copy anything else */
-		}		
-	}
-	if ( comment )
-		logger->log(LOG_WARNING, "Line %d  unclosed comment found", lineNumber);
-	
-	line[n] = 0;
-
-	if (src[m] != '\0' && src[m] == '\n')//need skip long string
-	{
-		for (;  src[m] != '\0' && src[m] != '\n'; m++);
-	}
-	
-	if (src[m] == '\n')
-		return src + m + 1; // next symvol
-	else
-		return NULL;
-
 }
 
 //====================================================================================================
@@ -173,6 +103,8 @@ void GCodeInterpreter::execute_line(const char *line, int lineNumber)
 		logger->log(LOG_ERROR, "Error line %d %s\n", lineNumber, result.description.c_str());
 }
 
+
+	
 //====================================================================================================
 //Actions are executed in the following order:
 //1. any comment.
@@ -185,6 +117,27 @@ void GCodeInterpreter::execute_line(const char *line, int lineNumber)
 //7. any g_codes (except g93, g94, g95) as described in convert_g.
 //8. stopping commands (m0, m1, m2, m30, or m60).
 
+InterError GCodeInterpreter::find_subrotinue(SubratinInfo *psubinfo)
+{
+	SubratinInfo newsubinstack;
+	int savedPos = fpos;
+	auto iter = submaps.find( psubinfo->name() );
+	if (iter = submaps.end())
+	{
+		newsubinstack = iter->second;		
+		newsubinstack.callfrom = savedPos;
+	}
+	else
+	{
+		//find in file
+		newsubinstack.callfrom = fpos;
+		_
+		// if subratina not in list it is in submaps, so we can just from file
+
+
+
+	}
+}
 
 InterError GCodeInterpreter::execute_frame(const char *str)
 {
@@ -195,6 +148,18 @@ InterError GCodeInterpreter::execute_frame(const char *str)
 	
 	if (!parser.neead_execute())
 		return InterError();
+
+	if ( parser.is_call_subrotinue(&subinfo) )
+	{
+		find_subrotinue( subinfo );
+		execute_subrotinue(subinfo );
+		return;
+	}
+	if ( parser.is_end_subrotinue() )
+	{
+		sub_stack.remove_
+		return;
+	}
 
 // выполняем команды в нужной последовательности 
 	if (!run_feed_mode(parser))
@@ -519,3 +484,72 @@ Coords GCodeInterpreter::to_mm(Coords value)
 	return value;
 }
 
+
+const char *GCodeInterpreter::cpy_close_and_downcase(char *line, const char *src, int lineNumber)       //!< string: one line of NC code
+{
+	int m;
+	int n;
+	bool comment, semicomment;
+	char item;
+	comment = semicomment = false;
+	for (n = 0, m = 0; src[m] != '\0' && src[m] != '\n'; m++)
+	{
+		item = src[m];
+		if (n >= MAX_GCODE_LINELEN - 1)
+		{
+			logger->log(LOG_WARNING, "Line %d is very long\n", lineNumber);
+			break;
+		}
+
+		if ((item == ';' || (item == '/' && src[m + 1] == '/')) && !comment)
+			semicomment = 1;
+
+		if (semicomment)
+		{
+			line[n++] = item; // pass literally
+			continue;
+		}
+		else if (comment)
+		{
+			line[n++] = item;
+			if (item == ')')
+			{
+				comment = 0;
+			}
+			else if (item == '(')
+			{
+				logger->log(LOG_WARNING, "Line %d  '(' inside comment", lineNumber);
+			}
+		}
+		else if ((item == ' ') || (item == '\t') || (item == '\r')) /* don't copy blank or tab or CR */
+		{
+			;
+		}
+		else if ((64 < item) && (item < 91))   /* downcase upper case letters */
+		{
+			line[n++] = (32 + item);
+		}
+		else if ((item == '(') && !semicomment) {   /* (comment is starting */
+			comment = 1;
+			line[n++] = item;
+		}
+		else {
+			line[n++] = item;         /* copy anything else */
+		}
+	}
+	if (comment)
+		logger->log(LOG_WARNING, "Line %d  unclosed comment found", lineNumber);
+
+	line[n] = 0;
+
+	if (src[m] != '\0' && src[m] == '\n')//need skip long string
+	{
+		for (; src[m] != '\0' && src[m] != '\n'; m++);
+	}
+
+	if (src[m] == '\n')
+		return src + m + 1; // next symvol
+	else
+		return NULL;
+
+}

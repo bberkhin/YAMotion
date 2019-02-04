@@ -45,6 +45,7 @@ namespace Interpreter
 		bool read_n_number();
 		bool read_dollars();
 		bool read_semicolon();
+		bool read_subrotinue();
 		bool read_m(); 
 		bool read_g();
 		bool read_real_param(IndexParam param);
@@ -79,6 +80,8 @@ namespace Interpreter
 		optparam params[PARAM_MAX];
 		int n_number; // N - value
 		std::string comment;
+		std::string o_name;
+		int o_type;
 		
 		const char *line;
 		int position;

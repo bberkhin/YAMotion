@@ -42,13 +42,16 @@ bool  CmdParser::init()
 	line = 0;
 	position = 0;
 	state = InterError();
+	o_name.clear();
+	o_type = O_none;
+
 	return true;
 }
 
 
 bool CmdParser::neead_execute()  const
 {
-
+// absolutly empty just comments
 	if (mcodes.empty() && gcodes.empty())
 	{
 		for (int i = 0; i < PARAM_MAX; ++i)
@@ -58,8 +61,10 @@ bool CmdParser::neead_execute()  const
 		}
 		return false;
 	}
+// check is an subrotines
 	return true;
 }
+
 
 
 bool  CmdParser::parse_codes(const char *frame )
@@ -74,47 +79,6 @@ bool  CmdParser::parse_codes(const char *frame )
 
 	if (line[position] == '/')     /* skip the slash character if first */
 		position++;
-
-	if (line[position] == 'N')
-	{
-		IF_F_RET_F(read_n_number());
-	}
-
-	//// Pre-check for M code, used in following logic
-	//if (!(line[counter] == 'M' &&
-	//	read_integer_value(line, &(m_counter = counter + 1), &m_number,
-	//		parameters) == INTERP_OK))
-	//	m_number = -1;
-
-	//if (line[counter] == 'o' || m_number == 98 ||
-	//	(m_number == 99 && _setup.call_level > 0))
-
-	//	/* Handle 'o', 'm98' and 'm99' sub return (but not 'm99' endless
-	//	   program) explicitly here. Default is to read letters via pointer
-	//	   calls to related reader functions. 'o' control lines have their
-	//	   own commands and command handlers. */
-	//{
-	//	CHP(read_o(line, &counter, block, parameters));
-
-	//	// if skipping, the conditionals are not evaluated and are therefore unconsumed
-	//	// so we can't check the rest of the line.  but don't worry, we'll get it later
-	//	if (_setup.skipping_o) return INTERP_OK;
-
-	//	// after if [...], etc., nothing is allowed except comments
-	//	for (; counter < length;) {
-	//		if (line[counter] == ';') read_semicolon(line, &counter, block, parameters);
-	//		else if (line[counter] == '(') read_comment(line, &counter, block, parameters);
-	//		else ERS("Unexpected character after O-word");
-	//	}
-	//	return INTERP_OK;
-	//}
-
-	// non O-lines
-
-	//while (parse_code(frame, position, key))
-	//{
-	//	codes.push_back(key);
-	//}
 
 	for (; position < length;)
 	{
@@ -166,11 +130,7 @@ bool CmdParser::parse_code()
 		return true;
 	}
 		
-
-	// set to upper case
-	if (letter >= 'a' && letter <= 'z')
-		letter += 'A' - 'a';
-
+		
 	switch (letter)
 	{
 	//specific
@@ -179,33 +139,36 @@ bool CmdParser::parse_code()
 		case '$':	read_dollars(); break;
 		case ';':	read_semicolon(); break;
 	//codes
-		case 'G':   read_g(); break;
-		case 'M':   read_m(); break;
+		case 'g':   read_g(); break;
+		case 'm':   read_m(); break;
+		case 'n':   read_n_number(); break;
+	// subrotinue
+		case 'o':   read_subrotinue(); break;
 	// Coordinates
-		case 'A':	read_real_param(PARAM_A); break;
-		case 'B':	read_real_param(PARAM_B); break;
-		case 'C':	read_real_param(PARAM_C); break;
-		case 'X':	read_real_param(PARAM_X); break;
-		case 'Y':	read_real_param(PARAM_Y); break;
-		case 'Z':	read_real_param(PARAM_Z); break;
+		case 'a':	read_real_param(PARAM_A); break;
+		case 'b':	read_real_param(PARAM_B); break;
+		case 'c':	read_real_param(PARAM_C); break;
+		case 'x':	read_real_param(PARAM_X); break;
+		case 'y':	read_real_param(PARAM_Y); break;
+		case 'z':	read_real_param(PARAM_Z); break;
 	// parameters
 		case '@':	read_real_param(PARAM_AT); break;
-		case 'D':   read_real_param(PARAM_D); break;
-		case 'E':   read_real_param(PARAM_E); break;
-		case 'F':   read_real_param(PARAM_F); break;		
-		case 'I':   read_real_param(PARAM_I); break;
-		case 'J':   read_real_param(PARAM_J); break;
-		case 'K':   read_real_param(PARAM_K); break;		
-		case 'P':   read_real_param(PARAM_P); break;
-		case 'Q':   read_real_param(PARAM_Q); break;
-		case 'R':   read_real_param(PARAM_R); break;
-		case 'S':   read_real_param(PARAM_S); break;
-		case 'T':   read_int_param(PARAM_T);  break;
-		case 'U':   read_real_param(PARAM_U); break;
-		case 'V':   read_real_param(PARAM_V); break;
-		case 'W':   read_real_param(PARAM_W); break;
-		case 'H':   read_int_param(PARAM_H); break;
-		case 'L':   read_int_param(PARAM_L); break;
+		case 'd':   read_real_param(PARAM_D); break;
+		case 'e':   read_real_param(PARAM_E); break;
+		case 'f':   read_real_param(PARAM_F); break;		
+		case 'i':   read_real_param(PARAM_I); break;
+		case 'j':   read_real_param(PARAM_J); break;
+		case 'k':   read_real_param(PARAM_K); break;		
+		case 'p':   read_real_param(PARAM_P); break;
+		case 'q':   read_real_param(PARAM_Q); break;
+		case 'r':   read_real_param(PARAM_R); break;
+		case 's':   read_real_param(PARAM_S); break;
+		case 't':   read_int_param(PARAM_T);  break;
+		case 'u':   read_real_param(PARAM_U); break;
+		case 'v':   read_real_param(PARAM_V); break;
+		case 'w':   read_real_param(PARAM_W); break;
+		case 'h':   read_int_param(PARAM_H); break;
+		case 'l':   read_int_param(PARAM_L); break;
 
 		default:
 			position++;
@@ -403,6 +366,77 @@ bool CmdParser::read_comment_eol()
 	comment = std::string(line + position + 2);
 	// skeep till end 
 	while (line[position] != 0)	position++;
+	return true;
+}
+
+bool CmdParser::read_subrotinue()
+{
+	int oNumber;
+	char oNameBuf[MAX_GCODE_LINELEN];
+	//position is on '0'
+	position++;
+	if (line[position] == '<')
+	{
+		RET_F_SETSTATE(PARAMETER_ERROR, "Subritine name does not supported ");
+		//read_name(oNameBuf);
+	}
+	else
+	{
+		IF_F_RET_F(read_int_value( &oNumber ));
+		sprintf(oNameBuf, "%d", oNumber);
+	}
+	// We stash the text the offset part of setup
+
+#define CMP(txt) (strncmp(line+position, txt, strlen(txt)) == 0 && (position += strlen(txt)))
+	  // characterize the type of o-word
+
+	if (CMP("sub"))
+		o_type = O_sub;
+	else if (CMP("endsub"))
+		o_type = O_endsub;
+	else if (CMP("call"))
+		o_type = O_call;
+	else if (CMP("do"))
+		o_type = O_do;
+	else if (CMP("while"))
+		o_type = O_while;
+	else if (CMP("repeat"))
+		o_type = O_repeat;
+	else if (CMP("if"))
+		o_type = O_if;
+	else if (CMP("elseif"))
+		o_type = O_elseif;
+	else if (CMP("else"))
+		o_type = O_else;
+	else if (CMP("endif"))
+		o_type = O_endif;
+	else if (CMP("break"))
+		o_type = O_break;
+	else if (CMP("continue"))
+		o_type = O_continue;
+	else if (CMP("endwhile"))
+		o_type = O_endwhile;
+	else if (CMP("endrepeat"))
+		o_type = O_endrepeat;
+	else if (CMP("return"))
+		o_type = O_return;	
+	else
+		o_type = O_;
+
+	// we now have it characterized
+	// now create the text of the oword
+
+	switch (o_type)
+	{
+			// the global cases first
+		case O_sub:
+		case O_:
+		case O_endsub:
+		case O_call:
+		case O_return:
+			o_name = oNameBuf;
+			break;
+	}
 	return true;
 }
 
