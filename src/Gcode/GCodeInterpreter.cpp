@@ -78,7 +78,7 @@ void GCodeInterpreter::execute_file()
 	execute_file_int(0, &GCodeInterpreter::execute_frame);
 
 
-	// next time will reopen seek to begin and call init
+	// next time will reopen and seek to begin and call init
 	if ( state.code == PRAGRAMM_ENDCLEAR)
 	{ 
 		close_nc_file(); 
