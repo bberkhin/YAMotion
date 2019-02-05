@@ -6,8 +6,10 @@
 class ExecutorLog : public IExecutor
 {
     int nline;
+	bool doprint;
 public:
-    ExecutorLog();
+    ExecutorLog(bool needprint = true);
+	void setneedprint(bool needprint = true);
     void set_current_line( int nu_of_line );
     void set_feed_rate(double feed);
     void set_spindle_speed(double speed);

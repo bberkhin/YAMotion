@@ -8,6 +8,7 @@
 #include "ilogger.h"
 #include "gcodedefs.h"
 #include <stack>
+#include <map>
 
 namespace Interpreter
 {
@@ -94,16 +95,23 @@ namespace Interpreter
 	struct SubratinInfo
 	{
 		std::string name;
-		unsigned int startpos;
-		unsigned int endpos;
-		int level;
+		long startpos;
+		long callfrom;
 		int type;
-		SubratinInfo() : startpos(0), endpos(0), level(0), type(O_none) { }
+		SubratinInfo() : startpos(0), callfrom(0), type(O_none) { }
 	};
 
-	typedef std::stack<SubratinInfo> substack;
+	typedef std::stack<SubratinInfo> substack_tp;
+	typedef std::map<std::string, SubratinInfo> submap_tp;
+
+
 	
 	class CmdParser;
+
+	//typedef bool GCodeInterpreter::(const char *)ExecFunction;
+	class GCodeInterpreter;
+	typedef InterError(GCodeInterpreter::*ExecFunction) (const char *);
+
 
 	class GCodeInterpreter  //несомненно, это интерпретатор г-кода )
 	{
@@ -111,16 +119,22 @@ namespace Interpreter
 		GCodeInterpreter(IEnvironment *penv, IExecutor *executor, ILogger *logger);
 		~GCodeInterpreter(void);
 
-		bool read_file(const char *name);             //запоминает строки текстового файла
+		bool open_nc_file(const char *name = 0);             //запоминает строки текстового файла
 		void execute_file();
-		void execute_file(const char *data);
-		void execute_line(const  char *line, int lineNumber = 1);    //исполняет одну строку
+	//	void execute_file(const char *data);
+	//	void execute_line(const  char *line, int lineNumber = 1);    //исполняет одну строку
 
 	private:
+		void close_nc_file();
 		void init();                            //инициализация для нового файла
+		bool execute_file_int(long pos, ExecFunction fun);
 		const char *cpy_close_and_downcase(char *line, const char *src, int lineNumber);
 		InterError execute_frame(const char *frame);    //выполнение строки
-	//  void set_move_mode(MoveMode mode);      //изменение режима перемещения
+		InterError is_subrotin_start(const char *str);    //выполнение строки при поиске
+		bool execute_subrotinue(const  CmdParser parser);
+		bool find_subrotinue(const char *subname, SubratinInfo *psub);
+		void reset_motion_mode();
+		//void set_move_mode(MotionMode mode);      //изменение режима перемещения
 		void local_deform(Coords &coords);      //преобразование масштаба, поворот в локальной системе координат
 		void to_global(Coords &coords);         //сдвиг в глобальные координаты
 		void to_local(Coords &coords);          //сдвиг в локальные координаты
@@ -143,12 +157,16 @@ namespace Interpreter
 		InterError get_state() { return state; }
 	private:
 		InterError state;
-		std::list<std::string> inputFile;     //строки входного файла
+		std::string file_name;     //строки входного файла
+		FILE *gfile;
+		submap_tp submap;
+		substack_tp substack;
+		std::string cursubr_;
 		RunnerData  runner;                    //текущее состояние
 		ILogger *logger;
 		IEnvironment *env;
 		IExecutor *executor; //устройство, которое исполняет команды   
-		substack sstack; // 
+		long fpos;
 	};
 
 };

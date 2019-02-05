@@ -34,6 +34,11 @@ namespace Interpreter
 		const g_container &getGCodes() const { return gcodes; }
 		InterError get_state() const;		
 		bool neead_execute()  const;
+		std::string getSubName() const { return o_name; }
+		
+		// helpers
+		bool real_to_int(double *pdbl, int *pint) const;
+
 	private:
 		bool init();
 		bool parse_codes(const char *frame);

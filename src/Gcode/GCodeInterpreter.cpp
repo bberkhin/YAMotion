@@ -12,7 +12,7 @@ using namespace Interpreter;
 
 //====================================================================================================
 GCodeInterpreter::GCodeInterpreter(IEnvironment *penv, IExecutor *ix, ILogger *log) :
-	env(penv), executor(ix), logger(log)
+	env(penv), executor(ix), logger(log), gfile(0)
 {
 	init();
 }
@@ -25,27 +25,120 @@ GCodeInterpreter::~GCodeInterpreter(void)
 //====================================================================================================
 void GCodeInterpreter::init()
 {
-
+	runner = RunnerData();
+	state = InterError();
+//	std::string file_name.;     don't change name
+	submap.clear();
+	while( !substack.empty() ) substack.pop();
+	cursubr_.clear();
+	fpos = -1;
 }
 
 
 
 //====================================================================================================
-//читает строки в список
-bool GCodeInterpreter::read_file(const char *name)
+// open the file
+bool GCodeInterpreter::open_nc_file(const char *name)
 {
-	std::ifstream file(name); //открываем файл
-
-	inputFile.clear();
-	while (file) //пока он не закончился
+	if ( file_name.empty() && name == NULL )
+		RET_F_SETSTATE( ERROR_FILEREAD, "File name not specified" );
+	
+	//empty or new name
+	if (name != NULL && file_name != std::string(name) )
 	{
-		std::string str;
-		std::getline(file, str); //читаем строку
-		inputFile.push_back(str); //добавляем в конец списка
+		file_name = name;
+		close_nc_file();
 	}
+
+	if (gfile != NULL)
+		return true;
+	gfile = fopen(name, "r");
+	IF_F_RET_F_SETSTATE((gfile != NULL), ERROR_FILEREAD, "Can not open file %s", name); 
+	init();
 	return true;
 }
 
+void GCodeInterpreter::close_nc_file()
+{
+	if (gfile)
+		fclose(gfile);
+	gfile = NULL;
+}
+
+void GCodeInterpreter::execute_file()
+{
+	SubratinInfo mainsub;
+	mainsub.name = "_main_";
+	mainsub.callfrom = mainsub.startpos = 0;
+	mainsub.type = O_;
+	
+	substack.push(mainsub);
+	cursubr_ = mainsub.name;
+	
+	execute_file_int(0, &GCodeInterpreter::execute_frame);
+
+	while (!substack.empty()) substack.pop();
+
+	// next time will reopen seek to begin and call init
+	if ( state.code == PRAGRAMM_ENDCLEAR)
+	{ 
+		close_nc_file(); 
+	}
+	
+	if (state.code != PRAGRAMM_END && state.code != PRAGRAMM_ENDCLEAR )
+	{
+		logger->log(LOG_WARNING, "No end of programm command ");
+		executor->set_end_programm();
+	}
+	if (substack.size() != 1)
+	{
+		logger->log(LOG_WARNING, "The programm end being in subrotinue" );
+	}
+
+	
+}
+
+bool GCodeInterpreter::execute_file_int( long pos, ExecFunction fun )
+{
+	int lineNumber = 1;
+	char line[MAX_GCODE_LINELEN];
+	size_t length;
+	IF_F_RET_F(open_nc_file());
+	IF_F_RET_F_SETSTATE((fseek(gfile, pos, SEEK_SET) == 0), ERROR_FILEREAD, "Can not seek to start of file");
+
+	for (; true ; ++lineNumber)
+	{
+		if (fgets(line, MAX_GCODE_LINELEN, gfile) == NULL)
+			break;
+		length = strlen(line);
+		if (length == (MAX_GCODE_LINELEN - 1))    // line is too long. need to finish reading the line to recover
+		{
+			for (; fgetc(gfile) != '\n' && !feof(gfile););
+			logger->log(LOG_WARNING, " Line %d is too long.", lineNumber);
+		}
+		
+		fpos = ftell(gfile); 
+		cpy_close_and_downcase( line, line, lineNumber);
+	
+		if (executor)		
+			executor->set_current_line(lineNumber);
+
+		state.clear();
+		
+		state = ((*this.*fun))( line );
+
+		if (state.code == PRAGRAMM_END || state.code == PRAGRAMM_ENDCLEAR || state.code == SUBROTINE_END )
+			break;
+
+		else if (state.code )
+			logger->log(LOG_ERROR, "Error line %d %s\n", lineNumber, state.description.c_str());
+
+	}
+
+	return true;
+}
+
+/*
 void GCodeInterpreter::execute_file(const char *data)
 {
 
@@ -65,32 +158,10 @@ void GCodeInterpreter::execute_file(const char *data)
 	} while (pEnd);
 }
 
-//====================================================================================================
-//читает строки в список
-void GCodeInterpreter::execute_file()
-{
-	RunnerData  runnerDump;
-	runnerDump = runner;
-	
-	if (!executor)
-	{
-		logger->log(LOG_ERROR,"Executor not defined");
-		return;
-	}
-
-	int lineNumber = 0;
-	char line[MAX_GCODE_LINELEN];
-	for (auto iter = inputFile.begin(); iter != inputFile.end(); ++iter)
-	{
-		cpy_close_and_downcase(line, iter->c_str(), lineNumber);
-		execute_line(line, ++lineNumber);
-	};
-	// restore ???
-	runner = runnerDump;
-}
 
 //====================================================================================================
 //читает строки в список
+
 void GCodeInterpreter::execute_line(const char *line, int lineNumber)
 {
 	if (executor)
@@ -104,44 +175,108 @@ void GCodeInterpreter::execute_line(const char *line, int lineNumber)
 }
 
 
-	
-//====================================================================================================
-//Actions are executed in the following order:
-//1. any comment.
-//2. a feed mode setting (g93, g94, g95)
-//3. a feed rate (f) setting if in units_per_minute feed mode.
-//4. a spindle speed (s) setting.
-//5. a tool selection (t).
-// Set Plane
-//6. "m" commands as described in convert_m (includes tool change).
-//7. any g_codes (except g93, g94, g95) as described in convert_g.
-//8. stopping commands (m0, m1, m2, m30, or m60).
+	*/
 
-InterError GCodeInterpreter::find_subrotinue(SubratinInfo *psubinfo)
+InterError GCodeInterpreter::is_subrotin_start(const char *str)
 {
-	SubratinInfo newsubinstack;
-	int savedPos = fpos;
-	auto iter = submaps.find( psubinfo->name() );
-	if (iter = submaps.end())
+	CmdParser parser(env);                              //парсер команд
+
+	if (!parser.parse(str))
+		return parser.get_state();
+
+	if (!parser.getSubName().empty() )
 	{
-		newsubinstack = iter->second;		
-		newsubinstack.callfrom = savedPos;
+		InterError out;
+		if (parser.getSubName() == cursubr_)
+			out.code = SUBROTINE_END; // to out from internal circle
+		return out;
+	}
+	return InterError();
+}
+
+bool GCodeInterpreter::find_subrotinue(const char *subname, SubratinInfo *psub )
+{
+	auto iter = submap.find(subname);
+	if (iter != submap.end())
+	{
+		*psub = iter->second;
+		psub->callfrom = fpos;
 	}
 	else
 	{
 		//find in file
-		newsubinstack.callfrom = fpos;
-		_
-		// if subratina not in list it is in submaps, so we can just from file
+		psub->name = subname;
+		psub->callfrom = fpos;
 
+		std::string savesbn = cursubr_;
+		
+		cursubr_ = subname;
+		if (!execute_file_int(0, &GCodeInterpreter::is_subrotin_start))
+		{
+			cursubr_ = savesbn;
+			return false;
+		}
 
+		cursubr_ = savesbn;
+		if (state.code != SUBROTINE_END)
+		{
+			RET_F_SETSTATE(SUBROUTINE_ERROR, "Can not find subroutinue: %s", subname);
+		}
 
+		psub->startpos = ftell(gfile);
+		submap.insert( std::pair<std::string, SubratinInfo>(psub->name,*psub) );
 	}
+	return true;
 }
+
+bool GCodeInterpreter::execute_subrotinue( const  CmdParser parser )
+{
+	std::string sname;
+
+	double dblval;
+	int ival;
+
+	IF_F_RET_F_SETSTATE(parser.getRParam(PARAM_P, &dblval), PARAMETER_ERROR, "There is no 'P' parameter for m98");
+	IF_F_RET_F(parser.real_to_int(&dblval, &ival));
+	sname = std::to_string(ival);
+	
+	SubratinInfo newsub;
+	IF_F_RET_F(find_subrotinue(sname.c_str(), &newsub));
+	substack.push(newsub);
+	
+	
+
+	int times = 1;
+	parser.getIParam(PARAM_L, &times);
+	for (int i = 0; i < times; ++i)
+	{
+		reset_motion_mode();
+		cursubr_ = sname; //restore current sub
+		execute_file_int(substack.top().startpos, &GCodeInterpreter::execute_frame);
+		if (state.code == SUBROTINE_END)
+			state.clear(); // clear END_SUBROTINUE STATE 
+		else if (state.code == PRAGRAMM_END || state.code == PRAGRAMM_ENDCLEAR)
+			break;
+	}
+	
+	// rewind file to the position just after the call
+	long pos = substack.top().callfrom;
+	IF_F_RET_F_SETSTATE((fseek(gfile, pos, SEEK_SET) == 0), ERROR_FILEREAD, "Can not seek to right position %ld of file", pos);
+
+	substack.pop();
+	if (!substack.empty())
+		cursubr_ = substack.top().name;
+
+	return true;
+	
+}
+
+
 
 InterError GCodeInterpreter::execute_frame(const char *str)
 {
 	CmdParser parser(env);                              //парсер команд
+	bool executablecall = (cursubr_ == substack.top().name);
 
 	if (!parser.parse(str))
 		return parser.get_state();
@@ -149,19 +284,52 @@ InterError GCodeInterpreter::execute_frame(const char *str)
 	if (!parser.neead_execute())
 		return InterError();
 
-	if ( parser.is_call_subrotinue(&subinfo) )
+	if ( parser.contain_m(98) && executablecall) // call sub
 	{
-		find_subrotinue( subinfo );
-		execute_subrotinue(subinfo );
-		return;
+		execute_subrotinue( parser );
+		return get_state();
 	}
-	if ( parser.is_end_subrotinue() )
+	else if ( !parser.getSubName().empty() ) // start sub desc
 	{
-		sub_stack.remove_
-		return;
+		cursubr_ = parser.getSubName();
+		return get_state();
+	}
+	else if ( parser.contain_m(99) ) // end sub
+	{
+		// variant 1 you now execute the subrotine 
+		if ( executablecall )
+		{
+			// stop internal loop
+			state.code = SUBROTINE_END;
+			return get_state();
+		}
+		// variant 2 you just go throw code not execute 
+		cursubr_ = substack.top().name; // restore execute name
+		return get_state();
+	}
+	//stopping commands(m0, m1, m2, m30, or m60).
+	else if ( run_stop(parser) ) // END of programm
+	{	
+		return get_state();
 	}
 
-// выполняем команды в нужной последовательности 
+	// check that we are in the same subrotinue as in the stack
+	if (cursubr_ != substack.top().name )
+		return get_state();
+
+
+	//====================================================================================================
+	//Actions are executed in the following order:
+	//1. any comment.
+	//2. a feed mode setting (g93, g94, g95)
+	//3. a feed rate (f) setting if in units_per_minute feed mode.
+	//4. a spindle speed (s) setting.
+	//5. a tool selection (t).
+	// Set Plane
+	//6. "m" commands as described in convert_m (includes tool change).
+	//7. any g_codes (except g93, g94, g95) as described in convert_g.
+	
+
 	if (!run_feed_mode(parser))
 		return get_state();
 	if (!run_feed_rate(parser))
@@ -175,8 +343,6 @@ InterError GCodeInterpreter::execute_frame(const char *str)
 	if (!run_mcode(parser))
 		return get_state();
 	if (!run_gcode(parser))
-		return get_state();
-	if (!run_stop(parser))
 		return get_state();
 
 	return InterError();
@@ -290,6 +456,10 @@ bool GCodeInterpreter::run_mcode(const  CmdParser &parser)
 	return true;
 }
 
+void GCodeInterpreter::reset_motion_mode()
+{
+	runner.motionMode = MotionMode_NONE;
+}
 
 bool GCodeInterpreter::run_gcode(const CmdParser &parser)
 {
@@ -427,14 +597,25 @@ void GCodeInterpreter::to_local(Coords &coords)
 		coords.r[i] -= runner.origin.r[i];
 }
 
+//M30 = Program end, Rewind to first block and STOP execution.
+//M02 = Program end, STOP execution with no Rewind.Hitting "START" again will continue with block after M02
+
 bool GCodeInterpreter::run_stop(const CmdParser &parser)
 {
 	//           M02	Конец программы	M02;
 	if ( parser.contain_m(2) )
 	{
 		executor->set_end_programm();
+		state.code = PRAGRAMM_END;
+		return true;
 	}
-	return true;
+	else if (parser.contain_m(30))
+	{
+		executor->set_end_programm();
+		state.code = PRAGRAMM_ENDCLEAR;
+		return true;
+	}
+	return false;
 }
 
 

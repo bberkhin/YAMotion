@@ -6,20 +6,29 @@
 
 using namespace std;
 
-ExecutorLog::ExecutorLog()
+ExecutorLog::ExecutorLog(bool needprint) : doprint(needprint)
 {
 
+}
+
+void ExecutorLog::setneedprint( bool needprint )
+{
+	doprint = needprint;
 }
 
 void ExecutorLog::output(const std::string &str )
 {
-    //cout << nline << " " << str << "\n" ;
+	if ( doprint )
+		cout << nline << " " << str << "\n" ;
 }
 
 void ExecutorLog::output(const std::string &str, const Coords &position )
 {
-    //cout << nline << " " << str << " ";
-   // cout << position.x << " " << position.y << " " <<position.z << "\n";
+	if (doprint)
+	{
+		cout << nline << " " << str << " ";
+		cout << position.x << " " << position.y << " " << position.z << "\n";
+	}
 }
 
  void ExecutorLog::set_current_line( int num_of_line )

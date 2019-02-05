@@ -52,7 +52,7 @@ bool  CmdParser::init()
 bool CmdParser::neead_execute()  const
 {
 // absolutly empty just comments
-	if (mcodes.empty() && gcodes.empty())
+	if (mcodes.empty() && gcodes.empty() && o_name.empty() )
 	{
 		for (int i = 0; i < PARAM_MAX; ++i)
 		{
@@ -198,9 +198,9 @@ void CmdParser::find_significal_symbol()
 			if(position > start )
 				comment = std::string(line + start, position - start - 1 ) ;
 		}
-		else if (line[position] == '/' && line[position + 1] == '/')
+		else if (line[position] == '/' || line[position] == ';')
 		{
-			position += 2;
+			position++;
 			read_comment_eol();			
 		}
 		else
@@ -369,6 +369,7 @@ bool CmdParser::read_comment_eol()
 	return true;
 }
 
+
 bool CmdParser::read_subrotinue()
 {
 	int oNumber;
@@ -516,16 +517,21 @@ bool CmdParser::read_int_value( int *pint )
 	double dblval;
 
 	IF_F_RET_F(read_real_value( &dblval));
-	*pint = static_cast<int>(floor(dblval));
-	if ((dblval - *pint) > 0.9999) {
-		*pint = static_cast<int>(ceil(dblval));
-	}
-	else if ((dblval - *pint) > 0.0001)
-		RET_F_SETSTATE(WRONG_VALUE, "Non ineger value for integer");
-
+	IF_F_RET_F(real_to_int(&dblval,pint));
 	return true;
 }
 
+
+
+bool CmdParser::real_to_int(double *pdbl, int *pint) const
+{
+	*pint = static_cast<int>(floor(*pdbl));
+	if ((*pdbl - *pint) > 0.9999)
+		*pint = static_cast<int>(ceil(*pdbl));
+	else if ((*pdbl - *pint) > 0.0001)
+		RET_F_SETSTATE(WRONG_VALUE, "Non ineger value for integer");
+	return true;
+}
 
 bool CmdParser::read_real_value( double *pdbl )
 {

@@ -33,6 +33,10 @@ namespace Interpreter
 	enum ErrorCode
 	{
 		ALL_OK = 0,
+		PRAGRAMM_END,       // M02
+		PRAGRAMM_ENDCLEAR, // M30
+		SUBROTINE_END,
+		ERROR_FILEREAD,
 		INVALID_STATEMENT, //неизвестная буква
 		DOUBLE_DEFINITION, //буква повторилась
 		WRONG_PLANE,       //задана неправильная плоскость
@@ -44,6 +48,7 @@ namespace Interpreter
 		UNKNOWN_OPERATOR,
 		PARAMETER_ERROR,
 		EXPRESSION_ERROR,
+		SUBROUTINE_ERROR,
 		INTERNAL_ERROR
 	};
 
