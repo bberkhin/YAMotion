@@ -45,6 +45,17 @@ void ExecutorLog::output(const std::string &str, const Coords &position )
     output( std::string("set_spindle_speed ") + std::to_string(speed) );
  }
 
+ 
+ void ExecutorLog::set_css_spindlemode(double &diam, double &)
+ {
+	 output(std::string("set_css_spindle_mode Diam") + std::to_string(diam));
+ }
+ void ExecutorLog::set_regular_spindlemode() 
+ {
+	 output(std::string("set_regular_spindlemode"));
+ }
+
+
  void ExecutorLog::set_tool_change( int toolid)
  {
     output( std::string("set_tool_change ") + std::to_string(toolid) );
@@ -71,6 +82,10 @@ void ExecutorLog::output(const std::string &str, const Coords &position )
     output( std::string("set_end_programm") );
  }
 
+ void ExecutorLog::set_dwell(long millseconds)
+ {
+	 output(std::string("set_dwell"));
+ }
 
  void LoggerConsole::log_string(int type, const char *s)
  {

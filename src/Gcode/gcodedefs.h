@@ -201,6 +201,7 @@ namespace Interpreter
 #define G_28   280
 #define G_28_1 281
 #define G_30   300
+#define G_31   310
 #define G_30_1 301
 #define G_33   330
 #define G_33_1 331

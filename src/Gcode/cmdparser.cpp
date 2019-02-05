@@ -19,7 +19,7 @@ CmdParser::CmdParser(IEnvironment *env_) : env(env_)
 bool  CmdParser::parse(const char *frame)
 {
 	// Clear data
-	IF_F_RET_F(init());
+	clear();
 	IF_F_RET_F(parse_codes(frame) );
 	IF_F_RET_F(check_modal_group()); //проверяем что в одной строке нет команд одной группы
 	return true;
@@ -29,23 +29,19 @@ bool  CmdParser::parse(const char *frame)
 
 
 // Clear data
-bool  CmdParser::init()
+void CmdParser::clear()
 {
 	// Clear data
-	for (int i = 0; i < PARAM_MAX; ++i)
-		params[i].reset();
-
+	remove_params();
 	n_number = -1;
 	comment.clear();
 	mcodes.clear();
 	gcodes.clear();	
 	line = 0;
 	position = 0;
-	state = InterError();
 	o_name.clear();
 	o_type = O_none;
-
-	return true;
+	state = InterError();
 }
 
 
@@ -290,6 +286,39 @@ InterError CmdParser::get_state() const
 	return state;
 }
 
+
+void CmdParser::remove_g(int n)
+{
+	auto iter = std::find( gcodes.begin(), gcodes.end(), n);
+	if (iter != gcodes.end())
+		gcodes.erase(iter);
+}
+
+void CmdParser::remove_param(IndexParam param)
+{
+	params[param].reset();
+}
+
+void CmdParser::remove_params()
+{
+	std::for_each(std::begin(params), std::end(params), // lambda
+		[](optparam &p) { p.reset(); });
+}
+
+
+int CmdParser::params_count()
+{
+	int n = 0;
+	/*
+	for (int i = 0; i < PARAM_MAX; ++i)
+	{
+		if (params[i]) n++;
+	}
+	*/
+	std::for_each(std::begin(params), std::end(params), // lambda
+		[&n](optparam &p) { if (p) ++n;} );
+	return n;
+}
 
 
 bool CmdParser::getRParam(IndexParam param, double *pd) const

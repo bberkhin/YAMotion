@@ -16,6 +16,12 @@ Coords EnvironmentSimple::GetG54G58 ( int i  )
 
 }
 
+void EnvironmentSimple::SetG54G58(int index, Coords &pos, bool incremental)
+{
+	SetVariable(index + 5000, pos.x);//
+}
+
+
 void EnvironmentSimple::SetVariable(int index, double &value)
 {
 	vars[index] = value;

@@ -35,12 +35,16 @@ namespace Interpreter
 		InterError get_state() const;		
 		bool neead_execute()  const;
 		std::string getSubName() const { return o_name; }
+		void remove_g(int n);
+		void remove_param(IndexParam param);
+		void remove_params();
+		int  params_count();
+		void clear();
 		
 		// helpers
 		bool real_to_int(double *pdbl, int *pint) const;
 
 	private:
-		bool init();
 		bool parse_codes(const char *frame);
 		bool parse_code(); //следующий код
 		bool check_modal_group() const;

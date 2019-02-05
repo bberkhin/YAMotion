@@ -77,7 +77,6 @@ void GCodeInterpreter::execute_file()
 	
 	execute_file_int(0, &GCodeInterpreter::execute_frame);
 
-	while (!substack.empty()) substack.pop();
 
 	// next time will reopen seek to begin and call init
 	if ( state.code == PRAGRAMM_ENDCLEAR)
@@ -94,6 +93,9 @@ void GCodeInterpreter::execute_file()
 	{
 		logger->log(LOG_WARNING, "The programm end being in subrotinue" );
 	}
+
+	// clear stack
+	while (!substack.empty()) substack.pop();
 
 	
 }
@@ -320,7 +322,7 @@ InterError GCodeInterpreter::execute_frame(const char *str)
 
 	//====================================================================================================
 	//Actions are executed in the following order:
-	//1. any comment.
+	//1. run dwell
 	//2. a feed mode setting (g93, g94, g95)
 	//3. a feed rate (f) setting if in units_per_minute feed mode.
 	//4. a spindle speed (s) setting.
@@ -330,6 +332,10 @@ InterError GCodeInterpreter::execute_frame(const char *str)
 	//7. any g_codes (except g93, g94, g95) as described in convert_g.
 	
 
+	if (!run_dwell(parser))
+		return get_state();
+	if (!run_input_mode(parser))
+		return get_state();
 	if (!run_feed_mode(parser))
 		return get_state();
 	if (!run_feed_rate(parser))
@@ -372,12 +378,82 @@ bool GCodeInterpreter::run_feed_rate(const  CmdParser &parser)
 }
 
 
-bool GCodeInterpreter::run_spindle_mode(const  CmdParser &parser)
+bool GCodeInterpreter::run_dwell(CmdParser &parser)
 {
-	if (parser.contain_cmd(ModalGroup_SPINDLEMODE))
-		RET_F_SETSTATE(NOTSUPPORTEDYET, "SPINDLE mode not suppoted");
+	if (parser.contain_g(G_4))
+	{
+		//G96 D2500 S250
+		double millseconds, sec;
+		if (parser.getRParam(PARAM_P, &millseconds))
+			; 
+		else if (parser.getRParam(PARAM_X, &sec))
+		{
+			millseconds = sec * 1000;
+		}
+		else if (parser.getRParam(PARAM_S, &sec))
+		{
+			millseconds = sec * 1000;
+		}
+		else if (parser.getRParam(PARAM_U, &sec))
+		{
+			millseconds = sec * 1000;
+		}
+		if (parser.params_count() != 1 )
+			RET_F_SETSTATE(WRONG_VALUE, "very many parameters for dwell G4 ");
+
+		executor->set_dwell(static_cast<long>(millseconds));
+		reset_motion_mode();
+		parser.remove_g(G_4);
+		parser.remove_params();
+	}
+	return true;
+
+}
+
+
+bool GCodeInterpreter::run_spindle_mode( CmdParser &parser)
+{
+	if ( parser.contain_g(G_96) )
+	{
+		//G96 D2500 S250
+		double diam, speed;
+		IF_F_RET_F_SETSTATE(parser.getRParam(PARAM_D, &diam), NO_VALUE, "Parametr 'D' must be defined for G96 (CSS mode)");
+		IF_F_RET_F_SETSTATE(parser.getRParam(PARAM_S, &speed), NO_VALUE, "Parametr 'S' must be defined for G96 (CSS mode)");
+		executor->set_css_spindlemode(diam, speed);		
+		parser.remove_g(G_96);
+		parser.remove_param(PARAM_D);
+		parser.remove_param(PARAM_S);
+	}
+	else if (parser.contain_g(G_97))
+	{
+		executor->set_regular_spindlemode();
+		parser.remove_g(G_97);
+	}
 	return true;
 }
+
+bool GCodeInterpreter::run_input_mode( CmdParser &parser )
+{
+	if (parser.contain_g(G_10))
+	{
+		//G10 L2 P2 X2 Y0 Z0(Set G55 offset to 2, 0, 0)
+
+		//now we can work only with L2  - setting coordinate sistem
+		int l;
+		double p;
+		IF_F_RET_F_SETSTATE(parser.getIParam(PARAM_L, &l), NO_VALUE, "Parametr 'L' must be defined for G10 ");
+		IF_F_RET_F_SETSTATE((l==2), WRONG_VALUE,"we can work only with L2 for G10 ");
+		IF_F_RET_F_SETSTATE(parser.getRParam(PARAM_P, &p), NO_VALUE, "Parametr 'p' must be defined for G10 ");
+		int ip = static_cast<int>(p);
+		IF_F_RET_F_SETSTATE((ip >= 1 && ip <= 5), WRONG_VALUE, "Parametr 'p' out of range ");
+		Coords newpos;
+		setcoordinates(newpos, parser);
+		env->SetG54G58(ip - 1, newpos, parser.contain_g(G_91)); 
+		parser.clear();
+	}
+	return true;
+}
+
 
 
 bool GCodeInterpreter::run_speed(const CmdParser &parser)
@@ -493,7 +569,7 @@ bool GCodeInterpreter::run_gcode(const CmdParser &parser)
 			//case G_40://	Cutter Diameter Compensation
 			case G_53:  g53 = true;  break;  //move to position in Global coordinate system
 			case G_52:  g52 = true; break; // offset of current coordinats system 
-			case G_54:  case 55: case 56: case 57: case 58:
+			case G_54:  case G_55: case G_56: case G_57: case G_58:
 				runner.origin = env->GetG54G58(*iter - 54);
 				break;
 
@@ -506,6 +582,7 @@ bool GCodeInterpreter::run_gcode(const CmdParser &parser)
 			case G_91: runner.incremental = true; break;
 			//case 98: runner.cycleLevel = CannedLevel_HIGH; break;
 			//case 99: runner.cycleLevel = CannedLevel_LOW; break;
+			
 
 		default:
 			RET_F_SETSTATE(INVALID_STATEMENT, "Unknown code: G%d", (*iter)/10 );
@@ -515,18 +592,27 @@ bool GCodeInterpreter::run_gcode(const CmdParser &parser)
 	if (g52)
 	{
 		setcoordinates( runner.origin, parser);
-		if (newMove != MotionMode_NONE)
+		reset_motion_mode();
+		if (parser.contain_cmd( ModalGroup_MOVE ) )
 			RET_F_SETSTATE(INVALID_STATEMENT, "G52 and movement command can not be in one frame" );
 	}
-	if (g53)
-		RET_F_SETSTATE(INVALID_STATEMENT, "G53 does not suppered yet");
+	
 
 
 	// check if need not move just return
 	if (newMove != MotionMode_NONE)
 	{
 
-		Coords newPos = get_new_coordinate(currentLocal, parser );
+		Coords newPos;
+		if (g53) // do movement in Global Coordinates
+		{
+			newPos = runner.position;
+			setcoordinates(newPos, parser);
+		}
+		else
+		{
+			newPos = get_new_coordinate(currentLocal, parser);
+		}
 
 		switch (newMove)
 		{
@@ -555,6 +641,11 @@ void GCodeInterpreter::setcoordinates(Coords &newpos, const CmdParser &parser) c
 	parser.getRParam(PARAM_A, &(newpos.a));
 	parser.getRParam(PARAM_B, &(newpos.b));
 	parser.getRParam(PARAM_C, &(newpos.c));	
+	if (runner.units == UnitSystem_INCHES)
+	{
+		newpos = to_mm(newpos);
+	}
+
 }
 
 
@@ -650,7 +741,7 @@ void  GCodeInterpreter::arc_to(const Coords &position, bool cw)
 
 //====================================================================================================
 //перевод в мм
-coord GCodeInterpreter::to_mm(coord value)
+coord GCodeInterpreter::to_mm(coord value) const
 {
 	if (runner.units == UnitSystem_INCHES)
 		value *= MM_PER_INCHES;
@@ -658,7 +749,7 @@ coord GCodeInterpreter::to_mm(coord value)
 }
 
 //====================================================================================================
-Coords GCodeInterpreter::to_mm(Coords value)
+Coords GCodeInterpreter::to_mm(Coords value) const
 {
 	for (int i = 0; i < MAX_AXES; ++i)
 		value.r[i] = to_mm(value.r[i]);

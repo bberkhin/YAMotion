@@ -138,19 +138,21 @@ namespace Interpreter
 		void local_deform(Coords &coords);      //преобразование масштаба, поворот в локальной системе координат
 		void to_global(Coords &coords);         //сдвиг в глобальные координаты
 		void to_local(Coords &coords);          //сдвиг в локальные координаты
-		coord to_mm(coord value);               //переводит из текущих единиц в мм
-		Coords to_mm(Coords value);
+		coord to_mm(coord value) const;               //переводит из текущих единиц в мм
+		Coords to_mm(Coords value) const;
 		void move_to(const Coords &position, bool fast);          //линейное перемещение
 		void  arc_to(const Coords &position, bool cw);
 
 		bool run_feed_mode(const CmdParser &parser);
 		bool run_feed_rate(const CmdParser &parser);
-		bool run_spindle_mode(const CmdParser &parser);
+		bool run_spindle_mode(CmdParser &parser);
+		bool run_dwell(CmdParser &parser);
 		bool run_speed(const CmdParser &parser);
 		bool run_tool_cmd(const CmdParser &parser);
 		bool run_mcode(const CmdParser &parser);
 		bool run_gcode(const CmdParser &parser);
 		bool run_stop(const CmdParser &parser);		
+		bool run_input_mode(CmdParser &parser);
 		void setcoordinates(Coords &newpos, const CmdParser &parser) const; 
 		Coords get_new_coordinate(Coords &oldLocal, const CmdParser &parser);
 
