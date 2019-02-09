@@ -38,13 +38,13 @@ void GCodeInterpreter::init()
 
 //====================================================================================================
 // open the file
-bool GCodeInterpreter::open_nc_file(const char *name)
+bool GCodeInterpreter::open_nc_file(const wchar_t *name)
 {
 	if ( file_name.empty() && name == NULL )
 		RET_F_SETSTATE( ERROR_FILEREAD, "File name not specified" );
 	
 	//empty or new name
-	if (name != NULL && file_name != std::string(name) )
+	if (name != NULL && file_name != std::wstring(name) )
 	{
 		file_name = name;
 		close_nc_file();
@@ -52,7 +52,7 @@ bool GCodeInterpreter::open_nc_file(const char *name)
 
 	if (gfile != NULL)
 		return true;
-	gfile = fopen(name, "r");
+	gfile = _wfopen(name,L"r");
 	IF_F_RET_F_SETSTATE((gfile != NULL), ERROR_FILEREAD, "Can not open file %s", name); 
 	init();
 	return true;
@@ -71,11 +71,12 @@ void GCodeInterpreter::execute_file()
 	mainsub.name = "_main_";
 	mainsub.callfrom = mainsub.startpos = 0;
 	mainsub.type = O_;
+	mainsub.nline = 1;
 	
 	substack.push(mainsub);
 	cursubr_ = mainsub.name;
-	
-	execute_file_int(0, &GCodeInterpreter::execute_frame);
+	int nline = 1;
+	execute_file_int(0, &GCodeInterpreter::execute_frame, nline );
 
 
 	// next time will reopen and seek to begin and call init
@@ -100,9 +101,8 @@ void GCodeInterpreter::execute_file()
 	
 }
 
-bool GCodeInterpreter::execute_file_int( long pos, ExecFunction fun )
+bool GCodeInterpreter::execute_file_int( long pos, ExecFunction fun, int &lineNumber )
 {
-	int lineNumber = 1;
 	char line[MAX_GCODE_LINELEN];
 	size_t length;
 	IF_F_RET_F(open_nc_file());
@@ -209,11 +209,11 @@ bool GCodeInterpreter::find_subrotinue(const char *subname, SubratinInfo *psub )
 		//find in file
 		psub->name = subname;
 		psub->callfrom = fpos;
-
+		int nline = 1;
 		std::string savesbn = cursubr_;
 		
 		cursubr_ = subname;
-		if (!execute_file_int(0, &GCodeInterpreter::is_subrotin_start))
+		if (!execute_file_int(0, &GCodeInterpreter::is_subrotin_start, nline))
 		{
 			cursubr_ = savesbn;
 			return false;
@@ -225,6 +225,7 @@ bool GCodeInterpreter::find_subrotinue(const char *subname, SubratinInfo *psub )
 			RET_F_SETSTATE(SUBROUTINE_ERROR, "Can not find subroutinue: %s", subname);
 		}
 
+		psub->nline = nline+1; //+1 becouse sekeep o100 string
 		psub->startpos = ftell(gfile);
 		submap.insert( std::pair<std::string, SubratinInfo>(psub->name,*psub) );
 	}
@@ -250,11 +251,14 @@ bool GCodeInterpreter::execute_subrotinue( const  CmdParser parser )
 
 	int times = 1;
 	parser.getIParam(PARAM_L, &times);
+
 	for (int i = 0; i < times; ++i)
 	{
 		reset_motion_mode();
 		cursubr_ = sname; //restore current sub
-		execute_file_int(substack.top().startpos, &GCodeInterpreter::execute_frame);
+		int nline = substack.top().nline;
+		execute_file_int(substack.top().startpos, &GCodeInterpreter::execute_frame, nline );
+		reset_motion_mode();
 		if (state.code == SUBROTINE_END)
 			state.clear(); // clear END_SUBROTINUE STATE 
 		else if (state.code == PRAGRAMM_END || state.code == PRAGRAMM_ENDCLEAR)
@@ -355,12 +359,29 @@ InterError GCodeInterpreter::execute_frame(const char *str)
 }
 
 
-bool GCodeInterpreter::run_feed_mode( const CmdParser &parser )
+bool GCodeInterpreter::run_feed_mode( CmdParser &parser )
 {
-	if (parser.contain_cmd(ModalGroup_FEEDMODE))
-		RET_F_SETSTATE(NOTSUPPORTEDYET, "FEEDMODE not suppoted");
-	else
-		return true;
+	//G93, G94, G95
+	//G93  is Inverse Time Mode.In inverse time feed rate mode, an F word means the move should be completed in[one divided by the F number] minutes.
+	//G94 - is Units per Minute Mode.
+	//G95 - is Units per Revolution Mode 
+	if (parser.contain_g(G_93))
+	{
+		//G96 D2500 S250
+		RET_F_SETSTATE( NO_VALUE, "G93 Inverse Time Mode not supported");
+		parser.remove_g(G_93);
+	}
+	else if (parser.contain_g(G_94))
+	{
+		// ok do nothing
+		parser.remove_g(G_94);
+	}
+	else if (parser.contain_g(G_95))
+	{
+		RET_F_SETSTATE(NO_VALUE, "G95 - is Units per Revolution Mode not supported");
+		parser.remove_g(G_95);
+	}
+	return true;
 }
 
 bool GCodeInterpreter::run_feed_rate(const  CmdParser &parser)
@@ -454,7 +475,67 @@ bool GCodeInterpreter::run_input_mode( CmdParser &parser )
 	return true;
 }
 
+bool GCodeInterpreter::run_tool_crc(const CmdParser &parser)
+{
+//G_40:	runner.tool_crc = TCRC_NONE;	//Tool radius compensation off
+//G_41:	runner.tool_crc = TCRC_LEFT;	//Turn on cutter radius compensation left
+//G_42:	runner.tool_crc = TL_RIGHT;	    //Turn on cutter radius compensation right
+	
+	if (parser.contain_g(G_40))
+	{
+		runner.tool_crc_type = CutterCompType_NONE;
+		runner.tool_crc = 0;
+		return true;
+	}
+	else if (parser.contain_g(G_41))
+	{
+		runner.tool_crc_type = CutterCompType_LEFT;	//Turn on cutter radius compensation left
+	}
+	else if (parser.contain_g(G_42))
+	{
+		runner.tool_crc_type = CutterCompType_RIGHT;	    //Turn on cutter radius compensation right
+	}
+	else
+		RET_F_SETSTATE(INTERNAL_ERROR, "GCodeInterpreter::run_tool_crc can notbe called here");
 
+	double d = 0;
+	IF_F_RET_F_SETSTATE(parser.getRParam(PARAM_D, &d), NO_VALUE, "Parametr 'D' must be defined for G41 ");
+	IF_F_RET_F_SETSTATE((d != 0), WRONG_VALUE, "Parametr 'D' must be non zero. Use G40 to cancel cutter radius compensation");
+	runner.tool_crc = d;
+	return true;
+
+}
+	
+
+
+bool GCodeInterpreter::run_tool_height_offset(const CmdParser &parser)
+{
+	//G_43:  Tool height offset compensation negative
+	//G_44:  Tool height offset compensation positive
+	//G_49:  Tool height offset compensation off
+	int h = 0;
+	if (parser.contain_g(G_49))
+	{
+		runner.tools_offset_height = 0;
+	}
+	else if (parser.contain_g(G_43))
+	{
+		IF_F_RET_F_SETSTATE(parser.getIParam(PARAM_H, &h), NO_VALUE, "Parametr 'H' must be defined for G44 ");
+		if  ( h > 0 )
+			runner.tools_offset_height = -h;
+		else
+			runner.tools_offset_height = h;
+	}
+	else if (parser.contain_g(G_44))
+	{
+		IF_F_RET_F_SETSTATE(parser.getIParam(PARAM_H, &h), NO_VALUE, "Parametr 'H' must be defined for G43 ");
+		runner.tools_offset_height = h;
+	}
+	else
+		RET_F_SETSTATE(INTERNAL_ERROR, "GCodeInterpreter::run_tool_height_offset can notbe called here");
+
+	return true;
+}
 
 bool GCodeInterpreter::run_speed(const CmdParser &parser)
 {
@@ -555,37 +636,80 @@ bool GCodeInterpreter::run_gcode(const CmdParser &parser)
 	for (auto iter = gcodes.begin(); iter != gcodes.end(); ++iter)
 	{
 		int num = *iter;
-		switch (*iter)
+		switch (num)
 		{
+		// Movement
 			case G_0:   newMove = MotionMode_FAST;   break;
 			case G_1:   newMove = MotionMode_LINEAR; break;
 			case G_2:   newMove = MotionMode_CW_ARC; break;
 			case G_3:   newMove = MotionMode_CCW_ARC; break;
+		// Src Plane
 			case G_17: runner.plane = Plane_XY; break;
 			case G_18: runner.plane = Plane_XZ; break;
 			case G_19: runner.plane = Plane_YZ; break;
+		// Units
 			case G_20: runner.units = UnitSystem_INCHES; break;
 			case G_21: runner.units = UnitSystem_MM; break;
-			//case G_40://	Cutter Diameter Compensation
+		// Porbe G_38 for linuxcnc  
+			case G_31: newMove = MotionMode_PROBE; break;
+		// 	G32 is a thread cutting.
+			case G_32: 
+				reset_motion_mode();  
+				RET_F_SETSTATE(INVALID_STATEMENT, "G32 threading mode doas not supporeted yet");
+				break;
+		 // Cutter radius compensation (CRC),
+			case G_40:	//Tool radius compensation off
+			case G_41:	//Turn on cutter radius compensation left
+			case G_42:  //Turn on cutter radius compensation right
+				IF_F_RET_F( run_tool_crc(parser));
+				break;
+		// Tool height offset compensation
+			case G_43:  //Tool height offset compensation negative
+			case G_44:  //Tool height offset compensation positive
+			case G_49:  //Tool height offset compensation off
+				IF_F_RET_F(run_tool_height_offset(parser));
+				break;
+		// Coordinate systems
 			case G_53:  g53 = true;  break;  //move to position in Global coordinate system
 			case G_52:  g52 = true; break; // offset of current coordinats system 
 			case G_54:  case G_55: case G_56: case G_57: case G_58:
 				runner.origin = env->GetG54G58(*iter - 54);
 				break;
-
-			case G_80: runner.cycle = CannedCycle_RESET; newMove = MotionMode_NONE;  break;
+		//G61, G64, G60 G - Code: Exact Stop & Anti - Backlash
+			case G_61: runner.accuracy = AccuracyExactStop;
+			case G_64: runner.accuracy = AccuracyNormal;
+				break;
+		//  Drilling Cycle
+			case G_80: runner.cycle = CannedCycle_RESET; reset_motion_mode();  break;
 			case G_81: runner.cycle = CannedCycle_SINGLE_DRILL; break;
 			case G_82: runner.cycle = CannedCycle_DRILL_AND_PAUSE; break;
 			case G_83: runner.cycle = CannedCycle_DEEP_DRILL; break;
-
+				break;
+		//  Boring Cycle
+			case G_85:
+			case G_86:
+			case G_87:
+			case G_88:
+			case G_89:
+				 break;
+						 
 			case G_90: runner.incremental = false; break;
 			case G_91: runner.incremental = true; break;
-			//case 98: runner.cycleLevel = CannedLevel_HIGH; break;
-			//case 99: runner.cycleLevel = CannedLevel_LOW; break;
+		
+		//Coordinate System Offset  //TODO
+			case G_92: 
+			case G_92_1:   
+			case G_92_2:
+			case G_92_3:	
+				g52 = true; 
+				break;  
+
+			case G_98: runner.cycleLevel = CannedLevel_HIGH; break; //Отмена G99
+			case G_99: runner.cycleLevel = CannedLevel_LOW; break; // Return to R level in canned cycle
 			
 
 		default:
-			RET_F_SETSTATE(INVALID_STATEMENT, "Unknown code: G%d", (*iter)/10 );
+			RET_F_SETSTATE(INVALID_STATEMENT, "Unknown code: G%d", (num)/10 );
 		}
 	}
 
@@ -616,15 +740,21 @@ bool GCodeInterpreter::run_gcode(const CmdParser &parser)
 
 		switch (newMove)
 		{
-			case MotionMode_FAST: move_to(newPos, true); break;
-			case MotionMode_LINEAR: move_to(newPos, false);   break;
-			case MotionMode_CW_ARC:   arc_to(newPos, true); break;
+			case MotionMode_FAST:    move_to(newPos, true); break;
+			case MotionMode_LINEAR:  move_to(newPos, false);   break;
+			case MotionMode_CW_ARC:  arc_to(newPos, true); break;
 			case MotionMode_CCW_ARC: arc_to(newPos, false); break;
-			case MotionMode_NONE:  break; // ta avoid compiler warning
+			case MotionMode_PROBE:   probe_to(newPos);   break;
+			case MotionMode_NONE:    break; // ta avoid compiler warning
 		}
 		if (state.code)
 			return false;
-		runner.motionMode = newMove;
+		
+		if (newMove == MotionMode_PROBE)
+			reset_motion_mode();
+		else
+			runner.motionMode = newMove;
+		
 	}
 
 	return true;
@@ -710,6 +840,14 @@ bool GCodeInterpreter::run_stop(const CmdParser &parser)
 }
 
 
+void  GCodeInterpreter::probe_to(const Coords &position)
+{
+	if (executor)
+		executor->process_probe(position);
+	
+	//executor->straight_traverce(position);
+	//runner.position = position; //???
+}
 
 //====================================================================================================
 void  GCodeInterpreter::move_to(const Coords &position, bool fast)

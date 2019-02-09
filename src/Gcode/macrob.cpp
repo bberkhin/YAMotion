@@ -259,106 +259,126 @@ bool CmdParser::read_operation(int *operation)
 	position++;
 	switch (c) 
 	{
-	case '+':	*operation = PLUS;	break;
-	case '-':	*operation = MINUS;	break;
-	case '/':	*operation = DIVIDED_BY; break;
-	case '*':	
-		if (line[position] == '*') 
-		{
-			*operation = POWER;
-			position++;
-		}
-		else
-			*operation = TIMES;
-		break;
-	case ']':
-		*operation = RIGHT_BRACKET;
-		break;
-	case 'a':
-		if ((line[position] == 'n') && (line[position + 1] == 'd')) {
-			*operation = AND2;
-			position += 2;
-		}
-		else
-			RET_F_SETSTATE(UNKNOWN_OPERATOR, "Unknown operator starting with 'a'");
-		break;
-	case 'm':
-		if ((line[position] == 'o') && (line[position + 1] == 'd')) {
-			*operation = MODULO;
-			position += 2;
-		}
-		else
-			RET_F_SETSTATE(UNKNOWN_OPERATOR, "Unknown operator starting with 'm'");
-		break;
-	case 'o':
-		if (line[position] == 'r') {
-			*operation = NON_EXCLUSIVE_OR;
-			position++;
-		}
-		else
-			RET_F_SETSTATE(UNKNOWN_OPERATOR, "Unknown operator starting with 'o'");
-		break;
-	case 'x':
-		if ((line[position] == 'o') && (line[position + 1] == 'r')) {
-			*operation = EXCLUSIVE_OR;
-			position += 2;
-		}
-		else
-			RET_F_SETSTATE(UNKNOWN_OPERATOR, "Unknown operator starting with 'x'");
-		break;
+		case '=':	*operation = EQ;    break;
+		case '+':	*operation = PLUS;	break;
+		case '-':	*operation = MINUS;	break;
+		case '/':	*operation = DIVIDED_BY; break;
+		case '*':	
+			if (line[position] == '*') 
+			{
+				*operation = POWER;
+				position++;
+			}
+			else
+				*operation = TIMES;
+			break;
+		case ']':
+			*operation = RIGHT_BRACKET;
+			break;
+		case 'a':
+			if ((line[position] == 'n') && (line[position + 1] == 'd')) {
+				*operation = AND2;
+				position += 2;
+			}
+			else
+				RET_F_SETSTATE(UNKNOWN_OPERATOR, "Unknown operator starting with 'a'");
+			break;
+		case 'm':
+			if ((line[position] == 'o') && (line[position + 1] == 'd')) {
+				*operation = MODULO;
+				position += 2;
+			}
+			else
+				RET_F_SETSTATE(UNKNOWN_OPERATOR, "Unknown operator starting with 'm'");
+			break;
+		case 'o':
+			if (line[position] == 'r') {
+				*operation = NON_EXCLUSIVE_OR;
+				position++;
+			}
+			else
+				RET_F_SETSTATE(UNKNOWN_OPERATOR, "Unknown operator starting with 'o'");
+			break;
+		case 'x':
+			if ((line[position] == 'o') && (line[position + 1] == 'r')) {
+				*operation = EXCLUSIVE_OR;
+				position += 2;
+			}
+			else
+				RET_F_SETSTATE(UNKNOWN_OPERATOR, "Unknown operator starting with 'x'");
+			break;
 
-		/* relational operators */
-	case 'e':
-		if (line[position] == 'q')
-		{
-			*operation = EQ;
-			position++;
-		}
-		else
-			RET_F_SETSTATE(UNKNOWN_OPERATOR, "Unknown operator starting with 'e'");
-		break;
-	case 'n':
-		if (line[position] == 'e')
-		{
-			*operation = NE;
-			position++;
-		}
-		else
-			RET_F_SETSTATE(UNKNOWN_OPERATOR, "Unknown operator starting with 'n'");
-		break;
-	case 'g':
-		if (line[position] == 'e')
-		{
-			*operation = GE;
-			position++;
-		}
-		else if (line[position] == 't')
-		{
-			*operation = GT;
-			position++;
-		}
-		else
-			RET_F_SETSTATE(UNKNOWN_OPERATOR, "Unknown operator starting with 'g'");
-		break;
-	case 'l':
-		if (line[position] == 'e')
-		{
-			*operation = LE;
-			position++;
-		}
-		else if (line[position] == 't')
-		{
-			*operation = LT;
-			position++;
-		}
-		else
-			RET_F_SETSTATE(UNKNOWN_OPERATOR, "Unknown operator starting with 'l'");
-		break;
-
-	case 0:
-		RET_F_SETSTATE(UNKNOWN_OPERATOR, "Unclosed expression");
-	default:
-		RET_F_SETSTATE(UNKNOWN_OPERATOR, "Unclosed operator");
+			/* relational operators */
+		case 'e':
+			if (line[position] == 'q')
+			{
+				*operation = EQ;
+				position++;
+			}
+			else
+				RET_F_SETSTATE(UNKNOWN_OPERATOR, "Unknown operator starting with 'e'");
+			break;
+		case 'n':
+			if (line[position] == 'e')
+			{
+				*operation = NE;
+				position++;
+			}
+			else
+				RET_F_SETSTATE(UNKNOWN_OPERATOR, "Unknown operator starting with 'n'");
+			break;
+		case 'g':
+			if (line[position] == 'e')
+			{
+				*operation = GE;
+				position++;
+			}
+			else if (line[position] == 't')
+			{
+				*operation = GT;
+				position++;
+			}
+			else
+				RET_F_SETSTATE(UNKNOWN_OPERATOR, "Unknown operator starting with 'g'");
+			break;
+		case 'l':
+			if (line[position] == 'e')
+			{
+				*operation = LE;
+				position++;
+			}
+			else if (line[position] == 't')
+			{
+				*operation = LT;
+				position++;
+			}
+			else
+				RET_F_SETSTATE(UNKNOWN_OPERATOR, "Unknown operator starting with 'l'");
+			break;
+		case '<':
+			if (line[position] == '=') {
+				*operation = LE;
+				position++;
+			}
+			else if (line[position] == '>') {
+				*operation = NE;
+				position++;
+			}
+			else
+				*operation = LT;
+			break;
+		case '>':
+			if (line[position] == '=') {
+				*operation = GE;
+				position++;
+			}	
+			else
+				*operation = GT;
+			break;
+		case 0:
+			RET_F_SETSTATE(UNKNOWN_OPERATOR, "Unclosed expression");
+		default:
+			RET_F_SETSTATE(UNKNOWN_OPERATOR, "Unclosed operator");
 	}
 	return true;
 

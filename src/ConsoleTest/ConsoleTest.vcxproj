@@ -167,16 +167,16 @@
     <ClInclude Include="..\Gcode\ienvironment.h" />
     <ClInclude Include="..\Gcode\Iexecutor.h" />
     <ClInclude Include="..\Gcode\ilogger.h" />
-    <ClInclude Include="logconsole.h" />
+    <ClInclude Include="..\Gcode\logconsole.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Gcode\cmdparser.cpp" />
     <ClCompile Include="..\Gcode\environmentsimple.cpp" />
     <ClCompile Include="..\Gcode\GCodeInterpreter.cpp" />
     <ClCompile Include="..\Gcode\ilogger.cpp" />
+    <ClCompile Include="..\Gcode\logconsole.cpp" />
     <ClCompile Include="..\Gcode\macrob.cpp" />
     <ClCompile Include="ConsoleTest.cpp" />
-    <ClCompile Include="logconsole.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

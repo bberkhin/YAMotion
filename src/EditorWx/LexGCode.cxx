@@ -96,6 +96,13 @@ static void ColouriseGCodeDoc(Sci_PositionU startPos, Sci_Position length, int i
 			if (!IsANumChar(sc.ch))
 				sc.SetState(SCE_GCODE_DEFAULT);
 		}
+		else if (sc.state == SCE_GCODE_VAR)
+		{
+			if (sc.ch == ']')
+			{
+				sc.ForwardSetState(SCE_GCODE_DEFAULT);
+			}
+		}
 
 		// Determine if a new state should be entered.
 		if (sc.state == SCE_GCODE_DEFAULT  )
@@ -112,6 +119,10 @@ static void ColouriseGCodeDoc(Sci_PositionU startPos, Sci_Position length, int i
 				(IsADigit(sc.ch) || ((sc.ch == '.' || sc.ch == '-') && IsASCII(sc.chNext) && IsADigit(sc.chNext)))
 				) {
 				sc.SetState(SCE_GCODE_NUMBER);
+			}
+			else if (sc.ch == '[')
+			{
+				sc.SetState(SCE_GCODE_VAR);
 			}
 			else
 			{

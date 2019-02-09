@@ -43,6 +43,7 @@ namespace Interpreter
 		MotionMode_LINEAR,    //линейная интерполяция
 		MotionMode_CW_ARC,    //круговая интерполяция
 		MotionMode_CCW_ARC,
+		MotionMode_PROBE		
 	};
 
 	enum CannedCycle
@@ -60,7 +61,17 @@ namespace Interpreter
 		CannedLevel_HIGH,   //отвод к исходной плоскости, G98
 		CannedLevel_LOW,    //отвод к плоскости обработки, G99
 	};
-	
+	enum CutterCompType
+	{
+		CutterCompType_NONE = 0,
+		CutterCompType_LEFT,
+		CutterCompType_RIGHT
+	};
+	enum MoveAccuracy
+	{
+		AccuracyNormal = 0,
+		AccuracyExactStop
+	};
 	//=================================================================================================
 	//интерпретатор работает следующим образом
 	//читается вся строка, выбираются команды и для них ищутся параметры
@@ -78,7 +89,14 @@ namespace Interpreter
 		double feed;             //подача в мм/мин
 		double spindlespeed; // обороты шпиндля
 		Coords origin;            //параметры команд G54..G58
+		int tools_offset_height;  // Tool height offset compensation
+		int tool_crc;			 // Cutter radius compensation (CRC),
+		CutterCompType tool_crc_type;
+		MoveAccuracy accuracy;
+			
+
 		CannedCycle cycle;       //текущий цикл
+		CannedLevel cycleLevel;
 	//    bool   cycleUseLowLevel; //использовать R вместо стартовой точки
 	//    double cycleLowLevel;    //плоскость отвода (задаётся в R)
 	//    double cycleHiLevel;     //исходная плоскость задаётся в стартовом Z
@@ -87,7 +105,7 @@ namespace Interpreter
 	//    int    cycleWait;        //задержка в цикле P
 		RunnerData() :
 			toolid(-1), units(UnitSystem_MM), incremental(false), motionMode(MotionMode_NONE), plane(Plane_XY), feed(0), spindlespeed(0),
-			cycle(CannedCycle_NONE) { }
+			cycle(CannedCycle_NONE), tools_offset_height(0), cycleLevel(CannedLevel_HIGH), accuracy(AccuracyNormal) { }
 
 	};
 
@@ -97,8 +115,9 @@ namespace Interpreter
 		std::string name;
 		long startpos;
 		long callfrom;
+		int nline;
 		int type;
-		SubratinInfo() : startpos(0), callfrom(0), type(O_none) { }
+		SubratinInfo() : startpos(0), callfrom(0), type(O_none), nline(1) { }
 	};
 
 	typedef std::stack<SubratinInfo> substack_tp;
@@ -119,7 +138,7 @@ namespace Interpreter
 		GCodeInterpreter(IEnvironment *penv, IExecutor *executor, ILogger *logger);
 		~GCodeInterpreter(void);
 
-		bool open_nc_file(const char *name = 0);             //запоминает строки текстового файла
+		bool open_nc_file(const wchar_t *name = 0);             //запоминает строки текстового файла
 		void execute_file();
 	//	void execute_file(const char *data);
 	//	void execute_line(const  char *line, int lineNumber = 1);    //исполняет одну строку
@@ -127,7 +146,7 @@ namespace Interpreter
 	private:
 		void close_nc_file();
 		void init();                            //инициализация для нового файла
-		bool execute_file_int(long pos, ExecFunction fun);
+		bool execute_file_int(long pos, ExecFunction fun, int &lineNumber);
 		const char *cpy_close_and_downcase(char *line, const char *src, int lineNumber);
 		InterError execute_frame(const char *frame);    //выполнение строки
 		InterError is_subrotin_start(const char *str);    //выполнение строки при поиске
@@ -141,9 +160,10 @@ namespace Interpreter
 		coord to_mm(coord value) const;               //переводит из текущих единиц в мм
 		Coords to_mm(Coords value) const;
 		void move_to(const Coords &position, bool fast);          //линейное перемещение
+		void probe_to(const Coords &position);
 		void  arc_to(const Coords &position, bool cw);
 
-		bool run_feed_mode(const CmdParser &parser);
+		bool run_feed_mode(CmdParser &parser);
 		bool run_feed_rate(const CmdParser &parser);
 		bool run_spindle_mode(CmdParser &parser);
 		bool run_dwell(CmdParser &parser);
@@ -153,13 +173,16 @@ namespace Interpreter
 		bool run_gcode(const CmdParser &parser);
 		bool run_stop(const CmdParser &parser);		
 		bool run_input_mode(CmdParser &parser);
+		bool run_tool_height_offset(const CmdParser &parser);
+		bool run_tool_crc(const CmdParser &parser);
+
 		void setcoordinates(Coords &newpos, const CmdParser &parser) const; 
 		Coords get_new_coordinate(Coords &oldLocal, const CmdParser &parser);
 
 		InterError get_state() { return state; }
 	private:
 		InterError state;
-		std::string file_name;     //строки входного файла
+		std::wstring file_name;     //строки входного файла
 		FILE *gfile;
 		submap_tp submap;
 		substack_tp substack;

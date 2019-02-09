@@ -60,8 +60,11 @@
     <ClCompile Include="..\Gcode\environmentsimple.cpp">
       <Filter>GCode</Filter>
     </ClCompile>
+    <ClCompile Include="..\Gcode\logconsole.cpp">
+      <Filter>GCode</Filter>
+    </ClCompile>
     <ClCompile Include="..\Gcode\macrob.cpp">
-      <Filter>Исходные файлы</Filter>
+      <Filter>GCode</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -120,6 +123,9 @@
       <Filter>GCode</Filter>
     </ClInclude>
     <ClInclude Include="..\Gcode\environmentsimple.h">
+      <Filter>GCode</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Gcode\logconsole.h">
       <Filter>GCode</Filter>
     </ClInclude>
   </ItemGroup>

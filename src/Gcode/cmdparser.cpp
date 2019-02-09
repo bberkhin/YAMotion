@@ -509,7 +509,7 @@ bool CmdParser::read_g()
 	if (value < 0)
 		RET_F_SETSTATE(WRONG_VALUE, "Negative G value");
 
-	IF_F_RET_F_SETSTATE(acsept_gcode(value), WRONG_VALUE, "Uknown G code %f", value);
+	IF_F_RET_F_SETSTATE(acsept_gcode(value), WRONG_VALUE, "Uknown G code %d", static_cast<int>(value/10));
 
 	gcodes.push_back(value);
 	return false;
@@ -672,6 +672,8 @@ ModalGroup CmdParser::get_gmodal_group(int num) const
 	case G_90: case G_91:
 		return ModalGroup_INCREMENTAL;
 
+	case G_93: case G_94: case G_95:
+		return ModalGroup_FEEDMODE;
 	case G_20: case G_21:
 		return ModalGroup_UNITS;
 
@@ -680,10 +682,10 @@ ModalGroup CmdParser::get_gmodal_group(int num) const
 
 	case G_43: case G_49:
 		return ModalGroup_TOOL_LENGTH_CORRECTION;
-
 	case G_40: case G_41: case G_42:
 		return ModalGroup_TOOL_RADIUS_CORRECTION;
-
+	case G_61: case G_64: 
+		return ModalGroup_ACCURACY;
 	case G_98: case G_99:
 		return ModalGroup_CYCLE_RETURN;
 
@@ -723,6 +725,8 @@ bool CmdParser::acsept_gcode(int num) const
 	case G_28_1:
 	case G_30:
 	case G_30_1:
+	case G_31:
+	case G_32:
 	case G_33:
 	case G_33_1:
 	case G_38_2:

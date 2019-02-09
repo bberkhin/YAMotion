@@ -1,10 +1,12 @@
-#ifndef EXECUTORLOG_H
-#define EXECUTORLOG_H
+#ifndef LOGCONSOLE_H
+#define LOGCONSOLE_H
 #include "IExecutor.h"
 #include "ILogger.h"
 
 class ExecutorLog : public IExecutor
 {
+protected:
+
     int nline;
 	bool doprint;
 public:
@@ -22,9 +24,10 @@ public:
     void run_mcode( int toolid);
     void set_end_programm();
 	void set_dwell(long millseconds);
+	void process_probe(const Coords &position);
 private:
-    void output(const std::string &str  );
-    void output(const std::string &str, const Coords &position );
+    virtual void output(const std::string &str  );
+	virtual void output(const std::string &str, const Coords &position );
 };
 
 
@@ -38,4 +41,4 @@ private:
 };
 
 
-#endif // EXECUTORLOG_H
+#endif // LOGCONSOLE_H

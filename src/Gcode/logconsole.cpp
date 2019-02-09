@@ -87,6 +87,12 @@ void ExecutorLog::output(const std::string &str, const Coords &position )
 	 output(std::string("set_dwell"));
  }
 
+ void ExecutorLog::process_probe(const Coords &position)
+ {
+	 output(std::string("process_probe "), position);
+ }
+
+
  void LoggerConsole::log_string(int type, const char *s)
  {
 	 if (type == LOG_WARNING )

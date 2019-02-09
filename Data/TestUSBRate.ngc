@@ -19,7 +19,7 @@
 
 (simple polygon)
 #1=0 (start angle)
-#2=1500 (number of sides)
+#2=1 (number of sides)
 #3=0.1 (radius)
 #4=100 (number of loops)
 #5=0

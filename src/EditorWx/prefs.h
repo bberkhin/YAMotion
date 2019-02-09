@@ -59,7 +59,7 @@
 
 
 #define STYLE_TYPES_COUNT 32
-#define DEFAULT_LANGUAGE "<default>"
+
 
 
 //----------------------------------------------------------------------------

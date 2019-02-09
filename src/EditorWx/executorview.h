@@ -27,9 +27,15 @@ public:
     void set_tool_change( int toolid);
     void straight_feed(const Coords &position );
     void straight_traverce(const Coords &position );
+	void set_regular_spindlemode();
     void arc_feed(const Coords &position, bool cw );
     void run_mcode( int toolid);
     void set_end_programm();
+	void set_css_spindlemode(double &diam, double &speed);
+	void set_dwell(long millseconds);
+	void process_probe(const Coords &position);
+
+
 	std::vector<TrackPoint> *getTrack() { return &trj; }
 	CoordsBox getBox() { return box; }
 private:

@@ -77,7 +77,7 @@ const LanguageInfo g_LanguagePrefs[] = {
 	 mySTC_FOLD_COMMENT | mySTC_FOLD_COMPACT | mySTC_FOLD_PREPROC},
 
 	 // * (any)
-    {wxTRANSLATE(DEFAULT_LANGUAGE),
+    {wxTRANSLATE("<default>"),
      "*.*",
      wxSTC_LEX_PROPERTIES,
      {{mySTC_TYPE_DEFAULT, NULL},

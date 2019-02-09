@@ -105,6 +105,7 @@ public:
     LanguageInfo const* GetLanguageInfo () {return m_language;}
 
     //! load/save file
+	bool NewFile();
     bool LoadFile (const wxString &filename);
     bool SaveFile ();
     bool SaveFile (const wxString &filename);

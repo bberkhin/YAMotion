@@ -61,6 +61,9 @@ public:
 	wxSimpleHtmlListBox *getLogWnd() { return m_hlbox; }
 	wxString GetText();
 private:
+	wxString GetSavedFileName();
+	bool DoFileSave(bool askToSave, bool bSaveAs);
+private:
 	// edit object
 	Edit *m_edit;
 	wxSimpleHtmlListBox *m_hlbox;

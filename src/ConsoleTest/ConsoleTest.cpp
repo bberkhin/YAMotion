@@ -22,23 +22,24 @@ int main(int argc, char *argv[] )
 	ExecutorLog exec;
 	EnvironmentSimple env;
 	LoggerConsole logger;
-	GCodeInterpreter ipret(&env, &exec,&logger);
+	GCodeInterpreter ipret(&env, &exec, &logger);
 	if (argc == 2)
 	{
 		exec.setneedprint(true);
-		ipret.open_nc_file(argv[1]);
+		std::string str(argv[1]);
+		std::wstring csFile(str.begin(), str.end());
+		ipret.open_nc_file( csFile.c_str() );
 		ipret.execute_file();
 	}
 	else
 	{
 		//setup converter//setup converter
 		exec.setneedprint(false);
-		std::string path;
+		std::wstring path;
 		for (const auto & entry : fs::directory_iterator(path))
 		{
-			std::cout << "Start file: " << entry.path() << "\n";
-			//use converter (.to_bytes: wstr->str, .from_bytes: str->wstr)
-			std::string csFile = entry.path().string();			
+			std::cout << "Start file: " << entry.path() << "\n";		
+			std::wstring csFile = entry.path().wstring();			
 			ipret.open_nc_file( csFile.c_str() );
 			ipret.execute_file();
 			std::cout << "End file: " << entry.path() << "\n" << "\n";

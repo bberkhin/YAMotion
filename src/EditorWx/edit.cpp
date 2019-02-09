@@ -116,7 +116,11 @@ Edit::Edit (wxWindow *parent, wxWindowID id,
     StyleSetForeground (wxSTC_STYLE_LINENUMBER, wxColour ("DARK GREY"));
     StyleSetBackground (wxSTC_STYLE_LINENUMBER, *wxWHITE);
     StyleSetForeground(wxSTC_STYLE_INDENTGUIDE, wxColour ("DARK GREY"));
-    InitializePrefs (DEFAULT_LANGUAGE);
+
+	// margin
+	m_LineNrMargin = TextWidth(wxSTC_STYLE_LINENUMBER, "_99999");
+	m_FoldingMargin = 16;
+    InitializePrefs (g_LanguagePrefs[0].name);
 
     // set visibility
     SetVisiblePolicy (wxSTC_VISIBLE_STRICT|wxSTC_VISIBLE_SLOP, 1);
@@ -134,10 +138,7 @@ Edit::Edit (wxWindow *parent, wxWindowID id,
 
     // annotations
     AnnotationSetVisible(wxSTC_ANNOTATION_BOXED);
-
-    // miscellaneous
-    m_LineNrMargin = TextWidth (wxSTC_STYLE_LINENUMBER, "_999999");
-    m_FoldingMargin = 16;
+ 
     CmdKeyClear (wxSTC_KEY_TAB, 0); // this is done by the menu accelerator key
     SetLayoutCache (wxSTC_CACHE_PAGE);
     UsePopUp(wxSTC_POPUP_ALL);
@@ -461,28 +462,31 @@ void Edit::OnChanged(wxStyledTextEvent &event)
 
 //----------------------------------------------------------------------------
 // private functions
-wxString Edit::DeterminePrefs (const wxString &filename) {
+wxString Edit::DeterminePrefs (const wxString &filename) 
+{
+	// support only GCoDe
+	return g_LanguagePrefs[0].name;
 
-    LanguageInfo const* curInfo;
+ //   LanguageInfo const* curInfo;
 
-	wxString filenamel = filename.Lower();
-   // determine language from filepatterns
-    int languageNr;
-    for (languageNr = 0; languageNr < g_LanguagePrefsSize; languageNr++) {
-        curInfo = &g_LanguagePrefs [languageNr];
-        wxString filepattern = curInfo->filepattern;
-        filepattern.MakeLower();
-        while (!filepattern.empty()) {
-            wxString cur = filepattern.BeforeFirst (';');
-            if ((cur == filenamel) ||
-                (cur == (filenamel.BeforeLast ('.') + ".*")) ||
-                (cur == ("*." + filenamel.AfterLast ('.')))) {
-                return curInfo->name;
-            }
-            filepattern = filepattern.AfterFirst (';');
-        }
-    }
-    return wxEmptyString;
+	//wxString filenamel = filename.Lower();
+ //  // determine language from filepatterns
+ //   int languageNr;
+ //   for (languageNr = 0; languageNr < g_LanguagePrefsSize; languageNr++) {
+ //       curInfo = &g_LanguagePrefs [languageNr];
+ //       wxString filepattern = curInfo->filepattern;
+ //       filepattern.MakeLower();
+ //       while (!filepattern.empty()) {
+ //           wxString cur = filepattern.BeforeFirst (';');
+ //           if ((cur == filenamel) ||
+ //               (cur == (filenamel.BeforeLast ('.') + ".*")) ||
+ //               (cur == ("*." + filenamel.AfterLast ('.')))) {
+ //               return curInfo->name;
+ //           }
+ //           filepattern = filepattern.AfterFirst (';');
+ //       }
+ //   }
+ //   return wxEmptyString;
 
 }
 
@@ -513,6 +517,7 @@ bool Edit::InitializePrefs (const wxString &name) {
     StyleSetForeground (wxSTC_STYLE_LINENUMBER, wxColour ("DARK GREY"));
     StyleSetBackground (wxSTC_STYLE_LINENUMBER, *wxWHITE);
     SetMarginWidth (m_LineNrID, 0); // start out not visible
+	SetMarginWidth(m_LineNrID, m_LineNrMargin);
 
     // annotations style
     StyleSetBackground(ANNOTATION_STYLE, wxColour(244, 220, 220));
@@ -540,6 +545,7 @@ bool Edit::InitializePrefs (const wxString &name) {
             wxFont font(wxFontInfo(curType.fontsize)
                             .Family(wxFONTFAMILY_MODERN)
                             .FaceName(curType.fontname));
+			//font.SetEncoding(wxFONTENCODING_CP1251);
             StyleSetFont (Nr, font);
             if (curType.foreground.length()) {
                 StyleSetForeground (Nr, wxColour (curType.foreground));
@@ -613,6 +619,16 @@ bool Edit::InitializePrefs (const wxString &name) {
                  wxSTC_WRAP_WORD: wxSTC_WRAP_NONE);
 
     return true;
+}
+
+bool Edit::NewFile()
+{
+	SetFilename(wxEmptyString);
+	ClearAll();
+	SetSavePoint();
+	EmptyUndoBuffer();
+	InitializePrefs( g_LanguagePrefs[0].name );
+	return true;
 }
 
 

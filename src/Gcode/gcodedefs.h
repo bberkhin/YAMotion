@@ -96,7 +96,8 @@ namespace Interpreter
 		ModalGroup_CYCLE_RETURN, //g98, g99
 		ModalGroup_ACTIVE_PLANE, //g17..g19
 		ModalGroup_STOP, //M0, M1, M2, M30, M60
-		ModalGroup_TURN_TOOL, //M3, M4, M5
+		ModalGroup_ACCURACY, // aqccuracy 	//G61, G64
+		ModalGroup_TURN_TOOL, //M3, M4, M5 
 		ModalGroup_GREASER, //M7, M8, M9
 		ModalGroup_FEEDMODE,  // g93, g94, g95
 		ModalGroup_SPINDLEMODE  //G96 G97 spindle
@@ -202,6 +203,7 @@ namespace Interpreter
 #define G_28_1 281
 #define G_30   300
 #define G_31   310
+#define G_32   320
 #define G_30_1 301
 #define G_33   330
 #define G_33_1 331
@@ -217,6 +219,8 @@ namespace Interpreter
 #define G_43   430
 #define G_43_1 431
 #define G_43_2 432
+#define G_44   440
+#define G_48   480
 #define G_49   490
 #define G_50   500
 #define G_51   510

@@ -22,6 +22,7 @@
 
 
 //Bitmaps
+#include "bitmaps/new.xpm"
 #include "bitmaps/open.xpm"
 #include "bitmaps/save.xpm"
 #include "bitmaps/copy.xpm"
@@ -51,8 +52,8 @@ using namespace Interpreter;
 class IntGCodeThread : public wxThread
 {
 public:
-	IntGCodeThread(AppFrame *handler)
-		: wxThread(wxTHREAD_DETACHED)
+	IntGCodeThread(AppFrame *handler, wxString &fname_)
+		: fname(fname_), wxThread(wxTHREAD_DETACHED)
 	{
 
 		m_pHandler = handler;
@@ -73,14 +74,15 @@ protected:
 	ExecutorLogWnd *pexec;
 	LoggerWnd *plogger;
 	GCodeInterpreter *ppret;
+	wxString fname;
 };
 
 
 class SimulateGCodeThread : public wxThread
 {
 public:
-	SimulateGCodeThread(AppFrame *handler)
-		: wxThread(wxTHREAD_DETACHED)
+	SimulateGCodeThread(AppFrame *handler, wxString &fname_)
+		: fname(fname_), wxThread(wxTHREAD_DETACHED)
 	{
 
 		m_pHandler = handler;
@@ -102,6 +104,7 @@ protected:
 	ExecutorView *pexec;
 	LoggerWnd *plogger;
 	GCodeInterpreter *ppret;
+	wxString fname;
 };
 
 
@@ -114,6 +117,7 @@ wxBEGIN_EVENT_TABLE (AppFrame, wxFrame)
     // common
     EVT_CLOSE (                      AppFrame::OnClose)
     // file
+	EVT_MENU(wxID_NEW, AppFrame::OnFileNew)
     EVT_MENU (wxID_OPEN,             AppFrame::OnFileOpen)
     EVT_MENU (wxID_SAVE,             AppFrame::OnFileSave)
     EVT_MENU (wxID_SAVEAS,           AppFrame::OnFileSaveAs)
@@ -242,13 +246,13 @@ void AppFrame::OnClose (wxCloseEvent &event)
 		wxThread::This()->Sleep(1);
 	}
 
-
-    wxCommandEvent evt;
-    OnFileClose (evt);
-    if (m_edit && m_edit->Modified()) {
-        if (event.CanVeto()) event.Veto (true);
-        return;
-    }
+   
+	DoFileSave( true, false );
+ //   if (m_edit && m_edit->Modified()) 
+	//{
+ //       if (event.CanVeto()) event.Veto (true);
+ //       return;
+ //   }
     Destroy();
 }
 
@@ -260,15 +264,64 @@ void AppFrame::OnExit (wxCommandEvent &WXUNUSED(event)) {
     Close (true);
 }
 
+bool AppFrame::DoFileSave(bool askToSave, bool bSaveAs )
+{
+	if (!m_edit) return false;
+	if ( !m_edit->Modified() )
+		return true;
 
+	// Ask need to save
+	if (askToSave)
+	{
+		int rez = wxMessageBox(_("Text is not saved, save before closing?"), _("Save file"),
+			wxYES_NO | wxCANCEL | wxICON_QUESTION);
+		if (rez == wxCANCEL)
+			return false;
+		else if (rez == wxNO)
+			return true;
+	}
+	// Need save
+	wxString fname = m_edit->GetFilename();
+	if (bSaveAs || fname.empty())
+	{
+		wxString filename = wxEmptyString;
+		wxFileDialog dlg(this, "Save file As", wxEmptyString, wxEmptyString, "GCode Files (*.ngc)|*.ngc", wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
+		if (dlg.ShowModal() != wxID_OK)
+			return false;
+		filename = dlg.GetPath();
+		m_edit->SaveFile(filename);
+	}
+	else //  fname exist && not save as  - just save
+	{
+		m_edit->SaveFile();
+		if (m_edit->Modified())
+		{
+			wxMessageBox(_("Text could not be saved!"), _("Close abort"),
+				wxOK | wxICON_EXCLAMATION);
+			return false;
+		}
+	}
+	return true;
+}
 
+void AppFrame::OnFileNew(wxCommandEvent &WXUNUSED(event))
+{
+	if ( !DoFileSave(true, false) )
+	{
+		return;
+	}
+	m_edit->NewFile();
+	UpdateTitle();
+}
 
 // file event handlers
 void AppFrame::OnFileOpen (wxCommandEvent &WXUNUSED(event)) 
 {
 
-	if (!m_edit) return;
-    wxString fname;
+	if ( !DoFileSave(true, false))
+		return;
+    
+	wxString fname;
     wxFileDialog dlg (this, "Open file", wxEmptyString, wxEmptyString, "Any file (*)|*",
                       wxFD_OPEN | wxFD_FILE_MUST_EXIST | wxFD_CHANGE_DIR);
     if (dlg.ShowModal() != wxID_OK) return;
@@ -278,43 +331,19 @@ void AppFrame::OnFileOpen (wxCommandEvent &WXUNUSED(event))
 
 void AppFrame::OnFileSave (wxCommandEvent &WXUNUSED(event)) 
 {
-    if (!m_edit) return;
-    if (!m_edit->Modified()) {
-        wxMessageBox (_("There is nothing to save!"), _("Save file"),
-                      wxOK | wxICON_EXCLAMATION);
-        return;
-    }
-    m_edit->SaveFile ();
+	DoFileSave( false, false );
+    UpdateTitle();
+}
+
+void AppFrame::OnFileSaveAs(wxCommandEvent &WXUNUSED(event))
+{
+	DoFileSave(false, true);
 	UpdateTitle();
 }
 
-void AppFrame::OnFileSaveAs (wxCommandEvent &WXUNUSED(event)) {
-    if (!m_edit) return;
-    wxString filename = wxEmptyString;
-    wxFileDialog dlg (this, "Save file", wxEmptyString, wxEmptyString, "Any file (*)|*", wxFD_SAVE|wxFD_OVERWRITE_PROMPT);
-    if (dlg.ShowModal() != wxID_OK) return;
-    filename = dlg.GetPath();
-    m_edit->SaveFile (filename);
-	UpdateTitle();
-}
-
-void AppFrame::OnFileClose (wxCommandEvent &WXUNUSED(event)) {
-    if (!m_edit) return;
-    if (m_edit->Modified()) {
-        if (wxMessageBox (_("Text is not saved, save before closing?"), _("Close"),
-                          wxYES_NO | wxICON_QUESTION) == wxYES) {
-            m_edit->SaveFile();
-            if (m_edit->Modified()) {
-                wxMessageBox (_("Text could not be saved!"), _("Close abort"),
-                              wxOK | wxICON_EXCLAMATION);
-                return;
-            }
-        }
-    }
-    m_edit->SetFilename (wxEmptyString);
-    m_edit->ClearAll();
-    m_edit->SetSavePoint();
-	UpdateTitle();
+void AppFrame::OnFileClose (wxCommandEvent &event) 
+{
+	OnFileNew(event);
 }
 
 // properties event handlers
@@ -354,6 +383,7 @@ void AppFrame::CreateMenu ()
 {
     // File menu
     wxMenu *menuFile = new wxMenu;
+	menuFile->Append(wxID_NEW, _("&New ..\tCtrl+O"));
     menuFile->Append (wxID_OPEN, _("&Open ..\tCtrl+O"));
     menuFile->Append (wxID_SAVE, _("&Save\tCtrl+S"));
     menuFile->Append (wxID_SAVEAS, _("Save &as ..\tCtrl+Shift+S"));
@@ -432,6 +462,8 @@ void AppFrame::CreateMenu ()
     menuView->AppendSeparator();
     menuView->Append (myID_USECHARSET, _("Use &code page of .."), menuCharset);
 
+	menuView->FindChildItem(myID_LINENUMBER)->Check(true);
+
 	// Edit menu
 	wxMenu *menuGCode = new wxMenu;
 	menuGCode->Append(ID_GCODE_CHECK, _("&Check"));
@@ -455,6 +487,7 @@ wxToolBar *AppFrame::CreateToolBar()
 	wxToolBar* toolBar = new wxToolBar(this, wxID_ANY, wxDefaultPosition, wxDefaultSize,
 		wxNO_BORDER | wxTB_FLAT | wxTB_NODIVIDER | wxTB_NOALIGN);
 
+	toolBar->AddTool(wxID_NEW, wxEmptyString, wxBitmap(new_xpm), _("New"));
 	toolBar->AddTool(wxID_OPEN, wxEmptyString, wxBitmap(open_xpm), _("Open"));
 	toolBar->AddTool(wxID_SAVE, wxEmptyString, wxBitmap(save_xpm), _("Save"));
 	toolBar->AddSeparator();
@@ -564,14 +597,12 @@ IntGCodeThread::~IntGCodeThread()
 
 wxThread::ExitCode IntGCodeThread::Entry()
 {
-	wxString buf;
-	if (m_pHandler)
+	if (ppret)
 	{
-		wxCriticalSectionLocker locker(m_pHandler->critsect);
-		buf = m_pHandler->GetText();
+		if (!ppret->open_nc_file( fname.c_str() ) )
+			return NULL;
+		ppret->execute_file();
 	}
-	if(ppret)
-		ppret->execute_file(buf.c_str());
 	
 	wxQueueEvent(m_pHandler, new wxThreadEvent(wxEVT_THREAD, CHECK_GCODE_COMPLETE));
 	return NULL;
@@ -595,15 +626,12 @@ SimulateGCodeThread::~SimulateGCodeThread()
 
 wxThread::ExitCode SimulateGCodeThread::Entry()
 {
-	wxString buf;
-	if (m_pHandler)
-	{
-		wxCriticalSectionLocker locker(m_pHandler->critsect);
-		buf = m_pHandler->GetText();
-	}
 	if (ppret)
-		ppret->execute_file(buf.c_str());
-
+	{
+		if (!ppret->open_nc_file(fname.c_str()))
+			return NULL;
+		ppret->execute_file();
+	}
 	wxQueueEvent(m_pHandler, new wxThreadEvent(wxEVT_THREAD, CHECK_SIMULATE_COMPLETE));
 	return NULL;
 }
@@ -652,28 +680,36 @@ void AppFrame::OnSimulateCompletion(wxThreadEvent&)
 	}
 }
 
+wxString AppFrame::GetSavedFileName()
+{
+	if ( !DoFileSave(false, false) )
+		return wxString();
+	return m_edit->GetFilename();
+}
 
 void  AppFrame::OnCheck(wxCommandEvent &event)
 {
-	if (!m_edit) return;
+	wxString fname = GetSavedFileName();
+	if (fname.empty())
+		return;	
 	m_hlbox->Clear();
-
-	checkThread = new IntGCodeThread(this);
+	checkThread = new IntGCodeThread(this, fname);
 	if (checkThread->Run() != wxTHREAD_NO_ERROR)
 	{
 		wxLogError("Can't create the thread!");
 		delete checkThread;
 		checkThread = NULL;
 	}
-	return;
 }
 
 void  AppFrame::OnSimulate(wxCommandEvent &event)
 {
-	if (!m_edit || !m_view) return;
+	wxString fname = GetSavedFileName();
+	if (fname.empty())
+		return;
 	m_hlbox->Clear();
 
-	simulateThread = new SimulateGCodeThread(this);
+	simulateThread = new SimulateGCodeThread(this, fname);
 	if (simulateThread->Run() != wxTHREAD_NO_ERROR)
 	{
 		wxLogError("Can't create the thread!");

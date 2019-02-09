@@ -49,6 +49,25 @@ void ExecutorView::output(const std::string &str)
     output( std::string("set_tool_change ") + std::to_string(toolid) );
  }
 
+ void ExecutorView::set_css_spindlemode(double &diam, double &speed)
+ {
+	 output(std::string("set_css_spindlemode ") + std::to_string(speed));
+ }
+
+ void ExecutorView::set_regular_spindlemode() 
+ {
+	 output(std::string("set_regular_spindlemode"));
+ }
+
+ void ExecutorView::set_dwell(long millseconds)
+ {
+	 output(std::string("set_dwell ") + std::to_string(millseconds));
+ }
+ void ExecutorView::process_probe(const Coords &position)
+ {
+	 output(std::string("process_probe "));
+ }
+
 
  void ExecutorView::addTrackPoint(TypeMove type, const Coords &position)
  {
