@@ -59,6 +59,10 @@ static int  get_letter_style(char ch )
 }
 
 
+static bool isALetter(int ch)
+{
+	return (ch >= 'A' && ch <= 'Z') || (ch >= 'a' && ch <= 'z');
+}
 
 static inline bool IsANumChar(int ch) {
 	return (ch < 0x80) && (IsADigit(ch) || ch == '.' || ch == 'e' || ch == 'E');
@@ -76,6 +80,7 @@ static inline bool IsRealVal(int ch)
 static void ColouriseGCodeDoc(Sci_PositionU startPos, Sci_Position length, int initStyle, WordList *keywordLists[],
 	Accessor &styler)
 {
+	WordList &keywords= *keywordLists[0];
 	StyleContext sc(startPos, length, initStyle, styler);
 
 	for (; sc.More(); sc.Forward())
@@ -103,6 +108,13 @@ static void ColouriseGCodeDoc(Sci_PositionU startPos, Sci_Position length, int i
 				sc.ForwardSetState(SCE_GCODE_DEFAULT);
 			}
 		}
+		//else if (sc.state == SCE_GCODE_WORD1)
+		//{
+		//	if (!isALetter(sc.ch))
+		//	{
+		//		sc.SetState(SCE_GCODE_DEFAULT);
+		//	}
+		//}
 
 		// Determine if a new state should be entered.
 		if (sc.state == SCE_GCODE_DEFAULT  )
@@ -126,8 +138,17 @@ static void ColouriseGCodeDoc(Sci_PositionU startPos, Sci_Position length, int i
 			}
 			else
 			{
-				int newState = get_letter_style(sc.ch);
-				if (newState == SCE_GCODE_G && IsADigit(sc.chNext))
+				int newState = get_letter_style(sc.ch);		
+				char s[24];
+				sc.GetCurrent(s, sizeof(s));
+				if (keywords.InList(s))
+				{
+					sc.ChangeState(SCE_GCODE_WORD1); 				// It's a keyword, change its state
+					while (sc.More() && isALetter(sc.ch) )
+						sc.Forward();
+					sc.ForwardSetState(SCE_GCODE_DEFAULT);
+				}
+				else if (newState == SCE_GCODE_G && IsADigit(sc.chNext))
 				{
 					sc.SetState(newState);
 					while (sc.More() && (IsADigit(sc.chNext) || (sc.chNext == '.')))

@@ -41,6 +41,22 @@ bool CmdParser::read_parameter(double *pdbl, bool check_exists)    //!< test for
 	return true;
 }
 
+// abs acos asin atan cos exp fix fup ln round sin sqrt tan exists
+#define ABS 1
+#define ACOS 2
+#define ASIN 3
+#define ATAN 4
+#define COS 5
+#define EXP 6
+#define FIX 7
+#define FUP 8
+#define LN 9
+#define ROUND 10
+#define SIN 11
+#define SQRT 12
+#define TAN 13
+#define EXISTS 14
+
 bool CmdParser::read_operation_unary( int *operation ) 
 {
 	char c;

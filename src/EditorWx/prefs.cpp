@@ -32,7 +32,7 @@ const CommonInfo g_CommonPrefs = {
 // C++
 
 // GCode 
-const char* GCoddeWordlist1 = "WHILE IF";
+const char* GCoddeWordlist = "abs acos asin atan cos exp fix fup ln round sin sqrt tan exists";
 
 
 //----------------------------------------------------------------------------
@@ -51,7 +51,7 @@ const LanguageInfo g_LanguagePrefs[] = {
 	  {SCE_GCODE_VAR, NULL},
 	  {SCE_GCODE_NUMBER, NULL},
 	  {SCE_GCODE_COORDINATE, NULL},
-	  {SCE_GCODE_WORD1, NULL},
+	  {SCE_GCODE_WORD1, GCoddeWordlist },
 	  {-1, NULL},
 	  {-1, NULL},
 	  {-1, NULL},
