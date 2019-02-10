@@ -52,7 +52,7 @@ const LanguageInfo g_LanguagePrefs[] = {
 	  {SCE_GCODE_NUMBER, NULL},
 	  {SCE_GCODE_COORDINATE, NULL},
 	  {SCE_GCODE_WORD1, GCoddeWordlist },
-	  {-1, NULL},
+	  {SCE_GCODE_IDENTIFIER, NULL},
 	  {-1, NULL},
 	  {-1, NULL},
 	  {-1, NULL},
@@ -166,10 +166,16 @@ const StyleInfo g_StylePrefs [] = {
      "MAGENTA", "WHITE",
 	 "", 10, mySTC_STYLE_BOLD, 0},
    
-    // mySTC_TYPE_UNDEFINED
-    {"Undefined",
+    // #define SCE_GCODE_WORD1 9 
+    {"Keywords",
      "ORANGE", "WHITE",
-     "", 10, 0, 0}
+     "", 10, 0, 0},
+
+	//SCE_GCODE_IDENTIFIER
+	{"Default",
+	 "GREY", "WHITE",
+	 "", 10, 0, 0},
+
 
     };
 
