@@ -53,6 +53,7 @@ static int  get_letter_style(char ch )
         case 'K':
         case 'R':
 		case 'O':
+		case 'Q':
 		  return SCE_GCODE_PARAM;
     }
     return SCE_GCODE_DEFAULT;
@@ -81,6 +82,7 @@ static void ColouriseGCodeDoc(Sci_PositionU startPos, Sci_Position length, int i
 	Accessor &styler)
 {
 	WordList &keywords= *keywordLists[0];
+	CharacterSet operators(CharacterSet::setNone, "][*/=+<>");
 	StyleContext sc(startPos, length, initStyle, styler);
 
 	for (; sc.More(); sc.Forward())
@@ -91,7 +93,8 @@ static void ColouriseGCodeDoc(Sci_PositionU startPos, Sci_Position length, int i
 				sc.SetState(SCE_GCODE_DEFAULT);
 			}
 		}
-		else if (sc.state == SCE_GCODE_COMMENT_ML) {
+		else if (sc.state == SCE_GCODE_COMMENT_ML) 
+		{
 			if (sc.ch == ')') {
 				sc.ForwardSetState(SCE_GCODE_DEFAULT);
 			}
@@ -118,14 +121,9 @@ static void ColouriseGCodeDoc(Sci_PositionU startPos, Sci_Position length, int i
 			}
 			sc.SetState(SCE_GCODE_DEFAULT);
 		}
-		//else if (sc.state == SCE_GCODE_WORD1)
-		//{
-		//	if (!isALetter(sc.ch))
-		//	{
-		//		sc.SetState(SCE_GCODE_DEFAULT);
-		//	}
-		//}
-
+		else if ( sc.state != SCE_GCODE_DEFAULT )
+			sc.SetState(SCE_GCODE_DEFAULT);
+		
 		// Determine if a new state should be entered.
 		if (sc.state == SCE_GCODE_DEFAULT  )
 		{
@@ -151,7 +149,10 @@ static void ColouriseGCodeDoc(Sci_PositionU startPos, Sci_Position length, int i
 				sc.SetState(SCE_GCODE_VAR);
 				while (sc.More() && IsADigit(sc.chNext) )
 					sc.Forward();
-				sc.ForwardSetState(SCE_GCODE_DEFAULT);
+			}
+			else if (operators.Contains(sc.ch))
+			{
+				sc.SetState(SCE_GCODE_OPERATORS); 
 			}
 			else 
 			{
@@ -161,19 +162,17 @@ static void ColouriseGCodeDoc(Sci_PositionU startPos, Sci_Position length, int i
 					sc.SetState(newState);
 					while (sc.More() && (IsADigit(sc.chNext) || (sc.chNext == '.')))
 						sc.Forward();
-					sc.ForwardSetState(SCE_GCODE_DEFAULT);
 				}
 				else if (newState == SCE_GCODE_M && IsADigit(sc.chNext))
 				{
 					sc.SetState(newState);
 					while (sc.More() && IsADigit(sc.chNext))
 						sc.Forward();
-					sc.ForwardSetState(SCE_GCODE_DEFAULT);
 				}
-				else if ((newState != SCE_GCODE_DEFAULT) && (IsRealVal(sc.chNext) || (sc.chNext == '#')))
+				else if ((newState != SCE_GCODE_DEFAULT) && (IsRealVal(sc.chNext) || (sc.chNext == '#') || (sc.chNext=='[') ))
 				{
 					sc.SetState(newState);
-					sc.ForwardSetState((sc.chNext == '#') ? SCE_GCODE_VAR : SCE_GCODE_NUMBER);
+					//sc.ForwardSetState((sc.chNext == '#') ? SCE_GCODE_VAR : SCE_GCODE_NUMBER);
 				}
 				else if (isALetter(sc.ch))
 				{

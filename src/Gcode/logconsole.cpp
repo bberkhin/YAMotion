@@ -64,14 +64,17 @@ void ExecutorLog::output(const std::string &str, const Coords &position )
  void ExecutorLog::straight_feed(const Coords &position )
  {
     output( std::string("straight_feed ") , position );
+	addTrackPoint(feedline, position);
  }
  void ExecutorLog::straight_traverce(const Coords &position )
  {
     output( std::string("straight_traverce"), position );
+	addTrackPoint(fast, position);
  }
  void ExecutorLog::arc_feed(const Coords &position, bool  )
  {
     output( std::string("arc_feed"), position );
+	addTrackPoint(feedarc, position);
  }
  void ExecutorLog::run_mcode( int code )
  {
@@ -92,6 +95,11 @@ void ExecutorLog::output(const std::string &str, const Coords &position )
 	 output(std::string("process_probe "), position);
  }
 
+
+ void ExecutorLog::addTrackPoint(TypeMove type, const Coords &position)
+ {
+	 box.addCoords(position);
+ }
 
  void LoggerConsole::log_string(int type, const char *s)
  {

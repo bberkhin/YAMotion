@@ -39,6 +39,38 @@ using namespace std;
  
  }
 
+
+ void ExecutorLogWnd::addTrackPoint(TypeMove type, const Coords &position)
+ {
+	 ExecutorLog::addTrackPoint( type, position);
+	 double val = distance(cur_position, position);
+	 update_position(position);
+	 if (type == fast)
+	 {
+		 traverce_len += val;
+		 //traverce_time += calc_time(val);
+	 }
+	 else
+	 {
+		 feed_len += val;
+		 //feed_time += calc_time(cur_feed, val);
+	 }
+ }
+
+ void ExecutorLogWnd::update_position(const Coords &position)
+ { 
+	 cur_position = position;
+ }
+
+ double ExecutorLogWnd::distance(const Coords &cur_position, const Coords &position)
+ {
+	 double dx = position.x - cur_position.x;
+	 double dy = position.y - cur_position.y;
+	 double dz = position.z - cur_position.z;
+	 return sqrt(dx*dx + dy * dy + dz * dz);
+ }
+
+
  void LoggerWnd::log_string(int type, const char *s)
  {
 	 if (!handler)
@@ -47,8 +79,10 @@ using namespace std;
 	 wxString label;
 	 if (type == LOG_ERROR )
 		label = wxString::Format("<font color=#FF0000> %s </font>", s);
-	 else 
+	 else  if( type == LOG_WARNING )
 		label = wxString::Format("<font color=#0000FF> %s </font>", s);
+	 else 
+		label = wxString::Format("<font color=#800000> %s </font>", s);
 
 	 
 	wxThreadEvent *ev = new wxThreadEvent(wxEVT_THREAD, CHECK_GCODE_UPDATE);

@@ -3,12 +3,16 @@
 #include "IExecutor.h"
 #include "ILogger.h"
 
+
+enum TypeMove
+{
+	fast,
+	feedline,
+	feedarc
+};
+
 class ExecutorLog : public IExecutor
 {
-protected:
-
-    int nline;
-	bool doprint;
 public:
     ExecutorLog(bool needprint = true);
 	void setneedprint(bool needprint = true);
@@ -25,9 +29,16 @@ public:
     void set_end_programm();
 	void set_dwell(long millseconds);
 	void process_probe(const Coords &position);
-private:
+	CoordsBox getBox() { return box; }
+
+protected:
+	virtual void addTrackPoint(TypeMove type, const Coords &pt);
     virtual void output(const std::string &str  );
 	virtual void output(const std::string &str, const Coords &position );
+protected:
+	int nline;
+	bool doprint;
+	CoordsBox box;
 };
 
 

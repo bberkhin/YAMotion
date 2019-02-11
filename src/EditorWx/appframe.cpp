@@ -58,7 +58,7 @@ public:
 
 		m_pHandler = handler;
 		penv = new EnvironmentSimple();
-		pexec = new ExecutorLogWnd(m_pHandler);
+		pexec = new ExecutorLogWnd(m_pHandler,true);
 		plogger = new LoggerWnd(m_pHandler);
 		ppret = new GCodeInterpreter(penv, pexec, plogger);
 
@@ -603,7 +603,12 @@ wxThread::ExitCode IntGCodeThread::Entry()
 			return NULL;
 		ppret->execute_file();
 	}
-	
+	plogger->log(LOG_INFORMATION, "Feed Lenght: %f", pexec->get_feed_len());
+	plogger->log(LOG_INFORMATION, "Traverce Lenght: %f", pexec->get_traverce_len());
+	plogger->log(LOG_INFORMATION, "X Min: %f X Max %f", pexec->getBox().Min.x, pexec->getBox().Max.x);
+	plogger->log(LOG_INFORMATION, "Y Min: %f Y Max %f", pexec->getBox().Min.y, pexec->getBox().Max.y);
+	plogger->log(LOG_INFORMATION, "Z Min: %f Z Max %f", pexec->getBox().Min.z, pexec->getBox().Max.z);
+
 	wxQueueEvent(m_pHandler, new wxThreadEvent(wxEVT_THREAD, CHECK_GCODE_COMPLETE));
 	return NULL;
 }
@@ -632,6 +637,8 @@ wxThread::ExitCode SimulateGCodeThread::Entry()
 			return NULL;
 		ppret->execute_file();
 	}
+	//output stat
+
 	wxQueueEvent(m_pHandler, new wxThreadEvent(wxEVT_THREAD, CHECK_SIMULATE_COMPLETE));
 	return NULL;
 }

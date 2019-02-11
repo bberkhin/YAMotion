@@ -2,6 +2,8 @@
 
 #define LOG_WARNING 1
 #define LOG_ERROR 2
+#define LOG_INFORMATION 3
+
 class ILogger
 {    
 public:
