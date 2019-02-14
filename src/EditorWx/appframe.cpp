@@ -213,7 +213,7 @@ AppFrame::AppFrame (const wxString &title)
 	splitterV->UpdateSize();
 
 	m_edit->SetFocus();
-	m_view->InitGL();
+	m_view->initializeGL();
 }
 
 AppFrame::~AppFrame () {
@@ -618,7 +618,8 @@ SimulateGCodeThread::~SimulateGCodeThread()
 {
 	wxCriticalSectionLocker enter(m_pHandler->critsect);
 	// the thread is being destroyed; make sure not to leave dangling pointers around
-	m_pHandler->m_view->setTrack(getTack());
+	
+	m_pHandler->m_view->setTrack( getTack() );
 	m_pHandler->m_view->setBox(getBox());
 
 	m_pHandler->simulateThread = NULL;

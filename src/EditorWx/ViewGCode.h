@@ -14,9 +14,65 @@
 #   include <GL/glu.h>
 #endif
 
-#include "wx/glcanvas.h"
+#include <wx/glcanvas.h>
+
+#include <glm/glm.hpp>
+
 
 #include "ExecutorView.h"
+
+
+struct TrackPointGL
+{
+	bool isFast;
+	glm::vec3 position;
+};
+
+enum View
+{
+	TOP,
+	BOTTOM,
+	LEFT,
+	RIGHT,
+	FRONT,
+	BACK
+};
+
+struct Camera
+{
+	float     scale;          //масштаб изображени¤
+	glm::vec3 position;       //где находитс¤ камера
+	glm::vec3 look;           //нормализованный вектор взгл¤да
+	glm::vec3 top;            //вектор ориентации камеры
+	float     screenAngle;    //поворот экрана
+	glm::mat4 viewProjection; //матрица камеры
+
+	void recalc_matrix(int width, int height);     //пересчитать матрицу проекции
+	void rotate_cursor(float x, float y, float deltaX, float deltaY); //обработка поворота камеры
+	void screen_matrix(int width, int height);     //вывод 2d графики
+};
+
+struct Vertex
+{
+	glm::vec3 position;
+	glm::vec4 color;
+
+	Vertex(glm::vec3 _position, glm::vec4 _color) :
+		position(_position), color(_color) {};
+};
+
+struct Object3d
+{
+	glm::vec3           position; //положение
+	glm::vec3           ortX;     //ориентаци¤
+	glm::vec3           ortY;
+	std::vector<Vertex> verts;    //вершины
+	std::vector<int>    indices;  //треугольники
+
+	void draw(); //нарисовать треугольники
+};
+
+
 
 class ViewGCode : public wxGLCanvas
 {
@@ -27,27 +83,50 @@ public:
 
 	virtual ~ViewGCode();
 
-	void setTrack(std::vector<TrackPoint> *ptr) { track.assign( ptr->begin(), ptr->end() ); }
+	//void setTrack(std::vector<TrackPointGL> *ptr) { track.assign( ptr->begin(), ptr->end() ); }
+	void setTrack(std::vector<TrackPoint> *ptr);	
 	void setBox(const CoordsBox &bx);
 	
 	void OnPaint(wxPaintEvent& event);
 	void OnSize(wxSizeEvent& event);
 	void OnChar(wxKeyEvent& event);
 	void OnMouseEvent(wxMouseEvent& event);
-	
-	void InitMaterials();
-	void InitGL();
+	void initializeGL();
 
 private:
-	void drawTrack();
+	void resizeGL(int nWidth, int nHeight);
+	void recalc_matrices();
+	void draw_bounds();
+	void draw_3d_grid();
+	void draw_grid();
+	void draw_track();
+	void draw_real_track();
+	void draw_border();
+	void draw_fps();
+	void set_view(View view);
+	void update_tool_coords(float x, float y, float z);
 
 private:
 	wxGLContext* m_glRC;
 
 	GLfloat m_xrot;
 	GLfloat m_yrot;
-	std::vector<TrackPoint> track;
+	std::vector<TrackPointGL> track;
+	std::vector<glm::vec3> realTrack; //пройденна¤ фрезой траектори¤
+	
 	CoordsBox box;
+	int    m_windowWidth;  //размеры окна
+	int    m_windowHeight;
+
+	float  m_zoneWidth;  //размеры зоны станка
+	float  m_zoneHeight;
+	float  m_zoneTop;
+	bool   m_showGrid;   //показывать ли сетку масштаба
+	float  m_gridStep;   //размер ¤чейки сетки
+	Camera camera;
+    Object3d tool;
+    int _drawCalls; //вызовов отрисовки за последнюю секунду
+    int _fps;
 
 	wxDECLARE_NO_COPY_CLASS(ViewGCode);
 	wxDECLARE_EVENT_TABLE();
