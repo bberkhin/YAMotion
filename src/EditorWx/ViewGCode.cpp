@@ -8,6 +8,8 @@
 #include <wx/timer.h>
 #include <wx/math.h>
 #include "ViewGCode.h"
+#include "defsext.h"     // additional definitions
+
 
 #include <glm/gtc/matrix_transform.hpp>
 //#include <glm/gtc/constants.hpp>
@@ -22,19 +24,21 @@ EVT_SIZE(ViewGCode::OnSize)
 EVT_PAINT(ViewGCode::OnPaint)
 EVT_CHAR(ViewGCode::OnChar)
 EVT_MOUSE_EVENTS(ViewGCode::OnMouseEvent)
+EVT_MENU_RANGE(myID_SETVIEWFIRST, myID_SETVIEWLAST, ViewGCode::OnSetView)
+//EVT_KEY_DOWN(ViewGCode::OnKeyDown)
 wxEND_EVENT_TABLE()
 
 ViewGCode::ViewGCode(wxWindow *parent,
 	wxWindowID id,
 	int* gl_attrib)
-	: wxGLCanvas(parent, id, gl_attrib)
+	: wxGLCanvas(parent, id, gl_attrib, wxDefaultPosition, wxDefaultSize, wxWANTS_CHARS | wxFULL_REPAINT_ON_RESIZE)
+	
 {
-	m_xrot = 0;
-	m_yrot = 0;
 
 	// Explicitly create a new rendering context instance for this canvas.
 	m_glRC = new wxGLContext(this);	
 
+	scale_add = 1;
 	m_zoneWidth = 1000;
 	m_zoneHeight = 1000;
 	m_zoneTop = 300;
@@ -46,6 +50,7 @@ ViewGCode::ViewGCode(wxWindow *parent,
 	camera.position = glm::vec3(0, 0, 0);  //находится сверху
 	camera.look = glm::vec3(0, 0, -1); //смотрит вниз
 	camera.top = glm::vec3(0, 1, 0);  //смотрит ровно
+	camera.translate = glm::vec3(-0.9f, -0.9f, -0.9f);
 
 //	m_lastMousePosition = QPoint(0, 0);
 //	m_mousePressed = false;
@@ -62,6 +67,7 @@ ViewGCode::ViewGCode(wxWindow *parent,
 
 	_drawCalls = 0;
 	_fps = 0;
+	
 }
 
 ViewGCode::~ViewGCode()
@@ -85,9 +91,68 @@ void ViewGCode::initializeGL()
 	glEnableClientState(GL_COLOR_ARRAY);*/
 }
 
+
+
+void ViewGCode::move_scale_cursor(int x, int y, float delta)
+{
+
+	glm::vec3 windowCoordinates = glm::vec3(x, y, 0.0f);
+
+	glm::vec4 viewport = glm::vec4(0.0f, 0.0f, m_windowWidth, m_windowHeight);
+	glm::vec3 worldCoordinates = glm::unProject(windowCoordinates, glm::mat4(1.0f), camera.viewProjection, viewport);
+	worldCoordinates = glm::vec3( worldCoordinates.x, worldCoordinates.y, worldCoordinates.z );
+	scale_add *= delta;
+	recalc_matrices();
+	glm::vec3 windowCoordinates1 = glm::project(worldCoordinates, glm::mat4(1.0f), camera.viewProjection, viewport);
+
+	move_drag_cursor(x, y, windowCoordinates1.x - windowCoordinates.x, windowCoordinates1.y - windowCoordinates.y);
+}
+
+
+void ViewGCode::move_drag_cursor(int x, int y, int deltaX, int deltaY)
+{
+		// Unproject Window Coordinates
+	glm::vec3 windowCoordinates = glm::vec3(x, y, 0.0f);
+	glm::vec3 windowCoordinates1 = glm::vec3(x + deltaX, y + deltaY, 0.0f);
+
+	glm::vec4 viewport = glm::vec4(0.0f, 0.0f, (float)m_windowWidth, (float)m_windowHeight);
+
+	glm::vec3 worldCoordinates = glm::unProject(windowCoordinates, glm::mat4(1.0f), camera.viewProjection, viewport);
+	glm::vec3 worldCoordinates1 = glm::unProject(windowCoordinates1, glm::mat4(1.0f), camera.viewProjection, viewport);
+	
+	camera.translate += ((worldCoordinates1 - worldCoordinates) * camera.scale);
+
+}
+
+
+
 void ViewGCode::recalc_matrices()
 {
-	camera.recalc_matrix(m_windowWidth, m_windowHeight);
+	float scalex = 2.0f / m_zoneWidth;
+	float scaley = 2.0f / m_zoneHeight;
+	float scalez = 2.0f / m_zoneTop;
+	float scale = glm::min(glm::min(scalex, scaley), scalez);
+	scale *= 0.9f;
+	scale *= scale_add;
+	camera.scale = scale;
+
+	//Во время умножения матриц правая матрица умножается на вектор, поэтому вам надо читать умножения справа налево.
+	//Рекомендуется в начале масштабировать, затем вращать и в конце сдвигать
+
+	glm::mat4 mView = glm::lookAt(camera.position - camera.look,
+		camera.position,
+		camera.top);
+
+	glm::mat4 mTrans(1.0f);
+	mTrans = glm::translate(mTrans, camera.translate);
+	mTrans = glm::scale(mTrans, glm::vec3(scale, scale, scale) );
+
+	glm::mat4 mProj = glm::ortho(-1.f, 1.f, -1.f, 1.f, -1000.f, 10000.f);
+
+	camera.viewProjection = mProj * mView * mTrans  ;
+
+	glMatrixMode(GL_PROJECTION);
+	glLoadMatrixf(glm::value_ptr(camera.viewProjection));
 }
 
 void ViewGCode::resizeGL(int nWidth, int nHeight)
@@ -117,14 +182,7 @@ void ViewGCode::OnPaint(wxPaintEvent& WXUNUSED(event))
 	initializeGL();
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	glColor3f(0.0, 1.0, 1.0);
-
-	/*glBegin(GL_POINTS);
-		glVertex2f(0.05,0.05);
-		glVertex2f(0.5,0.5);
-	glEnd();*/
-
-	
+		
 	recalc_matrices();
 
 	glMatrixMode(GL_MODELVIEW);
@@ -132,19 +190,21 @@ void ViewGCode::OnPaint(wxPaintEvent& WXUNUSED(event))
 
 	glEnable(GL_DEPTH_TEST);
 	draw_bounds();
-	draw_3d_grid();
+	//draw_3d_grid();
+	
 	draw_track();
-	draw_real_track();
+//	draw_real_track();
 	tool.draw();
 	glDisable(GL_DEPTH_TEST);
 
-	camera.screen_matrix(m_windowWidth, m_windowHeight);
-
 	if (m_showGrid)
 		draw_grid();
-	draw_fps();
+
+	camera.screen_matrix(m_windowWidth, m_windowHeight);
+
+	//draw_fps();
 	
-	//if (hasFocus())
+	if ( HasFocus() )
 		draw_border();
 	
 	glFlush();
@@ -153,8 +213,6 @@ void ViewGCode::OnPaint(wxPaintEvent& WXUNUSED(event))
 
 void ViewGCode::OnSize(wxSizeEvent& event)
 {
-	if (!IsShownOnScreen())
-		return;
 	// This is normally only necessary if there is more than one wxGLCanvas
 	// or more than one wxGLContext in the application.
 	SetCurrent(*m_glRC);
@@ -166,24 +224,29 @@ void ViewGCode::OnChar(wxKeyEvent& event)
 {
 	switch (event.GetKeyCode())
 	{
-	case WXK_ESCAPE:
-		wxTheApp->ExitMainLoop();
-		return;
+	case wxT('+'):
+	case WXK_ADD:
+		scale_add *= 1.1f;
+		break;
+	case wxT('-'):
+	case WXK_SUBTRACT:
+		scale_add *= 0.9f;
+		break;
 
 	case WXK_LEFT:
-		m_yrot -= 15.0;
+		move_drag_cursor(m_windowWidth>>1, m_windowHeight >> 1, -20, 0);
 		break;
 
 	case WXK_RIGHT:
-		m_yrot += 15.0;
+		move_drag_cursor(m_windowWidth >> 1, m_windowHeight >> 1, +20, 0);
 		break;
 
 	case WXK_UP:
-		m_xrot += 15.0;
+		move_drag_cursor(m_windowWidth >> 1, m_windowHeight >> 1, 0, 20);
 		break;
 
 	case WXK_DOWN:
-		m_xrot -= 15.0;
+		move_drag_cursor(m_windowWidth >> 1, m_windowHeight >> 1, 0, -20);
 		break;
 
 	default:
@@ -203,16 +266,28 @@ void ViewGCode::OnMouseEvent(wxMouseEvent& event)
 	// (for key events).
 	event.Skip();
 
-	if (event.LeftIsDown())
+	if (event.LeftIsDown() || event.RightIsDown() )
 	{
 		if (!dragging)
 		{
 			dragging = 1;
 		}
-		else
+		else if (event.RightIsDown())
 		{
-			m_yrot += (event.GetX() - last_x)*1.0;
-			m_xrot += (event.GetY() - last_y)*1.0;
+
+			float scale = 5.1f;
+			float x = (float(last_x) / m_windowWidth - 0.5) * 2;
+			float y = (1 - float(last_y) / m_windowHeight - 0.5) * 2;
+			float newX = (float(event.GetX()) / m_windowWidth - 0.5) * 2;
+			float newY = (1 - float(event.GetY()) / m_windowHeight - 0.5) * 2;
+			float deltaX = scale * (newX - x);
+			float deltaY = scale * (newY - y);
+			camera.rotate_cursor(x, y, deltaX, deltaY);	
+			Refresh(false);
+		}
+		else if (event.LeftIsDown())
+		{
+			move_drag_cursor(event.GetX(), event.GetY(), event.GetX()- last_x, last_y - event.GetY() );
 			Refresh(false);
 		}
 		last_x = event.GetX();
@@ -222,12 +297,27 @@ void ViewGCode::OnMouseEvent(wxMouseEvent& event)
 	{
 		dragging = 0;
 	}
+
+	if (event.GetEventType() == wxEVT_MOUSEWHEEL)
+	{
+
+		int wheelRotation = event.GetWheelRotation();
+		int lines = wheelRotation / event.GetWheelDelta();
+		
+		float delta = event.GetWheelDelta();
+		delta = 1 + lines * 0.1f; //+-1.1;
+		move_scale_cursor(event.GetX(), event.GetY(), delta);
+		Refresh(false);
+	}
+	
 }
 
 
 void ViewGCode::setBox(const CoordsBox &bx)
 {
 	box = bx; 	
+	scale_add = 1;
+	camera.translate = glm::vec3(-0.9f, -0.9f, -0.9f);
 	Refresh(false);
 }
 
@@ -271,10 +361,10 @@ void ViewGCode::draw_track()
 		if (track[i].isFast)
 		{
 			//continue;
-			glColor4f(0.3f, 0.1f, 0.0f, 1.0f);
+			glColor3f(1.0f, 0.0f, 0.0f );
 		}
 		else
-			glColor3f(0.1f, 0.3f, 0.0f);
+			glColor3f(1.0f, 1.0f, 1.0f);
 		glVertex3f(track[i - 1].position.x, track[i - 1].position.y, track[i - 1].position.z);
 		glVertex3f(track[i].position.x, track[i].position.y, track[i].position.z);
 	}
@@ -316,7 +406,7 @@ void ViewGCode::draw_real_track()
 //--------------------------------------------------------------------
 void ViewGCode::draw_bounds()
 {
-	glColor3f(0.0f, 0.3f, 0.3f);
+	glColor3f(0.0f, 1.0f, 0.0f);
 
 	glBegin(GL_LINES);
 	glVertex3f(0, 0, 0);
@@ -353,7 +443,7 @@ void ViewGCode::draw_bounds()
 //--------------------------------------------------------------------
 void ViewGCode::draw_3d_grid()
 {
-	glColor3f(0.3f, 0.0f, 0.0f);
+	glColor3f(1.0f, 0.0f, 0.0f);
 
 	glBegin(GL_LINES);
 	for (float x = 0; x < m_zoneWidth; x += m_gridStep)
@@ -369,13 +459,14 @@ void ViewGCode::draw_3d_grid()
 	}
 	glEnd();
 }
-
+/*
 //--------------------------------------------------------------------
-void ViewGCode::draw_grid()
+void ViewGCode::draw_grid1()
 {
 	//при масштабе 1:1 квадрат занимает 500 пикселей, это его максимальный размер
 	//на 1 толстую линию еще 10 тонких
 	//если между совсем тонкими больше 2 пикселей, показываем и их
+
 	float maxSize = 500.f / camera.scale;
 	float quadSize = 1.f;
 
@@ -387,6 +478,11 @@ void ViewGCode::draw_grid()
 	float width = m_windowWidth / camera.scale;
 	float height = m_windowHeight / camera.scale;
 
+	glm::vec3 oldtranslate = camera.translate;
+//	camera.translate = glm::vec3(-0.9f, -0.9f, -0.9f);
+//	recalc_matrices();
+	
+
 	glm::vec4 pos0 = camera.viewProjection * glm::vec4(0.f, 0.f, 0.f, 1.f);
 	pos0.x += 1.f;
 	pos0.x *= -width / 2;
@@ -395,6 +491,8 @@ void ViewGCode::draw_grid()
 
 	float offsetX = -pos0.x + floor(pos0.x / quadSize) * quadSize;
 	float offsetY = -pos0.y + floor(pos0.y / quadSize) * quadSize;
+
+	
 
 	glBegin(GL_LINES);
 
@@ -465,7 +563,84 @@ void ViewGCode::draw_grid()
 	//int x = m_windowWidth - (offset + line / 2) * camera.scale - rect.width() / 2;
 	//int y = m_windowHeight - (offset + notch) * camera.scale;
 	//renderText(x, y, text, font);
+
+	camera.translate = oldtranslate;
 }
+
+*/
+void ViewGCode::draw_grid()
+{
+	glColor3f(0.0, 0.0, 1.0);
+
+	glMatrixMode(GL_MODELVIEW);
+	glPushMatrix();
+	glLoadIdentity();
+
+	//крупная сетка
+	float hMax = m_windowHeight >> 1;
+	float hMin = -hMax;
+	float wMax = m_windowWidth >> 1;
+	float wMin = -wMax;
+	//float quadSize = 200;
+
+	float offsetX = -100;
+	float offsetY = -100;
+
+	//float scale = m_zoneWidth / m_windowWidth;
+	float maxSize = 300;// 500.f / camera.scale;
+	float quadSize = 1.f;
+
+	while (quadSize < maxSize) //находим подходящий размер
+		quadSize *= 10;
+	while (quadSize > maxSize)
+		quadSize /= 10;
+
+
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+	//glTranslatef(1, 1, 0);
+	glScalef(2.0 / m_windowWidth, 2.0 / m_windowHeight, 1);
+
+
+	glBegin(GL_LINES);
+
+
+	float quadSizeS = quadSize / 10;
+	//мелкая сетка
+	float alpha = 0.2 + quadSize / maxSize * 0.7;
+	glColor4f(0.8f, 0.5f, 0.0f, alpha / 3);
+	for (float x = wMin; x < wMax + quadSize; x += quadSizeS )
+	{
+		glVertex2f(x + offsetX, hMin);
+		glVertex2f(x + offsetX, hMax);
+	}
+
+	for (float y = hMin; y < hMax + quadSize; y += quadSizeS )
+	{
+		glVertex2f(wMin, y + offsetY);
+		glVertex2f(wMax, y + offsetY);
+	}
+
+	//крупная сетка
+
+	glColor4f(0.8f, 0.5f, 0.0f, 1.f / 3);
+
+	for (float x = wMin; x < wMax + quadSize; x += quadSize)
+	{
+		glVertex2f(x + offsetX, hMin);
+		glVertex2f(x + offsetX, hMax);
+	}
+
+	for (float y = hMin; y < hMax + quadSize; y += quadSize)
+	{
+		glVertex2f(wMin, y + offsetY);
+		glVertex2f(wMax, y + offsetY);
+	}
+
+	glEnd();
+	glPopMatrix();
+}
+
 
 //--------------------------------------------------------------------
 void ViewGCode::draw_border()
@@ -493,6 +668,7 @@ void ViewGCode::draw_border()
 		glVertex2f(offset, offset);
 	}
 	glEnd();
+	glPopMatrix();
 }
 
 //--------------------------------------------------------------------
@@ -526,6 +702,14 @@ void ViewGCode::update_tool_coords(float x, float y, float z)
 	//update();
 }
 
+// view
+
+
+void ViewGCode::OnSetView(wxCommandEvent &event)
+{
+	set_view(View(event.GetId() - myID_SETVIEWFIRST) );
+}
+
 //--------------------------------------------------------------------
 void ViewGCode::set_view(View view)
 {
@@ -540,7 +724,8 @@ void ViewGCode::set_view(View view)
 		case View::FRONT: camera.look = y; camera.top = z; break;
 		case View::BACK: camera.look = -y; camera.top = z; break;
 	}
-
+	scale_add = 1;
+	camera.translate = glm::vec3(-0.9f, -0.9f, -0.9f);
 	Refresh(false);
 }
 
@@ -551,13 +736,11 @@ void Camera::recalc_matrix(int width, int height)
 		position,
 		top);
 
-	
-
 	float fscale = 2;// scale * 2; //1пиксель - 1мм, координаты на виджете от -1 до 1
 	glm::mat4 mScale = glm::scale(glm::mat4(1.0F), glm::vec3(fscale / width, fscale / height, 1.f));
 //	glm::mat4 mScale = glm::scale(glm::mat4(1.0F), glm::vec3(fscale, fscale , 1.f));
 	//glm::mat4 myScalingMatrix = glm::scale(2.0f, 2.0f, 2.0f);
-	glm::mat4 mTranslate = glm::translate(glm::mat4(1.0F), glm::vec3(-500.0f, -500.0f, 0.0f));
+	//glm::mat4 mTranslate = glm::translate(glm::mat4(1.0F), glm::vec3(-500.0f, -500.0f, 0.0f));
 
 	//float angle = glm::pi<float>()/40;
 	//glm::mat4 mProj  = glm::perspective(angle, 1.0f, 0.0f, 10000.0f);
@@ -566,7 +749,7 @@ void Camera::recalc_matrix(int width, int height)
 	//сначала располагаем объекты перед камерой
 	//потом масштабируем по размеру окна
 	//и считаем искривление перспективы
-	viewProjection = mProj * mScale* mTranslate * mView;
+	viewProjection = mProj * mScale * mView;
 
 	glMatrixMode(GL_PROJECTION);
 	glLoadMatrixf(glm::value_ptr(viewProjection));
@@ -576,11 +759,12 @@ void Camera::recalc_matrix(int width, int height)
 void Camera::screen_matrix(int width, int height)
 {
 	float fscale = scale * 2; //1пиксель - 1мм, координаты на виджете от -1 до 1
-	glm::mat4 mScale = glm::scale(glm::mat4(), glm::vec3(fscale / width, fscale / height, 1.f));
+	glm::mat4 mScale = glm::scale(glm::mat4(1.0f), glm::vec3(fscale / width, fscale / height, 1.f));
 
 	glMatrixMode(GL_PROJECTION);
 	glLoadMatrixf(glm::value_ptr(mScale));
 }
+
 
 //--------------------------------------------------------------------
 void Camera::rotate_cursor(float x, float y, float deltaX, float deltaY)
@@ -597,7 +781,7 @@ void Camera::rotate_cursor(float x, float y, float deltaX, float deltaY)
 	glm::vec3 axis = glm::cross(axisToCursor, cursorOffset);
 	glm::vec3 localAxis = axis.x * axisX + axis.y * axisY + axis.z * axisZ;
 
-	glm::mat4 rotation;
+	glm::mat4 rotation(1.0f);
 	rotation = glm::rotate(rotation, glm::sqrt(deltaX*deltaX + deltaY * deltaY), localAxis);
 
 	look = glm::vec3(glm::vec4(look, 0) * rotation);
@@ -620,7 +804,6 @@ void Object3d::draw()
 		glVertex3fv(&vert.position.x);
 	}
 	glEnd();
-
 	glPopMatrix();
 }
 
@@ -676,7 +859,7 @@ void make_tool_simple(Object3d& tool)
 	tool.ortY = glm::vec3(0, 1, 0);
 	tool.indices.clear();
 	tool.verts.clear();
-	tool.position = glm::vec3(0, 0, 0);
+	tool.position = glm::vec3(1, 1, 0);
 
 	glm::vec3 simple[] =
 	{
@@ -695,3 +878,4 @@ void make_tool_simple(Object3d& tool)
 
 	make_cylinder(tool, 20);
 }
+

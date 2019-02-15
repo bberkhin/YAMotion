@@ -46,6 +46,8 @@ public:
 	//! edit events
 	void OnEdit(wxCommandEvent &event);
 	void OnContextMenu(wxContextMenuEvent& evt);
+	//! 3DViewevents
+	void On3DView(wxCommandEvent &event);
 	//Gcode
 	void OnCheck(wxCommandEvent &event);
 	void OnSimulate(wxCommandEvent &event);

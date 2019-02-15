@@ -140,13 +140,17 @@ wxBEGIN_EVENT_TABLE (AppFrame, wxFrame)
                                      AppFrame::OnEdit)
     // help
     EVT_MENU (wxID_ABOUT,            AppFrame::OnAbout)
-    EVT_CONTEXT_MENU(                AppFrame::OnContextMenu)
+  //  EVT_CONTEXT_MENU(                AppFrame::OnContextMenu)
 //GCode
 	EVT_MENU(ID_GCODE_CHECK, AppFrame::OnCheck)
 	EVT_MENU(ID_GCODE_SIMULATE, AppFrame::OnSimulate)
 
 	EVT_UPDATE_UI(ID_GCODE_CHECK, AppFrame::OnUpdateCheck)
 	EVT_UPDATE_UI(ID_GCODE_SIMULATE, AppFrame::OnUpdateSimulate)
+
+	
+	EVT_MENU_RANGE(myID_SETVIEWFIRST, myID_SETVIEWLAST, AppFrame::On3DView)
+	
 
 	EVT_THREAD(CHECK_GCODE_UPDATE, AppFrame::OnThreadUpdate)
 	EVT_THREAD(CHECK_GCODE_COMPLETE, AppFrame::OnThreadCompletion)
@@ -214,6 +218,7 @@ AppFrame::AppFrame (const wxString &title)
 
 	m_edit->SetFocus();
 	m_view->initializeGL();
+	//m_view->SetFocus();
 }
 
 AppFrame::~AppFrame () {
@@ -357,6 +362,10 @@ void AppFrame::OnEdit (wxCommandEvent &event) {
     if (m_edit) m_edit->GetEventHandler()->ProcessEvent (event);
 }
 
+void AppFrame::On3DView(wxCommandEvent &event) {
+	if (m_view) m_view->GetEventHandler()->ProcessEvent(event);
+}
+
 void AppFrame::OnContextMenu(wxContextMenuEvent& evt)
 {
     wxPoint point = evt.GetPosition();
@@ -468,7 +477,18 @@ void AppFrame::CreateMenu ()
 	wxMenu *menuGCode = new wxMenu;
 	menuGCode->Append(ID_GCODE_CHECK, _("&Check"));
 	menuGCode->Append(ID_GCODE_SIMULATE, _("&Simulate"));
- 
+
+
+	// 3dView menu
+	wxMenu *menu3D = new wxMenu;
+	menu3D->Append(myID_SETVIEWFIRST, _("&Top"));
+	menu3D->Append(myID_SETVIEWFIRST+1, _("&Bottom"));
+	menu3D->Append(myID_SETVIEWFIRST+2, _("&Left"));
+	menu3D->Append(myID_SETVIEWFIRST+3, _("&Right"));
+	menu3D->Append(myID_SETVIEWFIRST+4, _("&Front"));
+	menu3D->Append(myID_SETVIEWFIRST+5, _("&Back"));
+	
+	 
      // Help menu
     wxMenu *menuHelp = new wxMenu;
     menuHelp->Append (wxID_ABOUT, _("&About ..\tCtrl+D"));
@@ -478,6 +498,7 @@ void AppFrame::CreateMenu ()
     m_menuBar->Append (menuEdit, _("&Edit"));
     m_menuBar->Append (menuView, _("&View"));
 	m_menuBar->Append(menuGCode, _("&GCode"));
+	m_menuBar->Append(menu3D, _("&3DView"));
     m_menuBar->Append (menuHelp, _("&Help"));
     SetMenuBar (m_menuBar);
 }

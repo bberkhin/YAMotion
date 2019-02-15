@@ -30,7 +30,7 @@ struct TrackPointGL
 
 enum View
 {
-	TOP,
+	TOP = 0,
 	BOTTOM,
 	LEFT,
 	RIGHT,
@@ -44,6 +44,7 @@ struct Camera
 	glm::vec3 position;       //где находитс¤ камера
 	glm::vec3 look;           //нормализованный вектор взгл¤да
 	glm::vec3 top;            //вектор ориентации камеры
+	glm::vec3 translate;       //вектор ориентации камеры
 	float     screenAngle;    //поворот экрана
 	glm::mat4 viewProjection; //матрица камеры
 
@@ -92,9 +93,13 @@ public:
 	void OnChar(wxKeyEvent& event);
 	void OnMouseEvent(wxMouseEvent& event);
 	void initializeGL();
+//command
+	void OnSetView(wxCommandEvent &event);
 
 private:
 	void resizeGL(int nWidth, int nHeight);
+	void move_scale_cursor(int x, int y, float delta);
+	void move_drag_cursor(int x, int y, int deltaX, int deltaY);
 	void recalc_matrices();
 	void draw_bounds();
 	void draw_3d_grid();
@@ -108,9 +113,7 @@ private:
 
 private:
 	wxGLContext* m_glRC;
-
-	GLfloat m_xrot;
-	GLfloat m_yrot;
+	
 	std::vector<TrackPointGL> track;
 	std::vector<glm::vec3> realTrack; //пройденна¤ фрезой траектори¤
 	
@@ -123,6 +126,8 @@ private:
 	float  m_zoneTop;
 	bool   m_showGrid;   //показывать ли сетку масштаба
 	float  m_gridStep;   //размер ¤чейки сетки
+	
+	float  scale_add;
 	Camera camera;
     Object3d tool;
     int _drawCalls; //вызовов отрисовки за последнюю секунду
