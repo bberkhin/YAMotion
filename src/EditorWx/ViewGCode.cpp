@@ -35,7 +35,7 @@ ViewGCode::ViewGCode(wxWindow *parent,
 	// Explicitly create a new rendering context instance for this canvas.
 	m_glRC = new wxGLContext(this);	
 
-	m_zoneWidth = 2000;
+	m_zoneWidth = 1000;
 	m_zoneHeight = 1000;
 	m_zoneTop = 300;
 
@@ -97,7 +97,9 @@ void ViewGCode::resizeGL(int nWidth, int nHeight)
 
 	glViewport(0, 0, nWidth, nHeight);
 
-	glMatrixMode(GL_PROJECTION);
+	camera.scale = m_windowWidth/ m_zoneWidth;
+
+	//glMatrixMode(GL_PROJECTION);
 
 	//recalc_matrices();
 }
@@ -112,8 +114,9 @@ void ViewGCode::OnPaint(wxPaintEvent& WXUNUSED(event))
 	// or more than one wxGLContext in the application.
 	SetCurrent(*m_glRC);
 
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	initializeGL();
 
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glColor3f(0.0, 1.0, 1.0);
 
 	/*glBegin(GL_POINTS);
@@ -121,7 +124,7 @@ void ViewGCode::OnPaint(wxPaintEvent& WXUNUSED(event))
 		glVertex2f(0.5,0.5);
 	glEnd();*/
 
-	initializeGL();
+	
 	recalc_matrices();
 
 	glMatrixMode(GL_MODELVIEW);
@@ -225,7 +228,7 @@ void ViewGCode::OnMouseEvent(wxMouseEvent& event)
 void ViewGCode::setBox(const CoordsBox &bx)
 {
 	box = bx; 	
-	Update();
+	Refresh(false);
 }
 
 void ViewGCode::setTrack(std::vector<TrackPoint> *ptr)
@@ -538,7 +541,7 @@ void ViewGCode::set_view(View view)
 		case View::BACK: camera.look = -y; camera.top = z; break;
 	}
 
-	Update();
+	Refresh(false);
 }
 
 //--------------------------------------------------------------------
@@ -548,8 +551,13 @@ void Camera::recalc_matrix(int width, int height)
 		position,
 		top);
 
-	float fscale = scale * 2; //1пиксель - 1мм, координаты на виджете от -1 до 1
-	glm::mat4 mScale = glm::scale(glm::mat4(), glm::vec3(fscale / width, fscale / height, 1.f));
+	
+
+	float fscale = 2;// scale * 2; //1пиксель - 1мм, координаты на виджете от -1 до 1
+	glm::mat4 mScale = glm::scale(glm::mat4(1.0F), glm::vec3(fscale / width, fscale / height, 1.f));
+//	glm::mat4 mScale = glm::scale(glm::mat4(1.0F), glm::vec3(fscale, fscale , 1.f));
+	//glm::mat4 myScalingMatrix = glm::scale(2.0f, 2.0f, 2.0f);
+	glm::mat4 mTranslate = glm::translate(glm::mat4(1.0F), glm::vec3(-500.0f, -500.0f, 0.0f));
 
 	//float angle = glm::pi<float>()/40;
 	//glm::mat4 mProj  = glm::perspective(angle, 1.0f, 0.0f, 10000.0f);
@@ -558,7 +566,7 @@ void Camera::recalc_matrix(int width, int height)
 	//сначала располагаем объекты перед камерой
 	//потом масштабируем по размеру окна
 	//и считаем искривление перспективы
-	viewProjection = mProj * mScale * mView;
+	viewProjection = mProj * mScale* mTranslate * mView;
 
 	glMatrixMode(GL_PROJECTION);
 	glLoadMatrixf(glm::value_ptr(viewProjection));
