@@ -35,22 +35,47 @@ enum View
 	LEFT,
 	RIGHT,
 	FRONT,
-	BACK
+	BACK,
+	ISOMETR
 };
 
-struct Camera
+class Camera
 {
-	float     scale;          //масштаб изображени¤
+public:
+	Camera();
+	void recalc_matrix();     //пересчитать матрицу проекции
+	void screen_matrix();     //вывод 2d графики
+	void set_viewport(int width, int height);
+	void rotate_cursor(int xc, int yc, int xprev, int yprev); //обработка поворота камеры
+	void move_scale_cursor(int x, int y, float delta);
+	void move_drag_cursor(int deltaX, int deltaY);
+	void set_view(View view);
+	void increase_scale(float dscl);
+	float mm_to_pix(float valmm);
+	float pix_to_mm(float pix);
+	void set_box(const CoordsBox &bx);
+	int get_vp_width() {return width_vp;	}
+	int get_vp_height() { return height_vp; }
+	CoordsBox &get_box() { return box; }
+	const glm::mat4 &get_projection() {	return viewProjection; }
+private:
+	void reset_matrix(float scale_add_);
+private:
+	float     scale_origin;          //масштаб изображени¤
+	glm::vec3 translate_origin;      //текущий сдвиг
+	float  scale_add;
+	glm::vec3 translate_add;
+	float k_pix_in_mm;
+
 	glm::vec3 position;       //где находитс¤ камера
 	glm::vec3 look;           //нормализованный вектор взгл¤да
 	glm::vec3 top;            //вектор ориентации камеры
-	glm::vec3 translate;       //вектор ориентации камеры
-	float     screenAngle;    //поворот экрана
+	     
+//	float     screenAngle;    //поворот экрана
 	glm::mat4 viewProjection; //матрица камеры
-
-	void recalc_matrix(int width, int height);     //пересчитать матрицу проекции
-	void rotate_cursor(float x, float y, float deltaX, float deltaY); //обработка поворота камеры
-	void screen_matrix(int width, int height);     //вывод 2d графики
+	int width_vp;             // viewport 
+	int height_vp;			  // viewport 
+	CoordsBox box;
 };
 
 struct Vertex
@@ -65,8 +90,9 @@ struct Vertex
 struct Object3d
 {
 	glm::vec3           position; //положение
-	glm::vec3           ortX;     //ориентаци¤
-	glm::vec3           ortY;
+	glm::vec3           rotate;     //ориентаци¤
+	float				angle;
+	glm::vec3           scale;     //ориентаци¤
 	std::vector<Vertex> verts;    //вершины
 	std::vector<int>    indices;  //треугольники
 
@@ -98,9 +124,6 @@ public:
 
 private:
 	void resizeGL(int nWidth, int nHeight);
-	void move_scale_cursor(int x, int y, float delta);
-	void move_drag_cursor(int x, int y, int deltaX, int deltaY);
-	void recalc_matrices();
 	void draw_bounds();
 	void draw_3d_grid();
 	void draw_grid();
@@ -108,28 +131,29 @@ private:
 	void draw_real_track();
 	void draw_border();
 	void draw_fps();
-	void set_view(View view);
+	void draw_axis();
 	void update_tool_coords(float x, float y, float z);
 
 private:
 	wxGLContext* m_glRC;
-	
 	std::vector<TrackPointGL> track;
 	std::vector<glm::vec3> realTrack; //пройденна¤ фрезой траектори¤
 	
-	CoordsBox box;
-	int    m_windowWidth;  //размеры окна
-	int    m_windowHeight;
+	//int    m_windowWidth;  //размеры окна
+	//int    m_windowHeight;
 
-	float  m_zoneWidth;  //размеры зоны станка
-	float  m_zoneHeight;
-	float  m_zoneTop;
+	//float  m_zoneWidth;  //размеры зоны станка
+	//float  m_zoneHeight;
+	//float  m_zoneTop;
 	bool   m_showGrid;   //показывать ли сетку масштаба
 	float  m_gridStep;   //размер ¤чейки сетки
 	
-	float  scale_add;
 	Camera camera;
     Object3d tool;
+	Object3d axisX;
+	Object3d axisY;
+	Object3d axisZ;
+
     int _drawCalls; //вызовов отрисовки за последнюю секунду
     int _fps;
 

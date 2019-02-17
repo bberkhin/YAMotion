@@ -58,7 +58,7 @@ public:
 
 		m_pHandler = handler;
 		penv = new EnvironmentSimple();
-		pexec = new ExecutorLogWnd(m_pHandler,true);
+		pexec = new ExecutorLogWnd(m_pHandler, false);
 		plogger = new LoggerWnd(m_pHandler);
 		ppret = new GCodeInterpreter(penv, pexec, plogger);
 
@@ -481,12 +481,14 @@ void AppFrame::CreateMenu ()
 
 	// 3dView menu
 	wxMenu *menu3D = new wxMenu;
-	menu3D->Append(myID_SETVIEWFIRST, _("&Top"));
-	menu3D->Append(myID_SETVIEWFIRST+1, _("&Bottom"));
-	menu3D->Append(myID_SETVIEWFIRST+2, _("&Left"));
-	menu3D->Append(myID_SETVIEWFIRST+3, _("&Right"));
-	menu3D->Append(myID_SETVIEWFIRST+4, _("&Front"));
-	menu3D->Append(myID_SETVIEWFIRST+5, _("&Back"));
+	menu3D->Append(myID_SETVIEWFIRST + 6, _("&Isometric"));
+	menu3D->Append(myID_SETVIEWFIRST,	  _("&Top"));
+	menu3D->Append(myID_SETVIEWFIRST+1,   _("&Bottom"));
+	menu3D->Append(myID_SETVIEWFIRST+2,   _("&Left"));
+	menu3D->Append(myID_SETVIEWFIRST+3,   _("&Right"));
+	menu3D->Append(myID_SETVIEWFIRST+4,   _("&Front"));
+	menu3D->Append(myID_SETVIEWFIRST+5,   _("&Back"));
+	
 	
 	 
      // Help menu
