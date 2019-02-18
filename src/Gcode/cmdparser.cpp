@@ -343,6 +343,11 @@ bool CmdParser::getIParam(IndexParam param, int *pi) const
 		return false;
 }
 
+bool CmdParser::hasParam(IndexParam param) const
+{
+	return params[param].has_value();
+}
+
 bool CmdParser::read_set_param()
 {
 	int index;

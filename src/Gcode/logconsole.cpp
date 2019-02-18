@@ -71,10 +71,15 @@ void ExecutorLog::output(const std::string &str, const Coords &position )
     output( std::string("straight_traverce"), position );
 	addTrackPoint(fast, position);
  }
- void ExecutorLog::arc_feed(const Coords &position, bool  )
+ 
+ void ExecutorLog::arc_feed(double &end1, double &end2, double &center1, double &center2, int turn, double &end3, double &AA_end, double &BB_end, double &CC_end, double &u, double &v)
  {
-    output( std::string("arc_feed"), position );
-	addTrackPoint(feedarc, position);
+	Coords pt;
+	pt.x = end1;
+	pt.y = end2;
+	pt.z = end3;
+    output( std::string("arc_feed"), pt );
+	addTrackPoint(feedarc, pt);
  }
  void ExecutorLog::run_mcode( int code )
  {

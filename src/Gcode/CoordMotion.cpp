@@ -128,35 +128,35 @@ CCoordMotion::CCoordMotion(ILogger *plog, IOutput *_hrout) : logger(plog), hrout
 	//// check for a special Kinematics File
 
 	//FILE *f = fopen((std::string)MainPath + "\\Data\\Kinematics.txt","rt");
+	FILE *f = 0;
+	if (f)
+	{
+		char s[81];
+		fgets(s, 80, f);
+		// one exists, check if it is calling for Geppetto otherwise assume it is the 3Rod
 
-	//if (f)
-	//{
-	//	char s[81];
-	//	fgets(s, 80, f);
-	//	// one exists, check if it is calling for Geppetto otherwise assume it is the 3Rod
-
-	//	if (strstr(s, "5AxisTableAC") != NULL)
-	//		Kinematics = new CKinematics5AxisTableAC;
-	//	else if (strstr(s, "5AxisTableBC") != NULL)
-	//		Kinematics = new CKinematics5AxisTableBC;
-	//	else if (strstr(s, "5AxisGimbalAB") != NULL)
-	//		Kinematics = new CKinematics5AxisGimbalAB;
-	//	else if (strstr(s, "5AxisGimbalCB") != NULL)
-	//		Kinematics = new CKinematics5AxisGimbalCB;
-	//	else if (strstr(s, "GeppettoExtruder") != NULL)
-	//		Kinematics = new CKinematicsGeppettoExtrude;
-	//	else if (strstr(s, "Geppetto") != NULL)
-	//		Kinematics = new CKinematicsGeppetto;
-	//	else
-	//		Kinematics = new CKinematics3Rod;
-	//	
-	//	fclose(f);
-	//}
-	//else
-	//{
-	//	m_TCP_affects_actuators = false;
-	//	Kinematics = new CKinematics;
-	//}
+		//if (strstr(s, "5AxisTableAC") != NULL)
+		//	Kinematics = new CKinematics5AxisTableAC;
+		//else if (strstr(s, "5AxisTableBC") != NULL)
+		//	Kinematics = new CKinematics5AxisTableBC;
+		//else if (strstr(s, "5AxisGimbalAB") != NULL)
+		//	Kinematics = new CKinematics5AxisGimbalAB;
+		//else if (strstr(s, "5AxisGimbalCB") != NULL)
+		//	Kinematics = new CKinematics5AxisGimbalCB;
+		//else if (strstr(s, "GeppettoExtruder") != NULL)
+		//	Kinematics = new CKinematicsGeppettoExtrude;
+		//else if (strstr(s, "Geppetto") != NULL)
+		//	Kinematics = new CKinematicsGeppetto;
+		//else
+		//	Kinematics = new CKinematics3Rod;
+		
+		fclose(f);
+	}
+	else
+	{
+		m_TCP_affects_actuators = false;
+		Kinematics = new CKinematics(logger);
+	}
 
 	RapidParamsDirty=true;  // Trsjectory Params should be refreshed from KFLOP
 
@@ -626,6 +626,7 @@ int CCoordMotion::ArcFeedAccel(double DesiredFeedRate_in_per_sec, double Desired
 	// from where we are now to the end of the arc
 	//bb
 	int _setupsequence_number = sequence_number;
+
 	if (m_ArcFeedCallback) m_ArcFeedCallback(true, 
 				DesiredFeedRate_in_per_sec, plane,
 				first_end, second_end, 

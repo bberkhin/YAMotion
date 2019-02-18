@@ -7,7 +7,11 @@
 #define PI 3.14159265358979323846
 #define TWO_PI (2.0*3.141592653589793238)
 #define HALF_PI 1.5707963267948966
+#define M_PI_2l 1.570796326794896619231321691639751442L /* pi/2 */
+
 #define THETA_SIGMA 1e-13
+#define SPIRAL_RELATIVE_TOLERANCE 0.001
+
 
 #define N_CHANNELS 8                  // number of channels/board
 
@@ -31,6 +35,14 @@
 		{ state = InterError::CreateErrorCode(error, fmt, ## __VA_ARGS__);            \
 		  return false; }                                   \
     } while(0)
+
+#define IF_T_RET_F_SETSTATE(fun, error, fmt, ...)                             \
+    do {                                                   \
+		if( fun )                                     \
+		{ state = InterError::CreateErrorCode(error, fmt, ## __VA_ARGS__);            \
+		  return false; }                                   \
+    } while(0)
+
 
 #ifndef MAX_PATH
 #define MAX_PATH 256

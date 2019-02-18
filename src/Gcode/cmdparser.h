@@ -30,6 +30,7 @@ namespace Interpreter
 		bool contain_g( int val)  const;
 		bool getRParam(IndexParam param, double *pr) const;
 		bool getIParam(IndexParam param, int *pi) const;
+		bool hasParam(IndexParam param) const;
 		const m_container &getMCodes() const { return mcodes; }
 		const g_container &getGCodes() const { return gcodes; }
 		InterError get_state() const;		
@@ -38,7 +39,7 @@ namespace Interpreter
 		void remove_g(int n);
 		void remove_param(IndexParam param);
 		void remove_params();
-		int  params_count();
+		int  params_count();	
 		void clear();
 		
 		// helpers

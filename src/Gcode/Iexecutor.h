@@ -72,7 +72,7 @@ public:
 	virtual void set_tool_change(int toolid) = 0;
 	virtual void straight_feed(const Coords &position) = 0;
 	virtual void straight_traverce(const Coords &position) = 0;
-	virtual void arc_feed(const Coords &position, bool cw) = 0; // пока не знаю что сюда передовать  пусть будет так
+	virtual void arc_feed(double &end1, double &end2, double &center1, double &center2, int turn, double &end3, double &AA_end, double &BB_end, double &CC_end, double &u, double &v) = 0; 
 	virtual void run_mcode(int id) = 0;
 	virtual void set_end_programm() = 0;
 	virtual void set_dwell(long millseconds) = 0;

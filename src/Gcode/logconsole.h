@@ -24,7 +24,7 @@ public:
     void set_tool_change( int toolid);
     void straight_feed(const Coords &position );
     void straight_traverce(const Coords &position );
-    void arc_feed(const Coords &position, bool cw );
+	void arc_feed(double &end1, double &end2, double &center1, double &center2, int turn, double &end3, double &AA_end, double &BB_end, double &CC_end, double &u, double &v);
     void run_mcode( int toolid);
     void set_end_programm();
 	void set_dwell(long millseconds);

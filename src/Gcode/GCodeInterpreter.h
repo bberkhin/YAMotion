@@ -36,6 +36,10 @@ namespace Interpreter
 		double tool_crc;			 // Cutter radius compensation (CRC),
 		CutterCompType tool_crc_type;
 		MoveAccuracy accuracy;
+		bool cutter_comp_firstmove;
+		int cutter_comp_side;
+		double cutter_comp_radius;
+		bool ij_absolute;
 			
 
 		CannedCycle cycle;       //текущий цикл
@@ -48,7 +52,8 @@ namespace Interpreter
 	//    int    cycleWait;        //задержка в цикле P
 		RunnerData() :
 			toolid(-1), units(UnitSystem_MM), incremental(false), motionMode(MotionMode_NONE), plane(Plane_XY), feed(0), spindlespeed(0),
-			cycle(CannedCycle_NONE), tools_offset_height(0), cycleLevel(CannedLevel_HIGH), accuracy(AccuracyNormal) { }
+			cycle(CannedCycle_NONE), tools_offset_height(0), cycleLevel(CannedLevel_HIGH), accuracy(AccuracyNormal),
+			cutter_comp_firstmove(true), cutter_comp_side(0), cutter_comp_radius(0.0), ij_absolute(true) { }
 
 	};
 
@@ -104,7 +109,7 @@ namespace Interpreter
 		Coords to_mm(Coords value) const;
 		void move_to(const Coords &position, bool fast);          //линейное перемещение
 		void probe_to(const Coords &position);
-		void  arc_to(const Coords &position, bool cw);
+		bool arc_to(const Coords &position, bool cw, const CmdParser &parser);
 
 		bool run_feed_mode(CmdParser &parser);
 		bool run_feed_rate(const CmdParser &parser);
@@ -123,6 +128,22 @@ namespace Interpreter
 		Coords get_new_coordinate(Coords &oldLocal, const CmdParser &parser);
 
 		InterError get_state() { return state; }
+		//Arc support
+		bool convert_arc2(bool cw, const CmdParser &parser, double *current1, double *current2, double *current3,
+			double &end1, double &end2, double &end3, double &AA_end, double &BB_end, double &CC_end, double &u, double &v, double &w,
+			double &offset1, double &offset2);
+		bool arc_data_ijk(bool cw, double &current_x, double &current_y, double &end_x, double &end_y,   //!< second coordinate of arc end point
+			double &i_number, double &j_number, int p_number, double *center_x, double *center_y, int *turn,
+			double radius_tolerance, double spiral_abs_tolerance, double spiral_rel_tolerance);
+		bool arc_data_r(bool cw, double &current_x, double &current_y, double &end_x, double &end_y,
+			double &radius, int p_number, double *center_x, double *center_y, int *turn, double &tolerance);
+		bool convert_arc_comp1(bool cw, const CmdParser &parser, double &end_x, double &end_y, double &end_z, double &offset_x, double offset_y,
+			double &AA_end, double &BB_end, double &CC_end, double &u_end, double &v_end, double &w_end);
+		bool convert_arc_comp2(bool cw, const CmdParser &parser, double end_x, double end_y, double end_z, double offset_x, double offset_y,
+			double AA_end, double BB_end, double CC_end, double u, double v, double w);
+
+		char arc_axis1(Plane plane);
+		char arc_axis2(Plane plane);
 	private:
 		InterError state;
 		std::wstring file_name;     //строки входного файла
