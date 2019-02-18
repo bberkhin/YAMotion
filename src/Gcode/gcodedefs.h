@@ -3,6 +3,13 @@
 
 
 #define MAX_GCODE_LINELEN 512
+#define MM_PER_INCHES 2.54
+#define PI 3.14159265358979323846
+#define TWO_PI (2.0*3.141592653589793238)
+#define HALF_PI 1.5707963267948966
+#define THETA_SIGMA 1e-13
+
+#define N_CHANNELS 8                  // number of channels/board
 
 
 #define IF_F_RET_F(fun)                             \
@@ -25,10 +32,93 @@
 		  return false; }                                   \
     } while(0)
 
+#ifndef MAX_PATH
+#define MAX_PATH 256
+#endif
 
+
+enum
+{
+	KMOTION_OK = 0,
+	KMOTION_TIMEOUT = 1,
+	KMOTION_READY = 2,
+	KMOTION_ERROR = 3,
+};
+
+enum
+{
+	BOARD_TYPE_UNKNOWN = 0,
+	BOARD_TYPE_KMOTION = 1,
+	BOARD_TYPE_KFLOP = 2,
+};
+
+enum // KMotionLocked Return Codes
+{
+	KMOTION_LOCKED = 0,        // (and token is locked) if KMotion is available for use
+	KMOTION_IN_USE = 1,        // if already in use
+	KMOTION_NOT_CONNECTED = 2, // if error or not able to connect
+};
 
 namespace Interpreter
 {
+	enum Plane
+	{
+		Plane_NONE = 0,
+		Plane_XY,
+		Plane_YZ,
+		Plane_XZ
+	};
+
+	enum UnitSystem //система единиц
+	{
+		UnitSystem_INCHES = 0,
+		UnitSystem_MM, //метричека€
+		UnitSystem_CM
+	};
+
+	enum CoordIndex //номера координат в массиве
+	{
+		X_AXIS = 0,
+		Y_AXIS = 1,
+		Z_AXIS = 2,
+	};
+
+	enum MotionMode //режимы перемещени€
+	{
+		MotionMode_NONE = 0,
+		MotionMode_FAST,      //быстрое позиционирование
+		MotionMode_LINEAR,    //линейна€ интерпол€ци€
+		MotionMode_CW_ARC,    //кругова€ интерпол€ци€
+		MotionMode_CCW_ARC,
+		MotionMode_PROBE
+	};
+
+	enum CannedCycle
+	{
+		CannedCycle_NONE = 0,
+		CannedCycle_RESET,           //отмена цикла, G80
+		CannedCycle_SINGLE_DRILL,    //простое сверление, G81
+		CannedCycle_DRILL_AND_PAUSE, //сверление с задержкой на дне, G82
+		CannedCycle_DEEP_DRILL,      //сверление итераци€ми, G83
+	};
+
+	enum CannedLevel
+	{
+		CannedLevel_NONE = 0,
+		CannedLevel_HIGH,   //отвод к исходной плоскости, G98
+		CannedLevel_LOW,    //отвод к плоскости обработки, G99
+	};
+	enum CutterCompType
+	{
+		CutterCompType_NONE = 0,
+		CutterCompType_LEFT,
+		CutterCompType_RIGHT
+	};
+	enum MoveAccuracy
+	{
+		AccuracyNormal = 0,
+		AccuracyExactStop
+	};
 
 	enum ErrorCode
 	{

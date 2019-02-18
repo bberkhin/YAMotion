@@ -13,10 +13,6 @@
 typedef double coord;//чтобы не путаться, координатный тип введём отдельно
 typedef std::optional<double> optdouble;
 
-#define MM_PER_INCHES 2.54
-#define PI 3.14159265358979323846
-
-
 struct Coords   //все координаты устройства
 {
 	union

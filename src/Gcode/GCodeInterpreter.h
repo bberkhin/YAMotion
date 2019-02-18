@@ -14,64 +14,7 @@ namespace Interpreter
 {
 
 
-	enum Plane
-	{
-		Plane_NONE = 0,
-		Plane_XY,
-		Plane_YZ,
-		Plane_XZ
-	};
-
-	enum UnitSystem //система единиц
-	{
-		UnitSystem_INCHES = 0,
-		UnitSystem_MM, //метричекая
-		UnitSystem_CM
-	};
-
-	enum CoordIndex //номера координат в массиве
-	{
-		X_AXIS = 0,
-		Y_AXIS = 1,
-		Z_AXIS = 2,
-	};
-
-	enum MotionMode //режимы перемещения
-	{
-		MotionMode_NONE = 0,
-		MotionMode_FAST,      //быстрое позиционирование
-		MotionMode_LINEAR,    //линейная интерполяция
-		MotionMode_CW_ARC,    //круговая интерполяция
-		MotionMode_CCW_ARC,
-		MotionMode_PROBE		
-	};
-
-	enum CannedCycle
-	{
-		CannedCycle_NONE = 0,
-		CannedCycle_RESET,           //отмена цикла, G80
-		CannedCycle_SINGLE_DRILL,    //простое сверление, G81
-		CannedCycle_DRILL_AND_PAUSE, //сверление с задержкой на дне, G82
-		CannedCycle_DEEP_DRILL,      //сверление итерациями, G83
-	};
-
-	enum CannedLevel
-	{
-		CannedLevel_NONE = 0,
-		CannedLevel_HIGH,   //отвод к исходной плоскости, G98
-		CannedLevel_LOW,    //отвод к плоскости обработки, G99
-	};
-	enum CutterCompType
-	{
-		CutterCompType_NONE = 0,
-		CutterCompType_LEFT,
-		CutterCompType_RIGHT
-	};
-	enum MoveAccuracy
-	{
-		AccuracyNormal = 0,
-		AccuracyExactStop
-	};
+	
 	//=================================================================================================
 	//интерпретатор работает следующим образом
 	//читается вся строка, выбираются команды и для них ищутся параметры
@@ -90,7 +33,7 @@ namespace Interpreter
 		double spindlespeed; // обороты шпиндля
 		Coords origin;            //параметры команд G54..G58
 		int tools_offset_height;  // Tool height offset compensation
-		int tool_crc;			 // Cutter radius compensation (CRC),
+		double tool_crc;			 // Cutter radius compensation (CRC),
 		CutterCompType tool_crc_type;
 		MoveAccuracy accuracy;
 			
