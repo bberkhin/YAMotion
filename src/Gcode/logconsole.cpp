@@ -72,7 +72,7 @@ void ExecutorLog::output(const std::string &str, const Coords &position )
 	addTrackPoint(fast, position);
  }
  
- void ExecutorLog::arc_feed(double &end1, double &end2, double &center1, double &center2, int turn, double &end3, double &AA_end, double &BB_end, double &CC_end, double &u, double &v)
+ void ExecutorLog::arc_feed(RunnerData *rd, double &end1, double &end2, double &center1, double &center2, int turn, double &end3, double &AA_end, double &BB_end, double &CC_end, double &u, double &v)
  {
 	Coords pt;
 	pt.x = end1;

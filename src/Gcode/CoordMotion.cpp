@@ -864,7 +864,11 @@ int CCoordMotion::StraightFeedAccelRapid(double DesiredFeedRate_in_per_sec, doub
 	// if exceeding limits trigger Halt
 
 	// check if we should sync parameters with KFLOP
-	if (GetRapidSettings()) return 1;
+	if ( !m_Simulate )
+	{
+		if (GetRapidSettings())
+			return 1;
+	}
 
 	std::string errmsg;
 	if (CheckSoftLimits(x,y,z,a,b,c,u,v,errmsg)) 
@@ -934,6 +938,7 @@ int CCoordMotion::StraightFeedAccelRapid(double DesiredFeedRate_in_per_sec, doub
 		// if simulating just draw it now
 		if (RapidMode)
 		{
+			
 			if (m_StraightTraverseCallback && !NoCallback) m_StraightTraverseCallback(x,y,z,_setupsequence_number);
 			if (m_StraightTraverseSixAxisCallback && !NoCallback) m_StraightTraverseSixAxisCallback(x,y,z,a,b,c,_setupsequence_number);
 		}

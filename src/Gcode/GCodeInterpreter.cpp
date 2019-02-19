@@ -516,20 +516,20 @@ bool GCodeInterpreter::run_tool_height_offset(const CmdParser &parser)
 	int h = 0;
 	if (parser.contain_g(G_49))
 	{
-		runner.tools_offset_height = 0;
+		runner.tool_length_offset = 0;
 	}
 	else if (parser.contain_g(G_43))
 	{
 		IF_F_RET_F_SETSTATE(parser.getIParam(PARAM_H, &h), NO_VALUE, "Parametr 'H' must be defined for G44 ");
 		if  ( h > 0 )
-			runner.tools_offset_height = -h;
+			runner.tool_length_offset = -h;
 		else
-			runner.tools_offset_height = h;
+			runner.tool_length_offset = h;
 	}
 	else if (parser.contain_g(G_44))
 	{
 		IF_F_RET_F_SETSTATE(parser.getIParam(PARAM_H, &h), NO_VALUE, "Parametr 'H' must be defined for G43 ");
-		runner.tools_offset_height = h;
+		runner.tool_length_offset = h;
 	}
 	else
 		RET_F_SETSTATE(INTERNAL_ERROR, "GCodeInterpreter::run_tool_height_offset can notbe called here");
@@ -765,17 +765,13 @@ bool GCodeInterpreter::run_gcode(const CmdParser &parser)
 
 void GCodeInterpreter::setcoordinates(Coords &newpos, const CmdParser &parser) const
 {
-	parser.getRParam(PARAM_X, &(newpos.x));
-	parser.getRParam(PARAM_Y, &(newpos.y));
-	parser.getRParam(PARAM_Z, &(newpos.z));
-	parser.getRParam(PARAM_A, &(newpos.a));
-	parser.getRParam(PARAM_B, &(newpos.b));
-	parser.getRParam(PARAM_C, &(newpos.c));	
-	if (runner.units == UnitSystem_INCHES)
-	{
-		newpos = to_mm(newpos);
-	}
-
+	double val;
+	if (parser.getRParam(PARAM_X, &val))	newpos.x = to_mm(val);
+	if (parser.getRParam(PARAM_Y, &val))	newpos.y = to_mm(val);
+	if (parser.getRParam(PARAM_Z, &val))	newpos.z = to_mm(val);
+	if (parser.getRParam(PARAM_A, &val))	newpos.a = to_mm(val);
+	if (parser.getRParam(PARAM_B, &val))	newpos.b = to_mm(val);
+	if (parser.getRParam(PARAM_C, &val))	newpos.c = to_mm(val);
 }
 
 
@@ -1131,10 +1127,11 @@ bool GCodeInterpreter::arc_to(const Coords &position, bool cw, const CmdParser &
 
 	//settings->motion_mode = move;
 
-	double i,j,k;
-	parser.getRParam(PARAM_I, &i);
-	parser.getRParam(PARAM_J, &j);
-	parser.getRParam(PARAM_K, &k);
+	double i = 0,j=0,k=0;
+	if( parser.getRParam(PARAM_I, &i) )  i = to_mm(i);
+	if( parser.getRParam(PARAM_J, &j) )  j = to_mm(j);
+	if( parser.getRParam(PARAM_K, &k) )  k = to_mm(k);
+	
 	if (runner.plane == Plane_XY) 
 	{
 		if ((!runner.cutter_comp_side) ||
@@ -1144,7 +1141,7 @@ bool GCodeInterpreter::arc_to(const Coords &position, bool cw, const CmdParser &
 					&(runner.position.x), &(runner.position.y), &(runner.position.z),
 					end_x, end_y, end_z,
 					AA_end, BB_end, CC_end,	
-					u_end, v_end, w_end,i, j));
+					u_end, v_end, w_end, i, j));
 		}
 		else if (first) 
 		{
@@ -1241,11 +1238,12 @@ bool GCodeInterpreter::convert_arc2(bool cw,       //!< either G_2 (cw arc) or G
 
 		
 	
-	double radius_tolerance = 1;  //bb xbz
-	double spiral_abs_tolerance = 1;
+	double radius_tolerance = 0.001;  //bb xbz
+	double spiral_abs_tolerance = 0.001;
 
 	if (parser.getRParam(PARAM_R, &rval))
 	{
+		rval = to_mm(rval);
 		IF_F_RET_F(arc_data_r(cw, *current1, *current2, end1, end2,
 			rval, p_int, &center1, &center2, &turn, radius_tolerance));
 	}
@@ -1259,7 +1257,7 @@ bool GCodeInterpreter::convert_arc2(bool cw,       //!< either G_2 (cw arc) or G
 	//inverse_time_rate_arc(*current1, *current2, *current3, center1, center2,
 //		turn, end1, end2, end3, block, settings);
 
-	executor->arc_feed(end1, end2, center1, center2, turn, end3, AA_end, BB_end, CC_end, u ,v);
+	executor->arc_feed(&runner, end1, end2, center1, center2, turn, end3, AA_end, BB_end, CC_end, u ,v);
 //	ARC_FEED(block->line_number, end1, end2, center1, center2, turn, end3,
 //		AA_end, BB_end, CC_end, u, v, w);
 	
@@ -1384,7 +1382,6 @@ of the arc lies on a line through M perpendicular to L.
 
 */
 
-#define TINY 1e-12              /* for arc_data_r */
 
 bool GCodeInterpreter::arc_data_r(bool cw, //!< either G_2 (cw arc) or G_3 (ccw arc)	
 	double &current_x, //!< first coordinate of current point

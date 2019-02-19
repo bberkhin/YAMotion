@@ -19,45 +19,6 @@ namespace Interpreter
 	//интерпретатор работает следующим образом
 	//читается вся строка, выбираются команды и для них ищутся параметры
 
-	//здесь переменные для выполнения команд
-	struct RunnerData
-	{
-		//параметры, нужные для кодов, которые действуют на несколько строк
-		int toolid;                       // инструмент
-		Coords position;         //"текущая" позиция устройства в миллиметрах
-		UnitSystem units;        //текущая система единиц измерения
-		bool incremental;        //абсолютная система координат?
-		MotionMode motionMode;   //режим перемещения (линейная интерполяция и т.п.)
-		Plane plane;             //текущая плоскость интерполяции
-		double feed;             //подача в мм/мин
-		double spindlespeed; // обороты шпиндля
-		Coords origin;            //параметры команд G54..G58
-		int tools_offset_height;  // Tool height offset compensation
-		double tool_crc;			 // Cutter radius compensation (CRC),
-		CutterCompType tool_crc_type;
-		MoveAccuracy accuracy;
-		bool cutter_comp_firstmove;
-		int cutter_comp_side;
-		double cutter_comp_radius;
-		bool ij_absolute;
-			
-
-		CannedCycle cycle;       //текущий цикл
-		CannedLevel cycleLevel;
-	//    bool   cycleUseLowLevel; //использовать R вместо стартовой точки
-	//    double cycleLowLevel;    //плоскость отвода (задаётся в R)
-	//    double cycleHiLevel;     //исходная плоскость задаётся в стартовом Z
-	//    double cycleDeepLevel;   //глубина сверления задаётся в Z
-	//    double cycleStep;        //глубина одного шага Q
-	//    int    cycleWait;        //задержка в цикле P
-		RunnerData() :
-			toolid(-1), units(UnitSystem_MM), incremental(false), motionMode(MotionMode_NONE), plane(Plane_XY), feed(0), spindlespeed(0),
-			cycle(CannedCycle_NONE), tools_offset_height(0), cycleLevel(CannedLevel_HIGH), accuracy(AccuracyNormal),
-			cutter_comp_firstmove(true), cutter_comp_side(0), cutter_comp_radius(0.0), ij_absolute(true) { }
-
-	};
-
-
 	struct SubratinInfo
 	{
 		std::string name;

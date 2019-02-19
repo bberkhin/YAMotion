@@ -1,6 +1,10 @@
 #pragma once
 #include <string>
-
+#include <list>
+#include <queue>
+#include <memory>
+#include "stdint.h"
+#include <optional>
 
 #define MAX_GCODE_LINELEN 512
 #define MM_PER_INCHES 2.54
@@ -8,9 +12,14 @@
 #define TWO_PI (2.0*3.141592653589793238)
 #define HALF_PI 1.5707963267948966
 #define M_PI_2l 1.570796326794896619231321691639751442L /* pi/2 */
-
+#define TINY 1e-12              /* for arc_data_r */
 #define THETA_SIGMA 1e-13
 #define SPIRAL_RELATIVE_TOLERANCE 0.001
+//#define NUM_AXES   4 //сколько осей используем (координаты плюс подчиненные им оси)
+#define MAX_AXES   6 //сколько всего есть осей на контроллере
+#define MAX_FEED_RATE 10000
+#define MAX_SPINDELSPEED 60000
+
 
 
 #define N_CHANNELS 8                  // number of channels/board
@@ -214,6 +223,93 @@ namespace Interpreter
 
 		InterError(ErrorCode code, std::string description) : code(code), description(description) {}
 		static InterError CreateErrorCode(ErrorCode cod, const char *fmt, ...);
+	};
+
+	typedef double coord;//чтобы не путатьс€, координатный тип введЄм отдельно
+	typedef std::optional<double> optdouble;
+
+	struct Coords   //все координаты устройства
+	{
+		union
+		{
+			struct
+			{
+				coord x, y, z, a, b, c;
+			};
+			struct
+			{
+				coord r[MAX_AXES];
+			};
+		};
+
+		Coords() { for (int i = 0; i < MAX_AXES; ++i) r[i] = 0; }
+		Coords(const coord &x_, const coord &y_, const coord &z_) :
+			x(x_), y(y_), z(z_) {
+			for (int i = 3; i < MAX_AXES; ++i) r[i] = 0; // лучше memset
+		}
+	};
+
+	struct CoordsBox
+	{
+		Coords Min;
+		Coords Max;
+		CoordsBox() : empty(true) { }
+		CoordsBox(Coords Min, Coords Max) : empty(true) {
+			addCoords(Min); addCoords(Max);
+		}
+		bool isEmpty() { return empty; }
+		void setEmpty() { empty = true; }
+		void addCoords(const Coords & pt)
+		{
+			if (empty)
+			{
+				Min = pt; Max = pt; empty = false;
+			}
+			else
+			{
+				for (int i = 0; i < MAX_AXES; ++i) Min.r[i] = std::min(Min.r[i], pt.r[i]);
+				for (int i = 0; i < MAX_AXES; ++i) Max.r[i] = std::max(Max.r[i], pt.r[i]);
+			}
+		}
+	private:
+		bool empty;
+	};
+
+	//здесь переменные дл€ выполнени€ команд
+	struct RunnerData
+	{
+		//параметры, нужные дл€ кодов, которые действуют на несколько строк
+		int toolid;                       // инструмент
+		Coords position;         //"текуща€" позици€ устройства в миллиметрах
+		UnitSystem units;        //текуща€ система единиц измерени€
+		bool incremental;        //абсолютна€ система координат?
+		MotionMode motionMode;   //режим перемещени€ (линейна€ интерпол€ци€ и т.п.)
+		Plane plane;             //текуща€ плоскость интерпол€ции
+		double feed;             //подача в мм/мин
+		double spindlespeed; // обороты шпиндл€
+		Coords origin;            //параметры команд G54..G58
+		int tool_length_offset;  // Tool height offset compensation
+		double tool_yoffset;
+		double tool_xoffset;
+		double tool_crc;			 // Cutter radius compensation (CRC),
+		CutterCompType tool_crc_type;
+		MoveAccuracy accuracy;
+		bool cutter_comp_firstmove;
+		int cutter_comp_side;
+		double cutter_comp_radius;
+		bool ij_absolute;
+		CannedCycle cycle;       //текущий цикл
+		CannedLevel cycleLevel;
+		//    bool   cycleUseLowLevel; //использовать R вместо стартовой точки
+		//    double cycleLowLevel;    //плоскость отвода (задаЄтс€ в R)
+		//    double cycleHiLevel;     //исходна€ плоскость задаЄтс€ в стартовом Z
+		//    double cycleDeepLevel;   //глубина сверлени€ задаЄтс€ в Z
+		//    double cycleStep;        //глубина одного шага Q
+		//    int    cycleWait;        //задержка в цикле P
+		RunnerData() :
+			toolid(-1), units(UnitSystem_MM), incremental(false), motionMode(MotionMode_NONE), plane(Plane_XY), feed(0), spindlespeed(0),
+			cycle(CannedCycle_NONE), tool_length_offset(0), tool_yoffset(0), tool_xoffset(0), cycleLevel(CannedLevel_HIGH),
+			accuracy(AccuracyNormal), cutter_comp_firstmove(true), cutter_comp_side(0), cutter_comp_radius(0.0), ij_absolute(false) { }
 	};
 };
 
