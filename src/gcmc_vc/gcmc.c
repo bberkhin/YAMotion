@@ -53,8 +53,8 @@ double *global_pos[MAXAXES];	/* Current turtle position */
 plane_et global_plane = PLANE_XY;
 int naxes = 6;			/* Default enable 6 axes */
 int cl_decimals = 8;		/* Number of significant decimals to print in output */
-int cl_relative;		/* Use relative output code */
-int cl_inch;			/* Set if output is to be in inch */
+int cl_relative = 0;		/* Use relative output code */
+int cl_inch = 0;			/* Set if output is to be in inch */
 format_et cl_format;		/* Set to output format to use */
 int cl_svg_movelayer = 1;	/* Set to output goto()s in separate SVG layer */
 int cl_svg_flip = 1;		/* Set to flip the output (mirror Y) */
@@ -63,18 +63,18 @@ double cl_svg_toolwidth = -1.0;	/* Line-width in SVG output */
 double cl_svg_opacity = 0.1;	/* Transparency in SVG ouput */
 int cl_nom2 = 0;		/* Use % when generating subs instead of ending in M2 */
 int cl_pedantic = 0;		/* Enable pendatic warnings when set */
-int runtimeerrors;		/* Nr of calls to script's error() function */
-int runtimewarnings;		/* Nr of calls to script's warning() function or internal rtwarning() */
+int runtimeerrors = 0;		/* Nr of calls to script's error() function */
+int runtimewarnings = 0;		/* Nr of calls to script's warning() function or internal rtwarning() */
 
-static char *definebuf;		/* Holds command-line defined entries/code */
-static int ndefinebuf;
-static int nadefinebuf;
+static char *definebuf = 0;		/* Holds command-line defined entries/code */
+static int ndefinebuf = 0;
+static int nadefinebuf = 0;
 
-static const char **includepaths;
-static int nincludepaths;
-static int naincludepaths;
+static const char **includepaths = 0;
+static int nincludepaths = 0;
+static int naincludepaths = 0;
 
-static int syntaxerrors;
+static int syntaxerrors = 0;
 
 #define STRVAL(x)	#x
 #define STRINGIZE(x)	STRVAL(x)
@@ -705,13 +705,14 @@ int main(int argc, char *argv[])
 	if(asfuncname)
 		proepi = 0;	/* Disable std. prologue/epilogue with functions */
 
-	debug = 1;
-	yydebug = 1;
+	//debug = 1;
+	yydebug = 0;
 	
 	if(debug) 
 	{
 		setbuf(stdout, NULL);
 		setbuf(stderr, NULL);
+		yydebug = 1;
 		
 	}
 
@@ -747,22 +748,29 @@ int main(int argc, char *argv[])
 
 	unit = cl_inch ? UNIT_IN : UNIT_MM;
 
-	/* Setup reference to global offset and position track variable */
+	///* Setup reference to global offset and position track variable */
 	v = value_new(VAL_VECTOR);
-	for(i = 0; i < naxes; i++) {
+	for(i = 0; i < naxes; i++) 
+	{
 		unit_et u = offsetunits[i];
-		if(u == UNIT_NONE) {
+		if(u == UNIT_NONE) 
+		{
 			if(i >= 3 && i < 6)
 				u = UNIT_DEG;
 			else
 				u = cl_inch ? UNIT_IN : UNIT_MM;
-		} else if(u == UNIT_MM && cl_inch) {
+		} 
+		else if(u == UNIT_MM && cl_inch) {
 			offsets[i] /= 25.4;
 			u = UNIT_IN;
-		} else if(u == UNIT_IN && !cl_inch) {
+		} 
+		else if(u == UNIT_IN && !cl_inch) 
+		{
 			offsets[i] *= 25.4;
 			u = UNIT_MM;
-		} else if(u == UNIT_RAD) {
+		} 
+		else if(u == UNIT_RAD) 
+		{
 			/* Angular offset must be degrees (gcode units) */
 			offsets[i] *= 180.0;
 			offsets[i] /= M_PI;

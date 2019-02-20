@@ -76,7 +76,6 @@
 
 #define YYDEBUG 1
 
-
 #define myassert(x)	do { \
 				if(!(x)) { \
 					yyfatal("Assertion failed:(%s:%d): %s", __FILE__, __LINE__, #x); \

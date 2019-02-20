@@ -1,2 +1,1 @@
-/* oprporoprpo*/
-feedrate(2);
+move([0, 0]);
