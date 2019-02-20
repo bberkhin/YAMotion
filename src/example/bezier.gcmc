@@ -1,0 +1,68 @@
+/*
+ * G-code meta compiler
+ *
+ * Copyright (C) 2015  B. Stultiens
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ *---------------------------------------------------------------------
+ * Example of vectorized Bezier curves
+ *---------------------------------------------------------------------
+ *
+ *   @@@--svg-toolwidth=0.1 --svg-opacity=1.0@@@
+ */
+
+include("vbezier.inc.gcmc");
+
+feedrate(500.0mm);
+
+/* A simple parametric square */
+square = {
+	[-1, -1],
+	[ 1, -1],
+	[ 1,  1],
+	[-1,  1]
+};
+
+/* Parametric position of control points */
+cp = {
+	[-2,  1],
+	[-2, -1],
+
+	[-1, -2],
+	[ 1, -2],
+
+	[ 2, -1],
+	[ 2,  1],
+
+	[ 1,  2],
+	[-1,  2],
+};
+
+/* Scale to distances */
+square *= 8.0mm;
+cp *= 4.4mm;
+factor = 1.25;
+
+repeat(30) {
+	/* Draw the pattern */
+	goto(square[-1]);
+	for(i = 0; i < count(square); i++) {
+		move(vbezier3(square[i-1], cp[2*i], cp[2*i+1], square[i]));
+	}
+	/* Scale the control points and rotate them a bit */
+	cp *= factor;
+	cp = rotate_xy(cp, 4.0deg);
+	factor *= 0.99;
+}

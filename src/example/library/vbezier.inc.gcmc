@@ -1,0 +1,209 @@
+/*
+ * G-code meta compiler
+ *
+ * Copyright (C) 2015  B. Stultiens
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+/* Default intervals for Bezier vectorization */
+const VBEZIER_DEFAULT_FLATNESS = 1.0e-4;
+const VBEZIER_DEFAULT_MINL = 0.1mm;
+
+/*
+ * Vectorize cubic Bezier curves by recursive subdivision
+ * using De Casteljau's algorithm
+ * Input:
+ *	b0		: node left
+ *	b1		: control point left
+ *	b2		: control point right
+ *	b3		: node right
+ *	flatness	: resisidual 2-2*|cos(phi)| to determine direction of line
+ *	minl		: minimum distance between points
+ * Output:
+ *	Vectorlist of points excluding b0 and exactly ending at b3
+ */
+function __vbezier3_worker(b0, b1, b2, b3, flatness, minl)
+{
+	local l = (b0 + b1) / 2.0;	// Left middle
+	local m = (b1 + b2) / 2.0;	// Mid middle
+	local r = (b2 + b3) / 2.0;	// Right middle
+	local lm = (l + m) / 2.0;
+	local rm = (r + m) / 2.0;
+	local t = (lm + rm) / 2.0;	// Top point
+
+	// If the b0-top-b3 triangle is under the minimum length then return
+	// this triangle. Extreme cases where the control points pull out the
+	// curve to the sides is handled by ensuring that left and right
+	// node-to-conrol points must adhere to the same minimum length.
+	if((length(t-b0) + length(b3-t)) < minl && length(r-l) < minl) {
+		return {t, b3};
+	}
+
+	// cos(Angles) as seen from both sides should sum to 2.0 within
+	// tolerance to be co-linear but from opposite direction.
+	local cplv = normalize(b0-m) * normalize(lm-t);
+	local cprv = normalize(b3-m) * normalize(t-rm);
+
+	// We're done if we are co-linear.
+	// The angle test is scaled by the distance between the end-points
+	// relative to the minl argument. This reduces the perpendicular
+	// deviation from the curve to a minimum.
+	if(length(b3-b0)/minl * (2.0 - abs(cprv - cplv)) < flatness) {
+		return {b3};
+	}
+
+	// Otherwise, return the points with bisected recursion
+	return	head(__vbezier3_worker(b0, l, lm, t, flatness, minl), -1) +
+		{t} +
+		head(__vbezier3_worker(t, rm, r, b3, flatness, minl), -1) +
+		{b3};
+}
+
+/*
+ * Vectorize cubic Bezier curves by recursive subdivision
+ *
+ * See comment above for description.
+ */
+function vbezier3(b0, b1, b2, b3, flatness = VBEZIER_DEFAULT_FLATNESS, minl = VBEZIER_DEFAULT_MINL)
+{
+	local mkunitsum = ismodemm() ? 0.0mm : 0.0in;
+	if(!isvector(b0) || count(b0) < 2 || isundef(b0[0]) || isundef(b0[1])) {
+		error("vbezier3(): Argument 'b0' (node left) must be a vector and have X and Y coordinates defined");
+		return {};
+	}
+	if(count(b0) > 3) {
+		error("vbezier3(): Argument 'b0' (node left) has coordinates extending 3D space beyond XYZ");
+		return {};
+	}
+	if(!isvector(b1) || count(b1) < 2 || isundef(b1[0]) || isundef(b1[1])) {
+		error("vbezier3(): Argument 'b1' (control point left) must be a vector and have X and Y coordinates defined");
+		return {};
+	}
+	if(count(b1) > 3) {
+		error("vbezier3(): Argument 'b1' (control point left) has coordinates extending 3D space beyond XYZ");
+		return {};
+	}
+	if(!isvector(b2) || count(b2) < 2 || isundef(b2[0]) || isundef(b2[1])) {
+		error("vbezier3(): Argument 'b2' (control point right) must be a vector and have X and Y coordinates defined");
+		return {};
+	}
+	if(count(b2) > 3) {
+		error("vbezier3(): Argument 'b2' (control point right) has coordinates extending 3D space beyond XYZ");
+		return {};
+	}
+	if(!isvector(b3) || count(b3) < 2 || isundef(b3[0]) || isundef(b3[1])) {
+		error("vbezier3(): Argument 'b3' (node right) must be a vector and have X and Y coordinates defined");
+		return {};
+	}
+	if(count(b3) > 3) {
+		error("vbezier3(): Argument 'b3' (node right) has coordinates extending 3D space beyond XYZ");
+		return {};
+	}
+	if(!isscalar(flatness) || !isnone(flatness)) {
+		error("vbezier3(): Argument 'flatness' must be scalar and have no units associated");
+		return {};
+	}
+	if(flatness < 0.0) {
+		error("vbezier3(): Argument 'flatness' must be larger than zero");
+		return {};
+	}
+	if(flatness < 1.0e-9) {
+		warning("vbezier3(): Argument 'flatness' is less than sqrt(<machine accuracy>). Might be unstable or unable to converge");
+	}
+	if(flatness > 2.0) {
+		error("vbezier3(): Argument 'flatness' is larger than 2*cos(x) and cannot converge");
+		return {};
+	}
+	if(!isscalar(minl)) {
+		error("vbezier3(): Argument 'minl' must be scalar");
+		return {};
+	}
+	if(!isdistance(minl) && !isnone(minl)) {
+		error("vbezier3(): Argument 'minl' must be a distance");
+		return {};
+	}
+	minl += mkunitsum;	// Assure distance units
+	if(minl <= 0.0mm) {
+		error("vbezier3(): Argument 'minl' must be larger than zero");
+		return {};
+	}
+	return __vbezier3_worker(b0, b1, b2, b3, flatness, minl);
+}
+
+/*
+ * Vectorize quadratic Bezier curves by recursive subdivision
+ *
+ * The quadratic curve is converted to a cubic curve, see comment above for
+ * description.
+ */
+function vbezier2(b0, b1, b2, flatness = VBEZIER_DEFAULT_FLATNESS, minl = VBEZIER_DEFAULT_MINL)
+{
+	local mkunitsum = ismodemm() ? 0.0mm : 0.0in;
+	if(!isvector(b0) || count(b0) < 2 || isundef(b0[0]) || isundef(b0[1])) {
+		error("vbezier2(): Argument 'b0' (node left) must be a vector and have X and Y coordinates defined");
+		return {};
+	}
+	if(count(b0) > 3) {
+		error("vbezier2(): Argument 'b0' (node left) has coordinates extending 3D space beyond XYZ");
+		return {};
+	}
+	if(!isvector(b1) || count(b1) < 2 || isundef(b1[0]) || isundef(b1[1])) {
+		error("vbezier2(): Argument 'b1' (control point) must be a vector and have X and Y coordinates defined");
+		return {};
+	}
+	if(count(b1) > 3) {
+		error("vbezier2(): Argument 'b1' (control point) has coordinates extending 3D space beyond XYZ");
+		return {};
+	}
+	if(!isvector(b2) || count(b2) < 2 || isundef(b2[0]) || isundef(b2[1])) {
+		error("vbezier2(): Argument 'b2' (node right) must be a vector and have X and Y coordinates defined");
+		return {};
+	}
+	if(count(b2) > 3) {
+		error("vbezier2(): Argument 'b2' (node right) has coordinates extending 3D space beyond XYZ");
+		return {};
+	}
+	if(!isscalar(flatness) || !isnone(flatness)) {
+		error("vbezier2(): Argument 'flatness' must be scalar and have no units associated");
+		return {};
+	}
+	if(flatness < 0.0) {
+		error("vbezier2(): Argument 'flatness' must be larger than zero");
+		return {};
+	}
+	if(flatness < 1.0e-9) {
+		warning("vbezier2(): Argument 'flatness' is less than sqrt(<machine accuracy>). Might be unstable or unable to converge");
+	}
+	if(flatness > 2.0) {
+		error("vbezier2(): Argument 'flatness' is larger than 2*cos(x) and cannot converge");
+		return {};
+	}
+	if(!isscalar(minl)) {
+		error("vbezier2(): Argument 'minl' must be scalar");
+		return {};
+	}
+	if(!isdistance(minl) && !isnone(minl)) {
+		error("vbezier2(): Argument 'minl' must be a distance");
+		return {};
+	}
+	minl += mkunitsum;	// Assure distance units
+	if(minl <= 0.0mm) {
+		error("vbezier3(): Argument 'minl' must be larger than zero");
+		return {};
+	}
+	// Up the quadratic curve to a cubic curve and vectorize
+	return __vbezier3_worker(b0, (b0 + 2.0*b1)/3.0, (2.0*b1 + b2)/3.0, b2, flatness, minl);
+}
+

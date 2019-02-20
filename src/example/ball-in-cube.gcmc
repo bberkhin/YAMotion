@@ -1,0 +1,74 @@
+/*
+ * Ball-in-a-cube design
+ *
+ * Original source unknown.
+ * Heavily modified and adapted for gcmc.
+ */
+boxsize		= 50mm;		// Outer size of box
+cutterrad	= 3.0mm / 2.0;	// cutter radius
+boxbarsize	= 3.0mm;	// size of box bars
+ang_inc		= 5.0deg;	// degrees of resolusion
+safeZ		= 10mm;		// Safe height above object
+
+crad = sqrt(2.0) * (boxsize/2.0 + cutterrad);	// actual radius of circle - cutter radius + radius
+
+feedrate(250.0mm);
+move([0, 0]);
+
+/*
+ * FIXME:
+ * --- Warning ---
+ * The space above the ball is not carved out. The cutter is unlikely to have
+ * enough vertical free-room to remove material. The current path would jam the
+ * cutter into the remaining material and that would end badly. A separate
+ * routine is required to remove enough material from the block to let the
+ * cutter do a proper job.
+ * --- Warning ---
+ */
+
+// This will cut the ball
+ang = ang_inc;	// Starting point at first angular displacement
+do {
+	xy = sin(ang) * crad * 0.5;	// Corner point
+	zz = -(1.0 - cos(ang)) * crad;	// Depth at corner
+	rr = cos(ang) * crad;		// Adjusted radius
+	feedrate(75.0mm);
+	move([xy, xy]);
+	move([-, -, zz]);
+	feedrate(100.0mm);
+	plane("XZ"); arc_cw( [-xy,  xy, zz], -rr);
+	plane("YZ"); arc_ccw([-xy, -xy, zz],  rr);
+	plane("XZ"); arc_ccw([ xy, -xy, zz], -rr);
+	plane("YZ"); arc_cw( [ xy,  xy, zz],  rr);
+	ang += ang_inc;
+} while(ang < 55deg && xy < boxsize/2.0-cutterrad-boxbarsize);
+
+move([-, -, safeZ]);
+
+feedrate(75.0mm);
+
+// Cut the inside bar
+xy = boxsize / 2.0 - boxbarsize - cutterrad;
+goto([xy, xy]);
+for(zz = -cutterrad; zz >= -boxbarsize; zz -= cutterrad) {
+	move([-, -, zz]);
+	move([-xy,  xy]);
+	move([-xy, -xy]);
+	move([ xy, -xy]);
+	move([ xy,  xy]);
+}
+move([-, -, safeZ]);
+
+// Cut the outside boxbar
+xy = boxsize / 2.0 + boxbarsize + cutterrad;
+goto([xy, xy]);
+for(zz = -cutterrad; zz >= -boxbarsize; zz -= cutterrad) {
+	move([-, -, zz]);
+	move([-xy,  xy]);
+	move([-xy, -xy]);
+	move([ xy, -xy]);
+	move([ xy,  xy]);
+}
+
+move([-, -, safeZ]);
+goto([0, 0]);

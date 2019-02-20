@@ -1,0 +1,101 @@
+/*
+ * G-code meta compiler
+ *
+ * Copyright (C) 2015  B. Stultiens
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ *---------------------------------------------------------------------
+ * Example of vector fonts manipulation
+ *---------------------------------------------------------------------
+ *
+ *   @@@--svg-toolwidth=0.5 --svg-opacity=1.0 --svg-no-movelayer@@@
+ */
+
+include("engrave.inc.gcmc");	/* Engraving helper function */
+
+
+feedrate(400.0mm);
+
+sf = 10.0mm;	/* Scaling factor */
+
+/*
+ * Create a vectorlist from different text snippets.
+ * Concatenation is easy as the last vector in the vectorlist is the position
+ * of the would-be next glyph.
+ */
+vl  = typeset("Text ",     FONT_HSANS_1		 );
+vl += typeset("and ",      FONT_HSANS_2		 ) + vl[-1];
+vl += typeset("fonts ",    FONT_HSCRIPT_1	 ) + vl[-1];
+vl += typeset("going ",    FONT_HSCRIPT_2	 ) + vl[-1];
+vl += typeset("Round ",    FONT_HTIMES		 ) + vl[-1];
+vl += typeset("and ",      FONT_HTIMES_BOLD	 ) + vl[-1];
+vl += typeset("Round ",    FONT_HTIMES_ITALIC	 ) + vl[-1];
+vl += typeset("<dizzy>. ", FONT_HTIMES_ITALIC_BOLD) + vl[-1];
+
+/* Scale to real world coordinates */
+vl = scale(vl, [sf / (2.0*pi()), sf]);
+
+/* The end-point's X is the actual size of the string, which is the circumference */
+circ = vl[-1].x;		/* Represents 0...360 degrees */
+radius = circ / (2.0 * pi());
+
+/* Construct a new list with all coordinates transformed */
+rotlst = {};
+foreach(vl; v) {
+	if(!isundef(v.x)) {
+		/* Only XY movements are to be transformed */
+		/* The Z-movement is pen-up/down */
+		angle = v.x / circ * 360.0deg;
+		/* Every point is rotated from the origin */
+		/* Y-Scaled for readability (above) */
+		/* Positioned at circle's border */
+		v = rotate_xy([0.0mm, v.y + circ, -], -angle);
+	}
+	rotlst += {v};
+}
+
+/* Do the actual engraving */
+engrave(rotlst, 1.0mm, 0.0mm);
+
+
+/* Inset text too, with accents */
+sf = 8.0mm;	/* Scaling factor a bit less than above */
+
+vl  = typeset("Blá Blå Blà Blæ Blø", FONT_HSANS_1);
+
+/* Scale to real world coordinates */
+vl = scale(vl, [sf / pi(), sf]);
+
+/* The end-point's X is the actual size of the string, which is the circumference */
+circ = vl[-1].x;		/* Represents 0...180 degrees */
+radius = circ / (2.0 * pi());
+
+/* Construct a new list with all coordinates transformed */
+rotlst = {};
+foreach(vl; v) {
+	if(!isundef(v.x)) {
+		/* Only XY movements are to be transformed */
+		/* The Z-movement is pen-up/down */
+		angle = 90.0deg - v.x / circ * 180.0deg;
+		/* Every point is rotated from the origin */
+		/* Y-Scaled for readability (above) */
+		/* Positioned at circle's border */
+		v = rotate_xy([0.0mm, v.y + circ, -], angle);
+	}
+	rotlst += {v};
+}
+
+/* Engrave on a different engraving plane */
+engrave(rotlst, 5.0mm, 1.0mm);

@@ -1,0 +1,235 @@
+/*
+ * G-code meta compiler
+ *
+ * Copyright (C) 2014  B. Stultiens
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+ * Floret example
+ * --------------
+ * Mathematical model of a sunflower arrangement. The pattern is drilled three
+ * times. The first time without any sorting, the second time in a simple
+ * move-length-reduce sorted fashion and a third time using a binning sort
+ * algorithm.
+ *
+ * Assuming the parameters from the original file, then the unsorted rapid move
+ * length is ~55.5 metres, whereas the sorted rapid move length is about 4.1
+ * metres. That is reason enough to spend some time sorting/optimizing the
+ * moves. Using binning sort reduces the rapid path to ~3.2 metres, which is
+ * fairly close to the optimal path.
+ *
+ * @@@--svg-toolwidth 2.0 --svg-opacity 0.25@@@
+ */
+
+include("canned_drill.inc.gcmc");
+
+/*
+ * sortlist() - Not-so-efficient sort-by-length routine
+ *
+ * Take a list and sort the vectors based on length between them. Starts at the
+ * last entry of the list and determines the closest neighbor for each next
+ * point. The routine runs in O(n^2), so don't give it a million points...
+ *
+ * The sorting is not optimal because it is _not_ a complete "shortest-path"
+ * algorithm. However, it does reduce the actual trajectory considerably.
+ */
+function sortlist(lst)
+{
+	local p, i, len, tag;
+	local res = { lst[-1] };	// Last entry is first result
+	lst = head(lst, -1);		// and remove it from the source
+	while(count(lst) > 0) {
+		p = res[-1];		// Point to measure from
+		tag = -1;		// Closest next point tag
+		for(i = 0; i < count(lst); i++) {
+			if(tag == -1 || length(p - lst[i]) < len) {
+				tag = i;
+				len = length(p - lst[i]);
+			}
+		}
+		res += { lst[tag] };	// Add tagged point to result
+		lst = head(lst, tag) + tail(lst, -(tag+1));	// and remove from source
+	}
+	return res;
+}
+
+/*
+ * heapsort_x() - Sort array at X-coordinate
+ *
+ * Code taken from http://www.codecodex.com/wiki/Heapsort and adapted to
+ * function with gcmc (which is quite easy due to the syntax overlap).
+ */
+function heapsort_x(&arr)
+{
+	local n = count(arr);
+	local i = n/2;
+	local parent, child;
+	local t;
+
+	while(1) {				/* Loops until arr is sorted */
+		if(i > 0) {			/* First stage - Sorting the heap */
+			i--;			/* Save its index to i */
+			t = arr[i];		/* Save parent value to t */
+		} else {			/* Second stage - Extracting elements in-place */
+			n--;			/* Make the new heap smaller */
+			if(n == 0) {
+				return;		/* When the heap is empty, we are done */
+			}
+			t = arr[n];		/* Save last value (it will be overwritten) */
+			arr[n] = arr[0];	/* Save largest value at the end of arr */
+		}
+
+		parent = i;			/* We will start pushing down t from parent */
+		child = i*2 + 1;		/* parent's left child */
+
+		/* Sift operation - pushing the value of t down the heap */
+		while(child < n) {
+			if(child + 1 < n && arr[child + 1][0] > arr[child][0]) {
+				child++;	/* Choose the largest child */
+			}
+			if(arr[child][0] > t[0]) {	/* If any child is bigger than the parent */
+				arr[parent] = arr[child]; /* Move the largest child up */
+				parent = child;	/* Move parent pointer to this child */
+				child = parent*2+1;	/* Find the next child */
+			} else {
+				break;	/* t's place is found */
+			}
+		}
+		arr[parent] = t;	/* We save t in the heap */
+	}
+}
+
+/*
+ * binningsort() - Sort with Y-binning to band the path
+ *
+ * Makes bands of similar Y-coordinates by binning them. Each band's
+ * X-coordinates are then sorted and added to the result in left/right
+ * alternating direction.
+ */
+function binningsort(lst, nbins)
+{
+	local v;
+	local miny, maxy;	// Locals default to undef when not assigned a value
+	local ybin = [];
+	local i, j;
+	local res = {};
+	local band;
+	// Find the minimum/maximum Y coordinates
+	foreach(lst; v) {
+		if(isundef(miny) || v[1] < miny) {
+			miny = v[1];
+		}
+		if(isundef(maxy) || v[1] > maxy) {
+			maxy = v[1];
+		}
+	}
+	if(isundef(miny) || isundef(maxy)) {
+		error("binningsort(): no Y coordinates found");
+		return {};
+	}
+	// Create the bins based on the span of Y-coordinates and the number of bins requested
+	for(i = 0; i < count(lst); i++) {
+		ybin[i] = j = to_none(to_int(nbins * (lst[i][1] - miny) / (maxy - miny)));
+		if(j >= nbins) {
+			ybin[i] = nbins - 1;	// Correct for EPSILON rounding
+		}
+	}
+	// Take each bin and sort them in X
+	for(i = 0; i < nbins; i++) {
+		band = {};
+		for(j = 0; j < count(lst); j++) {
+			if(ybin[j] == i) {
+				band += {lst[j]};
+			}
+		}
+		heapsort_x(band);
+		// Change add-direction for each bin
+		if(i & 1) {
+			res += band;
+		} else {
+			res += reverse(band);
+		}
+	}
+	return res;
+}
+
+/* -------------------- Program Start -------------------- */
+
+safezv = 1.0mm;		// Safe Z-level
+drillz = -3.0mm;	// Drilling depth
+
+feedrate(600mm);	// Fast, very fast
+goto([-, -, safezv]);
+
+c = 4.0mm;				// Constant scaling factor of the floret
+ga = 180.0deg * (3.0 - sqrt(5.0));	// Golden angle
+
+list = {};				// Start with an empty list of points
+
+repeat(500; n) {
+	r = c * sqrt(n);		// H.Vogel 1979: https://en.wikipedia.org/wiki/Sunflower#Mathematical_model_of_floret_arrangement
+	p = n * ga;
+	list += { r * [sin(p), cos(p)] };
+}
+
+// Create a list of sorted coordinates and offset both lists so they may be
+// distinguished visually in preview.
+slist = sortlist(list) + [90.0mm, -35.0mm];
+blist = binningsort(list, 20) + [0.0mm, 145mm];
+list += [-90.0mm, -35.0mm];
+
+// First the unsorted list
+list[0][2] = drillz;			// Set drilling depth at first coordinate
+canned_drill(list, safezv, -1, 0);	// Run as a canned drill cycle
+
+// Second the sorted list
+slist[0][2] = drillz;			// Set drilling depth at first coordinate
+canned_drill(slist, safezv, -1, 0);	// Run as a canned drill cycle
+
+// Third the bin-sorted list
+blist[0][2] = drillz;			// Set drilling depth at first coordinate
+canned_drill(blist, safezv, -1, 0);	// Run as a canned drill cycle
+
+// Uncomment below code to see the rapid movement length for all lists
+/*
+	// Calculate the rapid move path length for each list
+	plen = 0;
+	for(i = 1; i < count(list); i++) {
+		plen += length(list[i-1] - list[i]);
+	}
+	splen = 0;
+	for(i = 1; i < count(slist); i++) {
+		splen += length(slist[i-1] - slist[i]);
+	}
+	bplen = 0;
+	for(i = 1; i < count(blist); i++) {
+		bplen += length(blist[i-1] - blist[i]);
+	}
+	message("Unsorted rapid move length     : ", plen);
+	message("Sorted rapid move length       : ", splen);
+	message("Binning sort rapid move length : ", bplen);
+*/
+
+// Uncomment below code to see the optimal bin count
+/*
+repeat(25; j) {
+	blist = binningsort(list, j);
+	bplen = 0;
+	for(i = 1; i < count(blist); i++) {
+		bplen += length(blist[i-1] - blist[i]);
+	}
+	message("Binning(", j, ") sort rapid move length : ", bplen);
+}
+*/
