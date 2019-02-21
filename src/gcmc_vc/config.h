@@ -1,13 +1,13 @@
 /* config.h.in.  Generated from configure.ac by autoheader.  */
 
 /* Set to the major version */
-#define GCMC_VERSION_MAJOR "0"
+#define GCMC_VERSION_MAJOR 0
 
 /* Set to the minor version */
-#define GCMC_VERSION_MINOR   "0"
+#define GCMC_VERSION_MINOR  0 
 
 /* Set to the point version */
-#define GCMC_VERSION_POINT "1"
+#define GCMC_VERSION_POINT 1
 
 /* Define to 1 if you have the <inttypes.h> header file. */
 #undef HAVE_INTTYPES_H

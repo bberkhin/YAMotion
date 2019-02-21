@@ -82,7 +82,7 @@ static int syntaxerrors = 0;
 static char gcmcconsts[] =
 	/* Automatically generated version numbers */
 	"const GCMC_VERSION_STR = \"" VERSION "\";\n"
-	"const GCMC_VERSION = (" STRINGIZE(GCMC_VERSION_MAJOR) " * 1000 + " STRINGIZE(GCMC_VERSION_MINOR) ") * 1000 + " STRINGIZE(GCMC_VERSION_POINT) ";\n"
+	"const GCMC_VERSION = (" STRINGIZE(GCMC_VERSION_MAJOR) " * 1000 + " STRINGIZE(GCMC_VERSION_MINOR) ") * 100 + " STRINGIZE(GCMC_VERSION_POINT) ";\n"
 	"const GCMC_VERSION_MAJOR = " STRINGIZE(GCMC_VERSION_MAJOR) ";\n"
 	"const GCMC_VERSION_MINOR = " STRINGIZE(GCMC_VERSION_MINOR) ";\n"
 	"const GCMC_VERSION_POINT = " STRINGIZE(GCMC_VERSION_POINT) ";\n"
@@ -280,7 +280,11 @@ static void includepath_purge(void)
 	for(i = 0; i < nincludepaths; i++)
 		free((void *)includepaths[i]);
 	free(includepaths);
+	includepaths = 0;
+	nincludepaths = 0;
+	naincludepaths = 0;
 }
+
 #endif
 
 const char *includepath_get(int idx)
@@ -462,26 +466,26 @@ static int get_offset(double *offs, const char *str, char ch, unit_et *unit)
 	return 1;
 }
 
+int processfile(const char *fn);
+
+
 int main(int argc, char *argv[])
 {
-	int i;
-	int unit;
-	int anyoffs;
+	//int i;
+	//int unit;
+	//int anyoffs;
 	int debug = 0;
-	int lose = 0;
-	int optc;
-	int oidx = 0;
-	char *cptr;
-	const char *ofn = NULL;
-	char *profn = NULL;
-	char *epifn = NULL;
+	//int lose = 0;
+	//int optc;
+	//int oidx = 0;
+	//char *cptr;
+	//const char *ofn = NULL;
+	//char *profn = NULL;
+	//char *epifn = NULL;
 	int retval = 0;
-	value_t *v, *w;
-	double offsets[NOFFSETS] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
-	unit_et offsetunits[NOFFSETS] = {UNIT_NONE, UNIT_NONE, UNIT_NONE, UNIT_NONE, UNIT_NONE, UNIT_NONE, UNIT_NONE, UNIT_NONE, UNIT_NONE};
-	int proepi = 1;
-	int warnerror = 0;
-	char *asfuncname = NULL;
+	//int proepi = 1;
+	//int warnerror = 0;
+	//char *asfuncname = NULL;
 //
 //	while(EOF != (optc = getopt_long(argc, argv, "a:b:c:D:dG:g:hI:io:p:P:qrUVWu:v:w:x:y:z:", lopts, &oidx))) 
 //	{
@@ -665,45 +669,43 @@ int main(int argc, char *argv[])
 //		}
 //	}
 
-	if(cl_pedantic && cl_decimals < 3)
-		fprintf(stderr, "Number of decimals less than 3 severely limits accuracy\n");
 
-	for(i = anyoffs = 0; i < NOFFSETS; i++)
-		anyoffs |= offsets[i] != 0.0;
-	if(cl_relative && anyoffs) {
-		fprintf(stderr, "Offsets must be zero when using relative addressing\n");
-		lose++;
-	}
+	//if(cl_pedantic && cl_decimals < 3)
+	//	fprintf(stderr, "Number of decimals less than 3 severely limits accuracy\n");
+	//int i, anyoffs;
+	//for(i = anyoffs = 0; i < NOFFSETS; i++)
+	//	anyoffs |= offsets[i] != 0.0;
+	//if(cl_relative && anyoffs) {
+	//	fprintf(stderr, "Offsets must be zero when using relative addressing\n");
+	//	lose++;
+	//}
 
-	/* Set SVG defaults */
-	if(cl_svg_toolwidth == -1.0)
-		cl_svg_toolwidth = cl_inch ? 0.125 : 3.0;
-	if(cl_format == FMT_NONE)
-		cl_format = FMT_GCODE;
+	///* Set SVG defaults */
+	//if(cl_svg_toolwidth == -1.0)
+	//	cl_svg_toolwidth = cl_inch ? 0.125 : 3.0;
+	//if(cl_format == FMT_NONE)
+	//	cl_format = FMT_GCODE;
 
-	if(cl_format != FMT_GCODE && (profn || epifn || !proepi)) {
-		fprintf(stderr, "Prologue/epilogue cannot be omitted or changed for non G-code backend\n");
-		lose++;
-	}
+	//if(cl_format != FMT_GCODE && (profn || epifn || !proepi)) {
+	//	fprintf(stderr, "Prologue/epilogue cannot be omitted or changed for non G-code backend\n");
+	//	lose++;
+	//}
 
-	if(cl_format != FMT_GCODE && asfuncname) {
-		fprintf(stderr, "G-Code as function only possible for G-code backend\n");
-		lose++;
-	}
+	//if(cl_format != FMT_GCODE && asfuncname) {
+	//	fprintf(stderr, "G-Code as function only possible for G-code backend\n");
+	//	lose++;
+	//}
 
-	if(asfuncname && (profn || epifn)) {
-		fprintf(stderr, "Prologue/epilogue code cannot be customized when generating G-Code as function\n");
-		lose++;
-	}
+	//if(asfuncname && (profn || epifn)) {
+	//	fprintf(stderr, "Prologue/epilogue code cannot be customized when generating G-Code as function\n");
+	//	lose++;
+	//}
 
-	if((cl_format != FMT_GCODE || !asfuncname) && cl_nom2)
-		fprintf(stderr, "Option --gcode-nom2 only has effect when generating gcode a function using --gcode-function\n");
+	//if((cl_format != FMT_GCODE || !asfuncname) && cl_nom2)
+	//	fprintf(stderr, "Option --gcode-nom2 only has effect when generating gcode a function using --gcode-function\n");
 
-	//if(lose)
-		//exit(1);
-
-	if(asfuncname)
-		proepi = 0;	/* Disable std. prologue/epilogue with functions */
+	//if(asfuncname)
+	//	proepi = 0;	/* Disable std. prologue/epilogue with functions */
 
 	//debug = 1;
 	yydebug = 0;
@@ -716,60 +718,68 @@ int main(int argc, char *argv[])
 		
 	}
 
-	/* Last search-path entry is current directory */
-	includepath_add(strdup(PKGDATADIR));
-	includepath_add(strdup("."));
-
-	int optind = 1;
-
-	if(optind >= argc) {
-		yyin = stdin;
-		filename = strdup("--stdin--");
-	} else {
-		if(NULL == (yyin = fopen(argv[optind], "r"))) {
-			perror(argv[optind]);
-			exit(1);
-		}
-		filename = strdup(argv[optind]);
-		printf(filename);
-	}
-
-	if(!ofn) {
-		ofp = stdout;
-	} else {
-		if(NULL == (ofp = fopen(ofn, "w"))) {
-			perror(ofn);
-			exit(1);
-		}
-		printf(ofn);
-	}
-
 	assert(naxes == 6 || naxes == 9);
 
-	unit = cl_inch ? UNIT_IN : UNIT_MM;
+	cl_format = FMT_GCODE;
+	ofp = stdout;
+	for (int i = 0; i < 100; ++i)
+	{
+		retval = processfile(argv[1]);
+		if ( retval)
+			break;
+	}
+
+	getchar();
+	return retval;
+}
+
+
+int  processfile( const char *fn)
+{
+	int retval = 0;
+	value_t *v, *w;
+	double offsets[NOFFSETS] = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
+	unit_et offsetunits[NOFFSETS] = { UNIT_NONE, UNIT_NONE, UNIT_NONE, UNIT_NONE, UNIT_NONE, UNIT_NONE, UNIT_NONE, UNIT_NONE, UNIT_NONE };
+
+	
+	if (!fn)
+	{
+		yyin = stdin;
+		filename = strdup("--stdin--");
+	}
+	else
+	{
+		if (NULL == (yyin = fopen(fn, "r"))) {
+			perror(fn);
+			exit(1);
+		}
+		filename = strdup(fn);
+	}
+
+	int unit = UNIT_MM;
 
 	///* Setup reference to global offset and position track variable */
 	v = value_new(VAL_VECTOR);
-	for(i = 0; i < naxes; i++) 
+	for (int i = 0; i < naxes; i++)
 	{
 		unit_et u = offsetunits[i];
-		if(u == UNIT_NONE) 
+		if (u == UNIT_NONE)
 		{
-			if(i >= 3 && i < 6)
+			if (i >= 3 && i < 6)
 				u = UNIT_DEG;
 			else
-				u = cl_inch ? UNIT_IN : UNIT_MM;
-		} 
-		else if(u == UNIT_MM && cl_inch) {
+				u = unit;
+		}
+		else if (u == UNIT_MM && cl_inch) {
 			offsets[i] /= 25.4;
 			u = UNIT_IN;
-		} 
-		else if(u == UNIT_IN && !cl_inch) 
+		}
+		else if (u == UNIT_IN && !cl_inch)
 		{
 			offsets[i] *= 25.4;
 			u = UNIT_MM;
-		} 
-		else if(u == UNIT_RAD) 
+		}
+		else if (u == UNIT_RAD)
 		{
 			/* Angular offset must be degrees (gcode units) */
 			offsets[i] *= 180.0;
@@ -791,7 +801,7 @@ int main(int argc, char *argv[])
 	w = value_new_flt(0.0, UNIT_RAD); value_vector_add(v, w); global_pos[3] = &w->d;
 	w = value_new_flt(0.0, UNIT_RAD); value_vector_add(v, w); global_pos[4] = &w->d;
 	w = value_new_flt(0.0, UNIT_RAD); value_vector_add(v, w); global_pos[5] = &w->d;
-	if(naxes > 6) {
+	if (naxes > 6) {
 		w = value_new_flt(0.0, unit); value_vector_add(v, w); global_pos[6] = &w->d;
 		w = value_new_flt(0.0, unit); value_vector_add(v, w); global_pos[7] = &w->d;
 		w = value_new_flt(0.0, unit); value_vector_add(v, w); global_pos[8] = &w->d;
@@ -804,34 +814,38 @@ int main(int argc, char *argv[])
 	/* Setup the predefined constants (handled before command-line defines) */
 	define_setup(gcmcconsts, ngcmcconsts, "<gcmc-internal constants>");
 
+	
+	/* Last search-path entry is current directory */
+	includepath_add(strdup(PKGDATADIR));
+	includepath_add(strdup("."));
+
+	
 	/* Parse the input script */
 	fprintf(stderr, "Start parsing...");
 
-	if(yyparse())
+
+	if (yyparse())
 		yyerror("Syntax error");
 
-	getchar();
-	//if(syntaxerrors)
-		//exit(1);
 
 	/* Output the G-code */
-	if(proepi || profn)
-		prologue(profn, ofp);
-	if(asfuncname)
-		asfunc_head(ofp, asfuncname);
-	if((v = execute(scripthead, NULL))) {
+	//if (proepi || profn)
+	prologue(0, ofp);
+	//if (asfuncname)
+	//asfunc_head(ofp, asfuncname);
+	if ((v = execute(scripthead, NULL))) {
 		retval = value_to_int(v);
 		value_delete(v);
 	}
-	if(proepi || epifn)
-		epilogue(epifn, ofp);
-	if(asfuncname)
-		asfunc_tail(ofp, asfuncname);
+	//if (proepi || epifn)
+	epilogue(0, ofp);
+	//if (asfuncname)
+	//asfunc_tail(ofp, asfuncname);
 
-	if(warnerror && runtimewarnings)
-		rterror(NULL, "Runtime warnings considered to be errors");
+	//if (warnerror && runtimewarnings)
+		//rterror(NULL, "Runtime warnings considered to be errors");
 
-	if(runtimeerrors)
+	if (runtimeerrors)
 		retval = 1;
 
 	/* Cleanup for testing purposes */
@@ -847,9 +861,7 @@ int main(int argc, char *argv[])
 	interpreter_cleanup();
 	includepath_purge();
 	free((void *)filename);
+	filename = 0;
 #endif
-	fclose(ofp);
-
-	getchar();
-	return retval;
+//	fclose(ofp);
 }

@@ -96,20 +96,35 @@ void value_purge(void)
 		value_delete(valuestack[i]);
 	if(valuestack)
 		free(valuestack);
+	valuestack = 0;
+	nvaluestack = 0;
+	
+
 
 	for(i = 0; i < nflscalar; i++)
 		free(flscalar[i]);
+	free(flscalar);
+	flscalar = 0;
+	nflscalar = 0;
+	naflscalar = 0;
+
 	for(i = 0; i < nflvector; i++) {
 		free(flvector[i]->v.vals);
 		free(flvector[i]);
 	}
+	free(flvector);
+	flvector = 0;
+	nflvector = 0;
+	naflvector = 0;
+
 	for(i = 0; i < nflvectorlist; i++) {
 		free(flvectorlist[i]->vl.vecs);
 		free(flvectorlist[i]);
 	}
-	free(flscalar);
-	free(flvector);
-	free(flvectorlist);
+	free(flvectorlist);		
+	flvectorlist = 0;
+	nflvectorlist = 0;
+	naflvectorlist = 0;
 }
 
 value_t *value_dup(const value_t *v)

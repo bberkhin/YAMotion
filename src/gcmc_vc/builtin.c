@@ -2466,7 +2466,7 @@ static value_t *bi_typeset(const node_t *ref, int argc)
 	if(farg->type != VAL_INT)
 		rterror(ref, "typeset() argument 2 must be integer without units");
 
-	//rv = font_typeset(ref, sarg->str.chs, value_to_int(farg));
+	rv = font_typeset(ref, sarg->str.chs, value_to_int(farg));
 	return rv;
 }
 

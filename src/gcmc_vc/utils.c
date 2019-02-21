@@ -259,4 +259,6 @@ void utils_cleanup(void)
 {
 	if(ls)
 		free(ls);
+	ls = 0;
+	lsn = lsna = 0;
 }

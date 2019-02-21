@@ -72,11 +72,21 @@ void variable_purge(void)
 	if(scopes)
 		free(scopes);
 
-	for(i = 0; i < gs_nvars; i++) {
+	scopes = 0;
+	nscopes = 0;
+	nascopes = 0;
+
+	for(i = 0; i < gs_nvars; i++) 
+	{
 		value_delete(gs_vars[i]->v);
 		free(gs_vars[i]);
 	}
 	free(gs_vars);
+
+	gs_vars = 0;
+	gs_nvars = 0;
+	gs_navars = 0;
+
 }
 
 static int var_cmp(const void *a, const void *b)

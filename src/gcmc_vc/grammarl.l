@@ -548,4 +548,6 @@ void lexer_cleanup(void)
 		free(str);
 	if(incstack)
 		free(incstack);
+	incstack = 0;
+	nincstack = naincstack = 0;
 }

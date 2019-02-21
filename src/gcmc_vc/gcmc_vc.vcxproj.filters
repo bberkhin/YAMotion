@@ -13,6 +13,9 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="fontdata">
+      <UniqueIdentifier>{3d439d2e-b693-4bbe-9234-87ddad31a17f}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="grammartypes.h">
@@ -100,6 +103,33 @@
     </ClCompile>
     <ClCompile Include="grammary.c">
       <Filter>Исходные файлы</Filter>
+    </ClCompile>
+    <ClCompile Include="fontdata\font_hsans_1.c">
+      <Filter>fontdata</Filter>
+    </ClCompile>
+    <ClCompile Include="fontdata\font_hsans_1_rs.c">
+      <Filter>fontdata</Filter>
+    </ClCompile>
+    <ClCompile Include="fontdata\font_hsans_2.c">
+      <Filter>fontdata</Filter>
+    </ClCompile>
+    <ClCompile Include="fontdata\font_hscript_1.c">
+      <Filter>fontdata</Filter>
+    </ClCompile>
+    <ClCompile Include="fontdata\font_hscript_2.c">
+      <Filter>fontdata</Filter>
+    </ClCompile>
+    <ClCompile Include="fontdata\font_htimes.c">
+      <Filter>fontdata</Filter>
+    </ClCompile>
+    <ClCompile Include="fontdata\font_htimes_bold.c">
+      <Filter>fontdata</Filter>
+    </ClCompile>
+    <ClCompile Include="fontdata\font_htimes_italic.c">
+      <Filter>fontdata</Filter>
+    </ClCompile>
+    <ClCompile Include="fontdata\font_htimes_italic_bold.c">
+      <Filter>fontdata</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
