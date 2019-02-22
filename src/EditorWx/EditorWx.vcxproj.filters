@@ -75,6 +75,9 @@
     <ClCompile Include="..\Gcode\Kinematics.cpp">
       <Filter>GCode</Filter>
     </ClCompile>
+    <ClCompile Include="LexGcmc.cxx">
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h">

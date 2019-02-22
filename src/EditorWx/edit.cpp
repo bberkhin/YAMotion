@@ -465,29 +465,27 @@ void Edit::OnChanged(wxStyledTextEvent &event)
 wxString Edit::DeterminePrefs (const wxString &filename) 
 {
 	// support only GCoDe
-	return g_LanguagePrefs[0].name;
+	 LanguageInfo const* curInfo;
 
- //   LanguageInfo const* curInfo;
-
-	//wxString filenamel = filename.Lower();
- //  // determine language from filepatterns
- //   int languageNr;
- //   for (languageNr = 0; languageNr < g_LanguagePrefsSize; languageNr++) {
- //       curInfo = &g_LanguagePrefs [languageNr];
- //       wxString filepattern = curInfo->filepattern;
- //       filepattern.MakeLower();
- //       while (!filepattern.empty()) {
- //           wxString cur = filepattern.BeforeFirst (';');
- //           if ((cur == filenamel) ||
- //               (cur == (filenamel.BeforeLast ('.') + ".*")) ||
- //               (cur == ("*." + filenamel.AfterLast ('.')))) {
- //               return curInfo->name;
- //           }
- //           filepattern = filepattern.AfterFirst (';');
- //       }
- //   }
- //   return wxEmptyString;
-
+	wxString filenamel = filename.Lower();
+   // determine language from filepatterns
+    int languageNr;
+    for (languageNr = 0; languageNr < g_LanguagePrefsSize; languageNr++) {
+        curInfo = &g_LanguagePrefs [languageNr];
+        wxString filepattern = curInfo->filepattern;
+        filepattern.MakeLower();
+        while (!filepattern.empty()) 
+		{
+            wxString cur = filepattern.BeforeFirst (';');
+            if ((cur == filenamel) ||
+                (cur == (filenamel.BeforeLast ('.') + ".*")) ||
+                (cur == ("*." + filenamel.AfterLast ('.')))) {
+                return curInfo->name;
+            }
+            filepattern = filepattern.AfterFirst (';');
+        }
+    }
+	return g_LanguagePrefs[0].name; // def return first type
 }
 
 bool Edit::InitializePrefs (const wxString &name) {

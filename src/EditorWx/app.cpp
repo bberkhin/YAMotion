@@ -64,8 +64,9 @@ bool App::OnInit() {
 	SetAppName(APP_NAME);
 	SetVendorName(APP_VENDOR);
 
-	// GCode lexer
+	// GCode & Gcmc lexer
 	LINK_LEXER(lmGcode)
+	LINK_LEXER(lmGcmc)
 		// create application frame
 	m_frame = new AppFrame(APP_NAME);
 

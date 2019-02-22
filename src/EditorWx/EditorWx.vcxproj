@@ -33,6 +33,7 @@
     <ClCompile Include="edit.cpp" />
     <ClCompile Include="executorlog.cpp" />
     <ClCompile Include="executorview.cpp" />
+    <ClCompile Include="LexGcmc.cxx" />
     <ClCompile Include="LexGCode.cxx" />
     <ClCompile Include="prefs.cpp" />
     <ClCompile Include="propertiesdlg.cpp" />

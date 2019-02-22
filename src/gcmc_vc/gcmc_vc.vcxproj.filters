@@ -60,6 +60,9 @@
     <ClInclude Include="grammary.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
+    <ClInclude Include="getopt.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Flex Include="grammarl.l" />

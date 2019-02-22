@@ -144,9 +144,13 @@ wxBEGIN_EVENT_TABLE (AppFrame, wxFrame)
 //GCode
 	EVT_MENU(ID_GCODE_CHECK, AppFrame::OnCheck)
 	EVT_MENU(ID_GCODE_SIMULATE, AppFrame::OnSimulate)
+	EVT_MENU(ID_GCODE_CONVERTGCMC, AppFrame::OnConvertGcmc)
 
 	EVT_UPDATE_UI(ID_GCODE_CHECK, AppFrame::OnUpdateCheck)
 	EVT_UPDATE_UI(ID_GCODE_SIMULATE, AppFrame::OnUpdateSimulate)
+	EVT_UPDATE_UI(ID_GCODE_CONVERTGCMC, AppFrame::OnUpdateConvertGcmc)
+
+	
 
 	
 	EVT_MENU_RANGE(myID_SETVIEWFIRST, myID_SETVIEWLAST, AppFrame::On3DView)
@@ -477,6 +481,7 @@ void AppFrame::CreateMenu ()
 	wxMenu *menuGCode = new wxMenu;
 	menuGCode->Append(ID_GCODE_CHECK, _("&Check"));
 	menuGCode->Append(ID_GCODE_SIMULATE, _("&Simulate"));
+	menuGCode->Append(ID_GCODE_CONVERTGCMC, _("&Convert Gcmc"));
 
 
 	// 3dView menu
@@ -523,7 +528,8 @@ wxToolBar *AppFrame::CreateToolBar()
 	toolBar->AddSeparator();
 	toolBar->AddTool(ID_GCODE_CHECK, wxEmptyString, wxBitmap(check_xpm), _("Check"));
 	toolBar->AddTool(ID_GCODE_SIMULATE, wxEmptyString, wxBitmap(find_xpm), _("Simulate"));
-
+	toolBar->AddTool(ID_GCODE_CONVERTGCMC, wxEmptyString, wxBitmap(new_xpm), _("Convert"));
+	
 //	toolBar->Realize();
 	return toolBar;
 }
@@ -749,3 +755,44 @@ void  AppFrame::OnSimulate(wxCommandEvent &event)
 	}
 	return;
 }
+
+
+
+void AppFrame::OnConvertGcmc(wxCommandEvent &event)
+{
+	if (!DoFileSave(false, false))
+		return;
+
+	//-o g00.nc g0.gcmc
+	// build command line
+
+	wxString src_fname = m_edit->GetFilename();
+	wxString dst_fname = src_fname.BeforeLast('.');
+	if (dst_fname.IsEmpty())
+		dst_fname = src_fname;
+	dst_fname += wxString(".nc");
+
+	wxString arg("-o ");
+	arg += dst_fname;
+	arg += src_fname;
+
+	//run 
+/*	
+	long wxExecute(const wxString & 	command,
+		wxArrayString & 	output,
+		wxArrayString & 	errors,
+		int 	flags = 0,
+		const wxExecuteEnv * 	env = NULL
+	)
+*/
+}
+
+void AppFrame::OnUpdateConvertGcmc(wxUpdateUIEvent& event)
+{
+	const LanguageInfo * pl = m_edit->GetLanguageInfo();
+	event.Enable(pl ? (strcmp(pl->name, g_LanguagePrefs[1].name) == 0) : false);
+}
+
+
+
+

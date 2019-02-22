@@ -14,4 +14,5 @@
 #define SCE_GCODE_IDENTIFIER 11
 
 #define SCLEX_GCODE 200
+#define SCLEX_GCMC 201
 

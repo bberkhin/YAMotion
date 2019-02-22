@@ -40,6 +40,9 @@
 #include "builtin_svg.h"
 #include "builtin_dxf.h"
 
+#include "getopt.h" //support get_opting foe windows
+
+
 #define FREEONEXIT	1	/* For valgrind testing */
 
 #define PKGDATADIR "./library"
@@ -279,7 +282,7 @@ static void includepath_purge(void)
 	int i;
 	for(i = 0; i < nincludepaths; i++)
 		free((void *)includepaths[i]);
-	free(includepaths);
+	free((void **)includepaths);
 	includepaths = 0;
 	nincludepaths = 0;
 	naincludepaths = 0;
@@ -389,44 +392,44 @@ enum {
 	CMD_PEDANTIC,
 };
 
-//static const struct option lopts[] = {
-//	{ "bare",		no_argument,		NULL,	'q' },
-//	{ "debug",		no_argument,		NULL,	'd' },
-//	{ "define",		required_argument,	NULL,	'D' },
-//	{ "dxf",		no_argument,		NULL,	CMD_DXF },
-//	{ "epilogue",		required_argument,	NULL,	'g' },
-//	{ "error",		no_argument,		NULL,	'W' },
-//	{ "gcode",		no_argument,		NULL,	CMD_GCODE },
-//	{ "gcode-function",	required_argument,	NULL,	CMD_GCODE_ASFUNC },
-//	{ "gcode-nom2",		no_argument,		NULL,	CMD_GCODE_NOM2 },
-//	{ "help",		no_argument,		NULL,	'h' },
-//	{ "imperial",		no_argument,		NULL,	'i' },
-//	{ "include",		required_argument,	NULL,	'I' },
-//	{ "offset-a",		required_argument,	NULL,	'a' },
-//	{ "offset-b",		required_argument,	NULL,	'b' },
-//	{ "offset-c",		required_argument,	NULL,	'c' },
-//	{ "offset-u",		required_argument,	NULL,	'u' },
-//	{ "offset-v",		required_argument,	NULL,	'x' },
-//	{ "offset-w",		required_argument,	NULL,	'x' },
-//	{ "offset-x",		required_argument,	NULL,	'x' },
-//	{ "offset-y",		required_argument,	NULL,	'y' },
-//	{ "offset-z",		required_argument,	NULL,	'z' },
-//	{ "output",		required_argument,	NULL,	'o' },
-//	{ "pedantic",		no_argument,		NULL,	CMD_PEDANTIC },
-//	{ "plane",		required_argument,	NULL,	'p' },
-//	{ "precision",		required_argument,	NULL,	'P' },
-//	{ "prologue",		required_argument,	NULL,	'G' },
-//	{ "relative",		no_argument,		NULL,	'r' },
-//	{ "svg",		no_argument,		NULL,	CMD_SVG },
-//	{ "svg-no-movelayer",	no_argument,		NULL,	CMD_SVG_NO_MOVELAYER },
-//	{ "svg-no-flip",	no_argument,		NULL,	CMD_SVG_NO_FLIP },
-//	{ "svg-no-grid",	no_argument,		NULL,	CMD_SVG_NO_GRID },
-//	{ "svg-toolwidth",	required_argument,	NULL,	CMD_SVG_TOOLWIDTH },
-//	{ "svg-opacity",	required_argument,	NULL,	CMD_SVG_OPACITY },
-//	{ "uvw",		no_argument,		NULL,	'U' },
-//	{ "version",		no_argument,		NULL,	'V' },
-//	{ NULL,			0,			NULL,	 0 },
-//};
+static const struct option lopts[] = {
+	{ "bare",		no_argument,		NULL,	'q' },
+	{ "debug",		no_argument,		NULL,	'd' },
+	{ "define",		required_argument,	NULL,	'D' },
+	{ "dxf",		no_argument,		NULL,	CMD_DXF },
+	{ "epilogue",		required_argument,	NULL,	'g' },
+	{ "error",		no_argument,		NULL,	'W' },
+	{ "gcode",		no_argument,		NULL,	CMD_GCODE },
+	{ "gcode-function",	required_argument,	NULL,	CMD_GCODE_ASFUNC },
+	{ "gcode-nom2",		no_argument,		NULL,	CMD_GCODE_NOM2 },
+	{ "help",		no_argument,		NULL,	'h' },
+	{ "imperial",		no_argument,		NULL,	'i' },
+	{ "include",		required_argument,	NULL,	'I' },
+	{ "offset-a",		required_argument,	NULL,	'a' },
+	{ "offset-b",		required_argument,	NULL,	'b' },
+	{ "offset-c",		required_argument,	NULL,	'c' },
+	{ "offset-u",		required_argument,	NULL,	'u' },
+	{ "offset-v",		required_argument,	NULL,	'x' },
+	{ "offset-w",		required_argument,	NULL,	'x' },
+	{ "offset-x",		required_argument,	NULL,	'x' },
+	{ "offset-y",		required_argument,	NULL,	'y' },
+	{ "offset-z",		required_argument,	NULL,	'z' },
+	{ "output",		required_argument,	NULL,	'o' },
+	{ "pedantic",		no_argument,		NULL,	CMD_PEDANTIC },
+	{ "plane",		required_argument,	NULL,	'p' },
+	{ "precision",		required_argument,	NULL,	'P' },
+	{ "prologue",		required_argument,	NULL,	'G' },
+	{ "relative",		no_argument,		NULL,	'r' },
+	{ "svg",		no_argument,		NULL,	CMD_SVG },
+	{ "svg-no-movelayer",	no_argument,		NULL,	CMD_SVG_NO_MOVELAYER },
+	{ "svg-no-flip",	no_argument,		NULL,	CMD_SVG_NO_FLIP },
+	{ "svg-no-grid",	no_argument,		NULL,	CMD_SVG_NO_GRID },
+	{ "svg-toolwidth",	required_argument,	NULL,	CMD_SVG_TOOLWIDTH },
+	{ "svg-opacity",	required_argument,	NULL,	CMD_SVG_OPACITY },
+	{ "uvw",		no_argument,		NULL,	'U' },
+	{ "version",		no_argument,		NULL,	'V' },
+	{ NULL,			0,			NULL,	 0 },
+};
 
 #define MAXOFFSET	1e6	/* 1000000mm is one kilometer, should be enough for a mill... */
 #define NOFFSETS	9	/* XYZABCUVW */
@@ -438,349 +441,338 @@ static int get_offset(double *offs, const char *str, char ch, unit_et *unit)
 	assert(str != NULL);
 	*unit = UNIT_NONE;
 	*offs = strtod(str, &cptr);
-	if(*cptr) {
-		if(!strcmp(cptr, "mm\0")) {
+	if (*cptr) {
+		if (!strcmp(cptr, "mm\0")) {
 			*unit = UNIT_MM;
-		} else if(!strcmp(cptr , "in\0")) {
+		}
+		else if (!strcmp(cptr, "in\0")) {
 			*unit = UNIT_IN;
-		} else if(!strcmp(cptr , "mil")) {
+		}
+		else if (!strcmp(cptr, "mil")) {
 			*unit = UNIT_IN;
 			*offs /= 1000.0;
-		} else if(!strcmp(cptr , "deg")) {
+		}
+		else if (!strcmp(cptr, "deg")) {
 			*unit = UNIT_DEG;
-		} else if(!strcmp(cptr , "rad")) {
+		}
+		else if (!strcmp(cptr, "rad")) {
 			*unit = UNIT_RAD;
-		} else {
+		}
+		else {
 			fprintf(stderr, "Invalid global %c-offset\n", ch);
 			return 0;
 		}
-		if(!(strchr("ABC", ch) && (*unit == UNIT_DEG || *unit == UNIT_RAD)) && !(strchr("XYZUVW", ch) && (*unit == UNIT_MM || *unit == UNIT_IN))) {
+		if (!(strchr("ABC", ch) && (*unit == UNIT_DEG || *unit == UNIT_RAD)) && !(strchr("XYZUVW", ch) && (*unit == UNIT_MM || *unit == UNIT_IN))) {
 			fprintf(stderr, "Invalid units for global %c-offset\n", ch);
 			return 0;
 		}
 	}
-	if(fabs(*offs) > MAXOFFSET) {
+	if (fabs(*offs) > MAXOFFSET) {
 		fprintf(stderr, "Global %c-offset out of range\n", ch);
 		return 0;
 	}
 	return 1;
 }
 
-int processfile(const char *fn);
-
-
 int main(int argc, char *argv[])
 {
-	//int i;
-	//int unit;
-	//int anyoffs;
+	int i;
+	int unit;
+	int anyoffs;
 	int debug = 0;
-	//int lose = 0;
-	//int optc;
-	//int oidx = 0;
-	//char *cptr;
-	//const char *ofn = NULL;
-	//char *profn = NULL;
-	//char *epifn = NULL;
-	int retval = 0;
-	//int proepi = 1;
-	//int warnerror = 0;
-	//char *asfuncname = NULL;
-//
-//	while(EOF != (optc = getopt_long(argc, argv, "a:b:c:D:dG:g:hI:io:p:P:qrUVWu:v:w:x:y:z:", lopts, &oidx))) 
-//	{
-//		switch(optc) 		
-//		{
-//		case 'a':
-//			if(!get_offset(&offsets[3], optarg, 'A', &offsetunits[3]))
-//				lose++;
-//			break;
-//		case 'b':
-//			if(!get_offset(&offsets[4], optarg, 'B', &offsetunits[4]))
-//				lose++;
-//			break;
-//		case 'c':
-//			if(!get_offset(&offsets[5], optarg, 'C', &offsetunits[5]))
-//				lose++;
-//			break;
-//		case 'D':
-//			define_add(optarg);
-//			break;
-//		case 'd':
-//			debug = 1;
-//			break;
-//		case 'h':
-//			fprintf(stderr, "%s", usage_str);
-//			exit(1);
-//			break;
-//		case 'G':
-//			profn = strdup(optarg);
-//			break;
-//		case 'g':
-//			epifn = strdup(optarg);
-//			break;
-//		case 'I':
-//			cptr = strdup(optarg);
-//			while(*cptr && (cptr[strlen(cptr)-1] == '/' || cptr[strlen(cptr)-1] == '\\'))
-//				cptr[strlen(cptr)-1] = 0;
-//			includepath_add(cptr);
-//			break;
-//		case 'i':
-//			cl_inch = 1;
-//			break;
-//		case 'o':
-//			ofn = optarg;
-//			break;
-//		case 'p':
-//			global_plane = strtoul(optarg, &cptr, 10);
-//			if(*cptr) {
-//				if(!strcasecmp(optarg, "xy"))
-//					global_plane = PLANE_XY;
-//				else if(!strcasecmp(optarg, "xz"))
-//					global_plane = PLANE_XZ;
-//				else if(!strcasecmp(optarg, "yz"))
-//					global_plane = PLANE_YZ;
-//				else
-//					goto plane_error;
-//			} else if(global_plane > 2) {
-//plane_error:
-//				fprintf(stderr, "Initial plane must be 0, 1, 2, XY, XZ or YZ\n");
-//				lose++;
-//			}
-//			break;
-//		case 'P':
-//			cl_decimals = strtoul(optarg, &cptr, 10);
-//			if(*cptr) {
-//				fprintf(stderr, "Invalid number of decimals\n");
-//				lose++;
-//			}
-//			if(cl_decimals < 1 || cl_decimals > 15) {
-//				fprintf(stderr, "Number of decimals out of range (1..15)\n");
-//				lose++;
-//			}
-//			break;
-//		case 'q':
-//			proepi = 0;
-//			break;
-//		case 'r':
-//			cl_relative = 1;
-//			break;
-//		case 'x':
-//			if(!get_offset(&offsets[0], optarg, 'X', &offsetunits[0]))
-//				lose++;
-//			break;
-//		case 'y':
-//			if(!get_offset(&offsets[1], optarg, 'Y', &offsetunits[1]))
-//				lose++;
-//			break;
-//		case 'z':
-//			if(!get_offset(&offsets[2], optarg, 'Z', &offsetunits[2]))
-//				lose++;
-//			break;
-//		case 'u':
-//			if(!get_offset(&offsets[3], optarg, 'U', &offsetunits[6]))
-//				lose++;
-//			break;
-//		case 'v':
-//			if(!get_offset(&offsets[4], optarg, 'V', &offsetunits[7]))
-//				lose++;
-//			break;
-//		case 'w':
-//			if(!get_offset(&offsets[5], optarg, 'W', &offsetunits[8]))
-//				lose++;
-//			break;
-//		case 'U':
-//			naxes = 9;
-//			break;
-//		case 'V':
-//			printf("G-Code Meta Compiler - gcmc version %s\n", PACKAGE_VERSION);
-//			printf("Distributed under GPLv3+\n");
-//			exit(0);
-//			break;
-//		case 'W':
-//			warnerror = 1;
-//			break;
-//		case CMD_GCODE_ASFUNC:
-//			asfuncname = strdup(optarg);
-//			for(i = strlen(optarg); i; i--) {
-//				int c = optarg[i-1] & 0xff;
-//				if(!isdigit(c) && !islower(c) && c != '-' && c != '_') {
-//					fprintf(stderr, "G-Code function name contains invalid characters (allowed: [a-z0-9_-])\n");
-//					lose++;
-//					break;
-//				}
-//			}
-//			break;
-//		case CMD_GCODE_NOM2:
-//			cl_nom2 = 1;
-//			break;
-//		case CMD_GCODE:
-//		case CMD_SVG:
-//		case CMD_DXF:
-//			if(cl_format != FMT_NONE) {
-//				fprintf(stderr, "Only one output format specifier allowed\n");
-//				lose++;
-//			}
-//			switch(optc) {
-//			case CMD_GCODE:	cl_format = FMT_GCODE; break;
-//			case CMD_SVG:	cl_format = FMT_SVG; break;
-//			case CMD_DXF:	cl_format = FMT_DXF; break;
-//			}
-//			break;
-//		case CMD_SVG_TOOLWIDTH:
-//			cl_svg_toolwidth = strtod(optarg, &cptr);
-//			if(*cptr) {
-//				fprintf(stderr, "SVG toolwidth is invalid\n");
-//				lose++;
-//			} else if(cl_svg_toolwidth < 0.001 || cl_svg_toolwidth > 1000.0) {
-//				fprintf(stderr, "SVG toolwidth should be >= 0.001 and <= 1000.0\n");
-//				lose++;
-//			}
-//			break;
-//		case CMD_SVG_NO_MOVELAYER:
-//			cl_svg_movelayer = 0;
-//			break;
-//		case CMD_SVG_NO_FLIP:
-//			cl_svg_flip = 0;
-//			break;
-//		case CMD_SVG_NO_GRID:
-//			cl_svg_grid = 0;
-//			break;
-//		case CMD_SVG_OPACITY:
-//			cl_svg_opacity = strtod(optarg, &cptr);
-//			if(*cptr) {
-//				fprintf(stderr, "SVG opacity is invalid\n");
-//				lose++;
-//			} else if(cl_svg_opacity < 0.001 || cl_svg_opacity > 1.0) {
-//				fprintf(stderr, "SVG opacity should be >= 0.001 and <= 1.0\n");
-//				lose++;
-//			}
-//			break;
-//		case CMD_PEDANTIC:
-//			cl_pedantic = 1;
-//			break;
-//		case '?':
-//			lose++;
-//			break;
-//		default:
-//			fprintf(stderr, "Unknown option character '%c' (%d) in option handling\n", isprint(optc) ? optc : ' ', optc);
-//			lose++;
-//			break;
-//		}
-//	}
-
-
-	//if(cl_pedantic && cl_decimals < 3)
-	//	fprintf(stderr, "Number of decimals less than 3 severely limits accuracy\n");
-	//int i, anyoffs;
-	//for(i = anyoffs = 0; i < NOFFSETS; i++)
-	//	anyoffs |= offsets[i] != 0.0;
-	//if(cl_relative && anyoffs) {
-	//	fprintf(stderr, "Offsets must be zero when using relative addressing\n");
-	//	lose++;
-	//}
-
-	///* Set SVG defaults */
-	//if(cl_svg_toolwidth == -1.0)
-	//	cl_svg_toolwidth = cl_inch ? 0.125 : 3.0;
-	//if(cl_format == FMT_NONE)
-	//	cl_format = FMT_GCODE;
-
-	//if(cl_format != FMT_GCODE && (profn || epifn || !proepi)) {
-	//	fprintf(stderr, "Prologue/epilogue cannot be omitted or changed for non G-code backend\n");
-	//	lose++;
-	//}
-
-	//if(cl_format != FMT_GCODE && asfuncname) {
-	//	fprintf(stderr, "G-Code as function only possible for G-code backend\n");
-	//	lose++;
-	//}
-
-	//if(asfuncname && (profn || epifn)) {
-	//	fprintf(stderr, "Prologue/epilogue code cannot be customized when generating G-Code as function\n");
-	//	lose++;
-	//}
-
-	//if((cl_format != FMT_GCODE || !asfuncname) && cl_nom2)
-	//	fprintf(stderr, "Option --gcode-nom2 only has effect when generating gcode a function using --gcode-function\n");
-
-	//if(asfuncname)
-	//	proepi = 0;	/* Disable std. prologue/epilogue with functions */
-
-	//debug = 1;
-	yydebug = 0;
-	
-	if(debug) 
-	{
-		setbuf(stdout, NULL);
-		setbuf(stderr, NULL);
-		yydebug = 1;
-		
-	}
-
-	assert(naxes == 6 || naxes == 9);
-
-	cl_format = FMT_GCODE;
-	ofp = stdout;
-	for (int i = 0; i < 100; ++i)
-	{
-		retval = processfile(argv[1]);
-		if ( retval)
-			break;
-	}
-
-	getchar();
-	return retval;
-}
-
-
-int  processfile( const char *fn)
-{
+	int lose = 0;
+	int optc;
+	int oidx = 0;
+	char *cptr;
+	const char *ofn = NULL;
+	char *profn = NULL;
+	char *epifn = NULL;
 	int retval = 0;
 	value_t *v, *w;
 	double offsets[NOFFSETS] = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
 	unit_et offsetunits[NOFFSETS] = { UNIT_NONE, UNIT_NONE, UNIT_NONE, UNIT_NONE, UNIT_NONE, UNIT_NONE, UNIT_NONE, UNIT_NONE, UNIT_NONE };
+	int proepi = 1;
+	int warnerror = 0;
+	char *asfuncname = NULL;
 
-	
-	if (!fn)
-	{
+	while (EOF != (optc = getopt_long(argc, argv, "a:b:c:D:dG:g:hI:io:p:P:qrUVWu:v:w:x:y:z:", lopts, &oidx))) {
+		switch (optc) {
+		case 'a':
+			if (!get_offset(&offsets[3], optarg, 'A', &offsetunits[3]))
+				lose++;
+			break;
+		case 'b':
+			if (!get_offset(&offsets[4], optarg, 'B', &offsetunits[4]))
+				lose++;
+			break;
+		case 'c':
+			if (!get_offset(&offsets[5], optarg, 'C', &offsetunits[5]))
+				lose++;
+			break;
+		case 'D':
+			define_add(optarg);
+			break;
+		case 'd':
+			debug = 1;
+			break;
+		case 'h':
+			fprintf(stderr, "%s", usage_str);
+			exit(1);
+			break;
+		case 'G':
+			profn = strdup(optarg);
+			break;
+		case 'g':
+			epifn = strdup(optarg);
+			break;
+		case 'I':
+			cptr = strdup(optarg);
+			while (*cptr && (cptr[strlen(cptr) - 1] == '/' || cptr[strlen(cptr) - 1] == '\\'))
+				cptr[strlen(cptr) - 1] = 0;
+			includepath_add(cptr);
+			break;
+		case 'i':
+			cl_inch = 1;
+			break;
+		case 'o':
+			ofn = optarg;
+			break;
+		case 'p':
+			global_plane = strtoul(optarg, &cptr, 10);
+			if (*cptr) {
+				if (!strcmpi(optarg, "xy"))
+					global_plane = PLANE_XY;
+				else if (!strcmpi(optarg, "xz"))
+					global_plane = PLANE_XZ;
+				else if (!strcmpi(optarg, "yz"))
+					global_plane = PLANE_YZ;
+				else
+					goto plane_error;
+			}
+			else if (global_plane > 2) {
+			plane_error:
+				fprintf(stderr, "Initial plane must be 0, 1, 2, XY, XZ or YZ\n");
+				lose++;
+			}
+			break;
+		case 'P':
+			cl_decimals = strtoul(optarg, &cptr, 10);
+			if (*cptr) {
+				fprintf(stderr, "Invalid number of decimals\n");
+				lose++;
+			}
+			if (cl_decimals < 1 || cl_decimals > 15) {
+				fprintf(stderr, "Number of decimals out of range (1..15)\n");
+				lose++;
+			}
+			break;
+		case 'q':
+			proepi = 0;
+			break;
+		case 'r':
+			cl_relative = 1;
+			break;
+		case 'x':
+			if (!get_offset(&offsets[0], optarg, 'X', &offsetunits[0]))
+				lose++;
+			break;
+		case 'y':
+			if (!get_offset(&offsets[1], optarg, 'Y', &offsetunits[1]))
+				lose++;
+			break;
+		case 'z':
+			if (!get_offset(&offsets[2], optarg, 'Z', &offsetunits[2]))
+				lose++;
+			break;
+		case 'u':
+			if (!get_offset(&offsets[3], optarg, 'U', &offsetunits[6]))
+				lose++;
+			break;
+		case 'v':
+			if (!get_offset(&offsets[4], optarg, 'V', &offsetunits[7]))
+				lose++;
+			break;
+		case 'w':
+			if (!get_offset(&offsets[5], optarg, 'W', &offsetunits[8]))
+				lose++;
+			break;
+		case 'U':
+			naxes = 9;
+			break;
+		case 'V':
+			printf("G-Code Meta Compiler - gcmc version %s\n", PACKAGE_VERSION);
+			printf("Distributed under GPLv3+\n");
+			exit(0);
+			break;
+		case 'W':
+			warnerror = 1;
+			break;
+		case CMD_GCODE_ASFUNC:
+			asfuncname = strdup(optarg);
+			for (i = strlen(optarg); i; i--) {
+				int c = optarg[i - 1] & 0xff;
+				if (!isdigit(c) && !islower(c) && c != '-' && c != '_') {
+					fprintf(stderr, "G-Code function name contains invalid characters (allowed: [a-z0-9_-])\n");
+					lose++;
+					break;
+				}
+			}
+			break;
+		case CMD_GCODE_NOM2:
+			cl_nom2 = 1;
+			break;
+		case CMD_GCODE:
+		case CMD_SVG:
+		case CMD_DXF:
+			if (cl_format != FMT_NONE) {
+				fprintf(stderr, "Only one output format specifier allowed\n");
+				lose++;
+			}
+			switch (optc) {
+			case CMD_GCODE:	cl_format = FMT_GCODE; break;
+			case CMD_SVG:	cl_format = FMT_SVG; break;
+			case CMD_DXF:	cl_format = FMT_DXF; break;
+			}
+			break;
+		case CMD_SVG_TOOLWIDTH:
+			cl_svg_toolwidth = strtod(optarg, &cptr);
+			if (*cptr) {
+				fprintf(stderr, "SVG toolwidth is invalid\n");
+				lose++;
+			}
+			else if (cl_svg_toolwidth < 0.001 || cl_svg_toolwidth > 1000.0) {
+				fprintf(stderr, "SVG toolwidth should be >= 0.001 and <= 1000.0\n");
+				lose++;
+			}
+			break;
+		case CMD_SVG_NO_MOVELAYER:
+			cl_svg_movelayer = 0;
+			break;
+		case CMD_SVG_NO_FLIP:
+			cl_svg_flip = 0;
+			break;
+		case CMD_SVG_NO_GRID:
+			cl_svg_grid = 0;
+			break;
+		case CMD_SVG_OPACITY:
+			cl_svg_opacity = strtod(optarg, &cptr);
+			if (*cptr) {
+				fprintf(stderr, "SVG opacity is invalid\n");
+				lose++;
+			}
+			else if (cl_svg_opacity < 0.001 || cl_svg_opacity > 1.0) {
+				fprintf(stderr, "SVG opacity should be >= 0.001 and <= 1.0\n");
+				lose++;
+			}
+			break;
+		case CMD_PEDANTIC:
+			cl_pedantic = 1;
+			break;
+		case '?':
+			lose++;
+			break;
+		default:
+			fprintf(stderr, "Unknown option character '%c' (%d) in option handling\n", isprint(optc) ? optc : ' ', optc);
+			lose++;
+			break;
+		}
+	}
+
+	if (cl_pedantic && cl_decimals < 3)
+		fprintf(stderr, "Number of decimals less than 3 severely limits accuracy\n");
+
+	for (i = anyoffs = 0; i < NOFFSETS; i++)
+		anyoffs |= offsets[i] != 0.0;
+	if (cl_relative && anyoffs) {
+		fprintf(stderr, "Offsets must be zero when using relative addressing\n");
+		lose++;
+	}
+
+	/* Set SVG defaults */
+	if (cl_svg_toolwidth == -1.0)
+		cl_svg_toolwidth = cl_inch ? 0.125 : 3.0;
+	if (cl_format == FMT_NONE)
+		cl_format = FMT_GCODE;
+
+	if (cl_format != FMT_GCODE && (profn || epifn || !proepi)) {
+		fprintf(stderr, "Prologue/epilogue cannot be omitted or changed for non G-code backend\n");
+		lose++;
+	}
+
+	if (cl_format != FMT_GCODE && asfuncname) {
+		fprintf(stderr, "G-Code as function only possible for G-code backend\n");
+		lose++;
+	}
+
+	if (asfuncname && (profn || epifn)) {
+		fprintf(stderr, "Prologue/epilogue code cannot be customized when generating G-Code as function\n");
+		lose++;
+	}
+
+	if ((cl_format != FMT_GCODE || !asfuncname) && cl_nom2)
+		fprintf(stderr, "Option --gcode-nom2 only has effect when generating gcode a function using --gcode-function\n");
+
+	if (lose)
+		exit(1);
+
+	if (asfuncname)
+		proepi = 0;	/* Disable std. prologue/epilogue with functions */
+
+	if (debug) {
+		setbuf(stdout, NULL);
+		setbuf(stderr, NULL);
+		/*yydebug = 1;*/
+	}
+
+	/* Last search-path entry is current directory */
+	includepath_add(strdup(PKGDATADIR));
+	includepath_add(strdup("."));
+
+	if (optind >= argc) {
 		yyin = stdin;
 		filename = strdup("--stdin--");
 	}
-	else
-	{
-		if (NULL == (yyin = fopen(fn, "r"))) {
-			perror(fn);
+	else {
+		if (NULL == (yyin = fopen(argv[optind], "r"))) {
+			perror(argv[optind]);
 			exit(1);
 		}
-		filename = strdup(fn);
+		filename = strdup(argv[optind]);
 	}
 
-	int unit = UNIT_MM;
+	if (!ofn) {
+		ofp = stdout;
+	}
+	else {
+		if (NULL == (ofp = fopen(ofn, "w"))) {
+			perror(ofn);
+			exit(1);
+		}
+	}
 
-	///* Setup reference to global offset and position track variable */
+	assert(naxes == 6 || naxes == 9);
+
+	unit = cl_inch ? UNIT_IN : UNIT_MM;
+
+	/* Setup reference to global offset and position track variable */
 	v = value_new(VAL_VECTOR);
-	for (int i = 0; i < naxes; i++)
-	{
+	for (i = 0; i < naxes; i++) {
 		unit_et u = offsetunits[i];
-		if (u == UNIT_NONE)
-		{
+		if (u == UNIT_NONE) {
 			if (i >= 3 && i < 6)
 				u = UNIT_DEG;
 			else
-				u = unit;
+				u = cl_inch ? UNIT_IN : UNIT_MM;
 		}
 		else if (u == UNIT_MM && cl_inch) {
 			offsets[i] /= 25.4;
 			u = UNIT_IN;
 		}
-		else if (u == UNIT_IN && !cl_inch)
-		{
+		else if (u == UNIT_IN && !cl_inch) {
 			offsets[i] *= 25.4;
 			u = UNIT_MM;
 		}
-		else if (u == UNIT_RAD)
-		{
+		else if (u == UNIT_RAD) {
 			/* Angular offset must be degrees (gcode units) */
 			offsets[i] *= 180.0;
 			offsets[i] /= M_PI;
@@ -814,36 +806,29 @@ int  processfile( const char *fn)
 	/* Setup the predefined constants (handled before command-line defines) */
 	define_setup(gcmcconsts, ngcmcconsts, "<gcmc-internal constants>");
 
-	
-	/* Last search-path entry is current directory */
-	includepath_add(strdup(PKGDATADIR));
-	includepath_add(strdup("."));
-
-	
 	/* Parse the input script */
-	fprintf(stderr, "Start parsing...");
-
-
 	if (yyparse())
 		yyerror("Syntax error");
 
+	if (syntaxerrors)
+		exit(1);
 
 	/* Output the G-code */
-	//if (proepi || profn)
-	prologue(0, ofp);
-	//if (asfuncname)
-	//asfunc_head(ofp, asfuncname);
+	if (proepi || profn)
+		prologue(profn, ofp);
+	if (asfuncname)
+		asfunc_head(ofp, asfuncname);
 	if ((v = execute(scripthead, NULL))) {
 		retval = value_to_int(v);
 		value_delete(v);
 	}
-	//if (proepi || epifn)
-	epilogue(0, ofp);
-	//if (asfuncname)
-	//asfunc_tail(ofp, asfuncname);
+	if (proepi || epifn)
+		epilogue(epifn, ofp);
+	if (asfuncname)
+		asfunc_tail(ofp, asfuncname);
 
-	//if (warnerror && runtimewarnings)
-		//rterror(NULL, "Runtime warnings considered to be errors");
+	if (warnerror && runtimewarnings)
+		rterror(NULL, "Runtime warnings considered to be errors");
 
 	if (runtimeerrors)
 		retval = 1;
@@ -861,7 +846,8 @@ int  processfile( const char *fn)
 	interpreter_cleanup();
 	includepath_purge();
 	free((void *)filename);
-	filename = 0;
 #endif
-//	fclose(ofp);
+	fclose(ofp);
+
+	return retval;
 }

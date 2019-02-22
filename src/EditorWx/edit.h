@@ -113,6 +113,7 @@ public:
     wxString GetFilename () {return m_filename;}
     void SetFilename (const wxString &filename) {m_filename = filename;}
 
+
 private:
     // file
     wxString m_filename;

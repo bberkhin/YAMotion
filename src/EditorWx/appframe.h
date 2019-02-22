@@ -51,8 +51,10 @@ public:
 	//Gcode
 	void OnCheck(wxCommandEvent &event);
 	void OnSimulate(wxCommandEvent &event);
+	void OnConvertGcmc(wxCommandEvent &event);
 	void OnUpdateCheck(wxUpdateUIEvent& event);
 	void OnUpdateSimulate(wxUpdateUIEvent& event);
+	void OnUpdateConvertGcmc(wxUpdateUIEvent& event);
 
 	void OnThreadUpdate(wxThreadEvent&);
 	void OnThreadCompletion(wxThreadEvent&);
