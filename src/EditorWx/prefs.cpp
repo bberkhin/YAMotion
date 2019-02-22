@@ -34,10 +34,11 @@ const CommonInfo g_CommonPrefs = {
 // GCode 
 const char* GCoddeWordlist = "abs acos asin atan cos exp fix fup ln round sin sqrt tan exists";
 const char* GcmcWordlist = "abs acos asin atan atan_xy atan_xz atan_yz ceil comment cos count delete error exp fixpos_restore fixpos_set fixpos_store floor head "
-	"insert isangle isconst isdefined isdeg isdistance isdxf isfloat isgcode isinch isint ismm ismodemm isnone israd isrelative isscalar isstring issvg"
-	"isundef isvector isvectorlist layer layerstack length literal log10 log2 loge message normalize pause pi plane position pow relocate reverse rotate_xy rotate_xz rotate_yz"
-	"round scale sign sin sqrt svg_closepath tail tan to_chr to_deg to_distance to_float to_in to_inch to_int to_mm to_native to_none to_rad to_string to_val typeset undef warning";
-
+"insert isangle isconst isdefined isdeg isdistance isdxf isfloat isgcode isinch isint ismm ismodemm isnone israd isrelative isscalar isstring issvg "
+"isundef isvector isvectorlist layer layerstack length literal log10 log2 loge message normalize pause pi plane position pow relocate reverse rotate_xy rotate_xz rotate_yz "
+"round scale sign sin sqrt svg_closepath tail tan to_chr to_deg to_distance to_float to_in to_inch to_int to_mm to_native to_none to_rad to_string to_val typeset undef warning "
+"arc_ccw arc_ccw_r arc_cw arc_cw_r circle_ccw circle_ccw_r circle_cw circle_cw_r coolant drill dwell feedmode feedrate fixpos_restore fixpos_store goto goto_r move move_r pathmode "
+"pause plane spindle spindlespeed toolchange";
 
 
 //----------------------------------------------------------------------------
@@ -214,13 +215,14 @@ const StyleInfo g_StylePrefs [] = {
      "", 10, 0, 0},
 	 //SCE_GCODE_OPERATORS
 	  {"Keyword2",
-	 "BLACK", "WHITE",
+	 "VIOLET RED", "WHITE",
 	 "", 10, mySTC_STYLE_BOLD, 0},
 	//SCE_GCODE_IDENTIFIER
 	{"Default",
 	 "GREY", "WHITE",
 	 "", 10, 0, 0},
 
+	 
 
     };
 

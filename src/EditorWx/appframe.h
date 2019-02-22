@@ -67,6 +67,7 @@ public:
 private:
 	wxString GetSavedFileName();
 	bool DoFileSave(bool askToSave, bool bSaveAs);
+	void FileChanged();
 private:
 	// edit object
 	Edit *m_edit;

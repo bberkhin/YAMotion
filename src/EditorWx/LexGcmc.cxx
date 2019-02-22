@@ -46,7 +46,17 @@ static void ColouriseGcmcDoc(Sci_PositionU startPos, Sci_Position length, int in
 	Accessor &styler)
 {
 	WordList &keywords= *keywordLists[0];
-	CharacterSet operators(CharacterSet::setNone, "][*/=+<>");
+	CharacterSet operators(CharacterSet::setNone, "*/=+<>");
+	StyleContext sctmp(startPos, length, initStyle, styler);
+
+	//char buf[256];
+	//int i = 0;
+	//for (; sctmp.More(); sctmp.Forward())
+	//{
+	//	if (sctmp.ch && i < 255 )
+	//	 buf[i++] = sctmp.ch;
+	//}
+
 	StyleContext sc(startPos, length, initStyle, styler);
 
 	for (; sc.More(); sc.Forward())
@@ -59,7 +69,9 @@ static void ColouriseGcmcDoc(Sci_PositionU startPos, Sci_Position length, int in
 		}
 		else if (sc.state == SCE_GCODE_COMMENT_ML) 
 		{
-			if (sc.ch == '*' && sc.chNext == '/') {
+			if (sc.ch == '*' && sc.chNext == '/') 
+			{
+				sc.Forward();
 				sc.ForwardSetState(SCE_GCODE_DEFAULT);
 			}
 		}
@@ -68,22 +80,25 @@ static void ColouriseGcmcDoc(Sci_PositionU startPos, Sci_Position length, int in
 			if (!IsANumChar(sc.ch))
 				sc.SetState(SCE_GCODE_DEFAULT);
 		}
-		else if (sc.state == SCE_GCODE_VAR)
+		//else if (sc.state == SCE_GCODE_VAR)
+		//{
+		//	if ( sc.ch == ']')
+		//	{
+		//		sc.SetState(SCE_GCODE_DEFAULT);
+		//	}
+		//}
+		else if ((sc.state == SCE_GCODE_IDENTIFIER)  )
 		{
-			if ( sc.ch == ']')
+			if (!isALetter(sc.ch))
 			{
+				char s[124];
+				sc.GetCurrent(s, sizeof(s));
+				if (keywords.InList(s))
+				{
+					sc.ChangeState(SCE_GCODE_WORD1); 				// It's a keyword, change its state
+				}
 				sc.SetState(SCE_GCODE_DEFAULT);
 			}
-		}
-		else if ((sc.state == SCE_GCODE_IDENTIFIER) && !isALetter(sc.ch) )
-		{
-			char s[124];
-			sc.GetCurrent(s, sizeof(s));
-			if (keywords.InList(s))
-			{
-				sc.ChangeState(SCE_GCODE_WORD1); 				// It's a keyword, change its state
-			}
-			sc.SetState(SCE_GCODE_DEFAULT);
 		}
 		else if ( sc.state != SCE_GCODE_DEFAULT )
 			sc.SetState(SCE_GCODE_DEFAULT);
@@ -102,7 +117,7 @@ static void ColouriseGcmcDoc(Sci_PositionU startPos, Sci_Position length, int in
 				) {
 				sc.SetState(SCE_GCODE_NUMBER);
 			}
-			else if (sc.ch == '[')
+			else if (sc.ch == '[' || sc.ch == ']')
 			{
 				sc.SetState(SCE_GCODE_VAR);
 			}

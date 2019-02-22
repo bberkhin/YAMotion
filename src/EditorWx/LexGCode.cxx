@@ -111,15 +111,18 @@ static void ColouriseGCodeDoc(Sci_PositionU startPos, Sci_Position length, int i
 				sc.SetState(SCE_GCODE_DEFAULT);
 			}
 		}
-		else if ((sc.state == SCE_GCODE_IDENTIFIER) && !isALetter(sc.ch) )
+		else if ((sc.state == SCE_GCODE_IDENTIFIER))
 		{
-			char s[124];
-			sc.GetCurrent(s, sizeof(s));
-			if (keywords.InList(s))
+			if (!isALetter(sc.ch))
 			{
-				sc.ChangeState(SCE_GCODE_WORD1); 				// It's a keyword, change its state
+				char s[124];
+				sc.GetCurrent(s, sizeof(s));
+				if (keywords.InList(s))
+				{
+					sc.ChangeState(SCE_GCODE_WORD1); 				// It's a keyword, change its state
+				}
+				sc.SetState(SCE_GCODE_DEFAULT);
 			}
-			sc.SetState(SCE_GCODE_DEFAULT);
 		}
 		else if ( sc.state != SCE_GCODE_DEFAULT )
 			sc.SetState(SCE_GCODE_DEFAULT);

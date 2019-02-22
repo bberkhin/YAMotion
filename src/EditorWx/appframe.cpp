@@ -4,6 +4,7 @@
 #include "wx/splitter.h"
 #include "wx/event.h"
 #include <wx/thread.h>
+#include <wx/stdpaths.h>
 
 
 //! application headers
@@ -313,6 +314,14 @@ bool AppFrame::DoFileSave(bool askToSave, bool bSaveAs )
 	return true;
 }
 
+
+void AppFrame::FileChanged()
+{
+	UpdateTitle();
+	m_hlbox->Clear();
+	m_view->clear();
+}
+
 void AppFrame::OnFileNew(wxCommandEvent &WXUNUSED(event))
 {
 	if ( !DoFileSave(true, false) )
@@ -320,7 +329,7 @@ void AppFrame::OnFileNew(wxCommandEvent &WXUNUSED(event))
 		return;
 	}
 	m_edit->NewFile();
-	UpdateTitle();
+	FileChanged();
 }
 
 // file event handlers
@@ -539,8 +548,7 @@ void AppFrame::FileOpen (wxString fname)
     wxFileName w(fname); w.Normalize(); fname = w.GetFullPath();
     m_edit->LoadFile (fname);
     m_edit->SelectNone();
-	UpdateTitle();
-
+	FileChanged();
 }
 
 void AppFrame::UpdateTitle()
@@ -756,7 +764,15 @@ void  AppFrame::OnSimulate(wxCommandEvent &event)
 	return;
 }
 
-
+static wxString GetDirFromFName(wxString &buf, const char *add)
+{
+	wxString arg = buf.BeforeLast('/');
+	if (arg.IsEmpty())
+		arg = buf.BeforeLast('\\');
+	if (!arg.IsEmpty() && add)
+		arg += add;
+	return arg;
+}
 
 void AppFrame::OnConvertGcmc(wxCommandEvent &event)
 {
@@ -766,26 +782,48 @@ void AppFrame::OnConvertGcmc(wxCommandEvent &event)
 	//-o g00.nc g0.gcmc
 	// build command line
 
+	wxExecuteEnv env;
 	wxString src_fname = m_edit->GetFilename();
+	
+	if (src_fname.IsEmpty())
+		return;
+	env.cwd = GetDirFromFName(src_fname, 0);
+	src_fname = src_fname.AfterLast('\\');
+	if ( src_fname.IsEmpty() )
+		src_fname = m_edit->GetFilename();
+
 	wxString dst_fname = src_fname.BeforeLast('.');
 	if (dst_fname.IsEmpty())
 		dst_fname = src_fname;
 	dst_fname += wxString(".nc");
 
-	wxString arg("-o ");
-	arg += dst_fname;
-	arg += src_fname;
-
 	//run 
-/*	
-	long wxExecute(const wxString & 	command,
-		wxArrayString & 	output,
-		wxArrayString & 	errors,
-		int 	flags = 0,
-		const wxExecuteEnv * 	env = NULL
-	)
-*/
+	wxString buf = wxStandardPaths::Get().GetExecutablePath();
+	wxString arg = GetDirFromFName(buf,"\\");
+	arg += "gcmc_vc.exe -o ";
+	arg += dst_fname;
+	arg += " ";
+	arg += src_fname;
+	   	 
+	wxArrayString output;
+	wxArrayString errors;
+	
+	m_hlbox->Clear();
+	wxString inf = wxString::Format("<font color=#008800>Process: %s is running...</font>", arg.c_str());
+	m_hlbox->Append(inf);
+
+	int code = wxExecute(arg, output, errors, wxEXEC_SYNC | wxEXEC_HIDE_CONSOLE,  &env);
+	m_hlbox->Append(errors);
+
+	inf = wxString::Format("<font color=#008800>Process terminated with exit code %d</font>", code);
+	m_hlbox->Append(inf);
+
+	if ( code == 0 )// Ok
+		FileOpen(dst_fname);
+
+
 }
+
 
 void AppFrame::OnUpdateConvertGcmc(wxUpdateUIEvent& event)
 {

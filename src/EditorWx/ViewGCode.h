@@ -113,6 +113,7 @@ public:
 	//void setTrack(std::vector<TrackPointGL> *ptr) { track.assign( ptr->begin(), ptr->end() ); }
 	void setTrack(std::vector<TrackPoint> *ptr);	
 	void setBox(const CoordsBox &bx);
+	void clear();
 	
 	void OnPaint(wxPaintEvent& event);
 	void OnSize(wxSizeEvent& event);

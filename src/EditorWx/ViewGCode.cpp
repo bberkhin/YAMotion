@@ -218,6 +218,14 @@ void ViewGCode::OnMouseEvent(wxMouseEvent& event)
 }
 
 
+void ViewGCode::clear()
+{
+	track.clear();
+	camera.set_box(CoordsBox(Coords(0, 0, 0), Coords(1000, 1000, 300)));
+	camera.set_view(TOP);
+	Refresh(false);	
+}
+
 void ViewGCode::setBox(const CoordsBox &bx)
 {
 //	box = bx; 	
@@ -311,111 +319,8 @@ void ViewGCode::draw_real_track()
 
 }
 
-
-#define RADPERDEG 0.0174533
-
-//void draw_arrow(
-//	float ax, float ay, float az,  /* starting point in local space */
-//	float bx, float by, float bz,  /* starting point in local space */
-//	float ah, float bh,            /* arrow head size start and end */
-//	char const * const annotation, /* annotation string */
-//	float annot_size               /* annotation string height (local units) */)
-//{
-//	int i;
-//
-//	GLdouble mv[16];
-//	glGetDoublev(GL_MODELVIEW_MATRIX, mv);
-//
-//	/* We're assuming the modelview RS part is (isotropically scaled)
-//	 * orthonormal, so the inverse is the transpose.
-//	 * The local view direction vector is the 3rd column of the matrix;
-//	 * assuming the view direction to be the normal on the arrows tangent
-//	 * space  taking the cross product of this with the arrow direction
-//	 * yields the binormal to be used as the orthonormal base to the
-//	 * arrow direction to be used for drawing the arrowheads */
-//
-//	double d[3] = {
-//		  bx - ax,
-//		  by - ay,
-//		  bz - az
-//	};
-//	normalize_v(d);
-//
-//	double r[3] = { mv[0], mv[4], mv[8] };
-//	int rev = scalarproduct_v(d, r) < 0.;
-//
-//	double n[3] = { mv[2], mv[6], mv[10] };
-//	{
-//		double const s = scalarproduct_v(d, n);
-//		for (int i = 0; i < 3; i++)
-//			n[i] -= d[i] * s;
-//	}
-//	normalize_v(n);
-//
-//	double b[3];
-//	crossproduct_v(n, d, b);
-//
-//	/* Make a 60° arrowhead ( sin(60°) = 0.866... ) */
-//	GLfloat const pos[][3] = {
-//		{ax, ay, az},
-//		{bx, by, bz},
-//		{ ax + (0.866*d[0] + 0.5*b[0])*ah,
-//		  ay + (0.866*d[1] + 0.5*b[1])*ah,
-//		  az + (0.866*d[2] + 0.5*b[2])*ah },
-//		{ ax + (0.866*d[0] - 0.5*b[0])*ah,
-//		  ay + (0.866*d[1] - 0.5*b[1])*ah,
-//		  az + (0.866*d[2] - 0.5*b[2])*ah },
-//		{ bx + (-0.866*d[0] + 0.5*b[0])*bh,
-//		  by + (-0.866*d[1] + 0.5*b[1])*bh,
-//		  bz + (-0.866*d[2] + 0.5*b[2])*bh },
-//		{ bx + (-0.866*d[0] - 0.5*b[0])*bh,
-//		  by + (-0.866*d[1] - 0.5*b[1])*bh,
-//		  bz + (-0.866*d[2] - 0.5*b[2])*bh }
-//	};
-//	GLushort const idx[][2] = {
-//		{0, 1},
-//		{0, 2}, {0, 3},
-//		{1, 4}, {1, 5}
-//	};
-//	glDisableClientState(GL_COLOR_ARRAY);
-//	glDisableClientState(GL_NORMAL_ARRAY);
-//	glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-//
-//	glEnableClientState(GL_VERTEX_ARRAY);
-//	glVertexPointer(3, GL_FLOAT, 0, pos);
-//
-//	glDrawElements(GL_LINES, 2 * 5, GL_UNSIGNED_SHORT, idx);
-//	glDisableClientState(GL_VERTEX_ARRAY);
-//
-//	if (annotation) {
-//		float w = 0;
-//		for (char const *c = annotation; *c; c++)
-//			w += glutStrokeWidth(GLUT_STROKE_ROMAN, *c);
-//		w *= annot_size / 100.;
-//
-//		float tx = (ax + bx) / 2.;
-//		float ty = (ay + by) / 2.;
-//		float tz = (az + bz) / 2.;
-//
-//		GLdouble r[16] = {
-//			d[0], d[1], d[2], 0,
-//			b[0], b[1], b[2], 0,
-//			n[0], n[1], n[2], 0,
-//			   0,    0,    0, 1
-//		};
-//		glPushMatrix();
-//		glTranslatef(tx, ty, tz);
-//		glMultMatrixd(r);
-//		if (rev)
-//			glScalef(-1, -1, 1);
-//		glTranslatef(-w / 2., annot_size*0.1, 0);
-//		draw_strokestring(GLUT_STROKE_ROMAN, annot_size, annotation);
-//		glPopMatrix();
-//	}
-//}
-
 //--------------------------------------------------------------------
-//создаёт объект сверло
+//создаёт объект стрлеку
 void make_axis(const glm::vec4 &color, const glm::vec3 &rot, float len, Object3d& axis)
 {
 	axis.indices.clear();
