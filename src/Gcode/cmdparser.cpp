@@ -36,7 +36,7 @@ void CmdParser::clear()
 	n_number = -1;
 	comment.clear();
 	mcodes.clear();
-	gcodes.clear();	
+	memset(g_mode, -1, sizeof(int)*ModalGroup_Size);
 	line = 0;
 	position = 0;
 	o_name.clear();
@@ -48,7 +48,7 @@ void CmdParser::clear()
 bool CmdParser::neead_execute()  const
 {
 // absolutly empty just comments
-	if (mcodes.empty() && gcodes.empty() && o_name.empty() )
+	if (mcodes.empty() && o_name.empty() )
 	{
 		for (int i = 0; i < PARAM_MAX; ++i)
 		{
@@ -57,7 +57,11 @@ bool CmdParser::neead_execute()  const
 		}
 		return false;
 	}
-// check is an subrotines
+	for (int i = 0; i < ModalGroup_Size; i++)
+	{
+		if (g_mode[i] != -1)
+			return false;
+	}
 	return true;
 }
 
@@ -204,20 +208,15 @@ void CmdParser::find_significal_symbol()
 	}
 }
 
-bool CmdParser::contain_cmd(ModalGroup group) const
-{
-	for (auto iter = gcodes.begin(); iter != gcodes.end(); ++iter)
-	{
-		if (group == get_gmodal_group(*iter) )
-			return true;
-	}
-	for (auto iter = mcodes.begin(); iter != mcodes.end(); ++iter)
-	{
-		if (group == get_mmodal_group(*iter))
-			return true;
-	}
-	return false;
-}
+//bool CmdParser::contain_cmd(MModalGroup group) const
+//{
+//	for (auto iter = mcodes.begin(); iter != mcodes.end(); ++iter)
+//	{
+//		if (group == get_mmodal_group(*iter))
+//			return true;
+//	}
+//	return false;
+//}
 
 bool CmdParser::contain_m(int val) const
 {
@@ -225,30 +224,21 @@ bool CmdParser::contain_m(int val) const
 		return true;
 	return false;
 }
-bool CmdParser::contain_g(int val)  const
-{
-	if (std::find(gcodes.begin(), gcodes.end(), val) != gcodes.end())
-		return true;
-	return false;
-}
+
+//bool CmdParser::contain_g(int val)  const
+//{
+//	if (std::find(gcodes.begin(), gcodes.end(), val) != gcodes.end())
+//		return true;
+//	return false;
+//}
 
 
 bool CmdParser::check_modal_group() const
 {
 	unsigned int flag = 0;
-	for (auto iter = gcodes.begin(); iter != gcodes.end(); ++iter)
-	{
-		ModalGroup group = get_gmodal_group(*iter);
-		if (group > 0)
-		{
-			if ((flag & (1 << group)) != 0)   //встретили два оператора из одной группы
-				RET_F_SETSTATE(DOUBLE_DEFINITION, "conflict G%d modal group", (*iter)/10 );
-			flag |= (1 << group);
-		}
-	}
 	for (auto iter = mcodes.begin(); iter != mcodes.end(); ++iter)
 	{
-		ModalGroup group = get_mmodal_group(*iter);
+		MModalGroup group = get_mmodal_group(*iter);
 		if (group > 0)
 		{
 			if ((flag & (1 << group)) != 0)   //встретили два оператора из одной группы
@@ -262,7 +252,7 @@ bool CmdParser::check_modal_group() const
 //====================================================================================================
 //возвращает модальную группу команды
 
-ModalGroup CmdParser::get_mmodal_group(int num) const
+MModalGroup CmdParser::get_mmodal_group(int num) const
 {
 	switch (num)
 	{
@@ -287,12 +277,12 @@ InterError CmdParser::get_state() const
 }
 
 
-void CmdParser::remove_g(int n)
-{
-	auto iter = std::find( gcodes.begin(), gcodes.end(), n);
-	if (iter != gcodes.end())
-		gcodes.erase(iter);
-}
+//void CmdParser::remove_g(int n)
+//{
+//	auto iter = std::find( gcodes.begin(), gcodes.end(), n);
+//	if (iter != gcodes.end())
+//		gcodes.erase(iter);
+//}
 
 void CmdParser::remove_param(IndexParam param)
 {
@@ -516,7 +506,9 @@ bool CmdParser::read_g()
 
 	IF_F_RET_F_SETSTATE(acsept_gcode(value), WRONG_VALUE, "Uknown G code %d", static_cast<int>(value/10));
 
-	gcodes.push_back(value);
+	GModalGroup grp = get_gmodal_group( value );
+	IF_T_RET_F_SETSTATE( hasGCode(grp) , DOUBLE_DEFINITION, "conflict G%d modal group", static_cast<int>(value / 10) );
+	g_mode[grp] = value;
 	return false;
 }
 
@@ -663,42 +655,46 @@ InterError InterError::CreateErrorCode(ErrorCode cod, const char *fmt, ...)
 	return InterError(cod, std::string(buf_error));
 }
 
-ModalGroup CmdParser::get_gmodal_group(int num) const
+
+GModalGroup CmdParser::get_gmodal_group(int num) const
 {
 	switch (num)
 	{
 		//G0, G1, G2, G3, G38.2, G80, G81 to G89, G33, G33.1, G76
-	case G_0: case G_1: case G_2: case G_3: case G_38_2: case G_33: case G_33_1: case G_76:
-	case G_81: case G_82: case G_83: case G_84: case G_85: case G_86: case G_87: case G_88: case G_89:
+	case G_0: case G_1: case G_2: case G_3: case G_5: case G_38_2: case G_33: case G_33_1: case G_76:
+	case G_80: case G_81: case G_82: case G_83: case G_84: case G_85: case G_86: case G_87: case G_88: case G_89:
+	//case G_6:
 		return ModalGroup_MOVE;
-	case G_80:
-		return ModalGroup_STOPMOVE;
-
+	case G_17: case G_18: case G_19:
+		return ModalGroup_ACTIVE_PLANE;
 	case G_90: case G_91:
-		return ModalGroup_INCREMENTAL;
-
+		return ModalGroup_DISTANCE;
+	case G_90_1: case G_91_1:
+		return ModalGroup_DISTANCE;
 	case G_93: case G_94: case G_95:
 		return ModalGroup_FEEDMODE;
 	case G_20: case G_21:
 		return ModalGroup_UNITS;
-
-	case G_54: case G_55: case G_56: case G_57: case G_58:
-		return ModalGroup_COORD_SYSTEM;
-
-	case G_43: case G_49:
+	case G_40: case G_41: case G_42: case G_42_1:
+	//case G41_1:
+		return ModalGroup_CUTTER_COMP;
+	case G_43: case G_44: case G_49: 
+	//case G43_1: case G43_2:
 		return ModalGroup_TOOL_LENGTH_CORRECTION;
-	case G_40: case G_41: case G_42:
-		return ModalGroup_TOOL_RADIUS_CORRECTION;
-	case G_61: case G_64: 
-		return ModalGroup_ACCURACY;
 	case G_98: case G_99:
 		return ModalGroup_CYCLE_RETURN;
-
-	case G_17: case G_18: case G_19:
-		return ModalGroup_ACTIVE_PLANE;
-
-	default:
-		return ModalGroup_NONE;
+		//g54, g55, g56, g57, g58, g59, g59.1, g59.2, g59.3
+	case G_54: case G_55: case G_56: case G_57: case G_58: case G_59: case G_59_1: 
+	//case G59_2: case G59_3:
+		return ModalGroup_COORD_SYSTEM;
+	case G_61: case G_61_1: case G_64:
+		return ModalGroup_CONTROL;
+	case G_96: case G_97:
+		return ModalGroup_SPINDLEMODE;  //G96 G97 spindle
+	case G_7: case G_8:
+		return ModalGroup_LATHE_DIAMETER; //G7 or G8
+	default: ////g4, g10, g28, g30, g53, g92 g92.1, g92.2, g92.3 - misc
+		return ModalGroup_MODAL_0;
 	}
 }
 

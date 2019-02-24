@@ -191,27 +191,51 @@ namespace Interpreter
 		PARAM_T,
 		PARAM_MAX
 	};
+//
+//#define GM_MODAL_0        0
+//#define GM_MOTION         1
+//#define GM_SET_PLANE      2
+//#define GM_DISTANCE_MODE  3
+//#define GM_IJK_DISTANCE_MODE  4
+//#define GM_FEED_MODE      5
+//#define GM_LENGTH_UNITS   6
+//#define GM_CUTTER_COMP    7
+//#define GM_TOOL_LENGTH_OFFSET 8
+//#define GM_RETRACT_MODE   10
+//#define GM_COORD_SYSTEM   12
+//#define GM_CONTROL_MODE   13
+//#define GM_SPINDLE_MODE  14
+//#define GM_LATHE_DIAMETER_MODE  15
 
-
-	enum ModalGroup //некоторые операторы не могут одновременно содержатьс€ в одном фрейме
+	enum GModalGroup //некоторые операторы не могут одновременно содержатьс€ в одном фрейме
 	{
-		ModalGroup_NONE = 0, //g4,g10,g28,g30,g53,g92.[0-3]
-		ModalGroup_MOVE,  //g0..g3 //G38.2, G81..G89
-		ModalGroup_STOPMOVE, // G80
-		ModalGroup_INCREMENTAL, //g90..g91
+		ModalGroup_MODAL_0 = 0, //g4, g10, g28, g30, g53, g92 g92.1, g92.2, g92.3 - misc
+		ModalGroup_MOVE,  //g0, g1, g2, g3, g38.2, g5, g6 g80, g81, g82, g83, g84, g85, g86, g87, g88, g89 - motion
+		ModalGroup_ACTIVE_PLANE, // g17, g18, g19 - plane selection
+		ModalGroup_DISTANCE, //g90..g91
+		ModalGroup_IJK_DISTANCE, //g90.1, g91.1 - IJK distance mode for arcs
+		ModalGroup_FEEDMODE,  // g93, g94, g95 - feed rate mode
 		ModalGroup_UNITS, //g20..g21
-		//ModalGroup_CYCLE, //g80..g85
-		ModalGroup_COORD_SYSTEM, //g54..g58
-		ModalGroup_TOOL_LENGTH_CORRECTION, //g43,g44,g49
-		ModalGroup_TOOL_RADIUS_CORRECTION, //g40..g42
+		ModalGroup_CUTTER_COMP, //G40, G41, G41.1, G42, G42.1
+		ModalGroup_TOOL_LENGTH_CORRECTION, //G43, G43.1, G43.2, G44 or G49 tool length offse
+		ModalGroup_NONDEFINED,
 		ModalGroup_CYCLE_RETURN, //g98, g99
-		ModalGroup_ACTIVE_PLANE, //g17..g19
+		ModalGroup_NONDEFINED1,
+		ModalGroup_COORD_SYSTEM, //g54, g55, g56, g57, g58, g59, g59.1, g59.2, g59.3
+		ModalGroup_CONTROL,//g61, g61.1, g64 - control mode
+		ModalGroup_SPINDLEMODE,  //G96 G97 spindle
+		ModalGroup_LATHE_DIAMETER, //G7 or G8
+		ModalGroup_Size
+		
+	};
+
+// M Group
+	enum MModalGroup //некоторые операторы не могут одновременно содержатьс€ в одном фрейме
+	{
+		ModalGroup_NONE,
 		ModalGroup_STOP, //M0, M1, M2, M30, M60
-		ModalGroup_ACCURACY, // aqccuracy 	//G61, G64
 		ModalGroup_TURN_TOOL, //M3, M4, M5 
-		ModalGroup_GREASER, //M7, M8, M9
-		ModalGroup_FEEDMODE,  // g93, g94, g95
-		ModalGroup_SPINDLEMODE  //G96 G97 spindle
+		ModalGroup_GREASER //M7, M8, M9
 	};
 
 	struct InterError
@@ -283,6 +307,7 @@ namespace Interpreter
 		Coords position;         //"текуща€" позици€ устройства в миллиметрах
 		UnitSystem units;        //текуща€ система единиц измерени€
 		bool incremental;        //абсолютна€ система координат?
+		bool ijk_incremental;
 		MotionMode motionMode;   //режим перемещени€ (линейна€ интерпол€ци€ и т.п.)
 		Plane plane;             //текуща€ плоскость интерпол€ции
 		double feed;             //подача в мм/мин
@@ -307,9 +332,9 @@ namespace Interpreter
 		//    double cycleStep;        //глубина одного шага Q
 		//    int    cycleWait;        //задержка в цикле P
 		RunnerData() :
-			toolid(-1), units(UnitSystem_MM), incremental(false), motionMode(MotionMode_NONE), plane(Plane_XY), feed(0), spindlespeed(0),
+			toolid(-1), units(UnitSystem_MM), incremental(false), ijk_incremental(true), motionMode(MotionMode_NONE), plane(Plane_XY), feed(0), spindlespeed(0),
 			cycle(CannedCycle_NONE), tool_length_offset(0), tool_yoffset(0), tool_xoffset(0), cycleLevel(CannedLevel_HIGH),
-			accuracy(AccuracyNormal), cutter_comp_firstmove(true), cutter_comp_side(0), cutter_comp_radius(0.0), ij_absolute(false) { }
+			accuracy(AccuracyNormal), cutter_comp_firstmove(true), cutter_comp_side(0), cutter_comp_radius(0.0) { }
 	};
 };
 

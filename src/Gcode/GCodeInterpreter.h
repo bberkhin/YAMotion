@@ -72,6 +72,8 @@ namespace Interpreter
 		void probe_to(const Coords &position);
 		bool arc_to(const Coords &position, bool cw, const CmdParser &parser);
 
+		bool run_start_stop_spindle(const CmdParser &parser);
+		bool run_set_plane(int gc);
 		bool run_feed_mode(CmdParser &parser);
 		bool run_feed_rate(const CmdParser &parser);
 		bool run_spindle_mode(CmdParser &parser);
@@ -79,11 +81,21 @@ namespace Interpreter
 		bool run_speed(const CmdParser &parser);
 		bool run_tool_cmd(const CmdParser &parser);
 		bool run_mcode(const CmdParser &parser);
-		bool run_gcode(const CmdParser &parser);
+		bool run_gcode( CmdParser &parser);
 		bool run_stop(const CmdParser &parser);		
 		bool run_input_mode(CmdParser &parser);
 		bool run_tool_height_offset(const CmdParser &parser);
 		bool run_tool_crc(const CmdParser &parser);
+		bool run_set_lathe_diam(const CmdParser &parser);
+		bool run_modal_0(CmdParser &parser);
+		bool convert_axis_offsets(int gc, const CmdParser &parser);
+		bool run_set_units(int gc);
+		bool run_set_coord_sys(const CmdParser &parser);
+		bool run_control_mode(int gc);
+		bool run_set_dist_mode(int gc);
+		bool run_set_dist_ijk(int gc);
+		bool run_set_cycle_return(int gc);
+		bool run_motion(const CmdParser &parser);
 
 		void setcoordinates(Coords &newpos, const CmdParser &parser) const; 
 		Coords get_new_coordinate(Coords &oldLocal, const CmdParser &parser);

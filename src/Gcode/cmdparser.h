@@ -25,14 +25,16 @@ namespace Interpreter
 	public:
 		CmdParser(IEnvironment *env_ = 0);
 		bool parse(const char *frame); //читает коды и значения параметров
-		bool contain_cmd(ModalGroup group) const;
+		int getGCode(GModalGroup grp) const { return  g_mode[grp];	}
+		int hasGCode(GModalGroup grp) const { return  g_mode[grp] != -1; }
+		//bool contain_cmd(ModalGroup group) const;
 		bool contain_m( int val ) const;
-		bool contain_g( int val)  const;
+		//bool contain_g( int val)  const;
 		bool getRParam(IndexParam param, double *pr) const;
 		bool getIParam(IndexParam param, int *pi) const;
 		bool hasParam(IndexParam param) const;
 		const m_container &getMCodes() const { return mcodes; }
-		const g_container &getGCodes() const { return gcodes; }
+		//const g_container &getGCodes() const { return gcodes; }
 		InterError get_state() const;		
 		bool neead_execute()  const;
 		std::string getSubName() const { return o_name; }
@@ -49,8 +51,8 @@ namespace Interpreter
 		bool parse_codes(const char *frame);
 		bool parse_code(); //следующий код
 		bool check_modal_group() const;
-		ModalGroup get_gmodal_group(int n) const;
-		ModalGroup get_mmodal_group(int n) const;
+		GModalGroup get_gmodal_group(int n) const;
+		MModalGroup get_mmodal_group(int n) const;
 		void find_significal_symbol(); //пропускает комментарии, пробелы
 		bool read_n_number();
 		bool read_dollars();
@@ -86,7 +88,8 @@ namespace Interpreter
 	
 	private:		
 		m_container mcodes;
-		g_container gcodes;
+		int g_mode[ModalGroup_Size];
+		//g_container gcodes;
 		optparam params[PARAM_MAX];
 		int n_number; // N - value
 		std::string comment;

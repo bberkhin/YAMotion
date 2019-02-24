@@ -140,45 +140,6 @@ bool GCodeInterpreter::execute_file_int( long pos, ExecFunction fun, int &lineNu
 	return true;
 }
 
-/*
-void GCodeInterpreter::execute_file(const char *data)
-{
-
-	char line[MAX_GCODE_LINELEN];
-	const char *p ;
-	const char *pEnd = data;
-	int lineNumber = 1;
-	do
-	{
-		p = pEnd;
-		pEnd = cpy_close_and_downcase(line, p, lineNumber);
-		if (line[0] != 0 )
-		{
-			execute_line(line, lineNumber);
-		}
-		++lineNumber;	
-	} while (pEnd);
-}
-
-
-//====================================================================================================
-//читает строки в список
-
-void GCodeInterpreter::execute_line(const char *line, int lineNumber)
-{
-	if (executor)
-		executor->set_current_line(lineNumber);
-	
-	state.clear();
-	auto result = execute_frame(line);
-	
-	if (result.code)
-		logger->log(LOG_ERROR, "Error line %d %s\n", lineNumber, result.description.c_str());
-}
-
-
-	*/
-
 InterError GCodeInterpreter::is_subrotin_start(const char *str)
 {
 	CmdParser parser(env);                              //парсер команд
@@ -289,7 +250,10 @@ InterError GCodeInterpreter::execute_frame(const char *str)
 	
 	if (!parser.neead_execute())
 		return InterError();
+	
+	// check 
 
+	// run
 	if ( parser.contain_m(98) && executablecall) // call sub
 	{
 		execute_subrotinue( parser );
@@ -326,35 +290,40 @@ InterError GCodeInterpreter::execute_frame(const char *str)
 
 	//====================================================================================================
 	//Actions are executed in the following order:
-	//1. run dwell
-	//2. a feed mode setting (g93, g94, g95)
+		//2. a feed mode setting (g93, g94, g95)
 	//3. a feed rate (f) setting if in units_per_minute feed mode.
 	//4. a spindle speed (s) setting.
 	//5. a tool selection (t).
 	// Set Plane
 	//6. "m" commands as described in convert_m (includes tool change).
-	//7. any g_codes (except g93, g94, g95) as described in convert_g.
+	//7. any g_codes (except g93, g94, g95) as described in .
 	
-
-	if (!run_dwell(parser))
+	//	STEP_SPINDLE_MODE,
+	if (!run_spindle_mode(parser) )
 		return get_state();
-	if (!run_input_mode(parser))
-		return get_state();
-	if (!run_feed_mode(parser))
-		return get_state();
+	//	STEP_FEED_MODE,
+	if ( !run_feed_mode(parser) )
+	return get_state();
+	//	STEP_SET_FEED_RATE
 	if (!run_feed_rate(parser))
 		return get_state();
-	if (!run_spindle_mode(parser))
-		return get_state();
+	//	STEP_SET_SPINDLE_SPEED,
 	if (!run_speed(parser))
 		return get_state();
+	//	STEP_PREPARE,
+	//	STEP_M_5,M3 M4
+	if (!run_start_stop_spindle(parser))
+		return get_state();
+		//STEP_M_6,
 	if (!run_tool_cmd(parser))
 		return get_state();
+//		STEP_RETAIN_G43,
+	//all other M
 	if (!run_mcode(parser))
 		return get_state();
 	if (!run_gcode(parser))
 		return get_state();
-
+	//	STEP_MGROUP4,	
 	return InterError();
 }
 
@@ -365,21 +334,20 @@ bool GCodeInterpreter::run_feed_mode( CmdParser &parser )
 	//G93  is Inverse Time Mode.In inverse time feed rate mode, an F word means the move should be completed in[one divided by the F number] minutes.
 	//G94 - is Units per Minute Mode.
 	//G95 - is Units per Revolution Mode 
-	if (parser.contain_g(G_93))
+	int gc = parser.getGCode(ModalGroup_FEEDMODE);
+	if( gc == G_93 )
 	{
 		//G96 D2500 S250
 		RET_F_SETSTATE( NO_VALUE, "G93 Inverse Time Mode not supported");
-		parser.remove_g(G_93);
 	}
-	else if (parser.contain_g(G_94))
+	else if( gc == G_94 )
 	{
 		// ok do nothing
-		parser.remove_g(G_94);
+		;
 	}
-	else if (parser.contain_g(G_95))
+	else if( gc == G_95 )
 	{
-		RET_F_SETSTATE(NO_VALUE, "G95 - is Units per Revolution Mode not supported");
-		parser.remove_g(G_95);
+		RET_F_SETSTATE(NO_VALUE, "G95 - is Units per Revolution Mode not supported");	
 	}
 	return true;
 }
@@ -401,7 +369,8 @@ bool GCodeInterpreter::run_feed_rate(const  CmdParser &parser)
 
 bool GCodeInterpreter::run_dwell(CmdParser &parser)
 {
-	if (parser.contain_g(G_4))
+	
+	if (parser.getGCode(ModalGroup_MODAL_0) == G_4)
 	{
 		//G96 D2500 S250
 		double millseconds, sec;
@@ -424,7 +393,6 @@ bool GCodeInterpreter::run_dwell(CmdParser &parser)
 
 		executor->set_dwell(static_cast<long>(millseconds));
 		reset_motion_mode();
-		parser.remove_g(G_4);
 		parser.remove_params();
 	}
 	return true;
@@ -434,28 +402,27 @@ bool GCodeInterpreter::run_dwell(CmdParser &parser)
 
 bool GCodeInterpreter::run_spindle_mode( CmdParser &parser)
 {
-	if ( parser.contain_g(G_96) )
+	int gc = parser.getGCode(ModalGroup_SPINDLEMODE);
+	if ( gc == G_96 )
 	{
 		//G96 D2500 S250
 		double diam, speed;
 		IF_F_RET_F_SETSTATE(parser.getRParam(PARAM_D, &diam), NO_VALUE, "Parametr 'D' must be defined for G96 (CSS mode)");
 		IF_F_RET_F_SETSTATE(parser.getRParam(PARAM_S, &speed), NO_VALUE, "Parametr 'S' must be defined for G96 (CSS mode)");
 		executor->set_css_spindlemode(diam, speed);		
-		parser.remove_g(G_96);
 		parser.remove_param(PARAM_D);
 		parser.remove_param(PARAM_S);
 	}
-	else if (parser.contain_g(G_97))
+	else if (gc == G_97)
 	{
 		executor->set_regular_spindlemode();
-		parser.remove_g(G_97);
 	}
 	return true;
 }
 
 bool GCodeInterpreter::run_input_mode( CmdParser &parser )
 {
-	if (parser.contain_g(G_10))
+	if (parser.getGCode(ModalGroup_MODAL_0) == G_10)
 	{
 		//G10 L2 P2 X2 Y0 Z0(Set G55 offset to 2, 0, 0)
 
@@ -469,7 +436,7 @@ bool GCodeInterpreter::run_input_mode( CmdParser &parser )
 		IF_F_RET_F_SETSTATE((ip >= 1 && ip <= 5), WRONG_VALUE, "Parametr 'p' out of range ");
 		Coords newpos;
 		setcoordinates(newpos, parser);
-		env->SetG54G58(ip - 1, newpos, parser.contain_g(G_91)); 
+		env->SetG54G58(ip - 1, newpos, runner.incremental );
 		parser.clear();
 	}
 	return true;
@@ -481,17 +448,18 @@ bool GCodeInterpreter::run_tool_crc(const CmdParser &parser)
 //G_41:	runner.tool_crc = TCRC_LEFT;	//Turn on cutter radius compensation left
 //G_42:	runner.tool_crc = TL_RIGHT;	    //Turn on cutter radius compensation right
 	
-	if (parser.contain_g(G_40))
+	int gc = parser.getGCode(ModalGroup_CUTTER_COMP);
+	if (gc == G_40)
 	{
 		runner.tool_crc_type = CutterCompType_NONE;
 		runner.tool_crc = 0;
 		return true;
 	}
-	else if (parser.contain_g(G_41))
+	else if(gc == G_41)
 	{
 		runner.tool_crc_type = CutterCompType_LEFT;	//Turn on cutter radius compensation left
 	}
-	else if (parser.contain_g(G_42))
+	else if(gc == G_42)
 	{
 		runner.tool_crc_type = CutterCompType_RIGHT;	    //Turn on cutter radius compensation right
 	}
@@ -514,26 +482,46 @@ bool GCodeInterpreter::run_tool_height_offset(const CmdParser &parser)
 	//G_44:  Tool height offset compensation positive
 	//G_49:  Tool height offset compensation off
 	int h = 0;
-	if (parser.contain_g(G_49))
+	int gc = parser.getGCode(ModalGroup_TOOL_LENGTH_CORRECTION);
+	if ( gc == G_49 )
 	{
 		runner.tool_length_offset = 0;
 	}
-	else if (parser.contain_g(G_43))
+	else if (gc == G_43)
 	{
-		IF_F_RET_F_SETSTATE(parser.getIParam(PARAM_H, &h), NO_VALUE, "Parametr 'H' must be defined for G44 ");
+		IF_F_RET_F_SETSTATE(parser.getIParam(PARAM_H, &h), NO_VALUE, "Parametr 'H' must be defined for G43 ");
 		if  ( h > 0 )
 			runner.tool_length_offset = -h;
 		else
 			runner.tool_length_offset = h;
 	}
-	else if (parser.contain_g(G_44))
+	else if (gc == G_44)
 	{
-		IF_F_RET_F_SETSTATE(parser.getIParam(PARAM_H, &h), NO_VALUE, "Parametr 'H' must be defined for G43 ");
+		IF_F_RET_F_SETSTATE(parser.getIParam(PARAM_H, &h), NO_VALUE, "Parametr 'H' must be defined for G44 ");
 		runner.tool_length_offset = h;
 	}
 	else
 		RET_F_SETSTATE(INTERNAL_ERROR, "GCodeInterpreter::run_tool_height_offset can notbe called here");
 
+	return true;
+}
+
+bool GCodeInterpreter::run_start_stop_spindle(const CmdParser &parser)
+{
+	//M_5, M3 M4
+	const m_container &mcodes = parser.getMCodes();
+	for (auto iter = mcodes.begin(); iter != mcodes.end(); ++iter)
+	{
+		switch (*iter)
+		{
+		case 3:
+		case 4:
+		case 5:
+			executor->run_mcode(*iter);
+			return true;
+		}
+			
+	}
 	return true;
 }
 
@@ -601,6 +589,10 @@ bool GCodeInterpreter::run_mcode(const  CmdParser &parser)
 	{
 		switch (*iter)
 		{
+		case 3:
+		case 4:
+		case 5://already processed
+			return true;
 		case 2:
 		case 6:
 			return true;
@@ -618,144 +610,309 @@ void GCodeInterpreter::reset_motion_mode()
 	runner.motionMode = MotionMode_NONE;
 }
 
-bool GCodeInterpreter::run_gcode(const CmdParser &parser)
+
+			//case G_17: runner.plane = Plane_XY; break;
+			//case G_18: runner.plane = Plane_XZ; break;
+			//case G_19: runner.plane = Plane_YZ; break;
+
+//		STEP_SET_PLANE,
+//		STEP_LENGTH_UNITS,
+//		STEP_LATHE_DIAMETER_MODE,
+//		STEP_CUTTER_COMP,
+//	STEP_TOOL_LENGTH_OFFSET,
+//		STEP_COORD_SYSTEM,
+//		STEP_CONTROL_MODE,
+//		STEP_DISTANCE_MODE,
+//		STEP_IJK_DISTANCE_MODE,
+//		STEP_RETRACT_MODE,
+//		STEP_MODAL_0,
+//		STEP_MOTION,
+
+bool GCodeInterpreter::run_gcode( CmdParser &parser)
+{
+	// STEP_DWELL,
+	if (parser.getGCode(ModalGroup_MODAL_0) == G_4)
+	{
+		IF_F_RET_F(run_dwell(parser));
+	}
+	if (parser.hasGCode(ModalGroup_ACTIVE_PLANE))
+	{
+		IF_F_RET_F(run_set_plane(parser.getGCode(ModalGroup_ACTIVE_PLANE)));
+	}
+	if (parser.hasGCode(ModalGroup_UNITS))
+	{
+		IF_F_RET_F(run_set_units(parser.getGCode(ModalGroup_UNITS)));
+	}
+	if (parser.hasGCode(ModalGroup_LATHE_DIAMETER))
+	{
+		IF_F_RET_F(run_set_lathe_diam(parser));
+	}
+	if (parser.hasGCode(ModalGroup_CUTTER_COMP))
+	{
+		IF_F_RET_F(run_tool_crc(parser));
+	}
+	if (parser.hasGCode(ModalGroup_TOOL_LENGTH_CORRECTION))
+	{
+		IF_F_RET_F(run_tool_height_offset(parser));
+	}
+	if (parser.hasGCode(ModalGroup_COORD_SYSTEM))
+	{
+		IF_F_RET_F(run_set_coord_sys(parser));
+	}
+	if (parser.hasGCode(ModalGroup_CONTROL))
+	{
+		IF_F_RET_F(run_control_mode(parser.getGCode(ModalGroup_CONTROL)));
+	}
+	if (parser.hasGCode(ModalGroup_DISTANCE))
+	{
+		IF_F_RET_F(run_set_dist_mode(parser.getGCode(ModalGroup_DISTANCE)));
+	}
+
+	if (parser.hasGCode(ModalGroup_IJK_DISTANCE))
+	{
+		IF_F_RET_F(run_set_dist_ijk(parser.getGCode(ModalGroup_IJK_DISTANCE)));
+	}
+
+	if (parser.hasGCode(ModalGroup_CYCLE_RETURN))
+	{
+		IF_F_RET_F(run_set_cycle_return(parser.getGCode(ModalGroup_CYCLE_RETURN)));
+	}
+
+	if ( parser.hasGCode(ModalGroup_MODAL_0) )
+	{
+		IF_F_RET_F(run_modal_0(parser));
+	}
+
+	if (runner.motionMode != -1)
+	{
+		IF_F_RET_F(run_motion(parser));
+	}
+	return true;
+}
+
+bool GCodeInterpreter::run_set_plane(int gc)
+{
+	// Src Plane
+	switch (gc)
+	{
+	case G_17: runner.plane = Plane_XY; break;
+	case G_18: runner.plane = Plane_XZ; break;
+	case G_19: runner.plane = Plane_YZ; break;
+	default: RET_F_SETSTATE(INTERNAL_ERROR, "No g17, g18, g19");
+	}
+	return true;
+}
+
+bool GCodeInterpreter::run_set_lathe_diam(const CmdParser &parser)
+{
+	RET_F_SETSTATE(INTERNAL_ERROR, "G7 and G8 does not support yet");
+}
+
+
+bool GCodeInterpreter::run_modal_0(CmdParser &parser)
+{
+	
+	int gc = parser.getGCode(ModalGroup_MODAL_0);
+	switch (gc)
+	{
+	case G_10: 
+		IF_F_RET_F(run_input_mode(parser));
+	case G_4:
+	case G_53: // did it just skip
+		break;
+
+	case G_52:
+	case G_92:
+	case G_92_1:
+	case G_92_2:
+	case G_92_3:
+		IF_F_RET_F(convert_axis_offsets(gc, parser));
+		break;
+	default: RET_F_SETSTATE(INTERNAL_ERROR, "run_modal_0 with no GCode");
+	}
+	return true;
+}
+
+bool GCodeInterpreter::convert_axis_offsets(int gc, const CmdParser &parser)
+{
+	//todo
+	setcoordinates(runner.origin, parser);
+	reset_motion_mode();
+	return true;
+}
+
+
+bool GCodeInterpreter::run_set_units(int gc)
+{
+	switch (gc)
+	{
+		// Units
+	case G_20: runner.units = UnitSystem_INCHES; break;
+	case G_21: runner.units = UnitSystem_MM; break;
+	default: RET_F_SETSTATE(INTERNAL_ERROR, "run_set_units no G20 or G21");
+	}
+	return true;
+}
+
+bool GCodeInterpreter::run_set_coord_sys(const CmdParser &parser)
+{
+	//g54, g55, g56, g57, g58, g59, g59.1, g59.2, g59.3
+	int gc = parser.getGCode(ModalGroup_COORD_SYSTEM);
+	switch (gc)
+	{
+	//case G_53:  g53 = true;  break;  //move to position in Global coordinate system
+	case G_54:  case G_55: case G_56: case G_57: case G_58:
+		runner.origin = env->GetG54G58(gc/10 - 54);
+		break;
+	default: RET_F_SETSTATE(INTERNAL_ERROR, "run_modal_0 with no GCode");
+	}
+	return true;
+}
+
+bool GCodeInterpreter::run_control_mode(int gc)
+{
+	//g61, g61.1, g64 - control mode
+	switch (gc)
+	{
+	case G_61: runner.accuracy = AccuracyExactStop;
+	case G_64: runner.accuracy = AccuracyNormal;
+		break;
+	default: RET_F_SETSTATE(INTERNAL_ERROR, "run_control_mode with no g61, g61.1, g64");
+	}
+	return true;
+}
+
+bool GCodeInterpreter::run_set_dist_mode(int gc)
+{
+	switch (gc)
+	{
+	case G_90: runner.incremental = false; break;
+	case G_91: runner.incremental = true; break;
+		break;
+	default: RET_F_SETSTATE(INTERNAL_ERROR, "run_set_dist_mode with no g90, g91");
+	}
+	return true;
+}
+
+bool GCodeInterpreter::run_set_dist_ijk(int gc)
+{
+	switch (gc)
+	{
+	case G_90_1: runner.ijk_incremental = false; break;
+	case G_91_1: runner.ijk_incremental = true; break;
+		break;
+	default: RET_F_SETSTATE(INTERNAL_ERROR, "run_set_dist_ijk with no g91.1, g92.1");
+	}
+	return true;
+}
+
+bool GCodeInterpreter::run_set_cycle_return(int gc)
+{
+	//g98, g99
+	switch (gc)
+	{
+	case G_98: runner.cycleLevel = CannedLevel_HIGH; break; //Отмена G99
+	case G_99: runner.cycleLevel = CannedLevel_LOW; break; // Return to R level in canned cycle
+		break;
+	default: RET_F_SETSTATE(INTERNAL_ERROR, "run_set_cycle_return with no g98, g99");
+	}
+	return true;
+}
+
+
+bool GCodeInterpreter::run_motion(const CmdParser &parser)
 {
 
-	Coords newpos;
-	MotionMode newMove = runner.motionMode;
+	//Coords newpos;
+	//MotionMode newMove = runner.motionMode;
 
-	// current coordinate is in the local system
-	Coords  currentLocal = runner.position;
-	to_local(currentLocal);
+	//// current coordinate is in the local system
+	//Coords  currentLocal = runner.position;
+	//to_local(currentLocal);
 
-	const g_container &gcodes = parser.getGCodes();
+	//const g_container &gcodes = parser.getGCodes();
 
-	bool  g52 = false, g53 = false;
-
-
-	for (auto iter = gcodes.begin(); iter != gcodes.end(); ++iter)
-	{
-		int num = *iter;
-		switch (num)
-		{
-		// Movement
-			case G_0:   newMove = MotionMode_FAST;   break;
-			case G_1:   newMove = MotionMode_LINEAR; break;
-			case G_2:   newMove = MotionMode_CW_ARC; break;
-			case G_3:   newMove = MotionMode_CCW_ARC; break;
-		// Src Plane
-			case G_17: runner.plane = Plane_XY; break;
-			case G_18: runner.plane = Plane_XZ; break;
-			case G_19: runner.plane = Plane_YZ; break;
-		// Units
-			case G_20: runner.units = UnitSystem_INCHES; break;
-			case G_21: runner.units = UnitSystem_MM; break;
-		// Porbe G_38 for linuxcnc  
-			case G_31: newMove = MotionMode_PROBE; break;
-		// 	G32 is a thread cutting.
-			case G_32: 
-				reset_motion_mode();  
-				RET_F_SETSTATE(INVALID_STATEMENT, "G32 threading mode doas not supporeted yet");
-				break;
-		 // Cutter radius compensation (CRC),
-			case G_40:	//Tool radius compensation off
-			case G_41:	//Turn on cutter radius compensation left
-			case G_42:  //Turn on cutter radius compensation right
-				IF_F_RET_F( run_tool_crc(parser));
-				break;
-		// Tool height offset compensation
-			case G_43:  //Tool height offset compensation negative
-			case G_44:  //Tool height offset compensation positive
-			case G_49:  //Tool height offset compensation off
-				IF_F_RET_F(run_tool_height_offset(parser));
-				break;
-		// Coordinate systems
-			case G_53:  g53 = true;  break;  //move to position in Global coordinate system
-			case G_52:  g52 = true; break; // offset of current coordinats system 
-			case G_54:  case G_55: case G_56: case G_57: case G_58:
-				runner.origin = env->GetG54G58(*iter - 54);
-				break;
-		//G61, G64, G60 G - Code: Exact Stop & Anti - Backlash
-			case G_61: runner.accuracy = AccuracyExactStop;
-			case G_64: runner.accuracy = AccuracyNormal;
-				break;
-		//  Drilling Cycle
-			case G_80: runner.cycle = CannedCycle_RESET; reset_motion_mode();  break;
-			case G_81: runner.cycle = CannedCycle_SINGLE_DRILL; break;
-			case G_82: runner.cycle = CannedCycle_DRILL_AND_PAUSE; break;
-			case G_83: runner.cycle = CannedCycle_DEEP_DRILL; break;
-				break;
-		//  Boring Cycle
-			case G_85:
-			case G_86:
-			case G_87:
-			case G_88:
-			case G_89:
-				 break;
-						 
-			case G_90: runner.incremental = false; break;
-			case G_91: runner.incremental = true; break;
-		
-		//Coordinate System Offset  //TODO
-			case G_92: 
-			case G_92_1:   
-			case G_92_2:
-			case G_92_3:	
-				g52 = true; 
-				break;  
-
-			case G_98: runner.cycleLevel = CannedLevel_HIGH; break; //Отмена G99
-			case G_99: runner.cycleLevel = CannedLevel_LOW; break; // Return to R level in canned cycle
-			
-
-		default:
-			RET_F_SETSTATE(INVALID_STATEMENT, "Unknown code: G%d", (num)/10 );
-		}
-	}
-
-	if (g52)
-	{
-		setcoordinates( runner.origin, parser);
-		reset_motion_mode();
-		if (parser.contain_cmd( ModalGroup_MOVE ) )
-			RET_F_SETSTATE(INVALID_STATEMENT, "G52 and movement command can not be in one frame" );
-	}
-	
+	//bool  g52 = false, g53 = false;
 
 
-	// check if need not move just return
-	if (newMove != MotionMode_NONE)
-	{
+	//for (auto iter = gcodes.begin(); iter != gcodes.end(); ++iter)
+	//{
+	//	int num = *iter;
+	//	switch (num)
+	//	{
+	//	// Movement
+	//		case G_0:   newMove = MotionMode_FAST;   break;
+	//		case G_1:   newMove = MotionMode_LINEAR; break;
+	//		case G_2:   newMove = MotionMode_CW_ARC; break;
+	//		case G_3:   newMove = MotionMode_CCW_ARC; break;
+	//		// Porbe G_38 for linuxcnc  
+	//		case G_31: newMove = MotionMode_PROBE; break;
+	//	// 	G32 is a thread cutting.
+	//		case G_32: 
+	//			reset_motion_mode();  
+	//			RET_F_SETSTATE(INVALID_STATEMENT, "G32 threading mode doas not supporeted yet");
+	//			break;
+	//	// Coordinate systems
+	//
+	//	//  Drilling Cycle
+	//		case G_80: runner.cycle = CannedCycle_RESET; reset_motion_mode();  break;
+	//		case G_81: runner.cycle = CannedCycle_SINGLE_DRILL; break;
+	//		case G_82: runner.cycle = CannedCycle_DRILL_AND_PAUSE; break;
+	//		case G_83: runner.cycle = CannedCycle_DEEP_DRILL; break;
+	//			break;
+	//			//  Boring Cycle
+	//		case G_85:
+	//		case G_86:
+	//		case G_87:
+	//		case G_88:
+	//		case G_89:
+	//			break;
+	//					 
+	//	
+	//	//Coordinate System Offset  //TODO
+	//
+	//			break;  
+	//	
 
-		Coords newPos;
-		if (g53) // do movement in Global Coordinates
-		{
-			newPos = runner.position;
-			setcoordinates(newPos, parser);
-		}
-		else
-		{
-			newPos = get_new_coordinate(currentLocal, parser);
-		}
+	//	default:
+	//		RET_F_SETSTATE(INVALID_STATEMENT, "Unknown code: G%d", (num)/10 );
+	//	}
+	//}
 
-		switch (newMove)
-		{
-			case MotionMode_FAST:    move_to(newPos, true); break;
-			case MotionMode_LINEAR:  move_to(newPos, false);   break;
-			case MotionMode_CW_ARC:  arc_to(newPos, true, parser); break;
-			case MotionMode_CCW_ARC: arc_to(newPos, false, parser); break;
-			case MotionMode_PROBE:   probe_to(newPos);   break;
-			case MotionMode_NONE:    break; // ta avoid compiler warning
-		}
-		if (state.code)
-			return false;
-		
-		if (newMove == MotionMode_PROBE)
-			reset_motion_mode();
-		else
-			runner.motionMode = newMove;
-		
-	}
+
+	//// check if need not move just return
+	//if (newMove != MotionMode_NONE)
+	//{
+
+	//	Coords newPos;
+	//	if (g53) // do movement in Global Coordinates
+	//	{
+	//		newPos = runner.position;
+	//		setcoordinates(newPos, parser);
+	//	}
+	//	else
+	//	{
+	//		newPos = get_new_coordinate(currentLocal, parser);
+	//	}
+
+	//	switch (newMove)
+	//	{
+	//		case MotionMode_FAST:    move_to(newPos, true); break;
+	//		case MotionMode_LINEAR:  move_to(newPos, false);   break;
+	//		case MotionMode_CW_ARC:  arc_to(newPos, true, parser); break;
+	//		case MotionMode_CCW_ARC: arc_to(newPos, false, parser); break;
+	//		case MotionMode_PROBE:   probe_to(newPos);   break;
+	//		case MotionMode_NONE:    break; // ta avoid compiler warning
+	//	}
+	//	if (state.code)
+	//		return false;
+	//	
+	//	if (newMove == MotionMode_PROBE)
+	//		reset_motion_mode();
+	//	else
+	//		runner.motionMode = newMove;
+	//	
+	//}
 
 	return true;
 }
@@ -1315,14 +1472,17 @@ bool GCodeInterpreter::arc_data_ijk(bool cw,       //!< either G_2 (cw arc) or G
 	double radius2;               // radius to end point    
 	char a = arc_axis1(runner.plane), b = arc_axis2(runner.plane);
 
-	if (runner.ij_absolute) {
-		*center_x = (i_number);
-		*center_y = (j_number);
-	}
-	else {
+	if (runner.ijk_incremental ) 
+	{
 		*center_x = (current_x + i_number);
 		*center_y = (current_y + j_number);
 	}
+	else 
+	{
+		*center_x = (i_number);
+		*center_y = (j_number);
+	}
+
 	radius = hypot((*center_x - current_x), (*center_y - current_y));
 	radius2 = hypot((*center_x - end_x), (*center_y - end_y));
 
