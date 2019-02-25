@@ -40,7 +40,7 @@
 
 #define IF_F_RET_F_SETSTATE(fun, error, fmt, ...)                             \
     do {                                                   \
-		if( !fun )                                     \
+		if( !(fun) )                                     \
 		{ state = InterError::CreateErrorCode(error, fmt, ## __VA_ARGS__);            \
 		  return false; }                                   \
     } while(0)
@@ -103,7 +103,7 @@ namespace Interpreter
 		Y_AXIS = 1,
 		Z_AXIS = 2,
 	};
-
+	/*
 	enum MotionMode //режимы перемещения
 	{
 		MotionMode_NONE = 0,
@@ -113,7 +113,7 @@ namespace Interpreter
 		MotionMode_CCW_ARC,
 		MotionMode_PROBE
 	};
-
+	*/
 	enum CannedCycle
 	{
 		CannedCycle_NONE = 0,
@@ -308,11 +308,12 @@ namespace Interpreter
 		UnitSystem units;        //текущая система единиц измерения
 		bool incremental;        //абсолютная система координат?
 		bool ijk_incremental;
-		MotionMode motionMode;   //режим перемещения (линейная интерполяция и т.п.)
+		int motion_mode;   //режим перемещения (линейная интерполяция и т.п.)
 		Plane plane;             //текущая плоскость интерполяции
 		double feed;             //подача в мм/мин
 		double spindlespeed; // обороты шпиндля
-		Coords origin;            //параметры команд G54..G58
+		Coords origin;     
+		Coords axis_offset;
 		int tool_length_offset;  // Tool height offset compensation
 		double tool_yoffset;
 		double tool_xoffset;
@@ -322,7 +323,8 @@ namespace Interpreter
 		bool cutter_comp_firstmove;
 		int cutter_comp_side;
 		double cutter_comp_radius;
-		bool ij_absolute;
+		bool cycle_il_flag;
+		int coordinate_index ;
 		CannedCycle cycle;       //текущий цикл
 		CannedLevel cycleLevel;
 		//    bool   cycleUseLowLevel; //использовать R вместо стартовой точки
@@ -332,9 +334,9 @@ namespace Interpreter
 		//    double cycleStep;        //глубина одного шага Q
 		//    int    cycleWait;        //задержка в цикле P
 		RunnerData() :
-			toolid(-1), units(UnitSystem_MM), incremental(false), ijk_incremental(true), motionMode(MotionMode_NONE), plane(Plane_XY), feed(0), spindlespeed(0),
-			cycle(CannedCycle_NONE), tool_length_offset(0), tool_yoffset(0), tool_xoffset(0), cycleLevel(CannedLevel_HIGH),
-			accuracy(AccuracyNormal), cutter_comp_firstmove(true), cutter_comp_side(0), cutter_comp_radius(0.0) { }
+			toolid(-1), units(UnitSystem_MM), incremental(false), ijk_incremental(true), motion_mode(-1), plane(Plane_XY), feed(0), spindlespeed(0),
+			cycle(CannedCycle_NONE), tool_length_offset(0), tool_yoffset(0), tool_xoffset(0), cycleLevel(CannedLevel_HIGH), cycle_il_flag(false),
+			accuracy(AccuracyNormal), cutter_comp_firstmove(true), cutter_comp_side(0), cutter_comp_radius(0.0), coordinate_index(-1) { }
 	};
 };
 

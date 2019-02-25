@@ -1,3 +1,6 @@
-G0 x7y7
-#100 = sin[9]
-M2
+G0 X0 Y0 Z0  
+G0 X-10 Y-10 Z0  		(move somewhere)
+G92 X0 Y0 Z0  				(declare where we are to be zero)
+G0 X10 Y2 Z0
+
+

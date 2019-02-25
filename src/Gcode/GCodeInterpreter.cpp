@@ -215,11 +215,9 @@ bool GCodeInterpreter::execute_subrotinue( const  CmdParser parser )
 
 	for (int i = 0; i < times; ++i)
 	{
-		reset_motion_mode();
 		cursubr_ = sname; //restore current sub
 		int nline = substack.top().nline;
 		execute_file_int(substack.top().startpos, &GCodeInterpreter::execute_frame, nline );
-		reset_motion_mode();
 		if (state.code == SUBROTINE_END)
 			state.clear(); // clear END_SUBROTINUE STATE 
 		else if (state.code == PRAGRAMM_END || state.code == PRAGRAMM_ENDCLEAR)
@@ -250,10 +248,8 @@ InterError GCodeInterpreter::execute_frame(const char *str)
 	
 	if (!parser.neead_execute())
 		return InterError();
-	
-	// check 
 
-	// run
+	// chexk & run subrotins
 	if ( parser.contain_m(98) && executablecall) // call sub
 	{
 		execute_subrotinue( parser );
@@ -287,6 +283,15 @@ InterError GCodeInterpreter::execute_frame(const char *str)
 	if (cursubr_ != substack.top().name )
 		return get_state();
 
+
+	// check 
+	motion_to_be = -1;
+	if (!enhance_frame(parser))
+		return get_state();
+
+	if (!check_frame(parser))
+		return get_state();
+	
 
 	//====================================================================================================
 	//Actions are executed in the following order:
@@ -325,6 +330,66 @@ InterError GCodeInterpreter::execute_frame(const char *str)
 		return get_state();
 	//	STEP_MGROUP4,	
 	return InterError();
+}
+
+bool GCodeInterpreter::check_frame(const CmdParser &parser)
+{
+	//to do
+	return true;
+}
+
+bool GCodeInterpreter::enhance_frame(const CmdParser &parser)
+{
+	
+	bool axis_flag = (parser.hasParam(PARAM_X) || parser.hasParam(PARAM_Y) ||
+		parser.hasParam(PARAM_Z) || parser.hasParam(PARAM_A) ||
+		parser.hasParam(PARAM_B) || parser.hasParam(PARAM_C));
+
+	bool ijk_flag = (parser.hasParam(PARAM_I) || parser.hasParam(PARAM_J) || parser.hasParam(PARAM_K));
+
+	int  mode0 = parser.getGCode(ModalGroup_MODAL_0);
+	int  mode1 = parser.getGCode(ModalGroup_MOVE);
+	
+	bool mode_zero_covets_axes =
+		((mode0 == G_10) || (mode0 == G_28) || (mode0 == G_30)
+			|| (mode0 == G_52) || (mode0 == G_92));
+
+	if (mode1 != -1) 
+	{
+		if (mode1 == G_80) 
+		{
+			IF_T_RET_F_SETSTATE((axis_flag && !mode_zero_covets_axes), PARAMETER_ERROR, "Can not use axis values with G80");
+			IF_T_RET_F_SETSTATE(((!axis_flag) && (mode0 == G_52 || mode0 == G_92)), PARAMETER_ERROR, "All Axis missing with G52 or G92");		
+		}
+		else 
+		{
+			IF_T_RET_F_SETSTATE(mode_zero_covets_axes, PARAMETER_ERROR, "Can not use two G codes that both use axis value");
+			IF_T_RET_F_SETSTATE((!axis_flag  && mode1 != G_0 && mode1 != G_1 &&
+				mode1 != G_2 && mode1 != G_3 && mode1 != G_5_2), PARAMETER_ERROR, "All Axis missing with motion code");
+		}
+		motion_to_be = mode1;
+	}
+	else if (mode_zero_covets_axes) 
+	{   /* other 3 can get by without axes but not G92 */
+		IF_T_RET_F_SETSTATE(((!axis_flag) &&
+			(mode0 == G_52 || mode0 == G_92)), PARAMETER_ERROR, "All Axis missing with G52 or G92 code");
+	}
+	else if (axis_flag ) 
+	{
+		IF_T_RET_F_SETSTATE(((runner.motion_mode == -1)
+			|| (runner.motion_mode == G_80)) && (parser.getGCode(ModalGroup_TOOL_LENGTH_CORRECTION) != G_43_1),
+				PARAMETER_ERROR, "Can not use axis values with out a G code");
+
+		if (parser.getGCode(ModalGroup_TOOL_LENGTH_CORRECTION) != G_43_1) 
+		{
+			motion_to_be = runner.motion_mode;
+		}
+	}
+	else if (!axis_flag && ijk_flag && (runner.motion_mode == G_2 || runner.motion_mode == G_3)) {
+		// this is a block like simply "i1" which should be accepted if we're in arc mode
+		motion_to_be = runner.motion_mode;
+	}	
+	return true;
 }
 
 
@@ -392,7 +457,6 @@ bool GCodeInterpreter::run_dwell(CmdParser &parser)
 			RET_F_SETSTATE(WRONG_VALUE, "very many parameters for dwell G4 ");
 
 		executor->set_dwell(static_cast<long>(millseconds));
-		reset_motion_mode();
 		parser.remove_params();
 	}
 	return true;
@@ -435,8 +499,8 @@ bool GCodeInterpreter::run_input_mode( CmdParser &parser )
 		int ip = static_cast<int>(p);
 		IF_F_RET_F_SETSTATE((ip >= 1 && ip <= 5), WRONG_VALUE, "Parametr 'p' out of range ");
 		Coords newpos;
-		setcoordinates(newpos, parser);
-		env->SetG54G58(ip - 1, newpos, runner.incremental );
+		setcoordinates(newpos, parser,false);
+		env->SetG54G58(ip - 1, newpos );
 		parser.clear();
 	}
 	return true;
@@ -605,10 +669,6 @@ bool GCodeInterpreter::run_mcode(const  CmdParser &parser)
 	return true;
 }
 
-void GCodeInterpreter::reset_motion_mode()
-{
-	runner.motionMode = MotionMode_NONE;
-}
 
 
 			//case G_17: runner.plane = Plane_XY; break;
@@ -683,9 +743,9 @@ bool GCodeInterpreter::run_gcode( CmdParser &parser)
 		IF_F_RET_F(run_modal_0(parser));
 	}
 
-	if (runner.motionMode != -1)
+	if (motion_to_be != -1)
 	{
-		IF_F_RET_F(run_motion(parser));
+		IF_F_RET_F(run_motion(motion_to_be, parser));
 	}
 	return true;
 }
@@ -735,9 +795,68 @@ bool GCodeInterpreter::run_modal_0(CmdParser &parser)
 
 bool GCodeInterpreter::convert_axis_offsets(int gc, const CmdParser &parser)
 {
-	//todo
-	setcoordinates(runner.origin, parser);
-	reset_motion_mode();
+	IF_T_RET_F_SETSTATE(runner.cutter_comp_side, PARAMETER_ERROR, " Can not change axis offset with cuitter compensation mode");
+	
+	Coords axis_offset;
+	setcoordinates(axis_offset, parser, false);
+
+	if ((gc == G_52) || (gc == G_92)) 
+	{
+		double val;
+		if (gc == G_52)
+		{
+			// update current position
+			for (int i = 0; i < MAX_AXES; ++i)
+			{
+				runner.position.r[i] -= (runner.axis_offset.r[i] + axis_offset.r[i]);
+			}
+			
+			if (parser.getRParam(PARAM_X, &val)) runner.axis_offset.x = axis_offset.x;
+			if (parser.getRParam(PARAM_Y, &val)) runner.axis_offset.y = axis_offset.y;
+			if (parser.getRParam(PARAM_Z, &val)) runner.axis_offset.z = axis_offset.z;
+			if (parser.getRParam(PARAM_A, &val)) runner.axis_offset.a = axis_offset.a;
+			if (parser.getRParam(PARAM_B, &val)) runner.axis_offset.b = axis_offset.b;
+			if (parser.getRParam(PARAM_C, &val)) runner.axis_offset.c = axis_offset.c;
+		}
+		else
+		{
+			if (parser.getRParam(PARAM_X, &val))
+			{
+				runner.axis_offset.x = runner.position.x - axis_offset.x;
+				runner.position.x = axis_offset.x;
+			}
+
+			if (parser.getRParam(PARAM_Y, &val))
+			{
+				runner.axis_offset.y = runner.position.y - axis_offset.y;
+				runner.position.y = axis_offset.y;
+			}
+			if (parser.getRParam(PARAM_Z, &val))
+			{
+				runner.axis_offset.z = runner.position.z - axis_offset.z;
+				runner.position.z = axis_offset.z;
+			}
+			if (parser.getRParam(PARAM_A, &val))
+			{
+				runner.axis_offset.a = runner.position.a - axis_offset.a;
+				runner.position.a = axis_offset.a;
+			}
+			if (parser.getRParam(PARAM_B, &val))
+			{
+				runner.axis_offset.b = runner.position.b - axis_offset.b;
+				runner.position.b = axis_offset.b;
+			}
+			if (parser.getRParam(PARAM_C, &val))
+			{
+				runner.axis_offset.c = runner.position.c - axis_offset.c;
+				runner.position.c = axis_offset.c;
+			}
+		}
+	}
+	else
+	{
+		RET_F_SETSTATE(INTERNAL_ERROR, "G92.1 and G92.2 not implemented yet");	
+	}
 	return true;
 }
 
@@ -754,18 +873,34 @@ bool GCodeInterpreter::run_set_units(int gc)
 	return true;
 }
 
+
 bool GCodeInterpreter::run_set_coord_sys(const CmdParser &parser)
 {
-	//g54, g55, g56, g57, g58, g59, g59.1, g59.2, g59.3
+	IF_T_RET_F_SETSTATE(runner.cutter_comp_side, PARAMETER_ERROR, " Cannot change coordinate systems with cuitter compensation mode");
+
+	int origin;
 	int gc = parser.getGCode(ModalGroup_COORD_SYSTEM);
 	switch (gc)
 	{
-	//case G_53:  g53 = true;  break;  //move to position in Global coordinate system
-	case G_54:  case G_55: case G_56: case G_57: case G_58:
-		runner.origin = env->GetG54G58(gc/10 - 54);
+	case G_54:	origin = 1;	break;
+	case G_55:	origin = 2;	break;
+	case G_56:	origin = 3;	break;
+	case G_57:	origin = 4;	break;
+	case G_58:	origin = 5;	break;
+	case G_59:	origin = 6;	break;
+	case G_59_1: origin = 7; break;
+	case G_59_2: origin = 8; break;
+	case G_59_3: origin = 9; break;
 		break;
 	default: RET_F_SETSTATE(INTERNAL_ERROR, "run_modal_0 with no GCode");
 	}
+	if (runner.coordinate_index == origin) // the same as now
+		return true;
+
+	runner.coordinate_index = origin;
+	env->SetVariable(5220, static_cast<double>(origin)); //  save selected system
+	runner.origin = env->GetG54G58(origin);				 // load the origin of the newly-selected system
+	//runner.rotation_xy = env->GetVariable(5210 + (origin * 20));
 	return true;
 }
 
@@ -820,156 +955,129 @@ bool GCodeInterpreter::run_set_cycle_return(int gc)
 }
 
 
-bool GCodeInterpreter::run_motion(const CmdParser &parser)
+bool GCodeInterpreter::run_motion(int motion, const CmdParser &parser)
 {
+	Coords newPos;
 
-	//Coords newpos;
-	//MotionMode newMove = runner.motionMode;
+	IF_F_RET_F( get_new_coordinate(parser, newPos));
 
-	//// current coordinate is in the local system
-	//Coords  currentLocal = runner.position;
-	//to_local(currentLocal);
+	int xyzuvw_flag = (parser.hasParam(PARAM_X) || parser.hasParam(PARAM_Y) || parser.hasParam(PARAM_Z) ||
+		parser.hasParam(PARAM_U) || parser.hasParam(PARAM_V) || parser.hasParam(PARAM_W));
 
-	//const g_container &gcodes = parser.getGCodes();
-
-	//bool  g52 = false, g53 = false;
-
-
-	//for (auto iter = gcodes.begin(); iter != gcodes.end(); ++iter)
-	//{
-	//	int num = *iter;
-	//	switch (num)
-	//	{
-	//	// Movement
-	//		case G_0:   newMove = MotionMode_FAST;   break;
-	//		case G_1:   newMove = MotionMode_LINEAR; break;
-	//		case G_2:   newMove = MotionMode_CW_ARC; break;
-	//		case G_3:   newMove = MotionMode_CCW_ARC; break;
-	//		// Porbe G_38 for linuxcnc  
-	//		case G_31: newMove = MotionMode_PROBE; break;
-	//	// 	G32 is a thread cutting.
-	//		case G_32: 
-	//			reset_motion_mode();  
-	//			RET_F_SETSTATE(INVALID_STATEMENT, "G32 threading mode doas not supporeted yet");
-	//			break;
-	//	// Coordinate systems
-	//
-	//	//  Drilling Cycle
-	//		case G_80: runner.cycle = CannedCycle_RESET; reset_motion_mode();  break;
-	//		case G_81: runner.cycle = CannedCycle_SINGLE_DRILL; break;
-	//		case G_82: runner.cycle = CannedCycle_DRILL_AND_PAUSE; break;
-	//		case G_83: runner.cycle = CannedCycle_DEEP_DRILL; break;
-	//			break;
-	//			//  Boring Cycle
-	//		case G_85:
-	//		case G_86:
-	//		case G_87:
-	//		case G_88:
-	//		case G_89:
-	//			break;
-	//					 
-	//	
-	//	//Coordinate System Offset  //TODO
-	//
-	//			break;  
-	//	
-
-	//	default:
-	//		RET_F_SETSTATE(INVALID_STATEMENT, "Unknown code: G%d", (num)/10 );
-	//	}
-	//}
-
-
-	//// check if need not move just return
-	//if (newMove != MotionMode_NONE)
-	//{
-
-	//	Coords newPos;
-	//	if (g53) // do movement in Global Coordinates
-	//	{
-	//		newPos = runner.position;
-	//		setcoordinates(newPos, parser);
-	//	}
-	//	else
-	//	{
-	//		newPos = get_new_coordinate(currentLocal, parser);
-	//	}
-
-	//	switch (newMove)
-	//	{
-	//		case MotionMode_FAST:    move_to(newPos, true); break;
-	//		case MotionMode_LINEAR:  move_to(newPos, false);   break;
-	//		case MotionMode_CW_ARC:  arc_to(newPos, true, parser); break;
-	//		case MotionMode_CCW_ARC: arc_to(newPos, false, parser); break;
-	//		case MotionMode_PROBE:   probe_to(newPos);   break;
-	//		case MotionMode_NONE:    break; // ta avoid compiler warning
-	//	}
-	//	if (state.code)
-	//		return false;
-	//	
-	//	if (newMove == MotionMode_PROBE)
-	//		reset_motion_mode();
-	//	else
-	//		runner.motionMode = newMove;
-	//	
-	//}
-
+//	if (!is_a_cycle(motion))
+//		runner.cycle_il_flag = false;
+	
+	if ((motion == G_0) || (motion == G_1) || (motion == G_33) || (motion == G_33_1) || (motion == G_76)) 
+	{
+		IF_F_RET_F(move_to(motion, newPos, parser)); 
+	}
+	else if ((motion == G_3) || (motion == G_2)) {
+		IF_F_RET_F(arc_to(motion, newPos,  parser));
+	}
+	else if ( motion == G_38_2 || motion == G_38_3 || //motion == GG_31 ||
+		motion == G_38_4 || motion == G_38_5) 
+	{
+		IF_F_RET_F(probe_to(motion, newPos, parser));
+	}
+	else if (motion == G_80) 
+	{
+		//settings->motion_mode = G_80;
+		runner.motion_mode = G_80;
+	}
+	else if (is_a_cycle(motion)) 
+	{
+		;// CHP(convert_cycle(motion, block, settings));
+	}
+	else if ((motion == G_5) || (motion == G_5_1)) 
+	{
+		;// CHP(convert_spline(motion, block, settings));
+	}
+	else if (motion == G_5_2) {
+		;// CHP(convert_nurbs(motion, block, settings));
+	}
+	else
+	{
+		RET_F_SETSTATE(INTERNAL_ERROR, "run_motion with no motion codes");
+	}
 	return true;
 }
 
 //====================================================================================================
 //чтение новых координат с учётом модальных кодов
 
-void GCodeInterpreter::setcoordinates(Coords &newpos, const CmdParser &parser) const
+void GCodeInterpreter::setcoordinates(Coords &newpos, const CmdParser &parser, bool doofesett) const
 {
 	double val;
-	if (parser.getRParam(PARAM_X, &val))	newpos.x = to_mm(val);
-	if (parser.getRParam(PARAM_Y, &val))	newpos.y = to_mm(val);
-	if (parser.getRParam(PARAM_Z, &val))	newpos.z = to_mm(val);
-	if (parser.getRParam(PARAM_A, &val))	newpos.a = to_mm(val);
-	if (parser.getRParam(PARAM_B, &val))	newpos.b = to_mm(val);
-	if (parser.getRParam(PARAM_C, &val))	newpos.c = to_mm(val);
+	if (parser.getRParam(PARAM_X, &val))
+	{
+		newpos.x = to_mm(val);
+		if (doofesett)
+			newpos.x += (runner.origin.x + runner.axis_offset.x + runner.tool_xoffset);
+	}
+	if (parser.getRParam(PARAM_Y, &val))
+	{
+		newpos.y = to_mm(val);
+		if (doofesett)
+			newpos.y += (runner.origin.y + runner.axis_offset.y + runner.tool_yoffset);
+	}
+
+	if (parser.getRParam(PARAM_Z, &val))
+	{
+		newpos.z = to_mm(val);
+		if (doofesett)
+			newpos.z += (runner.origin.z + runner.axis_offset.z + runner.tool_length_offset);
+	}
+
+	if (parser.getRParam(PARAM_A, &val))
+	{
+		newpos.a = to_mm(val);
+		if (doofesett)
+			newpos.a += (runner.origin.a + runner.axis_offset.a);
+	}
+	if (parser.getRParam(PARAM_B, &val)) 
+	{
+		newpos.b = to_mm(val);
+		if (doofesett)
+			newpos.b += (runner.origin.b + runner.axis_offset.b);
+	}
+	if (parser.getRParam(PARAM_C, &val)) 
+	{
+		newpos.c = to_mm(val);
+		if (doofesett)
+			newpos.c += (runner.origin.c + runner.axis_offset.c);
+	}
 }
 
 
-Coords GCodeInterpreter::get_new_coordinate(Coords &oldLocal, const CmdParser &parser)
+
+
+bool GCodeInterpreter::get_new_coordinate(const CmdParser &parser, Coords &newpos )
 {
-	Coords  newpos;
-	if (runner.incremental)
+	
+	//bool middle = !runner.cutter_comp_firstmove;
+	//bool comp = (runner.cutter_comp_side);
+	if (parser.getGCode(ModalGroup_MODAL_0) == G_53)
 	{
 		newpos = runner.position;
-		double v;
-		if (parser.getRParam(PARAM_X, &v)) newpos.x += to_mm(v);
-		if (parser.getRParam(PARAM_Y, &v)) newpos.y += to_mm(v);
-		if (parser.getRParam(PARAM_Z, &v)) newpos.z += to_mm(v);
-		if (parser.getRParam(PARAM_A, &v)) newpos.a += to_mm(v);
-		if (parser.getRParam(PARAM_B, &v)) newpos.b += to_mm(v);
-		if (parser.getRParam(PARAM_C, &v)) newpos.c += to_mm(v);
+		setcoordinates(newpos,  parser, false );
 	}
-	else
+
+	else if (!runner.incremental)  // absolute position
 	{
-		newpos = oldLocal;
-		setcoordinates(newpos, parser);
-		to_global(newpos);
+		newpos = runner.position;
+		setcoordinates(newpos, parser, true);
 	}
-	return newpos;
+	else // incremental
+	{
+		newpos = runner.position;
+		Coords move;
+		setcoordinates(move, parser, false);
+		for (int i = 0; i < MAX_AXES; ++i)
+			newpos.r[i] += move.r[i];
+	}
+	return true;
 }
 
-//====================================================================================================
-//сдвиг в глобальные координаты
-void GCodeInterpreter::to_global(Coords &coords)
-{
-	for (int i = 0; i < MAX_AXES; ++i)
-		coords.r[i] += runner.origin.r[i];
-}
-
-//====================================================================================================
-//получение локальных координат из глобальных
-void GCodeInterpreter::to_local(Coords &coords)
-{
-	for (int i = 0; i < MAX_AXES; ++i)
-		coords.r[i] -= runner.origin.r[i];
-}
 
 //M30 = Program end, Rewind to first block and STOP execution.
 //M02 = Program end, STOP execution with no Rewind.Hitting "START" again will continue with block after M02
@@ -993,22 +1101,24 @@ bool GCodeInterpreter::run_stop(const CmdParser &parser)
 }
 
 
-void  GCodeInterpreter::probe_to(const Coords &position)
+bool GCodeInterpreter::probe_to(int motion, const Coords &position, const CmdParser &parser)
 {
 	if (executor)
 		executor->process_probe(position);
 	
 	//executor->straight_traverce(position);
-	//runner.position = position; //???
+	//runner.position = position; //??
+	runner.motion_mode = motion;
+	return true;
 }
 
 //====================================================================================================
-void  GCodeInterpreter::move_to(const Coords &position, bool fast)
+bool  GCodeInterpreter::move_to(int motion, const Coords &position, const CmdParser &parser)
 {
 
 	if (executor)
 	{
-		if (fast)
+		if (motion == G_0)
 		{
 			executor->straight_traverce(position);
 		}
@@ -1016,7 +1126,8 @@ void  GCodeInterpreter::move_to(const Coords &position, bool fast)
 			executor->straight_feed(position);
 	}
 	runner.position = position;
-
+	runner.motion_mode = motion;
+	return true;
 }
 
 
@@ -1184,7 +1295,7 @@ void  GCodeInterpreter::arc_to(const Coords &position, bool cw)
 }
 */
 
-bool GCodeInterpreter::arc_to(const Coords &position, bool cw, const CmdParser &parser)       //!< either G_2 (cw arc) or G_3 (ccw arc)    
+bool GCodeInterpreter::arc_to(int motion, const Coords &position, const CmdParser &parser)       //!< either G_2 (cw arc) or G_3 (ccw arc)    
 {
 	bool first;                    /* flag set true if this is first move after comp true */
 	int ijk_flag;                 /* flag set true if any of i,j,k present in NC code  */
@@ -1283,6 +1394,7 @@ bool GCodeInterpreter::arc_to(const Coords &position, bool cw, const CmdParser &
 	CC_end = position.c;
 
 	//settings->motion_mode = move;
+	runner.motion_mode = motion;
 
 	double i = 0,j=0,k=0;
 	if( parser.getRParam(PARAM_I, &i) )  i = to_mm(i);
@@ -1294,7 +1406,7 @@ bool GCodeInterpreter::arc_to(const Coords &position, bool cw, const CmdParser &
 		if ((!runner.cutter_comp_side) ||
 			(runner.cutter_comp_radius == 0.0)) 
 		{
-			IF_F_RET_F(convert_arc2(cw, parser, 
+			IF_F_RET_F(convert_arc2(motion, parser,
 					&(runner.position.x), &(runner.position.y), &(runner.position.z),
 					end_x, end_y, end_z,
 					AA_end, BB_end, CC_end,	
@@ -1302,11 +1414,11 @@ bool GCodeInterpreter::arc_to(const Coords &position, bool cw, const CmdParser &
 		}
 		else if (first) 
 		{
-			IF_F_RET_F( convert_arc_comp1(cw, parser, end_x, end_y, end_z,
+			IF_F_RET_F( convert_arc_comp1(motion, parser, end_x, end_y, end_z,
 				i, j, AA_end, BB_end, CC_end, u_end, v_end, w_end));
 		}
 		else {
-			IF_F_RET_F( convert_arc_comp2(cw, parser, end_x, end_y, end_z,
+			IF_F_RET_F( convert_arc_comp2(motion, parser, end_x, end_y, end_z,
 				i,j, AA_end, BB_end, CC_end, u_end, v_end, w_end));
 		}
 	}
@@ -1315,24 +1427,24 @@ bool GCodeInterpreter::arc_to(const Coords &position, bool cw, const CmdParser &
 		if ((!runner.cutter_comp_side) ||
 			(runner.cutter_comp_radius == 0.0)) 
 		{
-			IF_F_RET_F(	convert_arc2(cw, parser, 
+			IF_F_RET_F(	convert_arc2(motion, parser,
 				&(runner.position.z), &(runner.position.x), &(runner.position.y),
 				end_z, end_x, end_y, AA_end, BB_end, CC_end,	u_end, v_end, w_end, k,i));
 		}
 		else if (first) 
 		{
-			IF_F_RET_F( convert_arc_comp1(cw, parser, end_z, end_x, end_y,
+			IF_F_RET_F( convert_arc_comp1(motion, parser, end_z, end_x, end_y,
 				k, i, AA_end, BB_end, CC_end, u_end, v_end, w_end));
 		}
 		else 
 		{
-			IF_F_RET_F(convert_arc_comp2(cw, parser, end_z, end_x, end_y,
+			IF_F_RET_F(convert_arc_comp2(motion, parser, end_z, end_x, end_y,
 				k, i, AA_end, BB_end, CC_end, u_end, v_end, w_end));
 			
 		}
 	}
 	else if (runner.plane == Plane_YZ) {
-		IF_F_RET_F(convert_arc2(cw, parser,
+		IF_F_RET_F(convert_arc2(motion, parser,
 				&(runner.position.y), &(runner.position.z), &(runner.position.x),
 				end_y, end_z, end_x,AA_end, BB_end, CC_end,	u_end, v_end, w_end, j,k));
 	}
@@ -1361,7 +1473,7 @@ This converts a helical or circular arc.
 */
 
 
-bool GCodeInterpreter::convert_arc2(bool cw,       //!< either G_2 (cw arc) or G_3 (ccw arc)    
+bool GCodeInterpreter::convert_arc2(int motion,       //!< either G_2 (cw arc) or G_3 (ccw arc)    
 	const CmdParser &parser,
 	double *current1,       //!< pointer to current value of coordinate 1
 	double *current2,       //!< pointer to current value of coordinate 2
@@ -1401,12 +1513,12 @@ bool GCodeInterpreter::convert_arc2(bool cw,       //!< either G_2 (cw arc) or G
 	if (parser.getRParam(PARAM_R, &rval))
 	{
 		rval = to_mm(rval);
-		IF_F_RET_F(arc_data_r(cw, *current1, *current2, end1, end2,
+		IF_F_RET_F(arc_data_r(motion, *current1, *current2, end1, end2,
 			rval, p_int, &center1, &center2, &turn, radius_tolerance));
 	}
 	else 
 	{
-		IF_F_RET_F(arc_data_ijk(cw, *current1, *current2, end1, end2,
+		IF_F_RET_F(arc_data_ijk(motion, *current1, *current2, end1, end2,
 			offset1, offset2, p_int,
 			&center1, &center2, &turn, radius_tolerance, spiral_abs_tolerance, SPIRAL_RELATIVE_TOLERANCE));
 	}
@@ -1453,7 +1565,7 @@ char GCodeInterpreter::arc_axis2(Plane plane)
 }
 
 
-bool GCodeInterpreter::arc_data_ijk(bool cw,       //!< either G_2 (cw arc) or G_3 (ccw arc)
+bool GCodeInterpreter::arc_data_ijk(int motion,       //!< either G_2 (cw arc) or G_3 (ccw arc)
 	double &current_x,       //!< first coordinate of current point
 	double &current_y,       //!< second coordinate of current point
 	double &end_x,   //!< first coordinate of arc end point
@@ -1499,7 +1611,7 @@ bool GCodeInterpreter::arc_data_ijk(bool cw,       //!< either G_2 (cw arc) or G
 		"Radius to end of arc differs from radius to start: start=(%c%.4f,%c%.4f) center=(%c%.4f,%c%.4f) end=(%c%.4f,%c%.4f) r1=%.4f r2=%.4f abs_err=%.4g rel_err=%.4f%%",
 		a, current_x, b, current_y,	a, *center_x, b, *center_y,	a, end_x, b, end_y, radius, radius2,abs_err, rel_err * 100);
 
-	if (cw)
+	if (motion == G_2)
 		*turn = -1 * p_number;
 	else 
 		*turn = 1 * p_number;
@@ -1543,7 +1655,7 @@ of the arc lies on a line through M perpendicular to L.
 */
 
 
-bool GCodeInterpreter::arc_data_r(bool cw, //!< either G_2 (cw arc) or G_3 (ccw arc)	
+bool GCodeInterpreter::arc_data_r(int motion, //!< either G_2 (cw arc) or G_3 (ccw arc)	
 	double &current_x, //!< first coordinate of current point
 	double &current_y, //!< second coordinate of current point
 	double &end_x,     //!< first coordinate of arc end point
@@ -1574,7 +1686,7 @@ bool GCodeInterpreter::arc_data_r(bool cw, //!< either G_2 (cw arc) or G_3 (ccw 
 	if ((half_length / abs_radius) > (1 - TINY))
 		half_length = abs_radius;   /* allow a small error for semicircle */
 	  /* check needed before calling asin   */
-	if (((cw) && (radius > 0)) || ((!cw) && (radius < 0)))
+	if (((motion == G_2) && (radius > 0)) || ((motion != G_2) && (radius < 0)))
 		theta = atan2((end_y - current_y), (end_x - current_x)) - M_PI_2l;
 	else
 		theta = atan2((end_y - current_y), (end_x - current_x)) + M_PI_2l;
@@ -1583,7 +1695,7 @@ bool GCodeInterpreter::arc_data_r(bool cw, //!< either G_2 (cw arc) or G_3 (ccw 
 	offset = abs_radius * cos(turn2);
 	*center_x = mid_x + (offset * cos(theta));
 	*center_y = mid_y + (offset * sin(theta));
-	*turn = (cw) ? -1 * p_number : 1 * p_number;
+	*turn = (motion==G_2) ? -1 * p_number : 1 * p_number;
 
 	return true;
 }
@@ -1616,7 +1728,7 @@ tangent to the second arc throughout the move.
 
 */
 
-bool GCodeInterpreter::convert_arc_comp1(bool cw,  //!< either G_2 (cw arc) or G_3 (ccw arc)            
+bool GCodeInterpreter::convert_arc_comp1(int motion,  //!< either G_2 (cw arc) or G_3 (ccw arc)            
 	const CmdParser &parser,
 	double &end_x,      //!< x-value at end of programmed (then actual) arc  
 	double &end_y,      //!< y-value at end of programmed (then actual) arc  
@@ -1765,7 +1877,7 @@ bool GCodeInterpreter::convert_arc_comp1(bool cw,  //!< either G_2 (cw arc) or G
 //
 //*/
 //
-bool GCodeInterpreter::convert_arc_comp2(bool cw,  //!< either G_2 (cw arc) or G_3 (ccw arc)          
+bool GCodeInterpreter::convert_arc_comp2(int motion,  //!< either G_2 (cw arc) or G_3 (ccw arc)          
 	const CmdParser &parser,
 	double end_x,      //!< x-value at end of programmed (then actual) arc
 	double end_y,      //!< y-value at end of programmed (then actual) arc

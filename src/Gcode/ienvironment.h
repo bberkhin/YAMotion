@@ -7,8 +7,8 @@ class IEnvironment
 {
  public:
      virtual Coords GetG54G58 ( int index  ) = 0; // возвращает пользовательскую систему координат
-	 virtual void SetG54G58(int index, Coords &pos, bool incremental) = 0;
-	 virtual void SetVariable(int index, double &value) = 0;
+	 virtual void SetG54G58(int index, Coords &pos ) = 0;
+	 virtual void SetVariable(int index, double value) = 0;
 	 virtual double GetVariable(int index ) = 0;
 };
 

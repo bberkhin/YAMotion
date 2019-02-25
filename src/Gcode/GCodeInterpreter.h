@@ -58,19 +58,18 @@ namespace Interpreter
 		bool execute_file_int(long pos, ExecFunction fun, int &lineNumber);
 		const char *cpy_close_and_downcase(char *line, const char *src, int lineNumber);
 		InterError execute_frame(const char *frame);    //выполнение строки
+		bool check_frame(const CmdParser &parser);
+		bool enhance_frame(const CmdParser &parser);
+
 		InterError is_subrotin_start(const char *str);    //выполнение строки при поиске
 		bool execute_subrotinue(const  CmdParser parser);
 		bool find_subrotinue(const char *subname, SubratinInfo *psub);
-		void reset_motion_mode();
 		//void set_move_mode(MotionMode mode);      //изменение режима перемещения
-		void local_deform(Coords &coords);      //преобразование масштаба, поворот в локальной системе координат
-		void to_global(Coords &coords);         //сдвиг в глобальные координаты
-		void to_local(Coords &coords);          //сдвиг в локальные координаты
 		coord to_mm(coord value) const;               //переводит из текущих единиц в мм
 		Coords to_mm(Coords value) const;
-		void move_to(const Coords &position, bool fast);          //линейное перемещение
-		void probe_to(const Coords &position);
-		bool arc_to(const Coords &position, bool cw, const CmdParser &parser);
+		bool move_to(int motion, const Coords &position, const CmdParser &parser);          //линейное перемещение
+		bool probe_to(int motion, const Coords &position, const CmdParser &parser);
+		bool arc_to(int motion, const Coords &position, const CmdParser &parser);
 
 		bool run_start_stop_spindle(const CmdParser &parser);
 		bool run_set_plane(int gc);
@@ -95,24 +94,26 @@ namespace Interpreter
 		bool run_set_dist_mode(int gc);
 		bool run_set_dist_ijk(int gc);
 		bool run_set_cycle_return(int gc);
-		bool run_motion(const CmdParser &parser);
+		bool run_motion(int motion, const CmdParser &parser);
 
-		void setcoordinates(Coords &newpos, const CmdParser &parser) const; 
-		Coords get_new_coordinate(Coords &oldLocal, const CmdParser &parser);
+
+		inline bool is_a_cycle(int motion);
+		void setcoordinates(Coords &newpos, const CmdParser &parser, bool doofesett) const;
+		bool get_new_coordinate(const CmdParser &parser, Coords &pos );
 
 		InterError get_state() { return state; }
 		//Arc support
-		bool convert_arc2(bool cw, const CmdParser &parser, double *current1, double *current2, double *current3,
+		bool convert_arc2(int motion, const CmdParser &parser, double *current1, double *current2, double *current3,
 			double &end1, double &end2, double &end3, double &AA_end, double &BB_end, double &CC_end, double &u, double &v, double &w,
 			double &offset1, double &offset2);
-		bool arc_data_ijk(bool cw, double &current_x, double &current_y, double &end_x, double &end_y,   //!< second coordinate of arc end point
+		bool arc_data_ijk(int motion, double &current_x, double &current_y, double &end_x, double &end_y,   //!< second coordinate of arc end point
 			double &i_number, double &j_number, int p_number, double *center_x, double *center_y, int *turn,
 			double radius_tolerance, double spiral_abs_tolerance, double spiral_rel_tolerance);
-		bool arc_data_r(bool cw, double &current_x, double &current_y, double &end_x, double &end_y,
+		bool arc_data_r(int motion, double &current_x, double &current_y, double &end_x, double &end_y,
 			double &radius, int p_number, double *center_x, double *center_y, int *turn, double &tolerance);
-		bool convert_arc_comp1(bool cw, const CmdParser &parser, double &end_x, double &end_y, double &end_z, double &offset_x, double offset_y,
+		bool convert_arc_comp1(int motion, const CmdParser &parser, double &end_x, double &end_y, double &end_z, double &offset_x, double offset_y,
 			double &AA_end, double &BB_end, double &CC_end, double &u_end, double &v_end, double &w_end);
-		bool convert_arc_comp2(bool cw, const CmdParser &parser, double end_x, double end_y, double end_z, double offset_x, double offset_y,
+		bool convert_arc_comp2(int motion, const CmdParser &parser, double end_x, double end_y, double end_z, double offset_x, double offset_y,
 			double AA_end, double BB_end, double CC_end, double u, double v, double w);
 
 		char arc_axis1(Plane plane);
@@ -129,6 +130,10 @@ namespace Interpreter
 		IEnvironment *env;
 		IExecutor *executor; //устройство, которое исполняет команды   
 		long fpos;
+		int motion_to_be;
 	};
 
+
+	inline bool GCodeInterpreter::is_a_cycle(int motion)
+		{	return ((motion > G_80) && (motion < G_90)) || (motion == G_73) || (motion == G_74); }
 };

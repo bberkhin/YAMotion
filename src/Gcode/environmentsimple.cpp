@@ -5,24 +5,27 @@ EnvironmentSimple::EnvironmentSimple()
 
 }
 
-Coords EnvironmentSimple::GetG54G58 ( int i  )
-{
-    if ( i == 0 )
-        return Coords(70,70,70);
-    else if ( i == 1 )
-        return Coords(73,73,73);
-    else
-        return Coords(0,0,0);
 
+Coords EnvironmentSimple::GetG54G58 ( int origin)
+{ //origin [1;9]
+	Coords cs;
+	for (int i = 0; i < MAX_AXES; ++i)
+	{
+		cs.r[i] = GetVariable(5201 + i + (origin * 20));
+	}
+	return cs;
 }
 
-void EnvironmentSimple::SetG54G58(int index, Coords &pos, bool incremental)
-{
-	SetVariable(index + 5000, pos.x);//
+void EnvironmentSimple::SetG54G58(int origin, Coords &cs)
+{ //origin [1;9]
+	for (int i = 0; i < MAX_AXES; ++i)
+	{
+		SetVariable(5201 + i + (origin * 20), cs.r[i] );
+	}
 }
 
 
-void EnvironmentSimple::SetVariable(int index, double &value)
+void EnvironmentSimple::SetVariable(int index, double value)
 {
 	vars[index] = value;
 }

@@ -48,21 +48,22 @@ void CmdParser::clear()
 bool CmdParser::neead_execute()  const
 {
 // absolutly empty just comments
-	if (mcodes.empty() && o_name.empty() )
+	if (!mcodes.empty() || !o_name.empty())
+		return true;
+	// check params
+	for (int i = 0; i < PARAM_MAX; ++i)
 	{
-		for (int i = 0; i < PARAM_MAX; ++i)
-		{
-			if (params[i])
-				return true;
-		}
-		return false;
+		if (params[i])
+			return true;
 	}
+	
 	for (int i = 0; i < ModalGroup_Size; i++)
 	{
 		if (g_mode[i] != -1)
-			return false;
+			return true;
 	}
-	return true;
+
+	return false;
 }
 
 
