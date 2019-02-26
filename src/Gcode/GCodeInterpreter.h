@@ -70,6 +70,8 @@ namespace Interpreter
 		bool move_to(int motion, const Coords &position, const CmdParser &parser);          //линейное перемещение
 		bool probe_to(int motion, const Coords &position, const CmdParser &parser);
 		bool arc_to(int motion, const Coords &position, const CmdParser &parser);
+		bool run_cycle(int motion, const Coords &position, const CmdParser &parser);
+		bool run_cycle_xy(int motion, const Coords &position, const CmdParser &parser);
 
 		bool run_start_stop_spindle(const CmdParser &parser);
 		bool run_set_plane(int gc);

@@ -964,8 +964,8 @@ bool GCodeInterpreter::run_motion(int motion, const CmdParser &parser)
 	int xyzuvw_flag = (parser.hasParam(PARAM_X) || parser.hasParam(PARAM_Y) || parser.hasParam(PARAM_Z) ||
 		parser.hasParam(PARAM_U) || parser.hasParam(PARAM_V) || parser.hasParam(PARAM_W));
 
-//	if (!is_a_cycle(motion))
-//		runner.cycle_il_flag = false;
+	if (!is_a_cycle(motion))
+		runner.cycle_il_flag = false;
 	
 	if ((motion == G_0) || (motion == G_1) || (motion == G_33) || (motion == G_33_1) || (motion == G_76)) 
 	{
@@ -980,13 +980,12 @@ bool GCodeInterpreter::run_motion(int motion, const CmdParser &parser)
 		IF_F_RET_F(probe_to(motion, newPos, parser));
 	}
 	else if (motion == G_80) 
-	{
-		//settings->motion_mode = G_80;
+	{		
 		runner.motion_mode = G_80;
 	}
 	else if (is_a_cycle(motion)) 
 	{
-		;// CHP(convert_cycle(motion, block, settings));
+		IF_F_RET_F(run_cycle(motion, newPos, parser));
 	}
 	else if ((motion == G_5) || (motion == G_5_1)) 
 	{
@@ -1219,6 +1218,247 @@ const char *GCodeInterpreter::cpy_close_and_downcase(char *line, const char *src
 }
 
 
+bool GCodeInterpreter::run_cycle(int motion, const Coords &position, const CmdParser &parser) 
+{
+	IF_T_RET_F_SETSTATE((runner.feed == 0.0),PARAMETER_ERROR,"Cannot feed with zero feed rate");
+	//CHKS((settings->feed_mode == INVERSE_TIME), _("Cannot use inverse time feed with canned cycles"));
+	IF_T_RET_F_SETSTATE((runner.cutter_comp_side), PARAMETER_ERROR, "Cannot use canned cycles with cutter compensation on");
+
+
+	if (parser.hasParam(PARAM_R))
+	{
+		runner.cycle_r = parser.getRParam(PARAM_R)
+	}
+	//if (!block->r_flag)
+	//{
+	//	if (settings->motion_mode == motion)
+	//		block->r_number = settings->cycle_r;
+	//	else
+	//		ERS(NCE_R_CLEARANCE_PLANE_UNSPECIFIED_IN_CYCLE);
+	//}
+
+	int l_number = 1;
+	if (parser.hasParam(PARAM_L))
+	{
+		l_number = parser.getIParam(PARAM_L);
+		IF_T_RET_F_SETSTATE((l_number == 0 || l_number < 0), PARAMETER_ERROR, "Cannot do zero repeats of cycle");
+	}
+	runner.cycle_l = l_number;
+	
+	if (runner.plane == Plane_XY)
+	{
+		CHP(run_cycle_xy(motion, position, parser));
+	}
+	else if (runner.plane == Plane_YZ) {
+		CHP(convert_cycle_yz(motion, position, parser));
+	}
+	else if (runner.plane == Plane_XZ) {
+		CHP(convert_cycle_zx(motion, position, parser));
+	}
+	else
+		RET_F_SETSTATE(INTERNAL_ERROR, "Cannot use canned cycles for this plane (shoul be XY, YZ or XZ)");
+
+	runner.motion_mode = motion;
+	return INTERP_OK;
+}
+
+bool GCodeInterpreter::run_cycle_xy(int motion, const Coords &position, const CmdParser &parser)
+{
+	double aa;
+	double aa_increment = 0.;
+	double bb;
+	double bb_increment = 0.;
+	double cc;
+	double clear_cc;
+	double i;
+	double j;
+	double k;
+	double old_cc;
+	double radius_increment = 0.;
+	double theta_increment = 0.;
+	
+	double r;
+	int repeat;
+	CANON_MOTION_MODE save_mode;
+	double save_tolerance;
+	double current_cc = runner.position.z;
+
+	Plane plane = Plane_XY;
+
+	if (runner.motion_mode != motion) 
+	{
+		IF_T_RET_F_SETSTATE(parser.hasParam(PARAM_Z), PARAMETER_ERROR, "Unexpected Z value for XY plane in cycle");
+	}
+
+	double z_number = parser.hasParam(PARAM_Z) ? parser.getRParam(PARAM_Z) : runner.cycle_cc;
+	
+	if (runner.cycle_il_flag)
+	{
+		old_cc = runner.cycle_il;
+	}
+	else 
+	{
+		old_cc = runner.cycle_il = current_cc;
+		runner.cycle_il_flag = true;
+	}
+
+	if ( !runner.incremental ) //  ABSOLUTE system
+	{
+		aa_increment = 0.0;
+		bb_increment = 0.0;
+		r = runner.cycle_r;
+		cc = z_number;
+		aa = parser.hasParam(PARAM_X) ? parser.getRParam(PARAM_X) : runner.position.x;
+		bb = parser.hasParam(PARAM_Y) ? parser.getRParam(PARAM_Y) : runner.position.y;
+	}
+	else //INCREMENTAL
+	{
+		if (block->x_flag) aa_increment = block->x_number;
+		if (block->y_flag) bb_increment = block->y_number;
+		if (block->radius_flag) radius_increment = block->radius;
+		if (block->theta_flag) theta_increment = D2R(block->theta);
+		r = (block->r_number + old_cc);
+		cc = (r + block->z_number); /* [NCMS, page 98] */
+		aa = settings->current_x;
+		bb = settings->current_y;
+	}
+
+	CHKS((r < cc), NCE_R_LESS_THAN_Z_IN_CYCLE_IN_XY_PLANE);
+
+	// First motion of a canned cycle (maybe): if we're below the R plane,
+	// rapid straight up to the R plane.
+	if (old_cc < r) 
+	{
+		STRAIGHT_TRAVERSE(block->line_number, settings->current_x, settings->current_y, r,
+			settings->AA_current, settings->BB_current, settings->CC_current,
+			settings->u_current, settings->v_current, settings->w_current);
+
+		old_cc = r;
+		current_cc = old_cc;
+	}
+	clear_cc = (settings->retract_mode == R_PLANE) ? r : old_cc;
+
+	save_mode = GET_EXTERNAL_MOTION_CONTROL_MODE();
+	save_tolerance = GET_EXTERNAL_MOTION_CONTROL_TOLERANCE();
+	if (save_mode != CANON_EXACT_PATH)
+		SET_MOTION_CONTROL_MODE(CANON_EXACT_PATH, 0);
+
+	switch (motion) 
+	{
+	case G_81:
+		CYCLE_MACRO(convert_cycle_g81(block, CANON_PLANE_XY, aa, bb, clear_cc, cc))
+			break;
+	case G_82:
+		CHKS(((settings->motion_mode != G_82) && (block->p_number == -1.0)),
+			NCE_DWELL_TIME_P_WORD_MISSING_WITH_G82);
+		block->p_number =
+			block->p_number == -1.0 ? settings->cycle_p : block->p_number;
+		CYCLE_MACRO(convert_cycle_g82(block, CANON_PLANE_XY, aa, bb, clear_cc, cc,
+			block->p_number))
+			settings->cycle_p = block->p_number;
+		break;
+	case G_73:
+		CHKS(((settings->motion_mode != G_73) && (block->q_number == -1.0)),
+			NCE_Q_WORD_MISSING_WITH_G73);
+		block->q_number =
+			block->q_number == -1.0 ? settings->cycle_q : block->q_number;
+		CYCLE_MACRO(convert_cycle_g73(block, CANON_PLANE_XY, aa, bb, r, clear_cc, cc,
+			block->q_number))
+			settings->cycle_q = block->q_number;
+		break;
+	case G_83:
+		CHKS(((settings->motion_mode != G_83) && (block->q_number == -1.0)),
+			NCE_Q_WORD_MISSING_WITH_G83);
+		block->q_number =
+			block->q_number == -1.0 ? settings->cycle_q : block->q_number;
+		CYCLE_MACRO(convert_cycle_g83(block, CANON_PLANE_XY, aa, bb, r, clear_cc, cc,
+			block->q_number))
+			settings->cycle_q = block->q_number;
+		break;
+	case G_74:
+	case G_84:
+		block->p_number =
+			block->p_number == -1.0 ? settings->cycle_p : block->p_number;
+		if (block->dollar_flag) {
+			CHKS((block->dollar_number < 0 || block->dollar_number >= settings->num_spindles),
+				(_("Invalid spindle ($) number in G74/G84 cycle")));
+			settings->active_spindle = (int)block->dollar_number;
+		}
+		CYCLE_MACRO(convert_cycle_g74_g84(block, CANON_PLANE_XY, aa, bb, clear_cc, cc,
+			settings->spindle_turning[settings->active_spindle],
+			settings->speed_feed_mode,
+			motion, block->p_number, settings->active_spindle))
+			settings->cycle_p = block->p_number;
+
+		break;
+	case G_85:
+		CYCLE_MACRO(convert_cycle_g85(block, CANON_PLANE_XY, aa, bb, r, clear_cc, cc))
+			break;
+	case G_86:
+		CHKS(((settings->motion_mode != G_86) && (block->p_number == -1.0)),
+			NCE_DWELL_TIME_P_WORD_MISSING_WITH_G86);
+		block->p_number =
+			block->p_number == -1.0 ? settings->cycle_p : block->p_number;
+		CYCLE_MACRO(convert_cycle_g86(block, CANON_PLANE_XY, aa, bb, clear_cc, cc,
+			block->p_number,
+			settings->spindle_turning[settings->active_spindle],
+			settings->active_spindle))
+			settings->cycle_p = block->p_number;
+		break;
+	case G_87:
+		if (settings->motion_mode != G_87) {
+			CHKS((!block->i_flag), NCE_I_WORD_MISSING_WITH_G87);
+			CHKS((!block->j_flag), NCE_J_WORD_MISSING_WITH_G87);
+			CHKS((!block->k_flag), NCE_K_WORD_MISSING_WITH_G87);
+		}
+		i = block->i_flag ? block->i_number : settings->cycle_i;
+		j = block->j_flag ? block->j_number : settings->cycle_j;
+		k = block->k_flag ? block->k_number : settings->cycle_k;
+		settings->cycle_i = i;
+		settings->cycle_j = j;
+		settings->cycle_k = k;
+		if (settings->distance_mode == MODE_INCREMENTAL) {
+			k = (cc + k);             /* k always absolute in function call below */
+		}
+		CYCLE_MACRO(convert_cycle_g87(block, CANON_PLANE_XY, aa, (aa + i), bb,
+			(bb + j), r, clear_cc, k, cc,
+			settings->spindle_turning[settings->active_spindle],
+			settings->active_spindle));
+		break;
+	case G_88:
+		CHKS(((settings->motion_mode != G_88) && (block->p_number == -1.0)),
+			NCE_DWELL_TIME_P_WORD_MISSING_WITH_G88);
+		block->p_number =
+			block->p_number == -1.0 ? settings->cycle_p : block->p_number;
+		CYCLE_MACRO(convert_cycle_g88(block, CANON_PLANE_XY, aa, bb, cc,
+			block->p_number,
+			settings->spindle_turning[settings->active_spindle],
+			settings->active_spindle))
+			settings->cycle_p = block->p_number;
+		break;
+
+	case G_89:
+		CHKS(((settings->motion_mode != G_89) && (block->p_number == -1.0)),
+			NCE_DWELL_TIME_P_WORD_MISSING_WITH_G89);
+		block->p_number =
+			block->p_number == -1.0 ? settings->cycle_p : block->p_number;
+		CYCLE_MACRO(convert_cycle_g89(block, CANON_PLANE_XY, aa, bb, clear_cc, cc,
+			block->p_number))
+			settings->cycle_p = block->p_number;
+		break;
+	default:
+		ERS(NCE_BUG_FUNCTION_SHOULD_NOT_HAVE_BEEN_CALLED);
+	}
+	settings->current_x = aa;     /* CYCLE_MACRO updates aa and bb */
+	settings->current_y = bb;
+	settings->current_z = clear_cc;
+	settings->cycle_cc = block->z_number;
+
+	if (save_mode != CANON_EXACT_PATH)
+		SET_MOTION_CONTROL_MODE(save_mode, save_tolerance);
+
+	return INTERP_OK;
+}
 
 /****************************************************************************/
 
