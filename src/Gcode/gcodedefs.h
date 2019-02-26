@@ -103,17 +103,7 @@ namespace Interpreter
 		Y_AXIS = 1,
 		Z_AXIS = 2,
 	};
-	/*
-	enum MotionMode //режимы перемещени€
-	{
-		MotionMode_NONE = 0,
-		MotionMode_FAST,      //быстрое позиционирование
-		MotionMode_LINEAR,    //линейна€ интерпол€ци€
-		MotionMode_CW_ARC,    //кругова€ интерпол€ци€
-		MotionMode_CCW_ARC,
-		MotionMode_PROBE
-	};
-	*/
+
 	enum CannedCycle
 	{
 		CannedCycle_NONE = 0,
@@ -191,21 +181,6 @@ namespace Interpreter
 		PARAM_T,
 		PARAM_MAX
 	};
-//
-//#define GM_MODAL_0        0
-//#define GM_MOTION         1
-//#define GM_SET_PLANE      2
-//#define GM_DISTANCE_MODE  3
-//#define GM_IJK_DISTANCE_MODE  4
-//#define GM_FEED_MODE      5
-//#define GM_LENGTH_UNITS   6
-//#define GM_CUTTER_COMP    7
-//#define GM_TOOL_LENGTH_OFFSET 8
-//#define GM_RETRACT_MODE   10
-//#define GM_COORD_SYSTEM   12
-//#define GM_CONTROL_MODE   13
-//#define GM_SPINDLE_MODE  14
-//#define GM_LATHE_DIAMETER_MODE  15
 
 	enum GModalGroup //некоторые операторы не могут одновременно содержатьс€ в одном фрейме
 	{
@@ -323,10 +298,13 @@ namespace Interpreter
 		bool cutter_comp_firstmove;
 		int cutter_comp_side;
 		double cutter_comp_radius;
-		bool cycle_il_flag;
 		int coordinate_index ;
-		CannedCycle cycle;       //текущий цикл
-		CannedLevel cycleLevel;
+		bool cycle_il_flag;
+		double cycle_r;
+		int cycle_l;
+		double cycle_cc;
+		//CannedCycle cycle;       //текущий цикл
+		//CannedLevel cycleLevel;
 		//    bool   cycleUseLowLevel; //использовать R вместо стартовой точки
 		//    double cycleLowLevel;    //плоскость отвода (задаЄтс€ в R)
 		//    double cycleHiLevel;     //исходна€ плоскость задаЄтс€ в стартовом Z
@@ -335,8 +313,9 @@ namespace Interpreter
 		//    int    cycleWait;        //задержка в цикле P
 		RunnerData() :
 			toolid(-1), units(UnitSystem_MM), incremental(false), ijk_incremental(true), motion_mode(-1), plane(Plane_XY), feed(0), spindlespeed(0),
-			cycle(CannedCycle_NONE), tool_length_offset(0), tool_yoffset(0), tool_xoffset(0), cycleLevel(CannedLevel_HIGH), cycle_il_flag(false),
-			accuracy(AccuracyNormal), cutter_comp_firstmove(true), cutter_comp_side(0), cutter_comp_radius(0.0), coordinate_index(-1) { }
+			tool_length_offset(0), tool_yoffset(0), tool_xoffset(0), cycle_il_flag(false), tool_crc_type(CutterCompType_NONE),
+			accuracy(AccuracyNormal), cutter_comp_firstmove(true), cutter_comp_side(0), cutter_comp_radius(0.0), coordinate_index(-1), cycle_r(0.0),
+			cycle_cc (0.0) { }
 	};
 };
 
