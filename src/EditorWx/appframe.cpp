@@ -59,7 +59,7 @@ public:
 
 		m_pHandler = handler;
 		penv = new EnvironmentSimple();
-		pexec = new ExecutorLogWnd(m_pHandler, false);
+		pexec = new ExecutorLogWnd(m_pHandler, true);
 		plogger = new LoggerWnd(m_pHandler);
 		ppret = new GCodeInterpreter(penv, pexec, plogger);
 

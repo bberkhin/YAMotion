@@ -64,15 +64,12 @@ namespace Interpreter
 		InterError is_subrotin_start(const char *str);    //выполнение строки при поиске
 		bool execute_subrotinue(const  CmdParser parser);
 		bool find_subrotinue(const char *subname, SubratinInfo *psub);
-		//void set_move_mode(MotionMode mode);      //изменение режима перемещения
 		coord to_mm(coord value) const;               //переводит из текущих единиц в мм
 		Coords to_mm(Coords value) const;
 		bool move_to(int motion, const Coords &position, const CmdParser &parser);          //линейное перемещение
 		bool probe_to(int motion, const Coords &position, const CmdParser &parser);
 		bool arc_to(int motion, const Coords &position, const CmdParser &parser);
 		bool run_cycle(int motion, const Coords &position, const CmdParser &parser);
-		bool run_cycle_xy(int motion, const Coords &position, const CmdParser &parser);
-
 		bool run_start_stop_spindle(const CmdParser &parser);
 		bool run_set_plane(int gc);
 		bool run_feed_mode(CmdParser &parser);
@@ -97,13 +94,24 @@ namespace Interpreter
 		bool run_set_dist_ijk(int gc);
 		bool run_set_cycle_return(int gc);
 		bool run_motion(int motion, const CmdParser &parser);
-
-
+		
 		inline bool is_a_cycle(int motion);
 		void setcoordinates(Coords &newpos, const CmdParser &parser, bool doofesett) const;
 		bool get_new_coordinate(const CmdParser &parser, Coords &pos );
-
 		InterError get_state() { return state; }
+
+		// Cycle support
+		bool run_cycle_xy(int motion, const Coords &position, const CmdParser &parser);
+		bool run_cycle_xz(int motion, const Coords &position, const CmdParser &parser);
+		bool run_cycle_yz(int motion, const Coords &position, const CmdParser &parser);
+		bool cycle_move(bool tavers, double e1, double e2, double e3, Plane pl = Plane_NONE);
+		bool cycle_feed(double e1, double e2, double e3, Plane pl = Plane_NONE) { return cycle_move(false, e1, e2, e3, pl); }
+		bool cycle_traverse(double e1, double e2, double e3, Plane pl = Plane_NONE) { return cycle_move(true, e1, e2, e3, pl); }
+		bool run_cycle_g81(double x, double y, double clear_z, double bottom_z);
+		bool run_cycle_g82(double x, double y, double clear_z, double bottom_z, double dwell);
+		bool run_cycle_g83(double x, double y, double r, double clear_z, double bottom_z, double delta);
+		bool run_cycle_g73(double x, double y, double r, double clear_z, double bottom_z, double delta);
+
 		//Arc support
 		bool convert_arc2(int motion, const CmdParser &parser, double *current1, double *current2, double *current3,
 			double &end1, double &end2, double &end3, double &AA_end, double &BB_end, double &CC_end, double &u, double &v, double &w,

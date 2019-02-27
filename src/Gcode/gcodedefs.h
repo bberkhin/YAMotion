@@ -19,7 +19,7 @@
 #define MAX_AXES   6 //сколько всего есть осей на контроллере
 #define MAX_FEED_RATE 10000
 #define MAX_SPINDELSPEED 60000
-
+#define G83_RAPID_DELTAMM 0.254
 
 
 #define N_CHANNELS 8                  // number of channels/board
@@ -104,20 +104,12 @@ namespace Interpreter
 		Z_AXIS = 2,
 	};
 
-	enum CannedCycle
-	{
-		CannedCycle_NONE = 0,
-		CannedCycle_RESET,           //отмена цикла, G80
-		CannedCycle_SINGLE_DRILL,    //простое сверление, G81
-		CannedCycle_DRILL_AND_PAUSE, //сверление с задержкой на дне, G82
-		CannedCycle_DEEP_DRILL,      //сверление итерациями, G83
-	};
 
 	enum CannedLevel
 	{
 		CannedLevel_NONE = 0,
-		CannedLevel_HIGH,   //отвод к исходной плоскости, G98
-		CannedLevel_LOW,    //отвод к плоскости обработки, G99
+		CannedLevel_Z,   //Return to current Z level in canned cycle
+		CannedLevel_R,    //Return to R level in canned cycle
 	};
 	enum CutterCompType
 	{
@@ -242,9 +234,11 @@ namespace Interpreter
 		};
 
 		Coords() { for (int i = 0; i < MAX_AXES; ++i) r[i] = 0; }
-		Coords(const coord &x_, const coord &y_, const coord &z_) :
-			x(x_), y(y_), z(z_) {
-			for (int i = 3; i < MAX_AXES; ++i) r[i] = 0; // лучше memset
+		Coords(const coord &x_, const coord &y_, const coord &z_) { Set(x_, y_, z_); }
+		void Set(const coord &x_, const coord &y_, const coord &z_, bool settozero = true) 
+		{
+			x = x_; y = y_; z = z_; 
+			if (settozero) { for (int i = 3; i < MAX_AXES; ++i) r[i] = 0; }// лучше memset
 		}
 	};
 
@@ -299,10 +293,15 @@ namespace Interpreter
 		int cutter_comp_side;
 		double cutter_comp_radius;
 		int coordinate_index ;
-		bool cycle_il_flag;
+		int retract_mode;
 		double cycle_r;
+		double cycle_q;
+		double cycle_p;
 		int cycle_l;
 		double cycle_cc;
+		optdouble cycle_il;
+		bool cycle_il_flag;
+	
 		//CannedCycle cycle;       //текущий цикл
 		//CannedLevel cycleLevel;
 		//    bool   cycleUseLowLevel; //использовать R вместо стартовой точки
@@ -314,8 +313,8 @@ namespace Interpreter
 		RunnerData() :
 			toolid(-1), units(UnitSystem_MM), incremental(false), ijk_incremental(true), motion_mode(-1), plane(Plane_XY), feed(0), spindlespeed(0),
 			tool_length_offset(0), tool_yoffset(0), tool_xoffset(0), cycle_il_flag(false), tool_crc_type(CutterCompType_NONE),
-			accuracy(AccuracyNormal), cutter_comp_firstmove(true), cutter_comp_side(0), cutter_comp_radius(0.0), coordinate_index(-1), cycle_r(0.0),
-			cycle_cc (0.0) { }
+			accuracy(AccuracyNormal), cutter_comp_firstmove(true), cutter_comp_side(0), cutter_comp_radius(0.0), coordinate_index(-1), 
+			retract_mode(CannedLevel_NONE),cycle_r(0.0), cycle_q(0.0), cycle_cc (0.0) { }
 	};
 };
 

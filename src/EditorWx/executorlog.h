@@ -9,7 +9,7 @@ class ExecutorLogWnd : public  ExecutorLog
 {
 public:
 	ExecutorLogWnd(wxEvtHandler *lbox, bool needprint = false)
-		: handler(lbox),feed_len(0),traverce_len(0), ExecutorLog(needprint) { }
+		: handler(lbox),feed_len(0),traverce_len(0), num_outputs(0), ExecutorLog(needprint) { }
 
 	double get_traverce_len() { return traverce_len;  }
 	double get_feed_len() { return feed_len;  }
@@ -27,6 +27,7 @@ private:
 	Coords  cur_position;
 	double traverce_len;
 	double feed_len;
+	int num_outputs;
 };
 
 class LoggerWnd : public ILogger

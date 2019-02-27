@@ -944,7 +944,6 @@ bool GCodeInterpreter::run_set_dist_ijk(int gc)
 bool GCodeInterpreter::run_set_cycle_return(int gc)
 {
 	//g98, g99
-	 == R_PLANEretract_mode == R_PLANE
 	switch (gc)
 	{
 	case G_98: runner.retract_mode = CannedLevel_Z; break; //Отмена G99
@@ -966,7 +965,7 @@ bool GCodeInterpreter::run_motion(int motion, const CmdParser &parser)
 		parser.hasParam(PARAM_U) || parser.hasParam(PARAM_V) || parser.hasParam(PARAM_W));
 
 	if (!is_a_cycle(motion))
-		runner.cycle_il_flag = false;
+		runner.cycle_il.reset();
 	
 	if ((motion == G_0) || (motion == G_1) || (motion == G_33) || (motion == G_33_1) || (motion == G_76)) 
 	{
@@ -1252,11 +1251,11 @@ bool GCodeInterpreter::run_cycle(int motion, const Coords &position, const CmdPa
 	}
 	else if (runner.plane == Plane_YZ) \
 	{
-		;// IF_F_RET_F(convert_cycle_yz(motion, position, parser));
+		IF_F_RET_F(run_cycle_yz(motion, position, parser));
 	}
 	else if (runner.plane == Plane_XZ) 
 	{
-		;// IF_F_RET_F(convert_cycle_zx(motion, position, parser));
+		IF_F_RET_F(run_cycle_xz(motion, position, parser));
 	}
 	else
 		RET_F_SETSTATE(INTERNAL_ERROR, "Cannot use canned cycles for this plane (shoul be XY, YZ or XZ)");
@@ -1267,19 +1266,10 @@ bool GCodeInterpreter::run_cycle(int motion, const Coords &position, const CmdPa
 
 bool GCodeInterpreter::run_cycle_xy(int motion, const Coords &position, const CmdParser &parser)
 {
-	double aa;
-	double aa_increment = 0.;
-	double bb;
-	double bb_increment = 0.;
-	double cc;
-	double clear_cc;
-	double i;
-	double j;
-	double k;
-	double old_cc;
+	double aa, bb;
+	double aa_increment = 0., bb_increment = 0.;
+	double cc, clear_cc, old_cc;
 	double r;
-	//CANON_MOTION_MODE save_mode;
-	double save_tolerance;
 	
 	double current_cc = runner.position.z;
 
@@ -1287,19 +1277,21 @@ bool GCodeInterpreter::run_cycle_xy(int motion, const Coords &position, const Cm
 
 	if (runner.motion_mode != motion) 
 	{
-		IF_T_RET_F_SETSTATE(parser.hasParam(PARAM_Z), PARAMETER_ERROR, "Unexpected Z value for XY plane in cycle");
+		IF_T_RET_F_SETSTATE(!parser.hasParam(PARAM_Z), PARAMETER_ERROR, "Unspesified Z value for XY plane in cycle");
 	}
 
-	double z_number = parser.hasParam(PARAM_Z) ? parser.getRParam(PARAM_Z) : runner.cycle_cc;
+	double z_number = runner.cycle_cc;
+	if (parser.hasParam(PARAM_Z))
+		parser.getRParam(PARAM_Z, &z_number);
 	
-	if (runner.cycle_il_flag)
+	if (runner.cycle_il )
 	{
-		old_cc = runner.cycle_il;
+		old_cc = runner.cycle_il.value();
 	}
 	else 
 	{
-		old_cc = runner.cycle_il = current_cc;
-		runner.cycle_il_flag = true;
+		old_cc = current_cc;
+		runner.cycle_il = current_cc;
 	}
 
 	
@@ -1309,7 +1301,7 @@ bool GCodeInterpreter::run_cycle_xy(int motion, const Coords &position, const Cm
 	if ( runner.incremental )
 	{
 		parser.getRParam(PARAM_X, &aa_increment);
-		parser.getRParam(PARAM_Y, &b_increment);
+		parser.getRParam(PARAM_Y, &bb_increment);
 		aa = runner.position.x;
 		bb = runner.position.y;
 	}
@@ -1335,15 +1327,15 @@ bool GCodeInterpreter::run_cycle_xy(int motion, const Coords &position, const Cm
 		current_cc = old_cc;
 	}
 
-	clear_cc = (settings->retract_mode == CannedLevel_R) ? r : old_cc;
+	clear_cc = (runner.retract_mode == CannedLevel_R) ? r : old_cc;
 
 	if (parser.hasParam(PARAM_P))
-		parser.hasParam(&runner.cycle_p);
+		parser.getRParam(PARAM_P, &runner.cycle_p);
 	else if (motion == G_82 && runner.motion_mode != G_82) // first time 82
 		RET_F_SETSTATE(INTERNAL_ERROR, "Dwell time (P) missing with G82 ");
 
 	if (parser.hasParam(PARAM_Q))
-		parser.hasParam(&runner.cycle_q);
+		parser.getRParam(PARAM_Q, &runner.cycle_q);
 	else if (motion == G_73 && runner.motion_mode != G_73) // first time 73
 		RET_F_SETSTATE(INTERNAL_ERROR, "Q missing with G73 ");
 	else if (motion == G_83 && runner.motion_mode != G_83) // first time 83
@@ -1360,29 +1352,29 @@ bool GCodeInterpreter::run_cycle_xy(int motion, const Coords &position, const Cm
 		bb = (bb + bb_increment); 
 		if((repeat == runner.cycle_l) && (current_cc > r)) 
 		{					
-			cycle_traverse(block, plane, aa, bb, current_cc); \
-			cycle_traverse(block, plane, aa, bb, r); 
+			cycle_traverse(aa, bb, current_cc); 
+			cycle_traverse(aa, bb, r); 
 		}
 		else 
 		{
 			/* we must be at CLEAR_CC already */ 
-			cycle_traverse(block, plane, aa, bb, clear_cc);
+			cycle_traverse(aa, bb, clear_cc);
 			if (clear_cc > r) 
-				cycle_traverse(block, plane, aa, bb, r); 
+				cycle_traverse(aa, bb, r); 
 		} 
 		switch (motion)
 		{
 		case G_81:
-			IF_F_RET_F(convert_cycle_g81(aa, bb, clear_cc, cc));
+			IF_F_RET_F(run_cycle_g81(aa, bb, clear_cc, cc));
 			break;
 		case G_82:
-			IF_F_RET_F(convert_cycle_g82(block, aa, bb, clear_cc, cc, runner.cycle_p));
+			IF_F_RET_F(run_cycle_g82(aa, bb, clear_cc, cc, runner.cycle_p));
 			break;
 		case G_73:
-			IF_F_RET_F(convert_cycle_g73(block, aa, bb, r, clear_cc, cc, runner.cycle_q));
+			IF_F_RET_F(run_cycle_g73(aa, bb, r, clear_cc, cc, runner.cycle_q));
 			break;
 		case G_83:
-			IF_F_RET_F(convert_cycle_g83(block, aa, bb, r, clear_cc, cc, runner.cycle_q));
+			IF_F_RET_F(run_cycle_g83(aa, bb, r, clear_cc, cc, runner.cycle_q));
 			break;
 		case G_74:
 		case G_84:
@@ -1409,16 +1401,317 @@ bool GCodeInterpreter::run_cycle_xy(int motion, const Coords &position, const Cm
 }
 
 
+bool GCodeInterpreter::run_cycle_xz(int motion, const Coords &position, const CmdParser &parser)
+{
+
+	double aa, bb;
+	double aa_increment = 0., bb_increment = 0.;
+	double cc, clear_cc, old_cc;
+	double r;
+
+	double current_cc = runner.position.y;
+
+	Plane plane = Plane_XZ;
+
+	if (runner.motion_mode != motion)
+	{
+		IF_T_RET_F_SETSTATE(!parser.hasParam(PARAM_Y), PARAMETER_ERROR, "Unspesified Y value for XZ (G18) plane in cycle");
+	}
+
+	double y_number = runner.cycle_cc;
+	if (parser.hasParam(PARAM_Y))
+		parser.getRParam(PARAM_Y, &y_number);
+
+	if (runner.cycle_il)
+	{
+		old_cc = runner.cycle_il.value();
+	}
+	else
+	{
+		old_cc = current_cc;
+		runner.cycle_il = current_cc;
+	}
 
 
-bool GCodeInterpreter::convert_cycle_g81( double x, double y, double clear_z, 	double bottom_z)
+	cc = y_number;
+	r = runner.cycle_r;
+
+	if (runner.incremental)
+	{
+		parser.getRParam(PARAM_Z, &aa_increment);
+		parser.getRParam(PARAM_X, &bb_increment);
+		aa = runner.position.z;
+		bb = runner.position.x;
+	}
+	else
+	{
+		aa_increment = 0.;
+		bb_increment = 0.;
+		aa = position.z;
+		bb = position.x;
+	}
+
+	IF_T_RET_F_SETSTATE((r < cc), PARAMETER_ERROR, "R less then Y for ZX (G18) plane in cycle");
+
+
+
+	// First motion of a canned cycle (maybe): if we're below the R plane,
+	// rapid straight up to the R plane.
+	if (old_cc < r)
+	{
+		Coords newZ = runner.position;
+		newZ.z = r;
+		executor->straight_traverce(newZ);
+		old_cc = r;
+		current_cc = old_cc;
+	}
+
+	clear_cc = (runner.retract_mode == CannedLevel_R) ? r : old_cc;
+
+	if (parser.hasParam(PARAM_P))
+		parser.getRParam(PARAM_P, &runner.cycle_p);
+	else if (motion == G_82 && runner.motion_mode != G_82) // first time 82
+		RET_F_SETSTATE(INTERNAL_ERROR, "Dwell time (P) missing with G82 ");
+
+	if (parser.hasParam(PARAM_Q))
+		parser.getRParam(PARAM_Q, &runner.cycle_q);
+	else if (motion == G_73 && runner.motion_mode != G_73) // first time 73
+		RET_F_SETSTATE(INTERNAL_ERROR, "Q missing with G73 ");
+	else if (motion == G_83 && runner.motion_mode != G_83) // first time 83
+		RET_F_SETSTATE(INTERNAL_ERROR, "Q missing with G83 ");
+
+	//save_mode = GET_EXTERNAL_MOTION_CONTROL_MODE();
+	//save_tolerance = GET_EXTERNAL_MOTION_CONTROL_TOLERANCE();
+	//if (save_mode != CANON_EXACT_PATH)
+	//	SET_MOTION_CONTROL_MODE(CANON_EXACT_PATH, 0);
+
+	for (int repeat = runner.cycle_l; repeat > 0; repeat--)
+	{
+		aa = (aa + aa_increment);
+		bb = (bb + bb_increment);
+		if ((repeat == runner.cycle_l) && (current_cc > r))
+		{
+			cycle_traverse(aa, bb, current_cc);
+			cycle_traverse(aa, bb, r);
+		}
+		else
+		{
+			/* we must be at CLEAR_CC already */
+			cycle_traverse(aa, bb, clear_cc);
+			if (clear_cc > r)
+				cycle_traverse(aa, bb, r);
+		}
+		switch (motion)
+		{
+		case G_81:
+			IF_F_RET_F(run_cycle_g81(aa, bb, clear_cc, cc));
+			break;
+		case G_82:
+			IF_F_RET_F(run_cycle_g82(aa, bb, clear_cc, cc, runner.cycle_p));
+			break;
+		case G_73:
+			IF_F_RET_F(run_cycle_g73(aa, bb, r, clear_cc, cc, runner.cycle_q));
+			break;
+		case G_83:
+			IF_F_RET_F(run_cycle_g83(aa, bb, r, clear_cc, cc, runner.cycle_q));
+			break;
+		case G_74:
+		case G_84:
+			RET_F_SETSTATE(INTERNAL_ERROR, "G_74 & G_84 not supported yet");
+			break;
+		case G_85:
+		case G_86:
+		case G_87:
+		case G_89:
+		case G_88:
+			RET_F_SETSTATE(INTERNAL_ERROR, "[G85, G88] not supported yet");
+			break;
+		default:
+			RET_F_SETSTATE(INTERNAL_ERROR, "run_cycle_xy internal error can not be called");
+		}
+	}
+	runner.position.z = aa;     /* CYCLE_MACRO updates aa and bb */
+	runner.position.x = bb;
+	runner.position.y = clear_cc;
+	runner.cycle_cc = y_number;
+
+	//if (save_mode != CANON_EXACT_PATH)
+	//	SET_MOTION_CONTROL_MODE(save_mode, save_tolerance);
+	return true;
+}
+
+
+
+bool GCodeInterpreter::run_cycle_yz(int motion, const Coords &position, const CmdParser &parser)
+{
+
+	double aa, bb;
+	double aa_increment = 0., bb_increment = 0.;
+	double cc, clear_cc, old_cc;
+	double r;
+
+	double current_cc = runner.position.x;
+
+	Plane plane = Plane_YZ;
+
+	if (runner.motion_mode != motion)
+	{
+		IF_T_RET_F_SETSTATE(!parser.hasParam(PARAM_X), PARAMETER_ERROR, "Unspesified X value for YZ (G19) plane in cycle");
+	}
+
+	double x_number = runner.cycle_cc;
+	if (parser.hasParam(PARAM_X))
+		parser.getRParam(PARAM_X, &x_number);
+
+	if (runner.cycle_il)
+	{
+		old_cc = runner.cycle_il.value();
+	}
+	else
+	{
+		old_cc = current_cc;
+		runner.cycle_il = current_cc;
+	}
+
+
+	cc = x_number;
+	r = runner.cycle_r;
+
+	if (runner.incremental)
+	{
+		parser.getRParam(PARAM_Y, &aa_increment);
+		parser.getRParam(PARAM_Z, &bb_increment);
+		aa = runner.position.z;
+		bb = runner.position.x;
+	}
+	else
+	{
+		aa_increment = 0.;
+		bb_increment = 0.;
+		aa = position.y;
+		bb = position.z;
+	}
+
+	IF_T_RET_F_SETSTATE((r < cc), PARAMETER_ERROR, "R less then Y for ZX (G18) plane in cycle");
+
+
+
+	// First motion of a canned cycle (maybe): if we're below the R plane,
+	// rapid straight up to the R plane.
+	if (old_cc < r)
+	{
+		Coords newZ = runner.position;
+		newZ.z = r;
+		executor->straight_traverce(newZ);
+		old_cc = r;
+		current_cc = old_cc;
+	}
+
+	clear_cc = (runner.retract_mode == CannedLevel_R) ? r : old_cc;
+
+	if (parser.hasParam(PARAM_P))
+		parser.getRParam(PARAM_P, &runner.cycle_p);
+	else if (motion == G_82 && runner.motion_mode != G_82) // first time 82
+		RET_F_SETSTATE(INTERNAL_ERROR, "Dwell time (P) missing with G82 ");
+
+	if (parser.hasParam(PARAM_Q))
+		parser.getRParam(PARAM_Q, &runner.cycle_q);
+	else if (motion == G_73 && runner.motion_mode != G_73) // first time 73
+		RET_F_SETSTATE(INTERNAL_ERROR, "Q missing with G73 ");
+	else if (motion == G_83 && runner.motion_mode != G_83) // first time 83
+		RET_F_SETSTATE(INTERNAL_ERROR, "Q missing with G83 ");
+
+	//save_mode = GET_EXTERNAL_MOTION_CONTROL_MODE();
+	//save_tolerance = GET_EXTERNAL_MOTION_CONTROL_TOLERANCE();
+	//if (save_mode != CANON_EXACT_PATH)
+	//	SET_MOTION_CONTROL_MODE(CANON_EXACT_PATH, 0);
+
+	for (int repeat = runner.cycle_l; repeat > 0; repeat--)
+	{
+		aa = (aa + aa_increment);
+		bb = (bb + bb_increment);
+		if ((repeat == runner.cycle_l) && (current_cc > r))
+		{
+			cycle_traverse(aa, bb, current_cc);
+			cycle_traverse(aa, bb, r);
+		}
+		else
+		{
+			/* we must be at CLEAR_CC already */
+			cycle_traverse(aa, bb, clear_cc);
+			if (clear_cc > r)
+				cycle_traverse(aa, bb, r);
+		}
+		switch (motion)
+		{
+		case G_81:
+			IF_F_RET_F(run_cycle_g81(aa, bb, clear_cc, cc));
+			break;
+		case G_82:
+			IF_F_RET_F(run_cycle_g82(aa, bb, clear_cc, cc, runner.cycle_p));
+			break;
+		case G_73:
+			IF_F_RET_F(run_cycle_g73(aa, bb, r, clear_cc, cc, runner.cycle_q));
+			break;
+		case G_83:
+			IF_F_RET_F(run_cycle_g83(aa, bb, r, clear_cc, cc, runner.cycle_q));
+			break;
+		case G_74:
+		case G_84:
+			RET_F_SETSTATE(INTERNAL_ERROR, "G_74 & G_84 not supported yet");
+			break;
+		case G_85:
+		case G_86:
+		case G_87:
+		case G_89:
+		case G_88:
+			RET_F_SETSTATE(INTERNAL_ERROR, "[G85, G88] not supported yet");
+			break;
+		default:
+			RET_F_SETSTATE(INTERNAL_ERROR, "run_cycle_xy internal error can not be called");
+		}
+	}
+	runner.position.y = aa;     /* CYCLE_MACRO updates aa and bb */
+	runner.position.z = bb;
+	runner.position.x = clear_cc;
+	runner.cycle_cc = x_number;
+
+	//if (save_mode != CANON_EXACT_PATH)
+	//	SET_MOTION_CONTROL_MODE(save_mode, save_tolerance);
+	return true;
+}
+
+
+bool GCodeInterpreter::cycle_move(bool tavers, double e1, double e2, double e3,  Plane pl )
+{
+	if (pl == Plane_NONE)
+		pl = runner.plane;
+
+	Coords pos = runner.position;
+	if (pl == Plane_XY)
+		pos.Set(e1, e2, e3, false);
+	else if (pl == Plane_YZ)
+		pos.Set(e3, e1, e2, false);
+	else if (pl == Plane_XZ)
+		pos.Set(e2, e3, e1, false);
+	else 
+		pos.Set(e1, e2, e3, false);
+
+	if ( tavers )
+		executor->straight_traverce(pos);
+	else
+		executor->straight_feed(pos);
+	return true;
+}
+
+bool GCodeInterpreter::run_cycle_g81( double x, double y, double clear_z, 	double bottom_z)
 {
 	cycle_feed(x, y, bottom_z);
 	cycle_traverse( x, y, clear_z);
 	return true;
 }
 
-bool GCodeInterpreter::convert_cycle_g82(
+bool GCodeInterpreter::run_cycle_g82(
 	double x,  //!< x-value where cycle is executed 
 	double y,  //!< y-value where cycle is executed 
 	double clear_z,    //!< z-value of clearance plane      
@@ -1426,12 +1719,12 @@ bool GCodeInterpreter::convert_cycle_g82(
 	double dwell)      //!< dwell time                      
 {
 	cycle_feed(x, y, bottom_z);
-	DWELL(dwell);
+	executor->set_dwell( static_cast<long>(dwell) );
 	cycle_traverse( x, y, clear_z);
 	return true;
 }
 
-bool GCodeInterpreter::convert_cycle_g83(                
+bool GCodeInterpreter::run_cycle_g83(
 	double x,  //!< x-value where cycle is executed 
 	double y,  //!< y-value where cycle is executed 
 	double r,  //!< initial z-value                 
@@ -1439,32 +1732,26 @@ bool GCodeInterpreter::convert_cycle_g83(
 	double bottom_z,   //!< value of z at bottom of cycle   
 	double delta)      //!< size of z-axis feed increment   
 {
-	double current_depth;
-	double rapid_delta;
-
 	/* Moved the check for negative Q values here as a sign
 		may be used with user defined M functions
 		Thanks to Billy Singleton for pointing it out... */
-	CHKS((delta <= 0.0), NCE_NEGATIVE_OR_ZERO_Q_VALUE_USED);
+	IF_T_RET_F_SETSTATE((delta <= 0.0), PARAMETER_ERROR, "Q value negative or zero for G73");
 
-	rapid_delta = G83_RAPID_DELTA;
+	double rapid_delta = G83_RAPID_DELTAMM;
 
-	if (_setup.length_units == CANON_UNITS_MM)
-		rapid_delta = (rapid_delta * 25.4);
-
-	for (current_depth = (r - delta);
+	for (double current_depth = (r - delta);
 		current_depth > bottom_z; current_depth = (current_depth - delta))
 	{
 		cycle_feed(x, y, current_depth);
 		cycle_traverse( x, y, r);
 		cycle_traverse(x, y, current_depth + rapid_delta);
 	}
-	cycle_feed(block, plane, x, y, bottom_z);
-	cycle_traverse(block, plane, x, y, clear_z);
+	cycle_feed(x, y, bottom_z);
+	cycle_traverse( x, y, clear_z);
 	return true;
 }
 
-bool GCodeInterpreter::convert_cycle_g73(
+bool GCodeInterpreter::run_cycle_g73(
 	double x,  //!< x-value where cycle is executed 
 	double y,  //!< y-value where cycle is executed 
 	double r,  //!< initial z-value                 
@@ -1472,19 +1759,15 @@ bool GCodeInterpreter::convert_cycle_g73(
 	double bottom_z,   //!< value of z at bottom of cycle   
 	double delta)      //!< size of z-axis feed increment   
 {
-	double current_depth;
-	double rapid_delta;
-
 	/* Moved the check for negative Q values here as a sign
 	   may be used with user defined M functions
 	   Thanks to Billy Singleton for pointing it out... */
-	CHKS((delta <= 0.0), NCE_NEGATIVE_OR_ZERO_Q_VALUE_USED);
+	
+	IF_T_RET_F_SETSTATE((delta <= 0.0), PARAMETER_ERROR, "Q value negative or zero for G73");
 
-	rapid_delta = G83_RAPID_DELTA;
-	if (_setup.length_units == CANON_UNITS_MM)
-		rapid_delta = (rapid_delta * 25.4);
-
-	for (current_depth = (r - delta);
+	double rapid_delta = G83_RAPID_DELTAMM;
+	
+	for (double current_depth = (r - delta);
 		current_depth > bottom_z; current_depth = (current_depth - delta)) 
 	{
 		cycle_feed( x, y, current_depth);
