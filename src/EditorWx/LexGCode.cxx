@@ -43,20 +43,25 @@ static int  get_letter_style(char ch )
         case 'B':
         case 'C':
             return SCE_GCODE_COORDINATE;
-	    case 'T':
-        case 'P':
-        case 'S':
-        case 'L':
+		case 'D':
+		case 'E':
 		case 'F':
-        case 'I':
-        case 'J':
-        case 'K':
-        case 'R':
-		case 'O':
+		case 'I':
+		case 'J':
+		case 'K':
+		case 'P':
 		case 'Q':
+		case 'R':
+		case 'S':
+		case 'U':
+		case 'V':
+		case 'W':      
+        case 'L':
+		case 'H':
+		case 'T':
 		  return SCE_GCODE_PARAM;
     }
-    return SCE_GCODE_DEFAULT;
+   return SCE_GCODE_DEFAULT;
 }
 
 

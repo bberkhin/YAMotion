@@ -2,6 +2,7 @@
 #define ENVIRONMENTSIMPLE_H
 #include "ienvironment.h"
 #include <map>
+#include <vector>
 
 typedef std::map<int,double> varsmap;
 
@@ -13,8 +14,10 @@ public:
 	void SetG54G58(int index, Coords &pos);
 	void SetVariable(int index, double value);
 	double GetVariable(int index);
+	ToolDesc& getToolById(int id);
 private:
 	varsmap vars;
+	std::vector<ToolDesc> tools;
 	
 };
 

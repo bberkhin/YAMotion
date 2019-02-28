@@ -3,12 +3,15 @@
 #define NOMINMAX
 #endif
 
+#include <stack>
+#include <map>
+
 #include "iexecutor.h"
 #include "ienvironment.h"
 #include "ilogger.h"
 #include "gcodedefs.h"
-#include <stack>
-#include <map>
+#include "CompQueue.h"
+
 
 namespace Interpreter
 {
@@ -44,7 +47,7 @@ namespace Interpreter
 	class GCodeInterpreter  //несомненно, это интерпретатор г-кода )
 	{
 	public:
-		GCodeInterpreter(IEnvironment *penv, IExecutor *executor, ILogger *logger);
+		GCodeInterpreter(IEnvironment *penv, IExecutor *ix, ILogger *logger);
 		~GCodeInterpreter(void);
 
 		bool open_nc_file(const wchar_t *name = 0);             //запоминает строки текстового файла
@@ -83,7 +86,6 @@ namespace Interpreter
 		bool run_stop(const CmdParser &parser);		
 		bool run_input_mode(CmdParser &parser);
 		bool run_tool_height_offset(const CmdParser &parser);
-		bool run_tool_crc(const CmdParser &parser);
 		bool run_set_lathe_diam(const CmdParser &parser);
 		bool run_modal_0(CmdParser &parser);
 		bool convert_axis_offsets(int gc, const CmdParser &parser);
@@ -99,6 +101,15 @@ namespace Interpreter
 		void setcoordinates(Coords &newpos, const CmdParser &parser, bool doofesett) const;
 		bool get_new_coordinate(const CmdParser &parser, Coords &pos );
 		InterError get_state() { return state; }
+		
+		// cutter compensation
+		bool run_cutter_comp(const CmdParser &parser);
+		bool run_cutter_comp_off();
+		bool run_cutter_comp_on(CutterCompType side, const CmdParser &parser);
+		
+		// straight support
+		bool run_straight_comp1(int move, double px, double py, double pz, double a, double b, double c);
+		bool run_straight_comp2(int move, double px, double py, double pz, double a, double b, double c);
 
 		// Cycle support
 		bool run_cycle_xy(int motion, const Coords &position, const CmdParser &parser);
@@ -128,7 +139,16 @@ namespace Interpreter
 
 		char arc_axis1(Plane plane);
 		char arc_axis2(Plane plane);
+
+		void comp_get(Coords *srs, double *x, double *y, double *z);
+		void comp_set(Coords *srs, double x, double y, double z);
+		void comp_set_current(double x, double y, double z);
+		void comp_set_programmed(double x, double y, double z);
+		void comp_get_current(double *x, double *y, double *z);
+		void comp_get_programmed(double *x, double *y, double *z);
+
 	private:
+		CompQueue cq;
 		InterError state;
 		std::wstring file_name;     //строки входного файла
 		FILE *gfile;

@@ -2,7 +2,10 @@
 
 EnvironmentSimple::EnvironmentSimple()
 {
-
+	// add tools
+	ToolDesc t;
+	t.diameter = 6;
+	tools.push_back(t);
 }
 
 
@@ -37,4 +40,10 @@ double EnvironmentSimple::GetVariable(int index)
 		return 0;
 	else
 		return iter->second;
+}
+
+
+ToolDesc& EnvironmentSimple::getToolById(int id )
+{
+	return tools.front();
 }

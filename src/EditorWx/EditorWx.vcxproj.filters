@@ -84,6 +84,9 @@
     <ClCompile Include="..\Gcode\arc.cpp">
       <Filter>GCode</Filter>
     </ClCompile>
+    <ClCompile Include="..\Gcode\CompQueue.cpp">
+      <Filter>GCode</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h">
@@ -153,6 +156,9 @@
       <Filter>GCode</Filter>
     </ClInclude>
     <ClInclude Include="..\Gcode\Kinematics.h">
+      <Filter>GCode</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Gcode\CompQueue.h">
       <Filter>GCode</Filter>
     </ClInclude>
   </ItemGroup>

@@ -21,6 +21,7 @@
   <ItemGroup>
     <ClCompile Include="..\Gcode\arc.cpp" />
     <ClCompile Include="..\Gcode\cmdparser.cpp" />
+    <ClCompile Include="..\Gcode\CompQueue.cpp" />
     <ClCompile Include="..\Gcode\CoordMotion.cpp" />
     <ClCompile Include="..\Gcode\cycle.cpp" />
     <ClCompile Include="..\Gcode\environmentsimple.cpp" />
@@ -44,6 +45,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Gcode\cmdparser.h" />
+    <ClInclude Include="..\Gcode\CompQueue.h" />
     <ClInclude Include="..\Gcode\CoordMotion.h" />
     <ClInclude Include="..\Gcode\environmentsimple.h" />
     <ClInclude Include="..\Gcode\gcodedefs.h" />

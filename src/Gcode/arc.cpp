@@ -90,7 +90,7 @@ bool GCodeInterpreter::arc_to(int motion, const Coords &position, const CmdParse
 	double AA_end;
 	double BB_end;
 	double CC_end;
-	double u_end, v_end, w_end;
+	double u_end = 0, v_end = 0, w_end = 0;
 
 	//CHKS((settings->arc_not_allowed), (_("The move just after exiting cutter compensation mode must be straight, not an arc")));
 

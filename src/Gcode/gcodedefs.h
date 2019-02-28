@@ -9,6 +9,7 @@
 #define MAX_GCODE_LINELEN 512
 #define MM_PER_INCHES 2.54
 #define PI 3.14159265358979323846
+#define M_PIl	3.1415926535897932384626433832795029L  /* pi */
 #define TWO_PI (2.0*3.141592653589793238)
 #define HALF_PI 1.5707963267948966
 #define M_PI_2l 1.570796326794896619231321691639751442L /* pi/2 */
@@ -20,6 +21,7 @@
 #define MAX_FEED_RATE 10000
 #define MAX_SPINDELSPEED 60000
 #define G83_RAPID_DELTAMM 0.254
+#define TOLERANCE_CONCAVE_CORNER 0.05   /* radians, testing corners */
 
 
 #define N_CHANNELS 8                  // number of channels/board
@@ -294,12 +296,11 @@ namespace Interpreter
 		int tool_length_offset;  // Tool height offset compensation
 		double tool_yoffset;
 		double tool_xoffset;
-		double tool_crc;			 // Cutter radius compensation (CRC),
-		CutterCompType tool_crc_type;
 		MoveAccuracy accuracy;
 		bool cutter_comp_firstmove;
-		int cutter_comp_side;
+		CutterCompType cutter_comp_side;
 		double cutter_comp_radius;
+		Coords program;      
 		int coordinate_index ;
 		int retract_mode;
 		double cycle_r;
@@ -320,8 +321,8 @@ namespace Interpreter
 		//    int    cycleWait;        //задержка в цикле P
 		RunnerData() :
 			toolid(-1), units(UnitSystem_MM), incremental(false), ijk_incremental(true), motion_mode(-1), feed_mode(FeedMode_UnitPerMin), plane(Plane_XY), 
-			feed(0), spindlespeed(0),tool_length_offset(0), tool_yoffset(0), tool_xoffset(0), cycle_il_flag(false), tool_crc_type(CutterCompType_NONE),
-			accuracy(AccuracyNormal), cutter_comp_firstmove(true), cutter_comp_side(0), cutter_comp_radius(0.0), coordinate_index(-1), 
+			feed(0), spindlespeed(0),tool_length_offset(0), tool_yoffset(0), tool_xoffset(0), cycle_il_flag(false), cutter_comp_side(CutterCompType_NONE),
+			accuracy(AccuracyNormal), cutter_comp_firstmove(true), cutter_comp_radius(0.0), coordinate_index(-1), 
 			retract_mode(CannedLevel_NONE),cycle_r(0.0), cycle_q(0.0), cycle_cc (0.0) { }
 	};
 };

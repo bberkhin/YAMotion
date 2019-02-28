@@ -2,6 +2,12 @@
 #define IENVIRONMENT_H
 #include "iexecutor.h"
 
+
+struct ToolDesc
+{
+	double diameter;
+};
+
 // Общие настройки системы
 class IEnvironment
 {
@@ -10,6 +16,7 @@ class IEnvironment
 	 virtual void SetG54G58(int index, Coords &pos ) = 0;
 	 virtual void SetVariable(int index, double value) = 0;
 	 virtual double GetVariable(int index ) = 0;
+	 virtual ToolDesc& getToolById(int id) = 0;
 };
 
 #endif // IENVIRONMENT_H
