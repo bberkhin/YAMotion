@@ -122,6 +122,13 @@ namespace Interpreter
 		AccuracyNormal = 0,
 		AccuracyExactStop
 	};
+	enum FeedMode
+	{
+		FeedMode_UnitPerMin = 0,
+		FeedMode_UnitPerRevolution,
+		FeedMode_InverseTime
+
+	};
 
 	enum ErrorCode
 	{
@@ -280,6 +287,7 @@ namespace Interpreter
 		int motion_mode;   //режим перемещени€ (линейна€ интерпол€ци€ и т.п.)
 		Plane plane;             //текуща€ плоскость интерпол€ции
 		double feed;             //подача в мм/мин
+		FeedMode feed_mode;
 		double spindlespeed; // обороты шпиндл€
 		Coords origin;     
 		Coords axis_offset;
@@ -311,8 +319,8 @@ namespace Interpreter
 		//    double cycleStep;        //глубина одного шага Q
 		//    int    cycleWait;        //задержка в цикле P
 		RunnerData() :
-			toolid(-1), units(UnitSystem_MM), incremental(false), ijk_incremental(true), motion_mode(-1), plane(Plane_XY), feed(0), spindlespeed(0),
-			tool_length_offset(0), tool_yoffset(0), tool_xoffset(0), cycle_il_flag(false), tool_crc_type(CutterCompType_NONE),
+			toolid(-1), units(UnitSystem_MM), incremental(false), ijk_incremental(true), motion_mode(-1), feed_mode(FeedMode_UnitPerMin), plane(Plane_XY), 
+			feed(0), spindlespeed(0),tool_length_offset(0), tool_yoffset(0), tool_xoffset(0), cycle_il_flag(false), tool_crc_type(CutterCompType_NONE),
 			accuracy(AccuracyNormal), cutter_comp_firstmove(true), cutter_comp_side(0), cutter_comp_radius(0.0), coordinate_index(-1), 
 			retract_mode(CannedLevel_NONE),cycle_r(0.0), cycle_q(0.0), cycle_cc (0.0) { }
 	};

@@ -403,15 +403,16 @@ bool GCodeInterpreter::run_feed_mode( CmdParser &parser )
 	if( gc == G_93 )
 	{
 		//G96 D2500 S250
+		runner.feed_mode = FeedMode_InverseTime;
 		RET_F_SETSTATE( NO_VALUE, "G93 Inverse Time Mode not supported");
 	}
 	else if( gc == G_94 )
 	{
-		// ok do nothing
-		;
+		runner.feed_mode = FeedMode_UnitPerMin;// ok do nothing
 	}
 	else if( gc == G_95 )
 	{
+		runner.feed_mode = FeedMode_UnitPerRevolution
 		RET_F_SETSTATE(NO_VALUE, "G95 - is Units per Revolution Mode not supported");	
 	}
 	return true;
@@ -1111,24 +1112,6 @@ bool GCodeInterpreter::probe_to(int motion, const Coords &position, const CmdPar
 	return true;
 }
 
-//====================================================================================================
-bool  GCodeInterpreter::move_to(int motion, const Coords &position, const CmdParser &parser)
-{
-
-	if (executor)
-	{
-		if (motion == G_0)
-		{
-			executor->straight_traverce(position);
-		}
-		else
-			executor->straight_feed(position);
-	}
-	runner.position = position;
-	runner.motion_mode = motion;
-	return true;
-}
-
 
 //====================================================================================================
 //перевод в мм
@@ -1217,1432 +1200,449 @@ const char *GCodeInterpreter::cpy_close_and_downcase(char *line, const char *src
 
 }
 
-
-bool GCodeInterpreter::run_cycle(int motion, const Coords &position, const CmdParser &parser) 
+//====================================================================================================
+bool  GCodeInterpreter::move_to(int motion, const Coords &position, const CmdParser &parser)
 {
-	IF_T_RET_F_SETSTATE((runner.feed == 0.0),PARAMETER_ERROR,"Cannot feed with zero feed rate");
-	//CHKS((settings->feed_mode == INVERSE_TIME), _("Cannot use inverse time feed with canned cycles"));
-	IF_T_RET_F_SETSTATE((runner.cutter_comp_side), PARAMETER_ERROR, "Cannot use canned cycles with cutter compensation on");
 
-
-	if (parser.hasParam(PARAM_R))
+	if (motion == G_1)
 	{
-		parser.getRParam(PARAM_R, &runner.cycle_r);
+		IF_T_RET_F_SETSTATE((runner.feed_rate == 0.0), PARAMETER_ERROR, "Ca not do G1 with  zero feed rate");
+		IF_T_RET_F_SETSTATE((runner.feed_mode == FeedMode_UnitPerRevolution) && (spindlespeed == 0.0)), PARAMETER_ERROR, "Can not feed with zero spindle speed in feed per rev mode");
 	}
-	//if (!block->r_flag)
-	//{
-	//	if (settings->motion_mode == motion)
-	//		block->r_number = settings->cycle_r;
-	//	else
-	//		ERS(NCE_R_CLEARANCE_PLANE_UNSPECIFIED_IN_CYCLE);
-	//}
-
-	int l_number = 1;
-	if (parser.hasParam(PARAM_L))
-	{
-		parser.getIParam(PARAM_L,&l_number);
-		IF_T_RET_F_SETSTATE((l_number == 0 || l_number < 0), PARAMETER_ERROR, "Cannot do zero repeats of cycle");
-	}
-	runner.cycle_l = l_number;
-	
-	if (runner.plane == Plane_XY)
-	{
-		IF_F_RET_F(run_cycle_xy(motion, position, parser));
-	}
-	else if (runner.plane == Plane_YZ) \
-	{
-		IF_F_RET_F(run_cycle_yz(motion, position, parser));
-	}
-	else if (runner.plane == Plane_XZ) 
-	{
-		IF_F_RET_F(run_cycle_xz(motion, position, parser));
-	}
-	else
-		RET_F_SETSTATE(INTERNAL_ERROR, "Cannot use canned cycles for this plane (shoul be XY, YZ or XZ)");
 
 	runner.motion_mode = motion;
-	return true;
-}
 
-bool GCodeInterpreter::run_cycle_xy(int motion, const Coords &position, const CmdParser &parser)
-{
-	double aa, bb;
-	double aa_increment = 0., bb_increment = 0.;
-	double cc, clear_cc, old_cc;
-	double r;
-	
-	double current_cc = runner.position.z;
-
-	Plane plane = Plane_XY;
-
-	if (runner.motion_mode != motion) 
+	if ((runner.cutter_comp_side) && (runner.cutter_comp_radius > 0.0))    /* radius always is >= 0 */
 	{
-		IF_T_RET_F_SETSTATE(!parser.hasParam(PARAM_Z), PARAMETER_ERROR, "Unspesified Z value for XY plane in cycle");
-	}
+		IF_T_RET_F_SETSTATE((parser.getGCode(ModalGroup_MODAL_0) == G_53), PARAMETER_ERROR, "Can not use G53 with cutter radius compenstion");
 
-	double z_number = runner.cycle_cc;
-	if (parser.hasParam(PARAM_Z))
-		parser.getRParam(PARAM_Z, &z_number);
-	
-	if (runner.cycle_il )
-	{
-		old_cc = runner.cycle_il.value();
-	}
-	else 
-	{
-		old_cc = current_cc;
-		runner.cycle_il = current_cc;
-	}
-
-	
-	cc = z_number;
-	r = runner.cycle_r;
-	
-	if ( runner.incremental )
-	{
-		parser.getRParam(PARAM_X, &aa_increment);
-		parser.getRParam(PARAM_Y, &bb_increment);
-		aa = runner.position.x;
-		bb = runner.position.y;
-	}
-	else
-	{
-		aa_increment = 0.;
-		bb_increment = 0.;
-		aa = position.x;
-		bb = position.y;
-	}
-
-
-	IF_T_RET_F_SETSTATE((r < cc), PARAMETER_ERROR, "R less then Z for XY plane in cycle");
-
-	// First motion of a canned cycle (maybe): if we're below the R plane,
-	// rapid straight up to the R plane.
-	if (old_cc < r) 
-	{
-		Coords newZ = runner.position;
-		newZ.z = r;
-		executor->straight_traverce(newZ);
-		old_cc = r;
-		current_cc = old_cc;
-	}
-
-	clear_cc = (runner.retract_mode == CannedLevel_R) ? r : old_cc;
-
-	if (parser.hasParam(PARAM_P))
-		parser.getRParam(PARAM_P, &runner.cycle_p);
-	else if (motion == G_82 && runner.motion_mode != G_82) // first time 82
-		RET_F_SETSTATE(INTERNAL_ERROR, "Dwell time (P) missing with G82 ");
-
-	if (parser.hasParam(PARAM_Q))
-		parser.getRParam(PARAM_Q, &runner.cycle_q);
-	else if (motion == G_73 && runner.motion_mode != G_73) // first time 73
-		RET_F_SETSTATE(INTERNAL_ERROR, "Q missing with G73 ");
-	else if (motion == G_83 && runner.motion_mode != G_83) // first time 83
-		RET_F_SETSTATE(INTERNAL_ERROR, "Q missing with G83 ");
-
-	//save_mode = GET_EXTERNAL_MOTION_CONTROL_MODE();
-	//save_tolerance = GET_EXTERNAL_MOTION_CONTROL_TOLERANCE();
-	//if (save_mode != CANON_EXACT_PATH)
-	//	SET_MOTION_CONTROL_MODE(CANON_EXACT_PATH, 0);
-
-	for (int repeat = runner.cycle_l; repeat > 0; repeat--) 
-	{ 
-		aa = (aa + aa_increment); 
-		bb = (bb + bb_increment); 
-		if((repeat == runner.cycle_l) && (current_cc > r)) 
-		{					
-			cycle_traverse(aa, bb, current_cc); 
-			cycle_traverse(aa, bb, r); 
+		if (runner.plane == Plane_XZ)
+		{
+			if (runner.cutter_comp_firstmove)
+				IF_F_RET_F(run_straight_comp1(motion, position.z, position.x, position.y, position.a, position.b, position.c);
+			else
+					IF_F_RET_F(run_straight_comp2(motion, position.z, position.x, position.y, position.a, position.b, position.c);
 		}
-		else 
+		else if (runner.plane == Plane_XY)
 		{
-			/* we must be at CLEAR_CC already */ 
-			cycle_traverse(aa, bb, clear_cc);
-			if (clear_cc > r) 
-				cycle_traverse(aa, bb, r); 
-		} 
-		switch (motion)
-		{
-		case G_81:
-			IF_F_RET_F(run_cycle_g81(aa, bb, clear_cc, cc));
-			break;
-		case G_82:
-			IF_F_RET_F(run_cycle_g82(aa, bb, clear_cc, cc, runner.cycle_p));
-			break;
-		case G_73:
-			IF_F_RET_F(run_cycle_g73(aa, bb, r, clear_cc, cc, runner.cycle_q));
-			break;
-		case G_83:
-			IF_F_RET_F(run_cycle_g83(aa, bb, r, clear_cc, cc, runner.cycle_q));
-			break;
-		case G_74:
-		case G_84:
-			RET_F_SETSTATE(INTERNAL_ERROR, "G_74 & G_84 not supported yet");
-			break;
-		case G_85:
-		case G_86:
-		case G_87:
-		case G_89:
-		case G_88:
-			RET_F_SETSTATE(INTERNAL_ERROR, "[G85, G88] not supported yet");
-			break;
-		default:
-			RET_F_SETSTATE(INTERNAL_ERROR, "run_cycle_xy internal error can not be called");
-		}
-	} 
-	runner.position.x = aa;     /* CYCLE_MACRO updates aa and bb */
-	runner.position.y = bb;
-	runner.position.z = clear_cc;
-	runner.cycle_cc = z_number;
-	//if (save_mode != CANON_EXACT_PATH)
-	//	SET_MOTION_CONTROL_MODE(save_mode, save_tolerance);
-	return true;
-}
-
-
-bool GCodeInterpreter::run_cycle_xz(int motion, const Coords &position, const CmdParser &parser)
-{
-
-	double aa, bb;
-	double aa_increment = 0., bb_increment = 0.;
-	double cc, clear_cc, old_cc;
-	double r;
-
-	double current_cc = runner.position.y;
-
-	Plane plane = Plane_XZ;
-
-	if (runner.motion_mode != motion)
-	{
-		IF_T_RET_F_SETSTATE(!parser.hasParam(PARAM_Y), PARAMETER_ERROR, "Unspesified Y value for XZ (G18) plane in cycle");
-	}
-
-	double y_number = runner.cycle_cc;
-	if (parser.hasParam(PARAM_Y))
-		parser.getRParam(PARAM_Y, &y_number);
-
-	if (runner.cycle_il)
-	{
-		old_cc = runner.cycle_il.value();
-	}
-	else
-	{
-		old_cc = current_cc;
-		runner.cycle_il = current_cc;
-	}
-
-
-	cc = y_number;
-	r = runner.cycle_r;
-
-	if (runner.incremental)
-	{
-		parser.getRParam(PARAM_Z, &aa_increment);
-		parser.getRParam(PARAM_X, &bb_increment);
-		aa = runner.position.z;
-		bb = runner.position.x;
-	}
-	else
-	{
-		aa_increment = 0.;
-		bb_increment = 0.;
-		aa = position.z;
-		bb = position.x;
-	}
-
-	IF_T_RET_F_SETSTATE((r < cc), PARAMETER_ERROR, "R less then Y for ZX (G18) plane in cycle");
-
-
-
-	// First motion of a canned cycle (maybe): if we're below the R plane,
-	// rapid straight up to the R plane.
-	if (old_cc < r)
-	{
-		Coords newZ = runner.position;
-		newZ.z = r;
-		executor->straight_traverce(newZ);
-		old_cc = r;
-		current_cc = old_cc;
-	}
-
-	clear_cc = (runner.retract_mode == CannedLevel_R) ? r : old_cc;
-
-	if (parser.hasParam(PARAM_P))
-		parser.getRParam(PARAM_P, &runner.cycle_p);
-	else if (motion == G_82 && runner.motion_mode != G_82) // first time 82
-		RET_F_SETSTATE(INTERNAL_ERROR, "Dwell time (P) missing with G82 ");
-
-	if (parser.hasParam(PARAM_Q))
-		parser.getRParam(PARAM_Q, &runner.cycle_q);
-	else if (motion == G_73 && runner.motion_mode != G_73) // first time 73
-		RET_F_SETSTATE(INTERNAL_ERROR, "Q missing with G73 ");
-	else if (motion == G_83 && runner.motion_mode != G_83) // first time 83
-		RET_F_SETSTATE(INTERNAL_ERROR, "Q missing with G83 ");
-
-	//save_mode = GET_EXTERNAL_MOTION_CONTROL_MODE();
-	//save_tolerance = GET_EXTERNAL_MOTION_CONTROL_TOLERANCE();
-	//if (save_mode != CANON_EXACT_PATH)
-	//	SET_MOTION_CONTROL_MODE(CANON_EXACT_PATH, 0);
-
-	for (int repeat = runner.cycle_l; repeat > 0; repeat--)
-	{
-		aa = (aa + aa_increment);
-		bb = (bb + bb_increment);
-		if ((repeat == runner.cycle_l) && (current_cc > r))
-		{
-			cycle_traverse(aa, bb, current_cc);
-			cycle_traverse(aa, bb, r);
+			if (runner.cutter_comp_firstmove)
+				IF_F_RET_F(run_straight_comp1(motion, position.x, position.y, position.z, position.a, position.b, position.c);
+			else
+					IF_F_RET_F(run_straight_comp2(motion, position.x, position.y, position.z, position.a, position.b, position.c);
 		}
 		else
-		{
-			/* we must be at CLEAR_CC already */
-			cycle_traverse(aa, bb, clear_cc);
-			if (clear_cc > r)
-				cycle_traverse(aa, bb, r);
-		}
-		switch (motion)
-		{
-		case G_81:
-			IF_F_RET_F(run_cycle_g81(aa, bb, clear_cc, cc));
-			break;
-		case G_82:
-			IF_F_RET_F(run_cycle_g82(aa, bb, clear_cc, cc, runner.cycle_p));
-			break;
-		case G_73:
-			IF_F_RET_F(run_cycle_g73(aa, bb, r, clear_cc, cc, runner.cycle_q));
-			break;
-		case G_83:
-			IF_F_RET_F(run_cycle_g83(aa, bb, r, clear_cc, cc, runner.cycle_q));
-			break;
-		case G_74:
-		case G_84:
-			RET_F_SETSTATE(INTERNAL_ERROR, "G_74 & G_84 not supported yet");
-			break;
-		case G_85:
-		case G_86:
-		case G_87:
-		case G_89:
-		case G_88:
-			RET_F_SETSTATE(INTERNAL_ERROR, "[G85, G88] not supported yet");
-			break;
-		default:
-			RET_F_SETSTATE(INTERNAL_ERROR, "run_cycle_xy internal error can not be called");
-		}
+						RET_F_SETSTATE(PARAMETER_ERROR, "Invalid plane for cutter compensation");
 	}
-	runner.position.z = aa;     /* CYCLE_MACRO updates aa and bb */
-	runner.position.x = bb;
-	runner.position.y = clear_cc;
-	runner.cycle_cc = y_number;
-
-	//if (save_mode != CANON_EXACT_PATH)
-	//	SET_MOTION_CONTROL_MODE(save_mode, save_tolerance);
-	return true;
-}
-
-
-
-bool GCodeInterpreter::run_cycle_yz(int motion, const Coords &position, const CmdParser &parser)
-{
-
-	double aa, bb;
-	double aa_increment = 0., bb_increment = 0.;
-	double cc, clear_cc, old_cc;
-	double r;
-
-	double current_cc = runner.position.x;
-
-	Plane plane = Plane_YZ;
-
-	if (runner.motion_mode != motion)
+	else if (motion == G_0)
 	{
-		IF_T_RET_F_SETSTATE(!parser.hasParam(PARAM_X), PARAMETER_ERROR, "Unspesified X value for YZ (G19) plane in cycle");
+		executor->straight_traverce(position);
+		runner.position = position;
 	}
-
-	double x_number = runner.cycle_cc;
-	if (parser.hasParam(PARAM_X))
-		parser.getRParam(PARAM_X, &x_number);
-
-	if (runner.cycle_il)
+	else if (motion == G_1)
 	{
-		old_cc = runner.cycle_il.value();
+		executor->straight_feed(position);
+		runner.position = position;
+	}
+	else if (motion == G_33)
+	{
+		RET_F_SETSTATE(PARAMETER_ERROR, "G33 not supported");
+	}
+	else if (motion == G_33_1)
+	{
+		RET_F_SETSTATE(PARAMETER_ERROR, "G33.1 not supported");
+	}
+	else if (motion == G_76)
+	{
+		RET_F_SETSTATE(PARAMETER_ERROR, "G76 not supported");
 	}
 	else
-	{
-		old_cc = current_cc;
-		runner.cycle_il = current_cc;
+	{	
+		RET_F_SETSTATE(PARAMETER_ERROR, "Undefened motion G%f", motion/10.);
 	}
-
-
-	cc = x_number;
-	r = runner.cycle_r;
-
-	if (runner.incremental)
-	{
-		parser.getRParam(PARAM_Y, &aa_increment);
-		parser.getRParam(PARAM_Z, &bb_increment);
-		aa = runner.position.z;
-		bb = runner.position.x;
-	}
-	else
-	{
-		aa_increment = 0.;
-		bb_increment = 0.;
-		aa = position.y;
-		bb = position.z;
-	}
-
-	IF_T_RET_F_SETSTATE((r < cc), PARAMETER_ERROR, "R less then Y for ZX (G18) plane in cycle");
-
-
-
-	// First motion of a canned cycle (maybe): if we're below the R plane,
-	// rapid straight up to the R plane.
-	if (old_cc < r)
-	{
-		Coords newZ = runner.position;
-		newZ.z = r;
-		executor->straight_traverce(newZ);
-		old_cc = r;
-		current_cc = old_cc;
-	}
-
-	clear_cc = (runner.retract_mode == CannedLevel_R) ? r : old_cc;
-
-	if (parser.hasParam(PARAM_P))
-		parser.getRParam(PARAM_P, &runner.cycle_p);
-	else if (motion == G_82 && runner.motion_mode != G_82) // first time 82
-		RET_F_SETSTATE(INTERNAL_ERROR, "Dwell time (P) missing with G82 ");
-
-	if (parser.hasParam(PARAM_Q))
-		parser.getRParam(PARAM_Q, &runner.cycle_q);
-	else if (motion == G_73 && runner.motion_mode != G_73) // first time 73
-		RET_F_SETSTATE(INTERNAL_ERROR, "Q missing with G73 ");
-	else if (motion == G_83 && runner.motion_mode != G_83) // first time 83
-		RET_F_SETSTATE(INTERNAL_ERROR, "Q missing with G83 ");
-
-	//save_mode = GET_EXTERNAL_MOTION_CONTROL_MODE();
-	//save_tolerance = GET_EXTERNAL_MOTION_CONTROL_TOLERANCE();
-	//if (save_mode != CANON_EXACT_PATH)
-	//	SET_MOTION_CONTROL_MODE(CANON_EXACT_PATH, 0);
-
-	for (int repeat = runner.cycle_l; repeat > 0; repeat--)
-	{
-		aa = (aa + aa_increment);
-		bb = (bb + bb_increment);
-		if ((repeat == runner.cycle_l) && (current_cc > r))
-		{
-			cycle_traverse(aa, bb, current_cc);
-			cycle_traverse(aa, bb, r);
-		}
-		else
-		{
-			/* we must be at CLEAR_CC already */
-			cycle_traverse(aa, bb, clear_cc);
-			if (clear_cc > r)
-				cycle_traverse(aa, bb, r);
-		}
-		switch (motion)
-		{
-		case G_81:
-			IF_F_RET_F(run_cycle_g81(aa, bb, clear_cc, cc));
-			break;
-		case G_82:
-			IF_F_RET_F(run_cycle_g82(aa, bb, clear_cc, cc, runner.cycle_p));
-			break;
-		case G_73:
-			IF_F_RET_F(run_cycle_g73(aa, bb, r, clear_cc, cc, runner.cycle_q));
-			break;
-		case G_83:
-			IF_F_RET_F(run_cycle_g83(aa, bb, r, clear_cc, cc, runner.cycle_q));
-			break;
-		case G_74:
-		case G_84:
-			RET_F_SETSTATE(INTERNAL_ERROR, "G_74 & G_84 not supported yet");
-			break;
-		case G_85:
-		case G_86:
-		case G_87:
-		case G_89:
-		case G_88:
-			RET_F_SETSTATE(INTERNAL_ERROR, "[G85, G88] not supported yet");
-			break;
-		default:
-			RET_F_SETSTATE(INTERNAL_ERROR, "run_cycle_xy internal error can not be called");
-		}
-	}
-	runner.position.y = aa;     /* CYCLE_MACRO updates aa and bb */
-	runner.position.z = bb;
-	runner.position.x = clear_cc;
-	runner.cycle_cc = x_number;
-
-	//if (save_mode != CANON_EXACT_PATH)
-	//	SET_MOTION_CONTROL_MODE(save_mode, save_tolerance);
 	return true;
 }
 
-
-bool GCodeInterpreter::cycle_move(bool tavers, double e1, double e2, double e3,  Plane pl )
-{
-	if (pl == Plane_NONE)
-		pl = runner.plane;
-
-	Coords pos = runner.position;
-	if (pl == Plane_XY)
-		pos.Set(e1, e2, e3, false);
-	else if (pl == Plane_YZ)
-		pos.Set(e3, e1, e2, false);
-	else if (pl == Plane_XZ)
-		pos.Set(e2, e3, e1, false);
-	else 
-		pos.Set(e1, e2, e3, false);
-
-	if ( tavers )
-		executor->straight_traverce(pos);
-	else
-		executor->straight_feed(pos);
-	return true;
-}
-
-bool GCodeInterpreter::run_cycle_g81( double x, double y, double clear_z, 	double bottom_z)
-{
-	cycle_feed(x, y, bottom_z);
-	cycle_traverse( x, y, clear_z);
-	return true;
-}
-
-bool GCodeInterpreter::run_cycle_g82(
-	double x,  //!< x-value where cycle is executed 
-	double y,  //!< y-value where cycle is executed 
-	double clear_z,    //!< z-value of clearance plane      
-	double bottom_z,   //!< value of z at bottom of cycle   
-	double dwell)      //!< dwell time                      
-{
-	cycle_feed(x, y, bottom_z);
-	executor->set_dwell( static_cast<long>(dwell) );
-	cycle_traverse( x, y, clear_z);
-	return true;
-}
-
-bool GCodeInterpreter::run_cycle_g83(
-	double x,  //!< x-value where cycle is executed 
-	double y,  //!< y-value where cycle is executed 
-	double r,  //!< initial z-value                 
-	double clear_z,    //!< z-value of clearance plane      
-	double bottom_z,   //!< value of z at bottom of cycle   
-	double delta)      //!< size of z-axis feed increment   
-{
-	/* Moved the check for negative Q values here as a sign
-		may be used with user defined M functions
-		Thanks to Billy Singleton for pointing it out... */
-	IF_T_RET_F_SETSTATE((delta <= 0.0), PARAMETER_ERROR, "Q value negative or zero for G73");
-
-	double rapid_delta = G83_RAPID_DELTAMM;
-
-	for (double current_depth = (r - delta);
-		current_depth > bottom_z; current_depth = (current_depth - delta))
-	{
-		cycle_feed(x, y, current_depth);
-		cycle_traverse( x, y, r);
-		cycle_traverse(x, y, current_depth + rapid_delta);
-	}
-	cycle_feed(x, y, bottom_z);
-	cycle_traverse( x, y, clear_z);
-	return true;
-}
-
-bool GCodeInterpreter::run_cycle_g73(
-	double x,  //!< x-value where cycle is executed 
-	double y,  //!< y-value where cycle is executed 
-	double r,  //!< initial z-value                 
-	double clear_z,    //!< z-value of clearance plane      
-	double bottom_z,   //!< value of z at bottom of cycle   
-	double delta)      //!< size of z-axis feed increment   
-{
-	/* Moved the check for negative Q values here as a sign
-	   may be used with user defined M functions
-	   Thanks to Billy Singleton for pointing it out... */
-	
-	IF_T_RET_F_SETSTATE((delta <= 0.0), PARAMETER_ERROR, "Q value negative or zero for G73");
-
-	double rapid_delta = G83_RAPID_DELTAMM;
-	
-	for (double current_depth = (r - delta);
-		current_depth > bottom_z; current_depth = (current_depth - delta)) 
-	{
-		cycle_feed( x, y, current_depth);
-		cycle_traverse( x, y, current_depth + rapid_delta);
-	}
-	cycle_feed( x, y, bottom_z);
-	cycle_traverse( x, y, clear_z);
-
-	return true;
-}
 
 
 /****************************************************************************/
 
-/*! convert_arc
-
-Returned Value: int
-   If one of the following functions returns an error code,
-   this returns that error code.
-	  convert_arc_comp1
-	  convert_arc_comp2
-	  convert_arc2
-   If any of the following errors occur, this returns the error code shown.
-   Otherwise, this returns INTERP_OK.
-   1. The block has neither an r value nor any i,j,k values:
-	  NCE_R_I_J_K_WORDS_ALL_MISSING_FOR_ARC
-   2. The block has both an r value and one or more i,j,k values:
-	  NCE_MIXED_RADIUS_IJK_FORMAT_FOR_ARC
-   3. In the ijk format the XY-plane is selected and
-	  the block has a k value: NCE_K_WORD_GIVEN_FOR_ARC_IN_XY_PLANE
-   4. In the ijk format the YZ-plane is selected and
-	  the block has an i value: NCE_I_WORD_GIVEN_FOR_ARC_IN_YZ_PLANE
-   5. In the ijk format the XZ-plane is selected and
-	  the block has a j value: NCE_J_WORD_GIVEN_FOR_ARC_IN_XZ_PLANE
-   6. In either format any of the following occurs.
-	  a. The XY-plane is selected and the block has no x or y value:
-		 NCE_X_AND_Y_WORDS_MISSING_FOR_ARC_IN_XY_PLANE
-	  b. The YZ-plane is selected and the block has no y or z value:
-		 NCE_Y_AND_Z_WORDS_MISSING_FOR_ARC_IN_YZ_PLANE
-	  c. The ZX-plane is selected and the block has no z or x value:
-		 NCE_X_AND_Z_WORDS_MISSING_FOR_ARC_IN_XZ_PLANE
-   7. The selected plane is an unknown plane:
-	  NCE_BUG_PLANE_NOT_XY_YZ__OR_XZ
-   8. The feed rate mode is UNITS_PER_MINUTE and feed rate is zero:
-	  NCE_CANNOT_MAKE_ARC_WITH_ZERO_FEED_RATE
-   9. The feed rate mode is INVERSE_TIME and the block has no f word:
-	  NCE_F_WORD_MISSING_WITH_INVERSE_TIME_ARC_MOVE
-
-Side effects:
-   This generates and executes an arc command at feed rate
-   (and, possibly a second arc command). It also updates the setting
-   of the position of the tool point to the end point of the move.
-
-Called by: convert_motion.
-
-This converts a helical or circular arc.  The function calls:
-convert_arc2 (when cutter radius compensation is off) or
-convert_arc_comp1 (when cutter comp is on and this is the first move) or
-convert_arc_comp2 (when cutter comp is on and this is not the first move).
-
-If the ijk format is used, at least one of the offsets in the current
-plane must be given in the block; it is common but not required to
-give both offsets. The offsets are always incremental [NCMS, page 21].
-
-If cutter compensation is in use, the path's length may increase or
-decrease.  Also an arc may be added, to go around a corner, before the
-original arc move.  For the purpose of calculating the feed rate when in
-inverse time mode, this length increase or decrease is ignored.  The
-feed is still set to the original programmed arc length divided by the F
-number (with the above lower bound).  The new arc (if needed) and the
-new longer or shorter original arc are taken at this feed.
-
-*/
-
-
-/*
-void  GCodeInterpreter::arc_to(const Coords &position, bool cw)
-{
-
-	if (executor)
-	{
-		executor->arc_feed(position, cw);
-	}
-	runner.position = position;
-}
-*/
-
-bool GCodeInterpreter::arc_to(int motion, const Coords &position, const CmdParser &parser)       //!< either G_2 (cw arc) or G_3 (ccw arc)    
-{
-	bool first;                    /* flag set true if this is first move after comp true */
-	int ijk_flag;                 /* flag set true if any of i,j,k present in NC code  */
-	double end_x;
-	double end_y;
-	double end_z;
-	double AA_end;
-	double BB_end;
-	double CC_end;
-	double u_end, v_end, w_end;
-
-	//CHKS((settings->arc_not_allowed), (_("The move just after exiting cutter compensation mode must be straight, not an arc")));
-
-	ijk_flag = parser.hasParam(PARAM_I) || parser.hasParam(PARAM_J)  || parser.hasParam(PARAM_K);
-
-	first = runner.cutter_comp_firstmove;
-
-	IF_T_RET_F_SETSTATE((!parser.hasParam(PARAM_R) && (!ijk_flag)), PARAMETER_ERROR, "R i j k words all missing for arc");
-
-	IF_T_RET_F_SETSTATE((parser.hasParam(PARAM_R) && (ijk_flag)), PARAMETER_ERROR, "Mixed radius ijk format for arc");
-	
-	//if (settings->feed_mode == UNITS_PER_MINUTE) {
-	//	CHKS((settings->feed_rate == 0.0),
-	//		NCE_CANNOT_MAKE_ARC_WITH_ZERO_FEED_RATE);
-	//}
-	//else if (settings->feed_mode == UNITS_PER_REVOLUTION) {
-	//	CHKS((settings->feed_rate == 0.0),
-	//		NCE_CANNOT_MAKE_ARC_WITH_ZERO_FEED_RATE);
-	//	CHKS((settings->speed[settings->active_spindle] == 0.0),
-	//		_("Cannot feed with zero spindle speed in feed per rev mode"));
-	//}
-	//else if (settings->feed_mode == INVERSE_TIME) {
-	//	CHKS((!block->f_flag),
-	//		NCE_F_WORD_MISSING_WITH_INVERSE_TIME_ARC_MOVE);
-	//}
-
-	if (ijk_flag) 
-	{
-		if (runner.plane == Plane_XY) 
-		{
-			IF_T_RET_F_SETSTATE(parser.hasParam(PARAM_K), PARAMETER_ERROR, "K word given for arc in XY plane");
-			if ( !parser.hasParam(PARAM_I) ) 
-				RET_F_SETSTATE(PARAMETER_ERROR, "I word missing in absolute center arc");
-			else if (!parser.hasParam(PARAM_J))
-				RET_F_SETSTATE(PARAMETER_ERROR, "J word missing in absolute center arc");
-		}
-		else if (runner.plane == Plane_YZ)
-		{
-			IF_T_RET_F_SETSTATE(parser.hasParam(PARAM_I), PARAMETER_ERROR, "I word given for arc in YZ plane");
-			if (!parser.hasParam(PARAM_J))
-				RET_F_SETSTATE(PARAMETER_ERROR, "J word missing in absolute center arc");
-			else if (!parser.hasParam(PARAM_K))
-				RET_F_SETSTATE(PARAMETER_ERROR, "K word missing in absolute center arc");
-		}
-		else if(runner.plane == Plane_XZ)
-		{
-			IF_T_RET_F_SETSTATE(parser.hasParam(PARAM_J), PARAMETER_ERROR, "J word given for arc in XZ plane");
-			if (!parser.hasParam(PARAM_I))
-				RET_F_SETSTATE(PARAMETER_ERROR, "I word missing in absolute center arc");
-			else if (!parser.hasParam(PARAM_K))
-				RET_F_SETSTATE(PARAMETER_ERROR, "K word missing in absolute center arc");
-		}
-		else 
-		{
-			RET_F_SETSTATE(PARAMETER_ERROR, "XY, XZ or YZ plane not defined");
-		}
-	}
-	else 	// in R format, we need some XYZ words specified because a full circle is not allowed.
-	{
-		// in R format, we need some XYZ words specified because a full circle is not allowed.
-		if (runner.plane == Plane_XY)
-		{
-			IF_T_RET_F_SETSTATE(((!parser.hasParam(PARAM_X)) && (!parser.hasParam(PARAM_Y))), ///* && (!block->radius_flag) && (!block->theta_flag)*/
-				PARAMETER_ERROR, "X and Z words missing for arc in xy plane");
-		}
-		else if (runner.plane == Plane_YZ) {
-			IF_T_RET_F_SETSTATE(((!parser.hasParam(PARAM_Y)) && (!parser.hasParam(PARAM_Z))),
-				PARAMETER_ERROR, "Y and Z words missing for arc in YZ plane");
-		}
-		else if (runner.plane == Plane_XZ) {
-			IF_T_RET_F_SETSTATE(((!parser.hasParam(PARAM_X)) && (parser.hasParam(PARAM_Z))),
-				PARAMETER_ERROR, "X and Z words missing for arc in XZ plane");  
-		}
-	}
-
-
-	//CHP(find_ends(block, settings, &end_x, &end_y, &end_z,
-	//	&AA_end, &BB_end, &CC_end,
-	//	&u_end, &v_end, &w_end));
-
-	end_x = position.x;
-	end_y = position.y;
-	end_z = position.z;
-	AA_end = position.a;
-	BB_end = position.b;
-	CC_end = position.c;
-
-	//settings->motion_mode = move;
-	runner.motion_mode = motion;
-
-	double i = 0,j=0,k=0;
-	if( parser.getRParam(PARAM_I, &i) )  i = to_mm(i);
-	if( parser.getRParam(PARAM_J, &j) )  j = to_mm(j);
-	if( parser.getRParam(PARAM_K, &k) )  k = to_mm(k);
-	
-	if (runner.plane == Plane_XY) 
-	{
-		if ((!runner.cutter_comp_side) ||
-			(runner.cutter_comp_radius == 0.0)) 
-		{
-			IF_F_RET_F(convert_arc2(motion, parser,
-					&(runner.position.x), &(runner.position.y), &(runner.position.z),
-					end_x, end_y, end_z,
-					AA_end, BB_end, CC_end,	
-					u_end, v_end, w_end, i, j));
-		}
-		else if (first) 
-		{
-			IF_F_RET_F( convert_arc_comp1(motion, parser, end_x, end_y, end_z,
-				i, j, AA_end, BB_end, CC_end, u_end, v_end, w_end));
-		}
-		else {
-			IF_F_RET_F( convert_arc_comp2(motion, parser, end_x, end_y, end_z,
-				i,j, AA_end, BB_end, CC_end, u_end, v_end, w_end));
-		}
-	}
-	else if (runner.plane == Plane_XZ) 
-	{
-		if ((!runner.cutter_comp_side) ||
-			(runner.cutter_comp_radius == 0.0)) 
-		{
-			IF_F_RET_F(	convert_arc2(motion, parser,
-				&(runner.position.z), &(runner.position.x), &(runner.position.y),
-				end_z, end_x, end_y, AA_end, BB_end, CC_end,	u_end, v_end, w_end, k,i));
-		}
-		else if (first) 
-		{
-			IF_F_RET_F( convert_arc_comp1(motion, parser, end_z, end_x, end_y,
-				k, i, AA_end, BB_end, CC_end, u_end, v_end, w_end));
-		}
-		else 
-		{
-			IF_F_RET_F(convert_arc_comp2(motion, parser, end_z, end_x, end_y,
-				k, i, AA_end, BB_end, CC_end, u_end, v_end, w_end));
-			
-		}
-	}
-	else if (runner.plane == Plane_YZ) {
-		IF_F_RET_F(convert_arc2(motion, parser,
-				&(runner.position.y), &(runner.position.z), &(runner.position.x),
-				end_y, end_z, end_x,AA_end, BB_end, CC_end,	u_end, v_end, w_end, j,k));
-	}
-	else
-		RET_F_SETSTATE(PARAMETER_ERROR, "Bug plane not xy yz or xz");
-	return true;
-}
-
-/****************************************************************************/
-
-/*! convert_arc2
-
-Returned Value: int
-   If arc_data_ijk or arc_data_r returns an error code,
-   this returns that code.
-   Otherwise, it returns INTERP_OK.
-
-Side effects:
-   This executes an arc command at feed rate. It also updates the
-   setting of the position of the tool point to the end point of the move.
-
-Called by: convert_arc.
-
-This converts a helical or circular arc.
-
-*/
-
-
-bool GCodeInterpreter::convert_arc2(int motion,       //!< either G_2 (cw arc) or G_3 (ccw arc)    
-	const CmdParser &parser,
-	double *current1,       //!< pointer to current value of coordinate 1
-	double *current2,       //!< pointer to current value of coordinate 2
-	double *current3,       //!< pointer to current value of coordinate 3
-	double &end1,    //!< coordinate 1 value at end of arc        
-	double &end2,    //!< coordinate 2 value at end of arc        
-	double &end3,    //!< coordinate 3 value at end of arc        
-	double &AA_end,  //!< a-value at end of arc                   
-	double &BB_end,  //!< b-value at end of arc                   
-	double &CC_end,  //!< c-value at end of arc                   
-	double &u, double &v, double &w, //!< values at end of arc
-	double &offset1, //!< center, either abs or offset from current
-	double &offset2)
-{
-	double center1;
-	double center2;
-	int turn;                     // number of full or partial turns CCW in arc 
-	
-	// Spiral tolerance is the amount of "spiral" allowed in a given arc segment, or (r2-r1)/theta
-	//double spiral_abs_tolerance = (settings->length_units == CANON_UNITS_INCHES) ?
-		//settings->center_arc_radius_tolerance_inch : settings->center_arc_radius_tolerance_mm;
-
-	// Radius tolerance allows a bit of leeway on the minimum radius for a radius defined arc.
-	//double radius_tolerance = (settings->length_units == CANON_UNITS_INCHES) ?
-		//RADIUS_TOLERANCE_INCH : RADIUS_TOLERANCE_MM;
-
-	double rval;
-	int p_int = 1;
-	if (parser.getRParam(PARAM_P, &rval) )
-		p_int = static_cast<int>(std::nearbyint(rval));
-
-		
-	
-	double radius_tolerance = 0.001;  //bb xbz
-	double spiral_abs_tolerance = 0.001;
-
-	if (parser.getRParam(PARAM_R, &rval))
-	{
-		rval = to_mm(rval);
-		IF_F_RET_F(arc_data_r(motion, *current1, *current2, end1, end2,
-			rval, p_int, &center1, &center2, &turn, radius_tolerance));
-	}
-	else 
-	{
-		IF_F_RET_F(arc_data_ijk(motion, *current1, *current2, end1, end2,
-			offset1, offset2, p_int,
-			&center1, &center2, &turn, radius_tolerance, spiral_abs_tolerance, SPIRAL_RELATIVE_TOLERANCE));
-	}
-
-	//inverse_time_rate_arc(*current1, *current2, *current3, center1, center2,
-//		turn, end1, end2, end3, block, settings);
-
-	executor->arc_feed(&runner, end1, end2, center1, center2, turn, end3, AA_end, BB_end, CC_end, u ,v);
-//	ARC_FEED(block->line_number, end1, end2, center1, center2, turn, end3,
-//		AA_end, BB_end, CC_end, u, v, w);
-	
-	*current1 = end1;
-	*current2 = end2;
-	*current3 = end3;
-
-	runner.position.a = AA_end;
-	runner.position.b = BB_end;
-	runner.position.c = CC_end;
-
-	return true;
-}
-
-
-char GCodeInterpreter::arc_axis1(Plane plane)
-{
-	switch (plane) 
-	{
-	case Plane_XY: return 'X';
-	case Plane_XZ: return 'Z';
-	case Plane_YZ: return 'Y';
-	default: return '!';
-	}
-}
-
-char GCodeInterpreter::arc_axis2(Plane plane) 
-{
-	switch (plane) 
-	{
-	case Plane_XY: return 'Y';
-	case Plane_XZ: return 'X';
-	case Plane_YZ: return 'Z';
-	default: return '!';
-	}
-}
-
-
-bool GCodeInterpreter::arc_data_ijk(int motion,       //!< either G_2 (cw arc) or G_3 (ccw arc)
-	double &current_x,       //!< first coordinate of current point
-	double &current_y,       //!< second coordinate of current point
-	double &end_x,   //!< first coordinate of arc end point
-	double &end_y,   //!< second coordinate of arc end point
-	double &i_number,        //!<first coordinate of center (abs or incr)
-	double &j_number,        //!<second coordinate of center (abs or incr)
-	int p_number,
-	double *center_x,       //!< pointer to first coordinate of center of arc
-	double *center_y,       //!< pointer to second coordinate of center of arc
-	int *turn,      //!< pointer to no. of full or partial circles CCW
-	double radius_tolerance, //!<minimum radius tolerance
-	double spiral_abs_tolerance,  //!<tolerance of start and end radius difference
-	double spiral_rel_tolerance)
-{
-	double radius;                // radius to current point 
-	double radius2;               // radius to end point    
-	char a = arc_axis1(runner.plane), b = arc_axis2(runner.plane);
-
-	if (runner.ijk_incremental ) 
-	{
-		*center_x = (current_x + i_number);
-		*center_y = (current_y + j_number);
-	}
-	else 
-	{
-		*center_x = (i_number);
-		*center_y = (j_number);
-	}
-
-	radius = hypot((*center_x - current_x), (*center_y - current_y));
-	radius2 = hypot((*center_x - end_x), (*center_y - end_y));
-
-	IF_T_RET_F_SETSTATE(((radius < radius_tolerance) || (radius2 < radius_tolerance)), PARAMETER_ERROR,
-		"Zero-radius arc: start=(%c%.4f,%c%.4f) center=(%c%.4f,%c%.4f) end=(%c%.4f,%c%.4f) r1=%.4f r2=%.4f",
-		a, current_x, b, current_y,
-		a, *center_x, b, *center_y,
-		a, end_x, b, end_y, radius, radius2);
-
-	double abs_err = fabs(radius - radius2);
-	double rel_err = abs_err / std::max(radius, radius2);
-	IF_T_RET_F_SETSTATE((abs_err > spiral_abs_tolerance * 100.0) ||
-		(rel_err > spiral_rel_tolerance && abs_err > spiral_abs_tolerance), PARAMETER_ERROR,
-		"Radius to end of arc differs from radius to start: start=(%c%.4f,%c%.4f) center=(%c%.4f,%c%.4f) end=(%c%.4f,%c%.4f) r1=%.4f r2=%.4f abs_err=%.4g rel_err=%.4f%%",
-		a, current_x, b, current_y,	a, *center_x, b, *center_y,	a, end_x, b, end_y, radius, radius2,abs_err, rel_err * 100);
-
-	if (motion == G_2)
-		*turn = -1 * p_number;
-	else 
-		*turn = 1 * p_number;
-	return true;
-}
-
-/****************************************************************************/
-
-/*! arc_data_r
+/*! convert_straight_comp1
 
 Returned Value: int
    If any of the following errors occur, this returns the error shown.
    Otherwise, it returns INTERP_OK.
-   1. The radius is too small to reach the end point:
-	  NCE_ARC_RADIUS_TOO_SMALL_TO_REACH_END_POINT
-   2. The current point is the same as the end point of the arc
-	  (so that it is not possible to locate the center of the circle):
-	  NCE_CURRENT_POINT_SAME_AS_END_POINT_OF_ARC
+   1. The side is not RIGHT or LEFT:
+	  NCE_BUG_SIDE_NOT_RIGHT_OR_LEFT
+   2. The destination tangent point is not more than a tool radius
+	  away (indicating gouging): NCE_CUTTER_GOUGING_WITH_CUTTER_RADIUS_COMP
+   3. The value of move is not G_0 or G_1
+	  NCE_BUG_CODE_NOT_G0_OR_G1
 
 Side effects:
-   This finds and sets the values of center_x, center_y, and turn.
+   This executes a STRAIGHT_MOVE command at cutting feed rate
+   or a STRAIGHT_TRAVERSE command.
+   It also updates the setting of the position of the tool point
+   to the end point of the move and updates the programmed point.
 
-Called by:
-   convert_arc2
-   convert_arc_comp2
+Called by: convert_straight.
 
-This finds the center coordinates and number of full or partial turns
-counterclockwise of a helical or circular arc in the r format. This
-function is used by convert_arc2 for all three planes, so "x" and
-"y" really mean "first_coordinate" and "second_coordinate" wherever
-they are used here as suffixes of variable names.
+This is called if cutter radius compensation is on and
+settings->cutter_comp_firstmove is true, indicating that this is the
+first move after cutter radius compensation is turned on.
 
-If the value of the radius argument is negative, that means [NCMS,
-page 21] that an arc larger than a semicircle is to be made.
-Otherwise, an arc of a semicircle or less is made.
-
-The algorithm used here is based on finding the midpoint M of the line
-L between the current point and the end point of the arc. The center
-of the arc lies on a line through M perpendicular to L.
+The algorithm used here for determining the path is to draw a straight
+line from the destination point which is tangent to a circle whose
+center is at the current point and whose radius is the radius of the
+cutter. The destination point of the cutter tip is then found as the
+center of a circle of the same radius tangent to the tangent line at
+the destination point.
 
 */
 
-
-bool GCodeInterpreter::arc_data_r(int motion, //!< either G_2 (cw arc) or G_3 (ccw arc)	
-	double &current_x, //!< first coordinate of current point
-	double &current_y, //!< second coordinate of current point
-	double &end_x,     //!< first coordinate of arc end point
-	double &end_y,     //!< second coordinate of arc end point
-	double &radius,    //!< radius of arc
-	int p_number,
-	double *center_x, //!< pointer to first coordinate of center of arc
-	double *center_y, //!< pointer to second coordinate of center of arc
-	int *turn,        //!< pointer to number of full or partial circles CCW
-	double &tolerance) //!< tolerance of differing radii
+void GCodeInterpreter::comp_get(Coords *srs, double *x, double *y, double *z)
 {
-	double abs_radius;            /* absolute value of given radius */
-	double half_length;           /* distance from M to end point   */
-	double mid_x;                 /* first coordinate of M          */
-	double mid_y;                 /* second coordinate of M         */
-	double offset;                /* distance from M to center      */
-	double theta;                 /* angle of line from M to center */
-	double turn2;                 /* absolute value of half of turn */
-
-	IF_T_RET_F_SETSTATE(((end_x == current_x) && (end_y == current_y)), PARAMETER_ERROR, "Current point same as end point of arc");
-	abs_radius = fabs(radius);
-	mid_x = (end_x + current_x) / 2.0;
-	mid_y = (end_y + current_y) / 2.0;
-	half_length = hypot((mid_x - end_x), (mid_y - end_y));
-	
-	IF_T_RET_F_SETSTATE(((half_length - abs_radius) > tolerance), PARAMETER_ERROR, "Arc radius too small to reach end point");
-
-	if ((half_length / abs_radius) > (1 - TINY))
-		half_length = abs_radius;   /* allow a small error for semicircle */
-	  /* check needed before calling asin   */
-	if (((motion == G_2) && (radius > 0)) || ((motion != G_2) && (radius < 0)))
-		theta = atan2((end_y - current_y), (end_x - current_x)) - M_PI_2l;
+	if (plane == Plane_XZ)
+	{
+		*x = srs->z;
+		*y = srs->x;
+		*z = srs->y;
+	}
 	else
-		theta = atan2((end_y - current_y), (end_x - current_x)) + M_PI_2l;
+	{
+		*x = srs->x;
+		*y = srs->y;
+		*z = srs->z;
+	}
+}
 
-	turn2 = asin(half_length / abs_radius);
-	offset = abs_radius * cos(turn2);
-	*center_x = mid_x + (offset * cos(theta));
-	*center_y = mid_y + (offset * sin(theta));
-	*turn = (motion==G_2) ? -1 * p_number : 1 * p_number;
 
+void GCodeInterpreter::comp_set(Coords *srs, double x, double y, double z)
+{
+	if (plane == Plane_XZ)
+	{
+		srs->z = x;
+		srs->x = y;
+		srs->y = z;
+	}
+	else
+	{ 
+		srs->x = x;
+		srs->y = y;
+		srs->z = z;
+	}
+}
+void GCodeInterpreter::comp_set_current(Coords *srs, double x, double y, double z)
+{
+	comp_set(&runner.position, x, y, z);
+}
+void GCodeInterpreter::comp_set_programmed(Coords *srs, double x, double y, double z)
+{
+	comp_set(&runner.program, x, y, z);
+}
+void GCodeInterpreter::comp_get_current(Coords *srs, double *x, double *y, double *z)
+{
+	comp_set(&runner.position, x, y, z);
+}
+void GCodeInterpreter::comp_get_programmed(Coords *srs, double *x, double *y, double *z)
+{
+	comp_set(&runner.program, x, y, z);
+}
+
+
+//void set_endpoint(double x, double y) 
+//{
+//	endpoint[0] = x; endpoint[1] = y;
+//	endpoint_valid = 1;
+//}
+
+bool GCodeInterpreter::run_straight_comp1(int move, double px, double py, double pz )
+{
+	double alpha;
+	double end_x, end_y;
+	double cx, cy, cz;
+
+
+	double radius = runner.cutter_comp_radius; /* always will be positive */
+	int side = runner.cutter_comp_side;
+	double distance = hypot((px - cx), (py - cy));
+	
+	comp_get_current( &cx, &cy, &cz);
+
+	IF_T_RET_F_SETSTATE(((side != CutterCompType_LEFT) && (side != CutterCompType_LEFT)), 
+		PARAMETER_ERROR, "Compensation type not left and not right "););
+	IF_T_RET_F_SETSTATE((distance <= radius), PARAMETER_ERROR, "Length of cutter compensation entry move is not greater than the tool radius");
+
+	alpha = atan2(py - cy, px - cx) + (CutterCompType_LEFT == LEFT ? M_PIl / 2. : -M_PIl / 2.);
+
+	end_x = (px + (radius * cos(alpha)));
+	end_y = (py + (radius * sin(alpha)));
+
+	//set_endpoint(cx, cy);
+	set_endpoint(cx, cy);
+
+	if (move == G_0) {
+		enqueue_STRAIGHT_TRAVERSE(settings, block->line_number,
+			cos(alpha), sin(alpha), 0,
+			end_x, end_y, pz,
+			AA_end, BB_end, CC_end, u_end, v_end, w_end);
+	}
+	else if (move == G_1) {
+		enqueue_STRAIGHT_FEED(settings, block->line_number,
+			cos(alpha), sin(alpha), 0,
+			end_x, end_y, pz,
+			AA_end, BB_end, CC_end, u_end, v_end, w_end);
+	}
+	else
+		RET_F_SETSTATE(INTERNAL_ERROR, "Not G0 nor G!");
+	
+	runner.cutter_comp_firstmove = false;
+
+	comp_set_current(end_x, end_y, pz);
+	comp_set_programmed( px, py, pz);
 	return true;
 }
-
-
 /****************************************************************************/
 
-/*! convert_arc_comp1
+/*! convert_straight_comp2
 
 Returned Value: int
-   If arc_data_comp_ijk or arc_data_comp_r returns an error code,
-   this returns that code.
+   If any of the following errors occur, this returns the error shown.
    Otherwise, it returns INTERP_OK.
+   1. The compensation side is not RIGHT or LEFT:
+	  NCE_BUG_SIDE_NOT_RIGHT_OR_LEFT
+   2. A concave corner is found:
+	  NCE_CONCAVE_CORNER_WITH_CUTTER_RADIUS_COMP
 
 Side effects:
-   This executes an arc command at
-   feed rate. It also updates the setting of the position of
-   the tool point to the end point of the move.
+   This executes a STRAIGHT_FEED command at cutting feed rate
+   or a STRAIGHT_TRAVERSE command.
+   It also generates an ARC_FEED to go around a corner, if necessary.
+   It also updates the setting of the position of the tool point to
+   the end point of the move and updates the programmed point.
 
-Called by: convert_arc.
+Called by: convert_straight.
 
-This function converts a helical or circular arc, generating only one
-arc. This is called when cutter radius compensation is on and this is
-the first cut after the turning on.
+This is called if cutter radius compensation is on and
+settings->cutter_comp_firstmove is not true, indicating that this is not
+the first move after cutter radius compensation is turned on.
 
-The arc which is generated is derived from a second arc which passes
-through the programmed end point and is tangent to the cutter at its
-current location. The generated arc moves the tool so that it stays
-tangent to the second arc throughout the move.
+The algorithm used here is:
+1. Determine the direction of the last motion. This is done by finding
+   the direction of the line from the last programmed point to the
+   current tool tip location. This line is a radius of the tool and is
+   perpendicular to the direction of motion since the cutter is tangent
+   to that direction.
+2. Determine the direction of the programmed motion.
+3. If there is a convex corner, insert an arc to go around the corner.
+4. Find the destination point for the tool tip. The tool will be
+   tangent to the line from the last programmed point to the present
+   programmed point at the present programmed point.
+5. Go in a straight line from the current tool tip location to the
+   destination tool tip location.
+
+This uses an angle tolerance of TOLERANCE_CONCAVE_CORNER (0.01 radian)
+to determine if:
+1) an illegal concave corner exists (tool will not fit into corner),
+2) no arc is required to go around the corner (i.e. the current line
+   is in the same direction as the end of the previous move), or
+3) an arc is required to go around a convex corner and start off in
+   a new direction.
+
+If a rotary axis is moved in this block and an extra arc is required
+to go around a sharp corner, all the rotary axis motion occurs on the
+arc.  An alternative might be to distribute the rotary axis motion
+over the arc and the straight move in proportion to their lengths.
+
+If the Z-axis is moved in this block and an extra arc is required to
+go around a sharp corner, all the Z-axis motion occurs on the straight
+line and none on the extra arc.  An alternative might be to distribute
+the Z-axis motion over the extra arc and the straight line in
+proportion to their lengths.
+
+This handles the case of there being no XY motion.
+
+This handles G0 moves. Where an arc is inserted to round a corner in a
+G1 move, no arc is inserted for a G0 move; a STRAIGHT_TRAVERSE is made
+from the current point to the end point. The end point for a G0
+move is the same as the end point for a G1 move, however.
 
 */
 
-bool GCodeInterpreter::convert_arc_comp1(int motion,  //!< either G_2 (cw arc) or G_3 (ccw arc)            
-	const CmdParser &parser,
-	double &end_x,      //!< x-value at end of programmed (then actual) arc  
-	double &end_y,      //!< y-value at end of programmed (then actual) arc  
-	double &end_z,      //!< z-value at end of arc
-	double &offset_x, double offset_y,
-	double &AA_end,     //!< a-value at end of arc
-	double &BB_end,     //!< b-value at end of arc
-	double &CC_end,     //!< c-value at end of arc
-	double &u_end, double &v_end, double &w_end) //!< uvw at end of arc
+bool GCodeInterpreter::convert_straight_comp2(int move,
+	double px,    //!< X coordinate of programmed end point     
+	double py,    //!< Y coordinate of programmed end point     
+	double pz,    //!< Z coordinate of end point                
+	
 {
-	return false;
+	double alpha;
+	double beta;
+	double end_x, end_y, end_z;                 /* x-coordinate of actual end point */
+	double gamma;
+	double mid_x, mid_y;                 /* x-coordinate of end of added arc, if needed */
+	double radius;
+	int side;
+	double small = TOLERANCE_CONCAVE_CORNER;      /* radians, testing corners */
+	double opx, opy, opz;      /* old programmed beginning point */
+	double theta;
+	double cx, cy, cz;
+	int concave;
+
+	comp_get_current(&cx, &cy, &cz);
+	comp_get_current(&end_x, &end_y, &end_z);
+	comp_get_programmed(&opx, &opy, &opz);
+
+	
+	if ((py == opy) && (px == opx)) 
+	{     /* no XY motion */
+		if (move == G_0) {
+			enqueue_STRAIGHT_TRAVERSE(settings, block->line_number,
+				px - opx, py - opy, pz - opz,
+				cx, cy, pz,
+				AA_end, BB_end, CC_end, u_end, v_end, w_end);
+		}
+		else if (move == G_1) {
+			enqueue_STRAIGHT_FEED(settings, block->line_number,
+				px - opx, py - opy, pz - opz,
+				cx, cy, pz, AA_end, BB_end, CC_end, u_end, v_end, w_end);
+		}
+		else
+			ERS(NCE_BUG_CODE_NOT_G0_OR_G1);
+		// end already filled out, above
+	}
+	else 
+	{
+		// some XY motion
+		side = runner.cutter_comp_side;
+		radius = runner.cutter_comp_radius;      /* will always be positive */
+		theta = atan2(cy - opy, cx - opx);
+		alpha = atan2(py - opy, px - opx);
+
+		if (side == LEFT) {
+			if (theta < alpha)
+				theta = (theta + (2 * M_PIl));
+			beta = ((theta - alpha) - M_PI_2l);
+			gamma = M_PI_2l;
+		}
+		else if (side == RIGHT) {
+			if (alpha < theta)
+				alpha = (alpha + (2 * M_PIl));
+			beta = ((alpha - theta) - M_PI_2l);
+			gamma = -M_PI_2l;
+		}
+		else
+			ERS(NCE_BUG_SIDE_NOT_RIGHT_OR_LEFT);
+		end_x = (px + (radius * cos(alpha + gamma)));
+		end_y = (py + (radius * sin(alpha + gamma)));
+		mid_x = (opx + (radius * cos(alpha + gamma)));
+		mid_y = (opy + (radius * sin(alpha + gamma)));
+
+		if ((beta < -small) || (beta > (M_PIl + small))) {
+			concave = 1;
+		}
+		else if (beta > (M_PIl - small) &&
+			(!qc().empty() && qc().front().type == QARC_FEED &&
+			((side == RIGHT && qc().front().data.arc_feed.turn > 0) ||
+				(side == LEFT && qc().front().data.arc_feed.turn < 0)))) {
+			// this is an "h" shape, tool on right, going right to left
+			// over the hemispherical round part, then up next to the
+			// vertical part (or, the mirror case).  there are two ways
+			// to stay to the "right", either loop down and around, or
+			// stay above and right.  we're forcing above and right.
+			concave = 1;
+		}
+		else {
+			concave = 0;
+			mid_x = (opx + (radius * cos(alpha + gamma)));
+			mid_y = (opy + (radius * sin(alpha + gamma)));
+		}
+
+		if (!concave && (beta > small))
+		{       /* ARC NEEDED */
+			CHP(move_endpoint_and_flush( cx, cy));			
+		}
+		else if (concave) 
+		{
+			if (qc().front().type != QARC_FEED) 
+			{
+				// line->line
+				double retreat;
+				// half the angle of the inside corner
+				double halfcorner = (beta + M_PIl) / 2.0;
+				CHKS((halfcorner == 0.0), (_("Zero degree inside corner is invalid for cutter compensation")));
+				retreat = radius / tan(halfcorner);
+				// move back along the compensated path
+				// this should replace the endpoint of the previous move
+				mid_x = cx + retreat * cos(theta + gamma);
+				mid_y = cy + retreat * sin(theta + gamma);
+				// we actually want to move the previous line's endpoint here.  That's the same as 
+				// discarding that line and doing this one instead.
+				CHP(move_endpoint_and_flush(settings, mid_x, mid_y));
+			}
+			else 
+			{
+				// arc->line
+				// beware: the arc we saved is the compensated one.
+				arc_feed prev = qc().front().data.arc_feed;
+				double oldrad = hypot(prev.center2 - prev.end2, prev.center1 - prev.end1);
+				double oldrad_uncomp;
+
+				// new line's direction
+				double base_dir = atan2(py - opy, px - opx);
+				double theta;
+				double phi;
+
+				theta = (prev.turn > 0) ? base_dir + M_PI_2l : base_dir - M_PI_2l;
+				phi = atan2(prev.center2 - opy, prev.center1 - opx);
+				if TOOL_INSIDE_ARC(side, prev.turn) {
+					oldrad_uncomp = oldrad + radius;
+				}
+				else {
+					oldrad_uncomp = oldrad - radius;
+				}
+
+				double alpha = theta - phi;
+				// distance to old arc center perpendicular to the new line
+				double d = oldrad_uncomp * cos(alpha);
+				double d2;
+				double angle_from_center;
+
+				if TOOL_INSIDE_ARC(side, prev.turn) {
+					d2 = d - radius;
+					double l = d2 / oldrad;
+					CHKS((l > 1.0 || l < -1.0), _("Arc to straight motion makes a corner the compensated tool can't fit in without gouging"));
+					if (prev.turn > 0)
+						angle_from_center = -acos(l) + theta + M_PIl;
+					else
+						angle_from_center = acos(l) + theta + M_PIl;
+				}
+				else {
+					d2 = d + radius;
+					double l = d2 / oldrad;
+					CHKS((l > 1.0 || l < -1.0), _("Arc to straight motion makes a corner the compensated tool can't fit in without gouging"));
+					if (prev.turn > 0)
+						angle_from_center = acos(l) + theta + M_PIl;
+					else
+						angle_from_center = -acos(l) + theta + M_PIl;
+				}
+				mid_x = prev.center1 + oldrad * cos(angle_from_center);
+				mid_y = prev.center2 + oldrad * sin(angle_from_center);
+				CHP(move_endpoint_and_flush(settings, mid_x, mid_y));
+			}
+		}
+		else {
+			// no arc needed, also not concave (colinear lines or tangent arc->line)
+			dequeue_canons(settings);
+			set_endpoint(cx, cy);
+		}
+		(move == G_0 ? enqueue_STRAIGHT_TRAVERSE : enqueue_STRAIGHT_FEED)
+			(settings, block->line_number,
+				px - opx, py - opy, pz - opz,
+				end_x, end_y, pz,
+				AA_end, BB_end, CC_end,
+				u_end, v_end, w_end);
+	}
+
+	comp_set_current( end_x, end_y, pz);
+	comp_set_programmed( px, py, pz);
+	return true;
 }
-//	double center_x, center_y;
-//	double gamma;                 /* direction of perpendicular to arc at end */
-//	int side;                     /* offset side - right or left              */
-//	double tool_radius;
-//	int turn;                     /* 1 for counterclockwise, -1 for clockwise */
-//	double cx, cy, cz; // current
-//	int plane = settings->plane;
-//
-//	side = settings->cutter_comp_side;
-//	tool_radius = settings->cutter_comp_radius;   /* always is positive */
-//
-//	double spiral_abs_tolerance = (settings->length_units == CANON_UNITS_INCHES) ? settings->center_arc_radius_tolerance_inch : settings->center_arc_radius_tolerance_mm;
-//	double radius_tolerance = (settings->length_units == CANON_UNITS_INCHES) ? RADIUS_TOLERANCE_INCH : RADIUS_TOLERANCE_MM;
-//
-//	comp_get_current(settings, &cx, &cy, &cz);
-//
-//	CHKS((hypot((end_x - cx), (end_y - cy)) <= tool_radius),
-//		_("Radius of cutter compensation entry arc is not greater than the tool radius"));
-//
-//	if (block->r_flag) {
-//		CHP(arc_data_comp_r(move, plane, side, tool_radius, cx, cy, end_x, end_y,
-//			block->r_number, block->p_flag ? round_to_int(block->p_number) : 1,
-//			&center_x, &center_y, &turn, radius_tolerance));
-//	}
-//	else {
-//		CHP(arc_data_comp_ijk(move, plane, side, tool_radius, cx, cy, end_x, end_y,
-//			(settings->ijk_distance_mode == MODE_ABSOLUTE),
-//			offset_x, offset_y, block->p_flag ? round_to_int(block->p_number) : 1,
-//			&center_x, &center_y, &turn, radius_tolerance, spiral_abs_tolerance, SPIRAL_RELATIVE_TOLERANCE));
-//	}
-//
-//	inverse_time_rate_arc(cx, cy, cz, center_x, center_y,
-//		turn, end_x, end_y, end_z, block, settings);
-//
-//
-//	// the tool will end up in gamma direction from the programmed arc endpoint
-//	if TOOL_INSIDE_ARC(side, turn) {
-//		// tool inside the arc: ends up toward the center
-//		gamma = atan2((center_y - end_y), (center_x - end_x));
-//	}
-//	else {
-//		// outside: away from the center
-//		gamma = atan2((end_y - center_y), (end_x - center_x));
-//	}
-//
-//	settings->cutter_comp_firstmove = false;
-//
-//	comp_set_programmed(settings, end_x, end_y, end_z);
-//
-//	// move endpoint to the compensated position.  This changes the radius and center.
-//	end_x += tool_radius * cos(gamma);
-//	end_y += tool_radius * sin(gamma);
-//
-//	/* To find the new center:
-//	   imagine a right triangle ABC with A being the endpoint of the
-//	   compensated arc, B being the center of the compensated arc, C being
-//	   the midpoint between start and end of the compensated arc. AB_ang
-//	   is the direction of A->B.  A_ang is the angle of the triangle
-//	   itself.  We need to find a new center for the compensated arc
-//	   (point B). */
-//
-//	double b_len = hypot(cy - end_y, cx - end_x) / 2.0;
-//	double AB_ang = atan2(center_y - end_y, center_x - end_x);
-//	double A_ang = atan2(cy - end_y, cx - end_x) - AB_ang;
-//
-//	CHKS((fabs(cos(A_ang)) < TOLERANCE_EQUAL), NCE_TOOL_RADIUS_NOT_LESS_THAN_ARC_RADIUS_WITH_COMP);
-//
-//	double c_len = b_len / cos(A_ang);
-//
-//	// center of the arc is c_len from end in direction AB
-//	center_x = end_x + c_len * cos(AB_ang);
-//	center_y = end_y + c_len * sin(AB_ang);
-//
-//	/* center to endpoint distances matched before - they still should. */
-//	CHKS((fabs(hypot(center_x - end_x, center_y - end_y) -
-//		hypot(center_x - cx, center_y - cy)) > spiral_abs_tolerance),
-//		NCE_BUG_IN_TOOL_RADIUS_COMP);
-//
-//	// need this move for lathes to move the tool origin first.  otherwise, the arc isn't an arc.
-//	if (settings->cutter_comp_orientation != 0 && settings->cutter_comp_orientation != 9) {
-//		enqueue_STRAIGHT_FEED(settings, block->line_number,
-//			0, 0, 0,
-//			cx, cy, cz,
-//			AA_end, BB_end, CC_end, u_end, v_end, w_end);
-//		set_endpoint(cx, cy);
-//	}
-//
-//	enqueue_ARC_FEED(settings, block->line_number,
-//		find_turn(cx, cy, center_x, center_y, turn, end_x, end_y),
-//		end_x, end_y, center_x, center_y, turn, end_z,
-//		AA_end, BB_end, CC_end, u_end, v_end, w_end);
-//
-//	comp_set_current(settings, end_x, end_y, end_z);
-//	settings->AA_current = AA_end;
-//	settings->BB_current = BB_end;
-//	settings->CC_current = CC_end;
-//	return INTERP_OK;
-//}
-//
-///****************************************************************************/
-//
-///*! convert_arc_comp2
-//
-//Returned Value: int
-//   If arc_data_ijk or arc_data_r returns an error code,
-//   this returns that code.
-//   If any of the following errors occurs, this returns the error code shown.
-//   Otherwise, it returns INTERP_OK.
-//   1. A concave corner is found: NCE_CONCAVE_CORNER_WITH_CUTTER_RADIUS_COMP
-//   2. The tool will not fit inside an arc:
-//	  NCE_TOOL_RADIUS_NOT_LESS_THAN_ARC_RADIUS_WITH_COMP
-//
-//Side effects:
-//   This executes an arc command feed rate. If needed, at also generates
-//   an arc to go around a convex corner. It also updates the setting of
-//   the position of the tool point to the end point of the move.
-//Called by: convert_arc.
-//
-//This function converts a helical or circular arc. The axis must be
-//parallel to the z-axis. This is called when cutter radius compensation
-//is on and this is not the first cut after the turning on.
-//
-//If one or more rotary axes is moved in this block and an extra arc is
-//required to go around a sharp corner, all the rotary axis motion
-//occurs on the main arc and none on the extra arc.  An alternative
-//might be to distribute the rotary axis motion over the extra arc and
-//the programmed arc in proportion to their lengths.
-//
-//If the Z-axis is moved in this block and an extra arc is required to
-//go around a sharp corner, all the Z-axis motion occurs on the main arc
-//and none on the extra arc.  An alternative might be to distribute the
-//Z-axis motion over the extra arc and the main arc in proportion to
-//their lengths.
-//
-//*/
-//
-bool GCodeInterpreter::convert_arc_comp2(int motion,  //!< either G_2 (cw arc) or G_3 (ccw arc)          
-	const CmdParser &parser,
-	double end_x,      //!< x-value at end of programmed (then actual) arc
-	double end_y,      //!< y-value at end of programmed (then actual) arc
-	double end_z,      //!< z-value at end of arc 
-	double offset_x, double offset_y,
-	double AA_end,     //!< a-value at end of arc
-	double BB_end,     //!< b-value at end of arc
-	double CC_end,     //!< c-value at end of arc
-	double u, double v, double w) //!< uvw at end of arc
-{
-	return false;
-}
-//	double alpha;                 /* direction of tangent to start of arc */
-//	double arc_radius;
-//	double beta;                  /* angle between two tangents above */
-//	double centerx, centery;              /* center of arc */
-//	double delta;                 /* direction of radius from start of arc to center of arc */
-//	double gamma;                 /* direction of perpendicular to arc at end */
-//	double midx, midy;
-//	int side;
-//	double small = TOLERANCE_CONCAVE_CORNER;      /* angle for testing corners */
-//	double opx, opy, opz;
-//	double theta;                 /* direction of tangent to last cut */
-//	double tool_radius;
-//	int turn;                     /* number of full or partial circles CCW */
-//	int plane = settings->plane;
-//	double cx, cy, cz;
-//	double new_end_x, new_end_y;
-//
-//	double spiral_abs_tolerance = (settings->length_units == CANON_UNITS_INCHES) ? settings->center_arc_radius_tolerance_inch : settings->center_arc_radius_tolerance_mm;
-//	double radius_tolerance = (settings->length_units == CANON_UNITS_INCHES) ? RADIUS_TOLERANCE_INCH : RADIUS_TOLERANCE_MM;
-//
-//	/* find basic arc data: center_x, center_y, and turn */
-//
-//	comp_get_programmed(settings, &opx, &opy, &opz);
-//	comp_get_current(settings, &cx, &cy, &cz);
-//
-//
-//	if (block->r_flag) {
-//		CHP(arc_data_r(move, plane, opx, opy, end_x, end_y,
-//			block->r_number, block->p_flag ? round_to_int(block->p_number) : 1,
-//			&centerx, &centery, &turn, radius_tolerance));
-//	}
-//	else {
-//		CHP(arc_data_ijk(move, plane,
-//			opx, opy, end_x, end_y,
-//			(settings->ijk_distance_mode == MODE_ABSOLUTE),
-//			offset_x, offset_y, block->p_flag ? round_to_int(block->p_number) : 1,
-//			&centerx, &centery, &turn, radius_tolerance, spiral_abs_tolerance, SPIRAL_RELATIVE_TOLERANCE));
-//	}
-//
-//	inverse_time_rate_arc(opx, opy, opz, centerx, centery,
-//		turn, end_x, end_y, end_z, block, settings);
-//
-//	side = settings->cutter_comp_side;
-//	tool_radius = settings->cutter_comp_radius;   /* always is positive */
-//	arc_radius = hypot((centerx - end_x), (centery - end_y));
-//	theta = atan2(cy - opy, cx - opx);
-//	theta = (side == LEFT) ? (theta - M_PI_2l) : (theta + M_PI_2l);
-//	delta = atan2(centery - opy, centerx - opx);
-//	alpha = (move == G_3) ? (delta - M_PI_2l) : (delta + M_PI_2l);
-//	beta = (side == LEFT) ? (theta - alpha) : (alpha - theta);
-//
-//	// normalize beta -90 to +270?
-//	beta = (beta > (1.5 * M_PIl)) ? (beta - (2 * M_PIl)) : (beta < -M_PI_2l) ? (beta + (2 * M_PIl)) : beta;
-//
-//	if (((side == LEFT) && (move == G_3)) || ((side == RIGHT) && (move == G_2))) {
-//		// we are cutting inside the arc
-//		gamma = atan2((centery - end_y), (centerx - end_x));
-//		CHKS((arc_radius <= tool_radius),
-//			NCE_TOOL_RADIUS_NOT_LESS_THAN_ARC_RADIUS_WITH_COMP);
-//	}
-//	else {
-//		gamma = atan2((end_y - centery), (end_x - centerx));
-//		delta = (delta + M_PIl);
-//	}
-//
-//	// move arc endpoint to the compensated position
-//	new_end_x = end_x + tool_radius * cos(gamma);
-//	new_end_y = end_y + tool_radius * sin(gamma);
-//
-//	if (beta < -small ||
-//		beta > M_PIl + small ||
-//		// special detection for convex corner on tangent arc->arc (like atop the middle of "m" shape)
-//		// or tangent line->arc (atop "h" shape)
-//		(fabs(beta - M_PIl) < small && !TOOL_INSIDE_ARC(side, turn))
-//		) {
-//		// concave
-//		if (qc().front().type != QARC_FEED) {
-//			// line->arc
-//			double cy = arc_radius * sin(beta - M_PI_2l);
-//			double toward_nominal;
-//			double dist_from_center;
-//			double angle_from_center;
-//
-//			if TOOL_INSIDE_ARC(side, turn) {
-//				// tool is inside the arc
-//				dist_from_center = arc_radius - tool_radius;
-//				toward_nominal = cy + tool_radius;
-//				double l = toward_nominal / dist_from_center;
-//				CHKS((l > 1.0 || l < -1.0), _("Arc move in concave corner cannot be reached by the tool without gouging"));
-//				if (turn > 0) {
-//					angle_from_center = theta + asin(l);
-//				}
-//				else {
-//					angle_from_center = theta - asin(l);
-//				}
-//			}
-//			else {
-//				dist_from_center = arc_radius + tool_radius;
-//				toward_nominal = cy - tool_radius;
-//				double l = toward_nominal / dist_from_center;
-//				CHKS((l > 1.0 || l < -1.0), _("Arc move in concave corner cannot be reached by the tool without gouging"));
-//				if (turn > 0) {
-//					angle_from_center = theta + M_PIl - asin(l);
-//				}
-//				else {
-//					angle_from_center = theta + M_PIl + asin(l);
-//				}
-//			}
-//
-//			midx = centerx + dist_from_center * cos(angle_from_center);
-//			midy = centery + dist_from_center * sin(angle_from_center);
-//
-//			CHP(move_endpoint_and_flush(settings, midx, midy));
-//		}
-//		else {
-//			// arc->arc
-//			struct arc_feed &prev = qc().front().data.arc_feed;
-//			double oldrad = hypot(prev.center2 - prev.end2, prev.center1 - prev.end1);
-//			double newrad;
-//			if TOOL_INSIDE_ARC(side, turn) {
-//				newrad = arc_radius - tool_radius;
-//			}
-//			else {
-//				newrad = arc_radius + tool_radius;
-//			}
-//
-//			double arc_cc, pullback, cc_dir, a;
-//			arc_cc = hypot(prev.center2 - centery, prev.center1 - centerx);
-//
-//			CHKS((oldrad == 0 || arc_cc == 0), _("Arc to arc motion is invalid because the arcs have the same center"));
-//			a = (SQ(oldrad) + SQ(arc_cc) - SQ(newrad)) / (2 * oldrad * arc_cc);
-//
-//			CHKS((a > 1.0 || a < -1.0), (_("Arc to arc motion makes a corner the compensated tool can't fit in without gouging")));
-//			pullback = acos(a);
-//			cc_dir = atan2(centery - prev.center2, centerx - prev.center1);
-//
-//			double dir;
-//			if TOOL_INSIDE_ARC(side, prev.turn) {
-//				if (turn > 0)
-//					dir = cc_dir + pullback;
-//				else
-//					dir = cc_dir - pullback;
-//			}
-//			else {
-//				if (turn > 0)
-//					dir = cc_dir - pullback;
-//				else
-//					dir = cc_dir + pullback;
-//			}
-//
-//			midx = prev.center1 + oldrad * cos(dir);
-//			midy = prev.center2 + oldrad * sin(dir);
-//
-//			CHP(move_endpoint_and_flush(settings, midx, midy));
-//		}
-//		enqueue_ARC_FEED(settings, block->line_number,
-//			find_turn(opx, opy, centerx, centery, turn, end_x, end_y),
-//			new_end_x, new_end_y, centerx, centery, turn, end_z,
-//			AA_end, BB_end, CC_end, u, v, w);
-//	}
-//	else if (beta > small) {           /* convex, two arcs needed */
-//		midx = opx + tool_radius * cos(delta);
-//		midy = opy + tool_radius * sin(delta);
-//		dequeue_canons(settings);
-//		enqueue_ARC_FEED(settings, block->line_number,
-//			0.0, // doesn't matter since we won't move this arc's endpoint
-//			midx, midy, opx, opy, ((side == LEFT) ? -1 : 1),
-//			cz,
-//			AA_end, BB_end, CC_end, u, v, w);
-//		dequeue_canons(settings);
-//		set_endpoint(midx, midy);
-//		enqueue_ARC_FEED(settings, block->line_number,
-//			find_turn(opx, opy, centerx, centery, turn, end_x, end_y),
-//			new_end_x, new_end_y, centerx, centery, turn, end_z,
-//			AA_end, BB_end, CC_end, u, v, w);
-//	}
-//	else {                      /* convex, one arc needed */
-//		dequeue_canons(settings);
-//		set_endpoint(cx, cy);
-//		enqueue_ARC_FEED(settings, block->line_number,
-//			find_turn(opx, opy, centerx, centery, turn, end_x, end_y),
-//			new_end_x, new_end_y, centerx, centery, turn, end_z,
-//			AA_end, BB_end, CC_end, u, v, w);
-//	}
-//
-//	comp_set_programmed(settings, end_x, end_y, end_z);
-//	comp_set_current(settings, new_end_x, new_end_y, end_z);
-//	settings->AA_current = AA_end;
-//	settings->BB_current = BB_end;
-//	settings->CC_current = CC_end;
-//	settings->u_current = u;
-//	settings->v_current = v;
-//	settings->w_current = w;
-//
-//	return INTERP_OK;
-//}
