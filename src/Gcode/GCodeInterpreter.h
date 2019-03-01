@@ -137,6 +137,12 @@ namespace Interpreter
 		bool convert_arc_comp2(int motion, const CmdParser &parser, double end_x, double end_y, double end_z, double offset_x, double offset_y,
 			double AA_end, double BB_end, double CC_end, double u, double v, double w);
 
+		bool arc_data_comp_ijk(int move, double tool_radius, double current_x, double current_y, double end_x, double end_y,
+			double i_number, double j_number, int p_number, double *center_x, double *center_y, int *turn, double radius_tolerance,
+			double spiral_abs_tolerance, double spiral_rel_tolerance);
+		bool arc_data_comp_r(int move, double tool_radius, double current_x, double current_y, double end_x, double end_y,
+			double big_radius, int p_number, double *center_x, double *center_y, int *turn, double tolerance);
+
 		char arc_axis1(Plane plane);
 		char arc_axis2(Plane plane);
 
@@ -166,4 +172,6 @@ namespace Interpreter
 
 	inline bool GCodeInterpreter::is_a_cycle(int motion)
 		{	return ((motion > G_80) && (motion < G_90)) || (motion == G_73) || (motion == G_74); }
+
+#define TOOL_INSIDE_ARC(side, turn) (((side)==CutterCompType_LEFT&&(turn)>0)||((side)==CutterCompType_RIGHT&&(turn)<0))
 };

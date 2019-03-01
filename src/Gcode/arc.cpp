@@ -513,7 +513,7 @@ tangent to the second arc throughout the move.
 
 */
 
-bool GCodeInterpreter::convert_arc_comp1(int motion,  //!< either G_2 (cw arc) or G_3 (ccw arc)            
+bool GCodeInterpreter::convert_arc_comp1(int move,  //!< either G_2 (cw arc) or G_3 (ccw arc)            
 	const CmdParser &parser,
 	double &end_x,      //!< x-value at end of programmed (then actual) arc  
 	double &end_y,      //!< y-value at end of programmed (then actual) arc  
@@ -524,107 +524,106 @@ bool GCodeInterpreter::convert_arc_comp1(int motion,  //!< either G_2 (cw arc) o
 	double &CC_end,     //!< c-value at end of arc
 	double &u_end, double &v_end, double &w_end) //!< uvw at end of arc
 {
-	return false;
+	double center_x, center_y;
+	double gamma;                 /* direction of perpendicular to arc at end */
+	int side;                     /* offset side - right or left              */
+	double tool_radius;
+	int turn;                     /* 1 for counterclockwise, -1 for clockwise */
+	double cx, cy, cz; // current
+	int plane = runner.plane;
+
+	side = runner.cutter_comp_side;
+	tool_radius = runner.cutter_comp_radius;   /* always is positive */
+
+	double spiral_abs_tolerance = env->GetCenterArcRadiusTolerance();
+	double radius_tolerance = RADIUS_TOLERANCE_MM;
+
+	comp_get_current(&cx, &cy, &cz);
+
+	IF_T_RET_F_SETSTATE((hypot((end_x - cx), (end_y - cy)) <= tool_radius),PARAMETER_ERROR,
+		"Radius of cutter compensation entry arc is not greater than the tool radius");
+
+	int p_number = 1;
+	parser.getIParam(PARAM_P, &p_number);
+
+	if ( parser.hasParam(PARAM_R) ) 
+	{
+		double r_number;
+		parser.getRParam(PARAM_R, &r_number);
+		IF_F_RET_F(arc_data_comp_r(move, tool_radius, cx, cy, end_x, end_y,
+			r_number, p_number,	&center_x, &center_y, &turn, radius_tolerance));
+	}
+	else 
+	{
+		IF_F_RET_F(arc_data_comp_ijk(move, tool_radius, cx, cy, end_x, end_y,
+			offset_x, offset_y, p_number,
+			&center_x, &center_y, &turn, radius_tolerance, spiral_abs_tolerance, SPIRAL_RELATIVE_TOLERANCE));
+	}
+
+	// the tool will end up in gamma direction from the programmed arc endpoint
+	if TOOL_INSIDE_ARC(side, turn) 
+	{
+		// tool inside the arc: ends up toward the center
+		gamma = atan2((center_y - end_y), (center_x - end_x));
+	}
+	else {
+		// outside: away from the center
+		gamma = atan2((end_y - center_y), (end_x - center_x));
+	}
+
+	runner.cutter_comp_firstmove = false;
+
+	comp_set_programmed(end_x, end_y, end_z);
+	
+	// move endpoint to the compensated position.  This changes the radius and center.
+	end_x += tool_radius * cos(gamma);
+	end_y += tool_radius * sin(gamma);
+
+	/* To find the new center:
+	   imagine a right triangle ABC with A being the endpoint of the
+	   compensated arc, B being the center of the compensated arc, C being
+	   the midpoint between start and end of the compensated arc. AB_ang
+	   is the direction of A->B.  A_ang is the angle of the triangle
+	   itself.  We need to find a new center for the compensated arc
+	   (point B). */
+
+	double b_len = hypot(cy - end_y, cx - end_x) / 2.0;
+	double AB_ang = atan2(center_y - end_y, center_x - end_x);
+	double A_ang = atan2(cy - end_y, cx - end_x) - AB_ang;
+
+	IF_T_RET_F_SETSTATE((fabs(cos(A_ang)) < TOLERANCE_EQUAL), PARAMETER_ERROR,
+		"Tool radius have to be not less than arc radius with compesation");
+	
+	double c_len = b_len / cos(A_ang);
+
+	// center of the arc is c_len from end in direction AB
+	center_x = end_x + c_len * cos(AB_ang);
+	center_y = end_y + c_len * sin(AB_ang);
+
+	/* center to endpoint distances matched before - they still should. */
+	IF_T_RET_F_SETSTATE((fabs(hypot(center_x - end_x, center_y - end_y) -
+		hypot(center_x - cx, center_y - cy)) > spiral_abs_tolerance), PARAMETER_ERROR,
+		"Bug in tool radius comp");
+
+	// need this move for lathes to move the tool origin first.  otherwise, the arc isn't an arc.
+	//if (runner.cutter_comp_orientation != 0 && runner.cutter_comp_orientation != 9) 
+	//{
+	//	cq.enqueue_straight_feed(0, 0, 0,	cx, cy, cz,	AA_end, BB_end, CC_end);
+	//	cq.set_endpoint(cx, cy);
+	//}
+
+	cq.enqueue_arc_feed(
+		cq.find_turn(cx, cy, center_x, center_y, turn, end_x, end_y),
+		end_x, end_y, center_x, center_y, turn, end_z,
+		AA_end, BB_end, CC_end);
+
+	comp_set_current(end_x, end_y, end_z);
+	runner.position.a = AA_end;
+	runner.position.b = BB_end;
+	runner.position.c = CC_end;
+	return true;
 }
-//	double center_x, center_y;
-//	double gamma;                 /* direction of perpendicular to arc at end */
-//	int side;                     /* offset side - right or left              */
-//	double tool_radius;
-//	int turn;                     /* 1 for counterclockwise, -1 for clockwise */
-//	double cx, cy, cz; // current
-//	int plane = settings->plane;
-//
-//	side = settings->cutter_comp_side;
-//	tool_radius = settings->cutter_comp_radius;   /* always is positive */
-//
-//	double spiral_abs_tolerance = (settings->length_units == CANON_UNITS_INCHES) ? settings->center_arc_radius_tolerance_inch : settings->center_arc_radius_tolerance_mm;
-//	double radius_tolerance = (settings->length_units == CANON_UNITS_INCHES) ? RADIUS_TOLERANCE_INCH : RADIUS_TOLERANCE_MM;
-//
-//	comp_get_current(settings, &cx, &cy, &cz);
-//
-//	CHKS((hypot((end_x - cx), (end_y - cy)) <= tool_radius),
-//		_("Radius of cutter compensation entry arc is not greater than the tool radius"));
-//
-//	if (block->r_flag) {
-//		CHP(arc_data_comp_r(move, plane, side, tool_radius, cx, cy, end_x, end_y,
-//			block->r_number, block->p_flag ? round_to_int(block->p_number) : 1,
-//			&center_x, &center_y, &turn, radius_tolerance));
-//	}
-//	else {
-//		CHP(arc_data_comp_ijk(move, plane, side, tool_radius, cx, cy, end_x, end_y,
-//			(settings->ijk_distance_mode == MODE_ABSOLUTE),
-//			offset_x, offset_y, block->p_flag ? round_to_int(block->p_number) : 1,
-//			&center_x, &center_y, &turn, radius_tolerance, spiral_abs_tolerance, SPIRAL_RELATIVE_TOLERANCE));
-//	}
-//
-//	inverse_time_rate_arc(cx, cy, cz, center_x, center_y,
-//		turn, end_x, end_y, end_z, block, settings);
-//
-//
-//	// the tool will end up in gamma direction from the programmed arc endpoint
-//	if TOOL_INSIDE_ARC(side, turn) {
-//		// tool inside the arc: ends up toward the center
-//		gamma = atan2((center_y - end_y), (center_x - end_x));
-//	}
-//	else {
-//		// outside: away from the center
-//		gamma = atan2((end_y - center_y), (end_x - center_x));
-//	}
-//
-//	settings->cutter_comp_firstmove = false;
-//
-//	comp_set_programmed(settings, end_x, end_y, end_z);
-//
-//	// move endpoint to the compensated position.  This changes the radius and center.
-//	end_x += tool_radius * cos(gamma);
-//	end_y += tool_radius * sin(gamma);
-//
-//	/* To find the new center:
-//	   imagine a right triangle ABC with A being the endpoint of the
-//	   compensated arc, B being the center of the compensated arc, C being
-//	   the midpoint between start and end of the compensated arc. AB_ang
-//	   is the direction of A->B.  A_ang is the angle of the triangle
-//	   itself.  We need to find a new center for the compensated arc
-//	   (point B). */
-//
-//	double b_len = hypot(cy - end_y, cx - end_x) / 2.0;
-//	double AB_ang = atan2(center_y - end_y, center_x - end_x);
-//	double A_ang = atan2(cy - end_y, cx - end_x) - AB_ang;
-//
-//	CHKS((fabs(cos(A_ang)) < TOLERANCE_EQUAL), NCE_TOOL_RADIUS_NOT_LESS_THAN_ARC_RADIUS_WITH_COMP);
-//
-//	double c_len = b_len / cos(A_ang);
-//
-//	// center of the arc is c_len from end in direction AB
-//	center_x = end_x + c_len * cos(AB_ang);
-//	center_y = end_y + c_len * sin(AB_ang);
-//
-//	/* center to endpoint distances matched before - they still should. */
-//	CHKS((fabs(hypot(center_x - end_x, center_y - end_y) -
-//		hypot(center_x - cx, center_y - cy)) > spiral_abs_tolerance),
-//		NCE_BUG_IN_TOOL_RADIUS_COMP);
-//
-//	// need this move for lathes to move the tool origin first.  otherwise, the arc isn't an arc.
-//	if (settings->cutter_comp_orientation != 0 && settings->cutter_comp_orientation != 9) {
-//		enqueue_STRAIGHT_FEED(settings, block->line_number,
-//			0, 0, 0,
-//			cx, cy, cz,
-//			AA_end, BB_end, CC_end, u_end, v_end, w_end);
-//		set_endpoint(cx, cy);
-//	}
-//
-//	enqueue_ARC_FEED(settings, block->line_number,
-//		find_turn(cx, cy, center_x, center_y, turn, end_x, end_y),
-//		end_x, end_y, center_x, center_y, turn, end_z,
-//		AA_end, BB_end, CC_end, u_end, v_end, w_end);
-//
-//	comp_set_current(settings, end_x, end_y, end_z);
-//	settings->AA_current = AA_end;
-//	settings->BB_current = BB_end;
-//	settings->CC_current = CC_end;
-//	return INTERP_OK;
-//}
-//
+
 ///****************************************************************************/
 //
 ///*! convert_arc_comp2
@@ -662,7 +661,7 @@ bool GCodeInterpreter::convert_arc_comp1(int motion,  //!< either G_2 (cw arc) o
 //
 //*/
 //
-bool GCodeInterpreter::convert_arc_comp2(int motion,  //!< either G_2 (cw arc) or G_3 (ccw arc)          
+bool GCodeInterpreter::convert_arc_comp2(int move,  //!< either G_2 (cw arc) or G_3 (ccw arc)          
 	const CmdParser &parser,
 	double end_x,      //!< x-value at end of programmed (then actual) arc
 	double end_y,      //!< y-value at end of programmed (then actual) arc
@@ -673,201 +672,383 @@ bool GCodeInterpreter::convert_arc_comp2(int motion,  //!< either G_2 (cw arc) o
 	double CC_end,     //!< c-value at end of arc
 	double u, double v, double w) //!< uvw at end of arc
 {
-	return false;
-}
-//	double alpha;                 /* direction of tangent to start of arc */
-//	double arc_radius;
-//	double beta;                  /* angle between two tangents above */
-//	double centerx, centery;              /* center of arc */
-//	double delta;                 /* direction of radius from start of arc to center of arc */
-//	double gamma;                 /* direction of perpendicular to arc at end */
-//	double midx, midy;
-//	int side;
-//	double small = TOLERANCE_CONCAVE_CORNER;      /* angle for testing corners */
-//	double opx, opy, opz;
-//	double theta;                 /* direction of tangent to last cut */
-//	double tool_radius;
-//	int turn;                     /* number of full or partial circles CCW */
-//	int plane = settings->plane;
-//	double cx, cy, cz;
-//	double new_end_x, new_end_y;
-//
-//	double spiral_abs_tolerance = (settings->length_units == CANON_UNITS_INCHES) ? settings->center_arc_radius_tolerance_inch : settings->center_arc_radius_tolerance_mm;
-//	double radius_tolerance = (settings->length_units == CANON_UNITS_INCHES) ? RADIUS_TOLERANCE_INCH : RADIUS_TOLERANCE_MM;
-//
-//	/* find basic arc data: center_x, center_y, and turn */
-//
-//	comp_get_programmed(settings, &opx, &opy, &opz);
-//	comp_get_current(settings, &cx, &cy, &cz);
-//
-//
-//	if (block->r_flag) {
-//		CHP(arc_data_r(move, plane, opx, opy, end_x, end_y,
-//			block->r_number, block->p_flag ? round_to_int(block->p_number) : 1,
-//			&centerx, &centery, &turn, radius_tolerance));
-//	}
-//	else {
-//		CHP(arc_data_ijk(move, plane,
-//			opx, opy, end_x, end_y,
-//			(settings->ijk_distance_mode == MODE_ABSOLUTE),
-//			offset_x, offset_y, block->p_flag ? round_to_int(block->p_number) : 1,
-//			&centerx, &centery, &turn, radius_tolerance, spiral_abs_tolerance, SPIRAL_RELATIVE_TOLERANCE));
-//	}
-//
-//	inverse_time_rate_arc(opx, opy, opz, centerx, centery,
+	double alpha;                 /* direction of tangent to start of arc */
+	double arc_radius;
+	double beta;                  /* angle between two tangents above */
+	double centerx, centery;              /* center of arc */
+	double delta;                 /* direction of radius from start of arc to center of arc */
+	double gamma;                 /* direction of perpendicular to arc at end */
+	double midx, midy;
+	int side;
+	double small = TOLERANCE_CONCAVE_CORNER;      /* angle for testing corners */
+	double opx, opy, opz;
+	double theta;                 /* direction of tangent to last cut */
+	double tool_radius;
+	int turn;                     /* number of full or partial circles CCW */
+	int plane = runner.plane;
+	double cx, cy, cz;
+	double new_end_x, new_end_y;
+
+	double spiral_abs_tolerance = env->GetCenterArcRadiusTolerance();
+	double radius_tolerance = RADIUS_TOLERANCE_MM;
+
+	/* find basic arc data: center_x, center_y, and turn */
+
+	comp_get_programmed(&opx, &opy, &opz);
+	comp_get_current(&cx, &cy, &cz);
+
+	int p_number = 1;
+	parser.getIParam(PARAM_P, &p_number);
+
+	if (parser.hasParam(PARAM_R))
+	{
+		double r_number;
+		parser.getRParam(PARAM_R, &r_number);
+		IF_F_RET_F(arc_data_r(move,opx, opy, end_x, end_y,
+			r_number, p_number,	&centerx, &centery, &turn, radius_tolerance));
+	}
+	else 
+	{
+		IF_F_RET_F(arc_data_ijk(move, opx, opy, end_x, end_y,			
+			offset_x, offset_y, p_number, &centerx, &centery, &turn, radius_tolerance, spiral_abs_tolerance, SPIRAL_RELATIVE_TOLERANCE));
+	}
+
+	//inverse_time_rate_arc(opx, opy, opz, centerx, centery,
 //		turn, end_x, end_y, end_z, block, settings);
-//
-//	side = settings->cutter_comp_side;
-//	tool_radius = settings->cutter_comp_radius;   /* always is positive */
-//	arc_radius = hypot((centerx - end_x), (centery - end_y));
-//	theta = atan2(cy - opy, cx - opx);
-//	theta = (side == LEFT) ? (theta - M_PI_2l) : (theta + M_PI_2l);
-//	delta = atan2(centery - opy, centerx - opx);
-//	alpha = (move == G_3) ? (delta - M_PI_2l) : (delta + M_PI_2l);
-//	beta = (side == LEFT) ? (theta - alpha) : (alpha - theta);
-//
-//	// normalize beta -90 to +270?
-//	beta = (beta > (1.5 * M_PIl)) ? (beta - (2 * M_PIl)) : (beta < -M_PI_2l) ? (beta + (2 * M_PIl)) : beta;
-//
-//	if (((side == LEFT) && (move == G_3)) || ((side == RIGHT) && (move == G_2))) {
-//		// we are cutting inside the arc
-//		gamma = atan2((centery - end_y), (centerx - end_x));
-//		CHKS((arc_radius <= tool_radius),
-//			NCE_TOOL_RADIUS_NOT_LESS_THAN_ARC_RADIUS_WITH_COMP);
-//	}
-//	else {
-//		gamma = atan2((end_y - centery), (end_x - centerx));
-//		delta = (delta + M_PIl);
-//	}
-//
-//	// move arc endpoint to the compensated position
-//	new_end_x = end_x + tool_radius * cos(gamma);
-//	new_end_y = end_y + tool_radius * sin(gamma);
-//
-//	if (beta < -small ||
-//		beta > M_PIl + small ||
-//		// special detection for convex corner on tangent arc->arc (like atop the middle of "m" shape)
-//		// or tangent line->arc (atop "h" shape)
-//		(fabs(beta - M_PIl) < small && !TOOL_INSIDE_ARC(side, turn))
-//		) {
-//		// concave
-//		if (qc().front().type != QARC_FEED) {
-//			// line->arc
-//			double cy = arc_radius * sin(beta - M_PI_2l);
-//			double toward_nominal;
-//			double dist_from_center;
-//			double angle_from_center;
-//
-//			if TOOL_INSIDE_ARC(side, turn) {
-//				// tool is inside the arc
-//				dist_from_center = arc_radius - tool_radius;
-//				toward_nominal = cy + tool_radius;
-//				double l = toward_nominal / dist_from_center;
-//				CHKS((l > 1.0 || l < -1.0), _("Arc move in concave corner cannot be reached by the tool without gouging"));
-//				if (turn > 0) {
-//					angle_from_center = theta + asin(l);
-//				}
-//				else {
-//					angle_from_center = theta - asin(l);
-//				}
-//			}
-//			else {
-//				dist_from_center = arc_radius + tool_radius;
-//				toward_nominal = cy - tool_radius;
-//				double l = toward_nominal / dist_from_center;
-//				CHKS((l > 1.0 || l < -1.0), _("Arc move in concave corner cannot be reached by the tool without gouging"));
-//				if (turn > 0) {
-//					angle_from_center = theta + M_PIl - asin(l);
-//				}
-//				else {
-//					angle_from_center = theta + M_PIl + asin(l);
-//				}
-//			}
-//
-//			midx = centerx + dist_from_center * cos(angle_from_center);
-//			midy = centery + dist_from_center * sin(angle_from_center);
-//
-//			CHP(move_endpoint_and_flush(settings, midx, midy));
-//		}
-//		else {
-//			// arc->arc
-//			struct arc_feed &prev = qc().front().data.arc_feed;
-//			double oldrad = hypot(prev.center2 - prev.end2, prev.center1 - prev.end1);
-//			double newrad;
-//			if TOOL_INSIDE_ARC(side, turn) {
-//				newrad = arc_radius - tool_radius;
-//			}
-//			else {
-//				newrad = arc_radius + tool_radius;
-//			}
-//
-//			double arc_cc, pullback, cc_dir, a;
-//			arc_cc = hypot(prev.center2 - centery, prev.center1 - centerx);
-//
-//			CHKS((oldrad == 0 || arc_cc == 0), _("Arc to arc motion is invalid because the arcs have the same center"));
-//			a = (SQ(oldrad) + SQ(arc_cc) - SQ(newrad)) / (2 * oldrad * arc_cc);
-//
-//			CHKS((a > 1.0 || a < -1.0), (_("Arc to arc motion makes a corner the compensated tool can't fit in without gouging")));
-//			pullback = acos(a);
-//			cc_dir = atan2(centery - prev.center2, centerx - prev.center1);
-//
-//			double dir;
-//			if TOOL_INSIDE_ARC(side, prev.turn) {
-//				if (turn > 0)
-//					dir = cc_dir + pullback;
-//				else
-//					dir = cc_dir - pullback;
-//			}
-//			else {
-//				if (turn > 0)
-//					dir = cc_dir - pullback;
-//				else
-//					dir = cc_dir + pullback;
-//			}
-//
-//			midx = prev.center1 + oldrad * cos(dir);
-//			midy = prev.center2 + oldrad * sin(dir);
-//
-//			CHP(move_endpoint_and_flush(settings, midx, midy));
-//		}
-//		enqueue_ARC_FEED(settings, block->line_number,
-//			find_turn(opx, opy, centerx, centery, turn, end_x, end_y),
-//			new_end_x, new_end_y, centerx, centery, turn, end_z,
-//			AA_end, BB_end, CC_end, u, v, w);
-//	}
-//	else if (beta > small) {           /* convex, two arcs needed */
-//		midx = opx + tool_radius * cos(delta);
-//		midy = opy + tool_radius * sin(delta);
-//		dequeue_canons(settings);
-//		enqueue_ARC_FEED(settings, block->line_number,
-//			0.0, // doesn't matter since we won't move this arc's endpoint
-//			midx, midy, opx, opy, ((side == LEFT) ? -1 : 1),
-//			cz,
-//			AA_end, BB_end, CC_end, u, v, w);
-//		dequeue_canons(settings);
-//		set_endpoint(midx, midy);
-//		enqueue_ARC_FEED(settings, block->line_number,
-//			find_turn(opx, opy, centerx, centery, turn, end_x, end_y),
-//			new_end_x, new_end_y, centerx, centery, turn, end_z,
-//			AA_end, BB_end, CC_end, u, v, w);
-//	}
-//	else {                      /* convex, one arc needed */
-//		dequeue_canons(settings);
-//		set_endpoint(cx, cy);
-//		enqueue_ARC_FEED(settings, block->line_number,
-//			find_turn(opx, opy, centerx, centery, turn, end_x, end_y),
-//			new_end_x, new_end_y, centerx, centery, turn, end_z,
-//			AA_end, BB_end, CC_end, u, v, w);
-//	}
-//
-//	comp_set_programmed(settings, end_x, end_y, end_z);
-//	comp_set_current(settings, new_end_x, new_end_y, end_z);
-//	settings->AA_current = AA_end;
-//	settings->BB_current = BB_end;
-//	settings->CC_current = CC_end;
-//	settings->u_current = u;
-//	settings->v_current = v;
-//	settings->w_current = w;
-//
-//	return INTERP_OK;
-//}
+
+	side = runner.cutter_comp_side;
+	tool_radius = runner.cutter_comp_radius;   /* always is positive */
+	arc_radius = hypot((centerx - end_x), (centery - end_y));
+	theta = atan2(cy - opy, cx - opx);
+	theta = (side == CutterCompType_LEFT) ? (theta - M_PI_2l) : (theta + M_PI_2l);
+	delta = atan2(centery - opy, centerx - opx);
+	alpha = (move == G_3) ? (delta - M_PI_2l) : (delta + M_PI_2l);
+	beta = (side == CutterCompType_LEFT) ? (theta - alpha) : (alpha - theta);
+
+	// normalize beta -90 to +270?
+	beta = (beta > (1.5 * M_PIl)) ? (beta - (2 * M_PIl)) : (beta < -M_PI_2l) ? (beta + (2 * M_PIl)) : beta;
+
+	if (((side == CutterCompType_LEFT) && (move == G_3)) || ((side == CutterCompType_RIGHT) && (move == G_2))) {
+		// we are cutting inside the arc
+		gamma = atan2((centery - end_y), (centerx - end_x));
+		IF_T_RET_F_SETSTATE((arc_radius <= tool_radius),PARAMETER_ERROR,
+			"Tool radius have to be not less than arc radius with compesation");
+	}
+	else 
+	{
+		gamma = atan2((end_y - centery), (end_x - centerx));
+		delta = (delta + M_PIl);
+	}
+
+	// move arc endpoint to the compensated position
+	new_end_x = end_x + tool_radius * cos(gamma);
+	new_end_y = end_y + tool_radius * sin(gamma);
+
+	if (beta < -small ||
+		beta > M_PIl + small ||
+		// special detection for convex corner on tangent arc->arc (like atop the middle of "m" shape)
+		// or tangent line->arc (atop "h" shape)
+		(fabs(beta - M_PIl) < small && !TOOL_INSIDE_ARC(side, turn))
+		) {
+		// concave
+		if (cq.front().type != QARC_FEED) {
+			// line->arc
+			double cy = arc_radius * sin(beta - M_PI_2l);
+			double toward_nominal;
+			double dist_from_center;
+			double angle_from_center;
+
+			if TOOL_INSIDE_ARC(side, turn) 
+			{
+				// tool is inside the arc
+				dist_from_center = arc_radius - tool_radius;
+				toward_nominal = cy + tool_radius;
+				double l = toward_nominal / dist_from_center;
+				IF_T_RET_F_SETSTATE((l > 1.0 || l < -1.0), PARAMETER_ERROR, "Arc move in concave corner cannot be reached by the tool without gouging");
+				if (turn > 0) 
+				{
+					angle_from_center = theta + asin(l);
+				}
+				else 
+				{
+					angle_from_center = theta - asin(l);
+				}
+			}
+			else 
+			{
+				dist_from_center = arc_radius + tool_radius;
+				toward_nominal = cy - tool_radius;
+				double l = toward_nominal / dist_from_center;
+				IF_T_RET_F_SETSTATE((l > 1.0 || l < -1.0), PARAMETER_ERROR, "Arc move in concave corner cannot be reached by the tool without gouging");
+				if (turn > 0)
+				{
+					angle_from_center = theta + M_PIl - asin(l);
+				}
+				else 
+				{
+					angle_from_center = theta + M_PIl + asin(l);
+				}
+			}
+
+			midx = centerx + dist_from_center * cos(angle_from_center);
+			midy = centery + dist_from_center * sin(angle_from_center);
+
+			IF_F_RET_F(cq.move_endpoint_and_flush(midx, midy));
+		}
+		else {
+			// arc->arc
+			struct arc_feed &prev = cq.front().data.arc_feed;
+			double oldrad = hypot(prev.center2 - prev.end2, prev.center1 - prev.end1);
+			double newrad;
+			if TOOL_INSIDE_ARC(side, turn) 
+			{
+				newrad = arc_radius - tool_radius;
+			}
+			else 
+			{
+				newrad = arc_radius + tool_radius;
+			}
+
+			double arc_cc, pullback, cc_dir, a;
+			arc_cc = hypot(prev.center2 - centery, prev.center1 - centerx);
+
+			IF_T_RET_F_SETSTATE((oldrad == 0 || arc_cc == 0), PARAMETER_ERROR, "Arc to arc motion is invalid because the arcs have the same center");
+			a = (SQ(oldrad) + SQ(arc_cc) - SQ(newrad)) / (2 * oldrad * arc_cc);
+
+			IF_T_RET_F_SETSTATE((a > 1.0 || a < -1.0), PARAMETER_ERROR, "Arc to arc motion makes a corner the compensated tool can't fit in without gouging");
+			pullback = acos(a);
+			cc_dir = atan2(centery - prev.center2, centerx - prev.center1);
+
+			double dir;
+			if TOOL_INSIDE_ARC(side, prev.turn) {
+				if (turn > 0)
+					dir = cc_dir + pullback;
+				else
+					dir = cc_dir - pullback;
+			}
+			else {
+				if (turn > 0)
+					dir = cc_dir - pullback;
+				else
+					dir = cc_dir + pullback;
+			}
+
+			midx = prev.center1 + oldrad * cos(dir);
+			midy = prev.center2 + oldrad * sin(dir);
+
+			IF_F_RET_F(cq.move_endpoint_and_flush(midx, midy));
+		}
+		cq.enqueue_arc_feed(
+			cq.find_turn(opx, opy, centerx, centery, turn, end_x, end_y),
+			new_end_x, new_end_y, centerx, centery, turn, end_z, AA_end, BB_end, CC_end);
+	}
+	else if (beta > small) /* convex, two arcs needed */
+	{           
+		midx = opx + tool_radius * cos(delta);
+		midy = opy + tool_radius * sin(delta);
+		cq.dequeue_canons();
+		cq.enqueue_arc_feed(
+			0.0, // doesn't matter since we won't move this arc's endpoint
+			midx, midy, opx, opy, ((side == CutterCompType_LEFT) ? -1 : 1),
+			cz,	AA_end, BB_end, CC_end);
+		cq.dequeue_canons();
+		cq.set_endpoint(midx, midy);
+		cq.enqueue_arc_feed(
+			cq.find_turn(opx, opy, centerx, centery, turn, end_x, end_y),
+			new_end_x, new_end_y, centerx, centery, turn, end_z,
+			AA_end, BB_end, CC_end);
+	}
+	else                      /* convex, one arc needed */
+	{ 
+		cq.dequeue_canons();
+		cq.set_endpoint(cx, cy);
+		cq.enqueue_arc_feed(
+		cq.find_turn(opx, opy, centerx, centery, turn, end_x, end_y),
+			new_end_x, new_end_y, centerx, centery, turn, end_z, AA_end, BB_end, CC_end);
+	}
+
+	comp_set_programmed( end_x, end_y, end_z);
+	comp_set_current( new_end_x, new_end_y, end_z);
+	runner.position.a = AA_end;
+	runner.position.b = BB_end;
+	runner.position.c = CC_end;
+	return true;
+}
+
+
+
+
+
+/***********************************************************************/
+
+/*! arc_data_comp_ijk
+
+Returned Value: int
+   If any of the following errors occur, this returns the error code shown.
+   Otherwise, it returns INTERP_OK.
+   1. The two calculable values of the radius differ by more than
+	  tolerance: NCE_RADIUS_TO_END_OF_ARC_DIFFERS_FROM_RADIUS_TO_START
+   2. move is not G_2 or G_3: NCE_BUG_CODE_NOT_G2_OR_G3
+
+Side effects:
+   This finds and sets the values of center_x, center_y, and turn.
+
+Called by: convert_arc_comp1
+
+This finds the center coordinates and number of full or partial turns
+counterclockwise of a helical or circular arc in ijk-format in the XY
+plane. The center is computed easily from the current point and center
+offsets, which are given. It is checked that the end point lies one
+tool radius from the arc.
+
+
+*/
+
+bool GCodeInterpreter::arc_data_comp_ijk(int move,  //!<either G_2 (cw arc) or G_3 (ccw arc)
+	double tool_radius,        //!<radius of the tool
+	double current_x,  //!<first coordinate of current point
+	double current_y,  //!<second coordinate of current point
+	double end_x,      //!<first coordinate of arc end point
+	double end_y,      //!<second coordinate of arc end point
+	double i_number,   //!<first coordinate of center (abs or incr)
+	double j_number,   //!<second coordinate of center (abs or incr)
+	int p_number,
+	double *center_x,  //!<pointer to first coordinate of center of arc
+	double *center_y,  //!<pointer to second coordinate of center of arc
+	int *turn, //!<pointer to number of full or partial circles CCW
+	double radius_tolerance, //!<minimum radius tolerance
+	double spiral_abs_tolerance,  //!<tolerance of start and end radius difference
+	double spiral_rel_tolerance)
+{
+	double arc_radius;
+	double radius2;
+	CutterCompType side = runner.cutter_comp_side;
+	char a = arc_axis1(runner.plane), b = arc_axis2(runner.plane);
+
+	if (!runner.ijk_incremental) 
+	{
+		*center_x = (i_number);
+		*center_y = (j_number);
+	}
+	else 
+	{
+		*center_x = (current_x + i_number);
+		*center_y = (current_y + j_number);
+	}
+	arc_radius = hypot((*center_x - current_x), (*center_y - current_y));
+	radius2 = hypot((*center_x - end_x), (*center_y - end_y));
+	IF_T_RET_F_SETSTATE(((arc_radius < radius_tolerance) || (radius2 < radius_tolerance)),PARAMETER_ERROR,
+		"Zero-radius arc: start=(%c%.4f,%c%.4f) center=(%c%.4f,%c%.4f) end=(%c%.4f,%c%.4f) r1=%.4f r2=%.4f",
+		a, current_x, b, current_y,
+		a, *center_x, b, *center_y,
+		a, end_x, b, end_y, arc_radius, radius2);
+
+	double abs_err = fabs(arc_radius - radius2);
+	double rel_err = abs_err / std::max(arc_radius, radius2);
+
+	IF_T_RET_F_SETSTATE((abs_err > spiral_abs_tolerance * 100.0) ||
+		(rel_err > spiral_rel_tolerance && abs_err > spiral_abs_tolerance), PARAMETER_ERROR,
+		"Radius to end of arc differs from radius to start: start=(%c%.4f,%c%.4f) center=(%c%.4f,%c%.4f) end=(%c%.4f,%c%.4f) "
+			"r1=%.4f r2=%.4f abs_err=%.4g rel_err=%.4f%%",
+		a, current_x, b, current_y,
+		a, *center_x, b, *center_y,
+		a, end_x, b, end_y, arc_radius, radius2,
+		abs_err, rel_err * 100);
+
+	IF_T_RET_F_SETSTATE(((arc_radius <= tool_radius) && (((side == CutterCompType_LEFT) && (move == G_3)) ||
+		((side == CutterCompType_RIGHT) && (move == G_2)))), PARAMETER_ERROR, "Tool radius not less than arc radius with com");
+
+	/* This catches an arc too small for the tool, also */
+	if (move == G_2)
+		*turn = -1 * p_number;
+	else if (move == G_3)
+		*turn = 1 * p_number;
+	else
+		RET_F_SETSTATE(INTERNAL_ERROR,"Arc CODE_NOT_G2 or G3");
+
+	return true;
+}
+
+/****************************************************************************/
+
+/*! arc_data_comp_r
+
+Returned Value: int
+   If any of the following errors occur, this returns the error code shown.
+   Otherwise, it returns INTERP_OK.
+   1. The arc radius is too small to reach the end point:
+	  NCE_RADIUS_TOO_SMALL_TO_REACH_END_POINT
+   2. The arc radius is not greater than the tool_radius, but should be:
+	  NCE_TOOL_RADIUS_NOT_LESS_THAN_ARC_RADIUS_WITH_COMP
+   3. An imaginary value for offset would be found, which should never
+	  happen if the theory is correct: NCE_BUG_IN_TOOL_RADIUS_COMP
+
+Side effects:
+   This finds and sets the values of center_x, center_y, and turn.
+
+Called by: convert_arc_comp1
+
+This finds the center coordinates and number of full or partial turns
+counterclockwise of a helical or circular arc (call it arc1) in
+r-format in the XY plane.  Arc2 is constructed so that it is tangent
+to a circle whose radius is tool_radius and whose center is at the
+point (current_x, current_y) and passes through the point (end_x,
+end_y). Arc1 has the same center as arc2. The radius of arc1 is one
+tool radius larger or smaller than the radius of arc2.
+
+If the value of the big_radius argument is negative, that means [NCMS,
+page 21] that an arc larger than a semicircle is to be made.
+Otherwise, an arc of a semicircle or less is made.
+
+The algorithm implemented here is to construct a line L from the
+current point to the end point, and a perpendicular to it from the
+center of the arc which intersects L at point P. Since the distance
+from the end point to the center and the distance from the current
+point to the center are known, two equations for the length of the
+perpendicular can be written. The right sides of the equations can be
+set equal to one another and the resulting equation solved for the
+length of the line from the current point to P. Then the location of
+P, the length of the perpendicular, the angle of the perpendicular,
+and the location of the center, can be found in turn.
+
+This needs to be better documented, with figures. There are eight
+possible arcs, since there are three binary possibilities: (1) tool
+inside or outside arc, (2) clockwise or counterclockwise (3) two
+positions for each arc (of the given radius) tangent to the tool
+outline and through the end point. All eight are calculated below,
+since theta, radius2, and turn may each have two values.
+
+To see two positions for each arc, imagine the arc is a hoop, the
+tool is a cylindrical pin, and the arc may rotate around the end point.
+The rotation covers all possible positions of the arc. It is easy to
+see the hoop is constrained by the pin at two different angles, whether
+the pin is inside or outside the hoop.
+
+*/
+
+bool GCodeInterpreter::arc_data_comp_r(int move,    //!< either G_2 (cw arc) or G_3 (ccw arc)
+	double tool_radius,  //!< radius of the tool
+	double current_x,    //!< first coordinate of current point
+	double current_y,    //!< second coordinate of current point
+	double end_x,        //!< first coordinate of arc end point
+	double end_y,        //!< second coordinate of arc end point
+	double big_radius,   //!< radius of arc
+	int p_number,
+	double *center_x,    //!< pointer to first coordinate of center of arc
+	double *center_y,    //!< pointer to second coordinate of center of arc
+	int *turn,           //!< pointer to number of full or partial circles CCW
+	double tolerance)    //!< tolerance of differing radii
+{
+	double abs_radius;            // absolute value of big_radius
+
+	CutterCompType side = runner.cutter_comp_side;
+
+	abs_radius = fabs(big_radius);
+	IF_T_RET_F_SETSTATE(((abs_radius <= tool_radius) && (((side == CutterCompType_LEFT) && (move == G_3)) ||
+		((side == CutterCompType_RIGHT) && (move == G_2)))), PARAMETER_ERROR, "Tool radius not less than arc radius with com");
+
+
+	return arc_data_r(move, current_x, current_y, end_x, end_y, big_radius, p_number,
+		center_x, center_y, turn, tolerance);
+
+}

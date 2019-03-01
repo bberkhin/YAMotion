@@ -30,6 +30,7 @@
     <ClCompile Include="..\Gcode\Kinematics.cpp" />
     <ClCompile Include="..\Gcode\logconsole.cpp" />
     <ClCompile Include="..\Gcode\macrob.cpp" />
+    <ClCompile Include="..\Gcode\straight.cpp" />
     <ClCompile Include="..\Gcode\TrajectoryPlanner.cpp" />
     <ClCompile Include="about.cpp" />
     <ClCompile Include="app.cpp" />
@@ -38,6 +39,7 @@
     <ClCompile Include="executorview.cpp" />
     <ClCompile Include="LexGcmc.cxx" />
     <ClCompile Include="LexGCode.cxx" />
+    <ClCompile Include="macrosesdlg.cpp" />
     <ClCompile Include="prefs.cpp" />
     <ClCompile Include="propertiesdlg.cpp" />
     <ClCompile Include="appframe.cpp" />
@@ -64,6 +66,7 @@
     <ClInclude Include="executorlog.h" />
     <ClInclude Include="executorview.h" />
     <ClInclude Include="LexGCode.h" />
+    <ClInclude Include="macrosesdlg.h" />
     <ClInclude Include="prefs.h" />
     <ClInclude Include="propertiesdlg.h" />
     <ClInclude Include="resource.h" />
@@ -143,7 +146,7 @@
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
       <PreprocessorDefinitions>_UNICODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(SolutionDir)GCode;C:\WxWidgets\include;C:\WxWidgets\include\msvc;$(SolutionDir)..\..\glm;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)GCode;C:\WxWidgets\include;C:\WxWidgets\include\msvc;$(SolutionDir)rapidxml;$(SolutionDir)..\..\glm</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
   </ItemDefinitionGroup>
@@ -154,7 +157,7 @@
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
-      <AdditionalIncludeDirectories>$(SolutionDir)GCode;C:\WxWidgets\include;C:\WxWidgets\include\msvc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)GCode;C:\WxWidgets\include;C:\WxWidgets\include\msvc;$(SolutionDir)rapidxml;$(SolutionDir)..\..\glm</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_UNICODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
   </ItemDefinitionGroup>

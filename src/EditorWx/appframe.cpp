@@ -20,6 +20,7 @@
 #include "executorlog.h"
 #include "ExecutorView.h"
 #include "GCodeInterpreter.h"
+#include "macrosesdlg.h"
 
 
 //Bitmaps
@@ -367,7 +368,8 @@ void AppFrame::OnFileClose (wxCommandEvent &event)
 // properties event handlers
 void AppFrame::OnProperties (wxCommandEvent &WXUNUSED(event)) {
     if (!m_edit) return;
-    EditProperties dlg(m_edit, 0);
+    //EditProperties dlg(m_edit, 0);
+	MacrosesDlg dlg(this);
 }
 
 // edit events
@@ -531,7 +533,7 @@ wxToolBar *AppFrame::CreateToolBar()
 	toolBar->AddTool(wxID_UNDO, wxEmptyString, wxBitmap(undo_xpm), _("Cut"));
 	toolBar->AddTool(wxID_REDO, wxEmptyString, wxBitmap(redo_xpm), _("Cut"));
 	toolBar->AddSeparator();
-	toolBar->AddTool(wxID_CUT, wxEmptyString, wxBitmap(cut_xpm), _("Cut"));
+	toolBar->AddTool(myID_PROPERTIES, wxEmptyString, wxBitmap(cut_xpm), _("Macroses"));
 	toolBar->AddTool(wxID_COPY, wxEmptyString, wxBitmap(copy_xpm), _("Copy"));
 	toolBar->AddTool(wxID_PASTE, wxEmptyString, wxBitmap(paste_xpm), _("Paste"));
 	toolBar->AddSeparator();

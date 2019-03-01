@@ -17,6 +17,7 @@ class IEnvironment
 	 virtual void SetVariable(int index, double value) = 0;
 	 virtual double GetVariable(int index ) = 0;
 	 virtual ToolDesc& getToolById(int id) = 0;
+	 virtual double GetCenterArcRadiusTolerance() = 0;
 };
 
 #endif // IENVIRONMENT_H

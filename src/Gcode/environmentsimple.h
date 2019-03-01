@@ -15,6 +15,7 @@ public:
 	void SetVariable(int index, double value);
 	double GetVariable(int index);
 	ToolDesc& getToolById(int id);
+	double GetCenterArcRadiusTolerance();
 private:
 	varsmap vars;
 	std::vector<ToolDesc> tools;

@@ -87,6 +87,12 @@
     <ClCompile Include="..\Gcode\CompQueue.cpp">
       <Filter>GCode</Filter>
     </ClCompile>
+    <ClCompile Include="..\Gcode\straight.cpp">
+      <Filter>GCode</Filter>
+    </ClCompile>
+    <ClCompile Include="macrosesdlg.cpp">
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h">
@@ -160,6 +166,9 @@
     </ClInclude>
     <ClInclude Include="..\Gcode\CompQueue.h">
       <Filter>GCode</Filter>
+    </ClInclude>
+    <ClInclude Include="macrosesdlg.h">
+      <Filter>Файлы заголовков</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

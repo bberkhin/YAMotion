@@ -68,11 +68,11 @@ namespace Interpreter
 		queued_canon &front() { return qc.front(); }
 		bool empty() { return qc.empty(); }
 		InterError get_state() const { return state; }
+		double find_turn(double x1, double y1, double center_x,
+			double center_y, int turn, double x2, double y2);
 	private:
 		double latheorigin_x(double x);
 		double latheorigin_z(double z);
-		double find_turn(double x1, double y1, double center_x,
-			double center_y, int turn, double x2, double y2);
 	private:
 
 		double endpoint[2];

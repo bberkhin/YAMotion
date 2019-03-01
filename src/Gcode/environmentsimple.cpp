@@ -47,3 +47,8 @@ ToolDesc& EnvironmentSimple::getToolById(int id )
 {
 	return tools.front();
 }
+
+double EnvironmentSimple::GetCenterArcRadiusTolerance()
+{
+	return CENTER_ARC_RADIUS_TOLERANCE_MM;
+}

@@ -13,6 +13,9 @@
 #define TWO_PI (2.0*3.141592653589793238)
 #define HALF_PI 1.5707963267948966
 #define M_PI_2l 1.570796326794896619231321691639751442L /* pi/2 */
+#define M_2_SQRTPI 1.12837916709551257390   // 2/sqrt(pi)
+#define M_SQRT2    1.41421356237309504880   // sqrt(2)
+#define M_SQRT1_2  0.707106781186547524401  // 1/sqrt(2)
 #define TINY 1e-12              /* for arc_data_r */
 #define THETA_SIGMA 1e-13
 #define SPIRAL_RELATIVE_TOLERANCE 0.001
@@ -22,6 +25,12 @@
 #define MAX_SPINDELSPEED 60000
 #define G83_RAPID_DELTAMM 0.254
 #define TOLERANCE_CONCAVE_CORNER 0.05   /* radians, testing corners */
+#define RADIUS_TOLERANCE_MM 0.00127
+
+
+/* Equivalent metric constants */
+#define CENTER_ARC_RADIUS_TOLERANCE_MM (2 * 0.01 * M_SQRT2)
+//#define MIN_CENTER_ARC_RADIUS_TOLERANCE_MM 0.001
 
 
 #define N_CHANNELS 8                  // number of channels/board
@@ -58,6 +67,9 @@
 #ifndef MAX_PATH
 #define MAX_PATH 256
 #endif
+
+template<class T>
+T SQ(T a) { return a * a; }
 
 
 enum
@@ -176,6 +188,7 @@ namespace Interpreter
 		PARAM_V,
 		PARAM_W,
 		PARAM_AT,
+		PARAM_MAX_R_PARAM,
 		//int value
 		PARAM_L,
 		PARAM_H,
