@@ -39,7 +39,9 @@
     <ClCompile Include="executorview.cpp" />
     <ClCompile Include="LexGcmc.cxx" />
     <ClCompile Include="LexGCode.cxx" />
+    <ClCompile Include="macroses.cpp" />
     <ClCompile Include="macrosesdlg.cpp" />
+    <ClCompile Include="macrosparamdlg.cpp" />
     <ClCompile Include="prefs.cpp" />
     <ClCompile Include="propertiesdlg.cpp" />
     <ClCompile Include="appframe.cpp" />
@@ -66,7 +68,9 @@
     <ClInclude Include="executorlog.h" />
     <ClInclude Include="executorview.h" />
     <ClInclude Include="LexGCode.h" />
+    <ClInclude Include="macroses.h" />
     <ClInclude Include="macrosesdlg.h" />
+    <ClInclude Include="macrosparamdlg.h" />
     <ClInclude Include="prefs.h" />
     <ClInclude Include="propertiesdlg.h" />
     <ClInclude Include="resource.h" />

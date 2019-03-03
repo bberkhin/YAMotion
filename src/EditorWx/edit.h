@@ -112,7 +112,7 @@ public:
     bool Modified ();
     wxString GetFilename () {return m_filename;}
     void SetFilename (const wxString &filename) {m_filename = filename;}
-
+	void PasteFile(std::wstring fname, bool toend = false);
 
 private:
     // file

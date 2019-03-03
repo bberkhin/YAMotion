@@ -685,3 +685,46 @@ bool Edit::Modified () {
     // return modified state
     return (GetModify() && !GetReadOnly());
 }
+
+
+
+
+void Edit::PasteFile(std::wstring fname, bool toend)
+{
+	wxString errtext;
+	try
+	{
+		FILE *file = _wfopen(fname.c_str(), L"r");
+		if (file == NULL)
+		{
+			std::string errmsg("Can not open file: ");
+			throw std::exception(errmsg.c_str());
+		}
+		fseek(file, 0, SEEK_END);
+		size_t size = ftell(file);
+		fseek(file, 0, SEEK_SET);
+		// Load data and add terminating 0
+		std::vector<char> data;
+		data.resize(size + 1);
+		fread(&data.front(), 1, size, file);
+		data[size] = 0;
+		fclose(file);
+		if (toend)
+			InsertTextRaw(GetTextLength(), &data.front());
+		else
+			AddTextRaw(&data.front());
+		SelectNone();
+		return;
+	}
+	catch (std::exception &e)
+	{
+		errtext = e.what();
+	}
+	catch (...)
+	{
+		errtext = _T("Can not open file");
+	}
+
+	wxMessageBox(errtext, fname.c_str(),
+		wxOK | wxICON_EXCLAMATION);
+}

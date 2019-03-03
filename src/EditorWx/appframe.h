@@ -68,6 +68,8 @@ private:
 	wxString GetSavedFileName();
 	bool DoFileSave(bool askToSave, bool bSaveAs);
 	void FileChanged();
+	int RunGcmc(const wchar_t *src_fname, const  wchar_t *dst_fname, const wchar_t *args);
+	bool CheckFileExist(const wchar_t *fname);
 private:
 	// edit object
 	Edit *m_edit;

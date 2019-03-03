@@ -1,8 +1,13 @@
 ﻿<?xml version="1.0" encoding="UTF-8"?>
 <macroses>
   <macros>
-    <name>Это первый макрос и нон на русском хаtheljl;jlj;kl'k'k'k </name>
+    <name>Это первый макрос иmacro0 </name>
+    <desc>
+      Это описание к самому первому макросы оно может быть весьма длинным 
+      и довольно муторным. Тем не менее мы должны все внимательно  проверить.   
+    </desc>
     <image>5 minutes</image>
+    <gcmc>macro0.gcmc</gcmc>
     <arguments>
       <argument defvalue ="1" type="string" ref="arg1">
         <name>First Argument</name>
@@ -11,8 +16,9 @@
     </arguments>
   </macros>
   <macros>
-    <name>Это second макрос</name>
+    <name>Это second macro3</name>
     <image>5 minutes</image>
+    <gcmc>macro3.gcmc</gcmc>
     <arguments>
       <argument defvalue ="1" type="string" ref="arg1">
         <name>First Argument</name>

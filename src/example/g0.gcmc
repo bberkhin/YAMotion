@@ -1,1 +1,4 @@
-move([0, 0]);
+
+feedrate ( rate );
+move(startpos);
+circle_ccw( center );

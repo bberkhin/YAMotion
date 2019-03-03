@@ -1,13 +1,24 @@
 #pragma once
 #include <wx/listbox.h>
+#include "macroses.h"
 
 class MacrosesDlg :	public wxDialog
 {
 public:
-	MacrosesDlg(wxWindow *parent);
+	MacrosesDlg(Macroses *pm, wxWindow *parent);
 	~MacrosesDlg();
-	void InitList(wxListBox *list);
+	int GetSelected() { return selection; }
+	void InitList();
+
+	void OnLboxSelect(wxCommandEvent& event);
+	void OnLboxDClick(wxCommandEvent& event);
+
 private:
-	bool GetMacrosNames(const wchar_t *path, wxArrayString &arr);
+	Macroses *msc;
+	int selection;
+	wxListBox *list;
+	wxStaticText *ptext;
+	
+	wxDECLARE_EVENT_TABLE();
 };
 
