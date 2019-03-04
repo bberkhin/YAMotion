@@ -1,6 +1,6 @@
 #include "wx/wx.h"
 #include <wx/textctrl.h>
-
+#include "standartpaths.h"
 #include "macrosparamdlg.h"
 
 
@@ -15,7 +15,10 @@ MacrosParamDlg::MacrosParamDlg(MacrosDesc *pm, wxWindow *parent)
 		// sets the application title
 		SetTitle(_("Macros Parameter"));
 		
+		
+		wxBoxSizer *inputpane = new wxBoxSizer(wxHORIZONTAL);
 
+		
 		wxStaticBoxSizer *textinfos = new wxStaticBoxSizer(
 			new wxStaticBox(this, wxID_ANY, _("Fill parameters:")),
 			wxVERTICAL);
@@ -37,20 +40,26 @@ MacrosParamDlg::MacrosParamDlg(MacrosDesc *pm, wxWindow *parent)
 			//textinfos->Add(0, 6);
 		}
 		textinfos->Add(sizer, 1, wxALL | wxEXPAND, 10);
-		textinfos->Add(Info);
+		textinfos->Add(Info);	
+		inputpane->Add(textinfos);
 
-		// buttons
-		//wxStdDialogButtonSizer *buttonSizer = CreateStdDialogButtonSizer(wxOK|wxCANCEL);
-		//wxBoxSizer* buttonSizer = new wxBoxSizer(wxHORIZONTAL);
-		//wxButton* bt;
-		//bt = new wxButton(this, wxID_OK, "Ok");
-		//buttonSizer->AddButton(bt);
-		//bt = new wxButton(this, wxID_CANCEL, "Cancel");
-		//buttonSizer->AddButton(bt);
+		// add picture
+		if (!mdesc->imgfile.empty())
+		{
+			wxString imageFile = StandartPaths::Get()->GetMacrosPath(mdesc->imgfile.c_str()).c_str();
+			wxImage image;
+			if (image.LoadFile(imageFile))
+			{
+				wxBitmap bmp(image);
+				wxStaticBitmap *pbmpctrl = new wxStaticBitmap(this, wxID_ANY, bmp);
+				inputpane->Add(pbmpctrl);
+			}
+		}
+		
 
 		// total pane
 		wxBoxSizer *totalpane = new wxBoxSizer(wxVERTICAL);
-		totalpane->Add(textinfos, 0, wxEXPAND | wxLEFT | wxRIGHT, 10);
+		totalpane->Add(inputpane, 0, wxEXPAND | wxLEFT | wxRIGHT, 10);
 		totalpane->Add(0, 10);
 		totalpane->Add(CreateStdDialogButtonSizer(wxOK | wxCANCEL), 0, wxALL | wxALIGN_RIGHT, 2);
 

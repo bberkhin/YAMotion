@@ -19,6 +19,7 @@ struct MacrosDesc
 	std::wstring name;
 	std::wstring desc;
 	std::wstring gcmcfile;
+	std::wstring imgfile;
 	ArgumentMap args;
 	
 };

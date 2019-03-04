@@ -7,7 +7,7 @@
       center=[100,100,0];startpos=[0, 0,0];rate=400;
       
     </desc>
-    <image>5 minutes</image>
+    <image>g0.jpg</image>
     <gcmc>g0.gcmc</gcmc>
     <arguments>
       <argument defvalue ="[20,0,0]" type="vector" ref="startpos">

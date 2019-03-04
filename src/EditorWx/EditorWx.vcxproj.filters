@@ -99,6 +99,9 @@
     <ClCompile Include="macrosparamdlg.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
+    <ClCompile Include="standartpaths.cpp">
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h">
@@ -180,6 +183,9 @@
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
     <ClInclude Include="macrosparamdlg.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="standartpaths.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
   </ItemGroup>

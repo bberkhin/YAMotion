@@ -133,7 +133,10 @@ void Macroses::parse_file(const wchar_t *path, bool fast)
 				{
 					toWstring(cn->value(), mdesc.gcmcfile);
 				}
-				
+				else if (strcmp(cn->name(), "image") == 0)
+				{
+					toWstring(cn->value(), mdesc.imgfile);
+				}		
 				else if (strcmp(cn->name(), "arguments") == 0)
 				{
 					read_arguments(cn, mdesc);

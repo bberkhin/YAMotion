@@ -4,9 +4,6 @@
 #include "wx/splitter.h"
 #include "wx/event.h"
 #include <wx/thread.h>
-#include <wx/stdpaths.h>
-
-#include <filesystem>
 
 
 //! application headers
@@ -24,6 +21,7 @@
 #include "GCodeInterpreter.h"
 #include "macrosesdlg.h"
 #include "macrosparamdlg.h"
+#include "standartpaths.h"
 
 //Bitmaps
 #include "bitmaps/new.xpm"
@@ -372,7 +370,7 @@ void AppFrame::OnProperties (wxCommandEvent &WXUNUSED(event)) {
     if (!m_edit) return;
     //EditProperties dlg(m_edit, 0);
 	Macroses msc;
-	std::wstring path = L"C:/Projects/YAMotion/src/example/";
+	std::wstring path = StandartPaths::Get()->GetMacrosPath();
 	msc.parse_dir(path.c_str(), true);
 	MacrosesDlg dlg(&msc, this);	
 	int indx = dlg.GetSelected();
@@ -389,11 +387,8 @@ void AppFrame::OnProperties (wxCommandEvent &WXUNUSED(event)) {
 
 	wxString  args = msc.build_commad_line(indx);
 
-	std::wstring src_fname = path;
-	src_fname += desc.gcmcfile;
-
-	std::wstring dst_fname = path;
-	dst_fname += L"tmp.nc";
+	std::wstring src_fname = StandartPaths::Get()->GetMacrosPath( desc.gcmcfile.c_str() );
+	std::wstring dst_fname = StandartPaths::Get()->GetTemporaryPath(L"tmp.nc");
 	
 	int code = RunGcmc(src_fname.c_str(), dst_fname.c_str(), args.c_str());
 
@@ -787,25 +782,23 @@ void  AppFrame::OnSimulate(wxCommandEvent &event)
 	return;
 }
 
-static wxString GetDirFromFName( const wchar_t *src_fname, const char *add)
-{
-//	std::filesystem::path p(src_fname);
-//	std::wstring arg = p.parent_path();
-
-	wxString buf(src_fname);
-	wxString arg = buf.BeforeLast('/');
-	if (arg.IsEmpty())
-		arg = buf.BeforeLast('\\');
-	if (!arg.IsEmpty() && add)
-		arg += add;
-	return arg;
-}
+//static wxString GetDirFromFName( const wchar_t *src_fname, const char *add)
+//{
+////	std::filesystem::path p(src_fname);
+////	std::wstring arg = p.parent_path();
+//
+//	wxString buf(src_fname);
+//	wxString arg = buf.BeforeLast('/');
+//	if (arg.IsEmpty())
+//		arg = buf.BeforeLast('\\');
+//	if (!arg.IsEmpty() && add)
+//		arg += add;
+//	return arg;
+////}
 
 bool AppFrame::CheckFileExist(const wchar_t *fname)
 {
-
-	std::filesystem::path p(fname);
-	if (std::filesystem::exists(p))
+	if ( StandartPaths::Get()->CheckFileExist(fname) )
 		return true;
 
 	wxString inf = wxString::Format("<font color=#008800>File %s not found.</font>", fname );
@@ -823,17 +816,16 @@ int AppFrame::RunGcmc(const wchar_t *src_fname, const  wchar_t *dst_fname, const
 		return 1;
 	
 	wxExecuteEnv env;
-	env.cwd = GetDirFromFName(src_fname, 0);
+	//env.cwd = GetDirFromFName(src_fname, 0);
+	env.cwd = L"C:\\Projects\\YAMotion\\YAMotion\\Data\\gcmc";//StandartPaths::Get()->GetDirFromFName(src_fname).c_str();
 
-	wxString buf = wxStandardPaths::Get().GetExecutablePath();
-	wxString arg = GetDirFromFName(buf.c_str(), "\\");
-	arg += "gcmc_vc.exe";
+	wxString arg = StandartPaths::Get()->GetExecutablePath( L"gcmc_vc.exe" ).c_str();
 
 	if (!CheckFileExist(arg))
 		return 1;
 
 	arg += " -o ";
-	arg += dst_fname;
+	arg += "tmpp.nc";//dst_fname;
 	arg += " ";
 	if (args)
 	arg += args;
@@ -871,10 +863,6 @@ void AppFrame::OnConvertGcmc(wxCommandEvent &event)
 	wxString src_fname = m_edit->GetFilename();
 	if (src_fname.IsEmpty())
 		return;
-	
-	src_fname = src_fname.AfterLast('\\');
-	if ( src_fname.IsEmpty() )
-		src_fname = m_edit->GetFilename();
 
 	wxString dst_fname = src_fname.BeforeLast('.');
 	if (dst_fname.IsEmpty())
