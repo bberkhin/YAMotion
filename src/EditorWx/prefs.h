@@ -85,8 +85,13 @@ extern const CommonInfo g_CommonPrefs;
 //----------------------------------------------------------------------------
 // LanguageInfo
 
+#define FILETYPE_UNKNOW 0  
+#define FILETYPE_NC   1
+#define FILETYPE_GCMC 2
+
 struct LanguageInfo {
     const char *name;
+	int file_type;
     const char *filepattern;
     int lexer;
     struct {

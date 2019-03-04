@@ -101,8 +101,8 @@ public:
     //! language/lexer
     wxString DeterminePrefs (const wxString &filename);
     bool InitializePrefs (const wxString &filename);
-    bool UserSettings (const wxString &filename);
-    LanguageInfo const* GetLanguageInfo () {return m_language;}
+    //bool UserSettings (const wxString &filename);
+	int GetFileType() {	return ((m_language != 0 ) ? m_language->file_type : FILETYPE_UNKNOW); }
 
     //! load/save file
 	bool NewFile();

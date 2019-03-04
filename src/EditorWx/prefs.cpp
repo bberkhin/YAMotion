@@ -46,6 +46,7 @@ const char* GcmcWordlist = "abs acos asin atan atan_xy atan_xz atan_yz ceil comm
 const LanguageInfo g_LanguagePrefs[] = {
 	  // G Code
 	{"G Code",
+	FILETYPE_NC,
 	 "*.ngc;*.nc;*.cnc",
 	SCLEX_GCODE,
 	 {{SCE_GCODE_DEFAULT, NULL},
@@ -83,6 +84,7 @@ const LanguageInfo g_LanguagePrefs[] = {
 	 mySTC_FOLD_COMMENT | mySTC_FOLD_COMPACT | mySTC_FOLD_PREPROC},
 	// GCMC
   {"GCMC",
+   FILETYPE_GCMC,
    "*.gcmc",
   SCLEX_GCMC,
    {{SCE_GCODE_DEFAULT, NULL},
@@ -120,7 +122,7 @@ const LanguageInfo g_LanguagePrefs[] = {
    mySTC_FOLD_COMMENT | mySTC_FOLD_COMPACT | mySTC_FOLD_PREPROC},
 
 	// * (any)
-{wxTRANSLATE("<default>"),
+{wxTRANSLATE("<default>"), FILETYPE_UNKNOW,
     "*.*",
     wxSTC_LEX_PROPERTIES,
     {{mySTC_TYPE_DEFAULT, NULL},

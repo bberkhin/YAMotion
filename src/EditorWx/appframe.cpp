@@ -83,7 +83,7 @@ protected:
 class SimulateGCodeThread : public wxThread
 {
 public:
-	SimulateGCodeThread(AppFrame *handler, wxString &fname_)
+	SimulateGCodeThread(AppFrame *handler, const wchar_t *fname_)
 		: fname(fname_), wxThread(wxTHREAD_DETACHED)
 	{
 
@@ -278,7 +278,7 @@ void AppFrame::OnExit (wxCommandEvent &WXUNUSED(event)) {
 bool AppFrame::DoFileSave(bool askToSave, bool bSaveAs )
 {
 	if (!m_edit) return false;
-	if ( !m_edit->Modified() )
+	if ( !m_edit->Modified() && !bSaveAs )
 		return true;
 
 	// Ask need to save
@@ -756,12 +756,19 @@ void  AppFrame::OnCheck(wxCommandEvent &event)
 	if (fname.empty())
 		return;	
 	m_hlbox->Clear();
-	checkThread = new IntGCodeThread(this, fname);
-	if (checkThread->Run() != wxTHREAD_NO_ERROR)
+	if (m_edit->GetFileType() == FILETYPE_NC)
 	{
-		wxLogError("Can't create the thread!");
-		delete checkThread;
-		checkThread = NULL;
+		checkThread = new IntGCodeThread(this, fname);
+		if (checkThread->Run() != wxTHREAD_NO_ERROR)
+		{
+			wxLogError("Can't create the thread!");
+			delete checkThread;
+			checkThread = NULL;
+		}
+	}
+	else if (m_edit->GetFileType() == FILETYPE_GCMC)
+	{
+		DoConvertGcmc(0);		
 	}
 }
 
@@ -772,7 +779,20 @@ void  AppFrame::OnSimulate(wxCommandEvent &event)
 		return;
 	m_hlbox->Clear();
 
-	simulateThread = new SimulateGCodeThread(this, fname);
+	if (m_edit->GetFileType() == FILETYPE_NC)
+	{
+		simulateThread = new SimulateGCodeThread(this, fname.c_str());
+	}
+	else if (m_edit->GetFileType() == FILETYPE_GCMC)
+	{
+		wxString dst_fname;
+		int ret = DoConvertGcmc( &dst_fname );
+		if (ret == 0)
+			simulateThread = new SimulateGCodeThread(this, dst_fname.c_str());
+	}
+	else
+		return;
+
 	if (simulateThread->Run() != wxTHREAD_NO_ERROR)
 	{
 		wxLogError("Can't create the thread!");
@@ -782,19 +802,6 @@ void  AppFrame::OnSimulate(wxCommandEvent &event)
 	return;
 }
 
-//static wxString GetDirFromFName( const wchar_t *src_fname, const char *add)
-//{
-////	std::filesystem::path p(src_fname);
-////	std::wstring arg = p.parent_path();
-//
-//	wxString buf(src_fname);
-//	wxString arg = buf.BeforeLast('/');
-//	if (arg.IsEmpty())
-//		arg = buf.BeforeLast('\\');
-//	if (!arg.IsEmpty() && add)
-//		arg += add;
-//	return arg;
-////}
 
 bool AppFrame::CheckFileExist(const wchar_t *fname)
 {
@@ -817,7 +824,7 @@ int AppFrame::RunGcmc(const wchar_t *src_fname, const  wchar_t *dst_fname, const
 	
 	wxExecuteEnv env;
 	//env.cwd = GetDirFromFName(src_fname, 0);
-	env.cwd = L"C:\\Projects\\YAMotion\\YAMotion\\Data\\gcmc";//StandartPaths::Get()->GetDirFromFName(src_fname).c_str();
+	env.cwd = StandartPaths::Get()->GetDirFromFName(src_fname).c_str();
 
 	wxString arg = StandartPaths::Get()->GetExecutablePath( L"gcmc_vc.exe" ).c_str();
 
@@ -825,7 +832,7 @@ int AppFrame::RunGcmc(const wchar_t *src_fname, const  wchar_t *dst_fname, const
 		return 1;
 
 	arg += " -o ";
-	arg += "tmpp.nc";//dst_fname;
+	arg += dst_fname;
 	arg += " ";
 	if (args)
 	arg += args;
@@ -851,38 +858,37 @@ int AppFrame::RunGcmc(const wchar_t *src_fname, const  wchar_t *dst_fname, const
 }
 
 
+int AppFrame::DoConvertGcmc(wxString *pdst_fname)
+{
+	wxString src_fname = m_edit->GetFilename();
+	if (src_fname.IsEmpty())
+		return 1;
+	wxString dst_fname = src_fname.BeforeLast('.');
+	if (dst_fname.IsEmpty())
+		dst_fname = src_fname;
+	dst_fname += wxString(".nc");
+	if (pdst_fname)
+		*pdst_fname = dst_fname;
+	return RunGcmc(src_fname, dst_fname, 0);
+}
+
+
 void AppFrame::OnConvertGcmc(wxCommandEvent &event)
 {
 	if (!DoFileSave(false, false))
 		return;
 
-	//-o g00.nc g0.gcmc
-	// build command line
-
-	
-	wxString src_fname = m_edit->GetFilename();
-	if (src_fname.IsEmpty())
-		return;
-
-	wxString dst_fname = src_fname.BeforeLast('.');
-	if (dst_fname.IsEmpty())
-		dst_fname = src_fname;
-	dst_fname += wxString(".nc");
-
-	int code = RunGcmc(src_fname, dst_fname, 0);
-	   	 
-
-	if ( code == 0 )// Ok
+	wxString dst_fname;
+	int code = DoConvertGcmc(&dst_fname);
+	if (code == 0)// Ok
 		FileOpen(dst_fname);
-
-
 }
 
 
 void AppFrame::OnUpdateConvertGcmc(wxUpdateUIEvent& event)
 {
-	const LanguageInfo * pl = m_edit->GetLanguageInfo();
-	event.Enable(pl ? (strcmp(pl->name, g_LanguagePrefs[1].name) == 0) : false);
+	//event.Enable(m_edit->GetFileType() == FILETYPE_GCMC);
+	event.Enable(true);
 }
 
 

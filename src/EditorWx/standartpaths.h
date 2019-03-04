@@ -42,8 +42,8 @@ public:
 
 	std::filesystem::path GetTemporaryPath(const Ch *finame = 0)
 	{
-		//std::filesystem::path path = std::filesystem::temp_directory_path();
-		std::filesystem::path  path = GetRootPath();
+		std::filesystem::path path = std::filesystem::temp_directory_path();
+		//std::filesystem::path  path = GetRootPath();
 		if (finame)
 		{
 			path.append(finame);
