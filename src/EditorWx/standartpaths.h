@@ -7,6 +7,7 @@
 #include <filesystem>
 
 #define MACROSES_DIR L"macroses"
+#define RESOURCES_DIR L"resources"
 
 template<typename  Ch> class StandartPathsTm;
 typedef StandartPathsTm<wchar_t> StandartPaths;
@@ -24,6 +25,16 @@ public:
 	{
 		std::filesystem::path  path  = GetRootPath();
 		path.append(MACROSES_DIR);
+		if (finame)
+		{
+			path.append(finame);
+		}
+		return path;
+	}
+	std::filesystem::path GetResourcesPath(const Ch *finame = 0)
+	{
+		std::filesystem::path  path = GetRootPath();
+		path.append(RESOURCES_DIR);
 		if (finame)
 		{
 			path.append(finame);

@@ -5,6 +5,7 @@
 #include <stdarg.h>
 #include "ienvironment.h"
 
+
 namespace Interpreter
 {
 
@@ -823,4 +824,7 @@ bool CmdParser::isreadonly_param(int num) const
 	}
 	return false;
 }
+
 };
+
+

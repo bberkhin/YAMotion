@@ -46,6 +46,7 @@ namespace Interpreter
 		
 		// helpers
 		bool real_to_int(double *pdbl, int *pint) const;
+		bool acsept_gcode(int num) const;
 
 	private:
 		bool parse_codes(const char *frame);
@@ -67,7 +68,6 @@ namespace Interpreter
 		bool read_integer(int *pint);
 		bool read_real(double *pdbl);
 		bool read_comment_eol();
-		bool acsept_gcode(int num) const;
 
 // Macro B fsupport
 		bool read_set_param();

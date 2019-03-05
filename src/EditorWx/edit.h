@@ -2,6 +2,8 @@
 #ifndef _EDIT_H_
 #define _EDIT_H_
 
+#include <memory>
+
 //----------------------------------------------------------------------------
 // information
 //----------------------------------------------------------------------------
@@ -24,7 +26,7 @@
 // declarations
 //============================================================================
 
-
+class CodeDescription;
 //----------------------------------------------------------------------------
 //! Edit
 class Edit: public wxStyledTextCtrl {
@@ -95,6 +97,8 @@ public:
     void OnMarginClick (wxStyledTextEvent &event);
     void OnCharAdded  (wxStyledTextEvent &event);
 	void OnChanged(wxStyledTextEvent &event);
+	void OnDwellStart(wxStyledTextEvent &event);
+	void OnDwellEnd(wxStyledTextEvent &event);
 
     void OnKeyDown(wxKeyEvent &event);
 
@@ -127,6 +131,7 @@ private:
     int m_FoldingID;
     int m_FoldingMargin;
     int m_DividerID;
+	std::shared_ptr<CodeDescription> code_description;
 
     wxDECLARE_EVENT_TABLE();
 };

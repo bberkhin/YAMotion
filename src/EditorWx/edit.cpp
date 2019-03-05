@@ -4,7 +4,7 @@
 //! application headers
 #include "defsext.h"     // additional definitions
 #include "edit.h"        // edit module
-
+#include "codedescription.h"
 
 //----------------------------------------------------------------------------
 // resources
@@ -26,59 +26,63 @@ const int ANNOTATION_STYLE = wxSTC_STYLE_LASTPREDEFINED + 1;
 // Edit
 //----------------------------------------------------------------------------
 
-wxBEGIN_EVENT_TABLE (Edit, wxStyledTextCtrl)
-    // common
-    EVT_SIZE (                         Edit::OnSize)
-    // edit
-    EVT_MENU (wxID_CLEAR,              Edit::OnEditClear)
-    EVT_MENU (wxID_CUT,                Edit::OnEditCut)
-    EVT_MENU (wxID_COPY,               Edit::OnEditCopy)
-    EVT_MENU (wxID_PASTE,              Edit::OnEditPaste)
-    EVT_MENU (wxID_SELECTALL,          Edit::OnEditSelectAll)
-    EVT_MENU (myID_SELECTLINE,         Edit::OnEditSelectLine)
-    EVT_MENU (wxID_REDO,               Edit::OnEditRedo)
-    EVT_MENU (wxID_UNDO,               Edit::OnEditUndo)
-    // find
-    EVT_MENU (wxID_FIND,               Edit::OnFind)
-    EVT_MENU (myID_FINDNEXT,           Edit::OnFindNext)
-    EVT_MENU (myID_REPLACE,            Edit::OnReplace)
-    EVT_MENU (myID_REPLACENEXT,        Edit::OnReplaceNext)
-    EVT_MENU (myID_BRACEMATCH,         Edit::OnBraceMatch)
-    EVT_MENU (myID_GOTO,               Edit::OnGoto)
-    // view
-    EVT_MENU_RANGE (myID_HIGHLIGHTFIRST, myID_HIGHLIGHTLAST,
-                                       Edit::OnHighlightLang)
-    EVT_MENU (myID_DISPLAYEOL,         Edit::OnDisplayEOL)
-    EVT_MENU (myID_INDENTGUIDE,        Edit::OnIndentGuide)
-    EVT_MENU (myID_LINENUMBER,         Edit::OnLineNumber)
-    EVT_MENU (myID_LONGLINEON,         Edit::OnLongLineOn)
-    EVT_MENU (myID_WHITESPACE,         Edit::OnWhiteSpace)
-    EVT_MENU (myID_FOLDTOGGLE,         Edit::OnFoldToggle)
-    EVT_MENU (myID_OVERTYPE,           Edit::OnSetOverType)
-    EVT_MENU (myID_READONLY,           Edit::OnSetReadOnly)
-    EVT_MENU (myID_WRAPMODEON,         Edit::OnWrapmodeOn)
-    EVT_MENU (myID_CHARSETANSI,        Edit::OnUseCharset)
-    EVT_MENU (myID_CHARSETMAC,         Edit::OnUseCharset)
-    // annotations
-    EVT_MENU (myID_ANNOTATION_ADD,     Edit::OnAnnotationAdd)
-    EVT_MENU (myID_ANNOTATION_REMOVE,  Edit::OnAnnotationRemove)
-    EVT_MENU (myID_ANNOTATION_CLEAR,   Edit::OnAnnotationClear)
-    EVT_MENU (myID_ANNOTATION_STYLE_HIDDEN,   Edit::OnAnnotationStyle)
-    EVT_MENU (myID_ANNOTATION_STYLE_STANDARD, Edit::OnAnnotationStyle)
-    EVT_MENU (myID_ANNOTATION_STYLE_BOXED,    Edit::OnAnnotationStyle)
-    // extra
-    EVT_MENU (myID_CHANGELOWER,                 Edit::OnChangeCase)
-    EVT_MENU (myID_CHANGEUPPER,                 Edit::OnChangeCase)
-    EVT_MENU (myID_CONVERTCR,                   Edit::OnConvertEOL)
-    EVT_MENU (myID_CONVERTCRLF,                 Edit::OnConvertEOL)
-    EVT_MENU (myID_CONVERTLF,                   Edit::OnConvertEOL)
-    EVT_MENU(myID_MULTIPLE_SELECTIONS,          Edit::OnMultipleSelections)
-    EVT_MENU(myID_MULTI_PASTE,                  Edit::OnMultiPaste)
-    EVT_MENU(myID_MULTIPLE_SELECTIONS_TYPING,   Edit::OnMultipleSelectionsTyping)
-    // stc
-    EVT_STC_MARGINCLICK (wxID_ANY,     Edit::OnMarginClick)
-    EVT_STC_CHARADDED (wxID_ANY,       Edit::OnCharAdded)
+wxBEGIN_EVENT_TABLE(Edit, wxStyledTextCtrl)
+// common
+EVT_SIZE(Edit::OnSize)
+// edit
+EVT_MENU(wxID_CLEAR, Edit::OnEditClear)
+EVT_MENU(wxID_CUT, Edit::OnEditCut)
+EVT_MENU(wxID_COPY, Edit::OnEditCopy)
+EVT_MENU(wxID_PASTE, Edit::OnEditPaste)
+EVT_MENU(wxID_SELECTALL, Edit::OnEditSelectAll)
+EVT_MENU(myID_SELECTLINE, Edit::OnEditSelectLine)
+EVT_MENU(wxID_REDO, Edit::OnEditRedo)
+EVT_MENU(wxID_UNDO, Edit::OnEditUndo)
+// find
+EVT_MENU(wxID_FIND, Edit::OnFind)
+EVT_MENU(myID_FINDNEXT, Edit::OnFindNext)
+EVT_MENU(myID_REPLACE, Edit::OnReplace)
+EVT_MENU(myID_REPLACENEXT, Edit::OnReplaceNext)
+EVT_MENU(myID_BRACEMATCH, Edit::OnBraceMatch)
+EVT_MENU(myID_GOTO, Edit::OnGoto)
+// view
+EVT_MENU_RANGE(myID_HIGHLIGHTFIRST, myID_HIGHLIGHTLAST,
+	Edit::OnHighlightLang)
+	EVT_MENU(myID_DISPLAYEOL, Edit::OnDisplayEOL)
+	EVT_MENU(myID_INDENTGUIDE, Edit::OnIndentGuide)
+	EVT_MENU(myID_LINENUMBER, Edit::OnLineNumber)
+	EVT_MENU(myID_LONGLINEON, Edit::OnLongLineOn)
+	EVT_MENU(myID_WHITESPACE, Edit::OnWhiteSpace)
+	EVT_MENU(myID_FOLDTOGGLE, Edit::OnFoldToggle)
+	EVT_MENU(myID_OVERTYPE, Edit::OnSetOverType)
+	EVT_MENU(myID_READONLY, Edit::OnSetReadOnly)
+	EVT_MENU(myID_WRAPMODEON, Edit::OnWrapmodeOn)
+	EVT_MENU(myID_CHARSETANSI, Edit::OnUseCharset)
+	EVT_MENU(myID_CHARSETMAC, Edit::OnUseCharset)
+	// annotations
+	EVT_MENU(myID_ANNOTATION_ADD, Edit::OnAnnotationAdd)
+	EVT_MENU(myID_ANNOTATION_REMOVE, Edit::OnAnnotationRemove)
+	EVT_MENU(myID_ANNOTATION_CLEAR, Edit::OnAnnotationClear)
+	EVT_MENU(myID_ANNOTATION_STYLE_HIDDEN, Edit::OnAnnotationStyle)
+	EVT_MENU(myID_ANNOTATION_STYLE_STANDARD, Edit::OnAnnotationStyle)
+	EVT_MENU(myID_ANNOTATION_STYLE_BOXED, Edit::OnAnnotationStyle)
+	// extra
+	EVT_MENU(myID_CHANGELOWER, Edit::OnChangeCase)
+	EVT_MENU(myID_CHANGEUPPER, Edit::OnChangeCase)
+	EVT_MENU(myID_CONVERTCR, Edit::OnConvertEOL)
+	EVT_MENU(myID_CONVERTCRLF, Edit::OnConvertEOL)
+	EVT_MENU(myID_CONVERTLF, Edit::OnConvertEOL)
+	EVT_MENU(myID_MULTIPLE_SELECTIONS, Edit::OnMultipleSelections)
+	EVT_MENU(myID_MULTI_PASTE, Edit::OnMultiPaste)
+	EVT_MENU(myID_MULTIPLE_SELECTIONS_TYPING, Edit::OnMultipleSelectionsTyping)
+	// stc
+	EVT_STC_MARGINCLICK(wxID_ANY, Edit::OnMarginClick)
+	EVT_STC_CHARADDED(wxID_ANY, Edit::OnCharAdded)
 	EVT_STC_MODIFIED(wxID_ANY, Edit::OnChanged)
+
+	EVT_STC_DWELLSTART(wxID_ANY, Edit::OnDwellStart)
+	EVT_STC_DWELLEND(wxID_ANY, Edit::OnDwellEnd)
+	
 
     EVT_KEY_DOWN( Edit::OnKeyDown )
 wxEND_EVENT_TABLE()
@@ -87,7 +91,8 @@ Edit::Edit (wxWindow *parent, wxWindowID id,
             const wxPoint &pos,
             const wxSize &size,
             long style)
-    : wxStyledTextCtrl (parent, id, pos, size, style) {
+    : wxStyledTextCtrl (parent, id, pos, size, style) 
+{
 
     m_filename = wxEmptyString;
 
@@ -142,9 +147,15 @@ Edit::Edit (wxWindow *parent, wxWindowID id,
     CmdKeyClear (wxSTC_KEY_TAB, 0); // this is done by the menu accelerator key
     SetLayoutCache (wxSTC_CACHE_PAGE);
     UsePopUp(wxSTC_POPUP_ALL);
+
+	CallTipSetBackground(*wxYELLOW);
+	CallTipSetForeground(*wxBLACK);
+	SetMouseDwellTime(2000);
 }
 
-Edit::~Edit () {}
+Edit::~Edit () 
+{
+}
 
 //----------------------------------------------------------------------------
 // common event handlers
@@ -176,15 +187,7 @@ void Edit::OnKeyDown (wxKeyEvent &event)
 {
     if (CallTipActive())
         CallTipCancel();
-    if (event.GetKeyCode() == WXK_SPACE && event.ControlDown() && event.ShiftDown())
-    {
-        int pos = GetCurrentPos();
-        CallTipSetBackground(*wxYELLOW);
-        CallTipShow(pos,
-                    "This is a CallTip with multiple lines.\n"
-                    "It is meant to be a context sensitive popup helper for the user.");
-        return;
-    }
+   
     event.Skip();
 }
 
@@ -196,6 +199,7 @@ void Edit::OnEditCut (wxCommandEvent &WXUNUSED(event)) {
 void Edit::OnEditCopy (wxCommandEvent &WXUNUSED(event)) {
     if (GetSelectionEnd()-GetSelectionStart() <= 0) return;
     Copy ();
+	
 }
 
 void Edit::OnEditPaste (wxCommandEvent &WXUNUSED(event)) {
@@ -457,6 +461,30 @@ void Edit::OnChanged(wxStyledTextEvent &event)
 	{
 		;// ((wxFrame *)GetParent())->SetTitle(" * ");
 	}
+}
+
+void Edit::OnDwellStart(wxStyledTextEvent &event)
+{
+	int pos = event.GetPosition();
+	int x = event.GetX();
+	int y = event.GetX();
+	int lineN = this->LineFromPosition(pos);
+	wxString str = this->GetLineText(lineN);
+	if (str.empty())
+		return;
+
+	if ( !code_description )
+	{
+		code_description.reset( new CodeDescription() );
+	}
+
+	str = code_description->get_description(str.c_str());
+	CallTipShow(pos, str );
+}
+void Edit::OnDwellEnd(wxStyledTextEvent &event)
+{
+	if (CallTipActive())
+		CallTipCancel();
 }
 
 
@@ -728,3 +756,5 @@ void Edit::PasteFile(std::wstring fname, bool toend)
 	wxMessageBox(errtext, fname.c_str(),
 		wxOK | wxICON_EXCLAMATION);
 }
+
+
