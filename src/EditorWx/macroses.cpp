@@ -192,7 +192,8 @@ std::wstring Macroses::build_commad_line(int indx)
 	MacrosDesc &mdesc = get(indx);
 	//std::pair<std::string, ArgumntDesc> itt;
 	//itt.first
-	arg = L" --define=\"";
+	arg = L"-q"; // do not use prologue\epilogue
+	arg += L" --define=\"";
 	for (auto it = mdesc.args.begin(); it != mdesc.args.end(); ++it)
 	{
 		toWstring(it->ref.c_str(),tmp);

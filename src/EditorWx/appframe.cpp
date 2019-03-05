@@ -823,9 +823,8 @@ int AppFrame::RunGcmc(const wchar_t *src_fname, const  wchar_t *dst_fname, const
 		return 1;
 	
 	wxExecuteEnv env;
-	//env.cwd = GetDirFromFName(src_fname, 0);
+	
 	env.cwd = StandartPaths::Get()->GetDirFromFName(src_fname).c_str();
-
 	wxString arg = StandartPaths::Get()->GetExecutablePath( L"gcmc_vc.exe" ).c_str();
 
 	if (!CheckFileExist(arg))
@@ -835,7 +834,7 @@ int AppFrame::RunGcmc(const wchar_t *src_fname, const  wchar_t *dst_fname, const
 	arg += dst_fname;
 	arg += " ";
 	if (args)
-	arg += args;
+		arg += args;
 	arg += " ";
 	arg += src_fname;
 
