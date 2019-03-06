@@ -1,6 +1,5 @@
 #include "wx/wx.h"
 #include "wx/filename.h" // filename support
-#include "wx/htmllbox.h"
 #include "wx/splitter.h"
 #include "wx/event.h"
 #include <wx/thread.h>
@@ -22,6 +21,7 @@
 #include "macrosesdlg.h"
 #include "macrosparamdlg.h"
 #include "standartpaths.h"
+#include "logwindow.h"
 
 //Bitmaps
 #include "bitmaps/new.xpm"
@@ -212,10 +212,9 @@ AppFrame::AppFrame (const wxString &title)
 
 	m_view = new ViewGCode(splitterV, wxID_ANY/*, gl_attrib*/ );
 	
-	m_hlbox = new wxSimpleHtmlListBox(splitter, wxID_ANY, wxDefaultPosition, wxDefaultSize,
-		0, NULL, wxLB_MULTIPLE);
-
-	splitter->SplitHorizontally(splitterV, m_hlbox,  -100);
+	logwnd = new LogWindow(splitter, this, wxID_ANY);
+	
+	splitter->SplitHorizontally(splitterV, logwnd,  -100);
 	splitterV->SplitVertically(m_edit, m_view, -300 );
 
 	Layout();
@@ -319,7 +318,7 @@ bool AppFrame::DoFileSave(bool askToSave, bool bSaveAs )
 void AppFrame::FileChanged()
 {
 	UpdateTitle();
-	m_hlbox->Clear();
+	logwnd->Clear();
 	m_view->clear();
 }
 
@@ -654,15 +653,18 @@ wxThread::ExitCode IntGCodeThread::Entry()
 {
 	if (ppret)
 	{
-		if (!ppret->open_nc_file( fname.c_str() ) )
+		if (!ppret->open_nc_file(fname.c_str()))
+		{
+			plogger->log(LOG_ERROR, "Can not open file: %s", fname.c_str() );
 			return NULL;
+		}
 		ppret->execute_file();
 	}
-	plogger->log(LOG_INFORMATION, "Feed Lenght: %f", pexec->get_feed_len());
-	plogger->log(LOG_INFORMATION, "Traverce Lenght: %f", pexec->get_traverce_len());
-	plogger->log(LOG_INFORMATION, "X Min: %f X Max %f", pexec->getBox().Min.x, pexec->getBox().Max.x);
-	plogger->log(LOG_INFORMATION, "Y Min: %f Y Max %f", pexec->getBox().Min.y, pexec->getBox().Max.y);
-	plogger->log(LOG_INFORMATION, "Z Min: %f Z Max %f", pexec->getBox().Min.z, pexec->getBox().Max.z);
+	plogger->log(LOG_INFORMATIONSUM, "Feed Lenght: %f", pexec->get_feed_len());
+	plogger->log(LOG_INFORMATIONSUM, "Traverce Lenght: %f", pexec->get_traverce_len());
+	plogger->log(LOG_INFORMATIONSUM, "X Min: %f X Max %f", pexec->getBox().Min.x, pexec->getBox().Max.x);
+	plogger->log(LOG_INFORMATIONSUM, "Y Min: %f Y Max %f", pexec->getBox().Min.y, pexec->getBox().Max.y);
+	plogger->log(LOG_INFORMATIONSUM, "Z Min: %f Z Max %f", pexec->getBox().Min.z, pexec->getBox().Max.z);
 
 	wxQueueEvent(m_pHandler, new wxThreadEvent(wxEVT_THREAD, CHECK_GCODE_COMPLETE));
 	return NULL;
@@ -690,7 +692,10 @@ wxThread::ExitCode SimulateGCodeThread::Entry()
 	if (ppret)
 	{
 		if (!ppret->open_nc_file(fname.c_str()))
+		{
+			plogger->log(LOG_ERROR, "Can not open file: %s", fname.c_str());
 			return NULL;
+		}
 		ppret->execute_file();
 	}
 	//output stat
@@ -711,25 +716,20 @@ wxString AppFrame::GetText()
 
 void AppFrame::OnThreadCompletion(wxThreadEvent&)
 {
-	wxString label("<font color=#008800>Checking completed</font>");
-	if (m_hlbox)
-	m_hlbox->Append(label);
+	logwnd->Append(MSLInfo, _("Checking completed"));
 }
 
 void AppFrame::OnThreadUpdate(wxThreadEvent &ev)
 {
-	if (m_hlbox)
-	{
-		m_hlbox->Append(ev.GetString());
-		m_hlbox->Update();
-	}
-
+	// convert from ILogerr Error Code to LogWindow error 
+	MsgStatusLevel lvl = (MsgStatusLevel)ev.GetInt();
+	int linen = static_cast<int>(ev.GetExtraLong());
+	logwnd->Append(lvl, ev.GetString(), linen, true );
 }
 
 void AppFrame::OnSimulateUpdate(wxThreadEvent &ev)
 {
-	if (m_hlbox)
-		m_hlbox->Append(ev.GetString());
+	logwnd->Append(MSLInfo, ev.GetString());
 }
 
 void AppFrame::OnSimulateCompletion(wxThreadEvent&)
@@ -755,7 +755,7 @@ void  AppFrame::OnCheck(wxCommandEvent &event)
 	wxString fname = GetSavedFileName();
 	if (fname.empty())
 		return;	
-	m_hlbox->Clear();
+	logwnd->Clear();
 	if (m_edit->GetFileType() == FILETYPE_NC)
 	{
 		checkThread = new IntGCodeThread(this, fname);
@@ -777,7 +777,7 @@ void  AppFrame::OnSimulate(wxCommandEvent &event)
 	wxString fname = GetSavedFileName();
 	if (fname.empty())
 		return;
-	m_hlbox->Clear();
+	logwnd->Clear();
 
 	if (m_edit->GetFileType() == FILETYPE_NC)
 	{
@@ -808,8 +808,8 @@ bool AppFrame::CheckFileExist(const wchar_t *fname)
 	if ( StandartPaths::Get()->CheckFileExist(fname) )
 		return true;
 
-	wxString inf = wxString::Format("<font color=#008800>File %s not found.</font>", fname );
-	m_hlbox->Append(inf);
+	wxString inf = wxString::Format("File %s not found.", fname );
+	logwnd->Append(MSLError, inf);
 	return false;
 
 }
@@ -817,7 +817,7 @@ bool AppFrame::CheckFileExist(const wchar_t *fname)
 int AppFrame::RunGcmc(const wchar_t *src_fname, const  wchar_t *dst_fname, const wchar_t *args)
 {
 
-	m_hlbox->Clear();
+	logwnd->Clear();
 	// cheks files
 	if (!CheckFileExist(src_fname))
 		return 1;
@@ -842,14 +842,15 @@ int AppFrame::RunGcmc(const wchar_t *src_fname, const  wchar_t *dst_fname, const
 	wxArrayString errors;
 
 	
-	wxString inf = wxString::Format("<font color=#008800>Process: %s is running...</font>", arg.c_str());
-	m_hlbox->Append(inf);
+	wxString inf = wxString::Format("Process: %s is running...", arg.c_str());
+	logwnd->Append(MSLInfo, inf);
 
 	int code = wxExecute(arg, output, errors, wxEXEC_SYNC | wxEXEC_HIDE_CONSOLE, &env);
-	m_hlbox->Append(errors);
+	for( size_t i = 0; i < errors.Count(); ++i )
+		logwnd->Append(MSLError, errors[i]);
 
-	inf = wxString::Format("<font color=#008800>Process terminated with exit code %d</font>", code);
-	m_hlbox->Append(inf);
+	inf = wxString::Format("Process terminated with exit code %d</font>", code);
+	logwnd->Append(code == 0 ? MSLInfo : MSLError, inf);
 
 	
 	return code;

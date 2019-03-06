@@ -34,7 +34,7 @@ class LoggerWnd : public ILogger
 {
 public:
 	LoggerWnd(wxEvtHandler *lbox) : handler(lbox) { }
-	void log_string(int type, const char *s);
+	void log_string(int type, int linen, const char *s);
 private:
 	wxEvtHandler *handler;
 

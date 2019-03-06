@@ -87,12 +87,12 @@ void GCodeInterpreter::execute_file()
 	
 	if (state.code != PRAGRAMM_END && state.code != PRAGRAMM_ENDCLEAR )
 	{
-		logger->log(LOG_WARNING, "No end of programm command ");
+		logger->log(LOG_WARNING, nline, "No end of programm command ");
 		executor->set_end_programm();
 	}
 	if (substack.size() != 1)
 	{
-		logger->log(LOG_WARNING, "The programm end being in subrotinue" );
+		logger->log(LOG_WARNING, nline, "The programm end being in subrotinue" );
 	}
 
 	// clear stack
@@ -116,7 +116,7 @@ bool GCodeInterpreter::execute_file_int( long pos, ExecFunction fun, int &lineNu
 		if (length == (MAX_GCODE_LINELEN - 1))    // line is too long. need to finish reading the line to recover
 		{
 			for (; fgetc(gfile) != '\n' && !feof(gfile););
-			logger->log(LOG_WARNING, " Line %d is too long.", lineNumber);
+			logger->log(LOG_WARNING, lineNumber, "Line is too long.");
 		}
 		
 		fpos = ftell(gfile); 
@@ -133,7 +133,7 @@ bool GCodeInterpreter::execute_file_int( long pos, ExecFunction fun, int &lineNu
 			break;
 
 		else if (state.code )
-			logger->log(LOG_ERROR, "Error line %d %s\n", lineNumber, state.description.c_str());
+			logger->log(LOG_ERROR, lineNumber, state.description.c_str());
 
 	}
 
@@ -1137,7 +1137,7 @@ const char *GCodeInterpreter::cpy_close_and_downcase(char *line, const char *src
 		item = src[m];
 		if (n >= MAX_GCODE_LINELEN - 1)
 		{
-			logger->log(LOG_WARNING, "Line %d is very long\n", lineNumber);
+			logger->log(LOG_WARNING, lineNumber, "Line is very long");
 			break;
 		}
 
@@ -1158,7 +1158,7 @@ const char *GCodeInterpreter::cpy_close_and_downcase(char *line, const char *src
 			}
 			else if (item == '(')
 			{
-				logger->log(LOG_WARNING, "Line %d  '(' inside comment", lineNumber);
+				logger->log(LOG_WARNING, lineNumber, "'(' inside comment");
 			}
 		}
 		else if ((item == ' ') || (item == '\t') || (item == '\r')) /* don't copy blank or tab or CR */
@@ -1178,7 +1178,7 @@ const char *GCodeInterpreter::cpy_close_and_downcase(char *line, const char *src
 		}
 	}
 	if (comment)
-		logger->log(LOG_WARNING, "Line %d  unclosed comment found", lineNumber);
+		logger->log(LOG_WARNING, lineNumber, "Unclosed comment");
 
 	line[n] = 0;
 

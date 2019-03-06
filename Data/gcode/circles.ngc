@@ -1,7 +1,9 @@
+(kkdhdk(lkjlkjl);lk
+
 G20
 G0 X0 Y0 Z0
 F40
-G3 X0 Y0.5 I0 J0.25
+G3987 X0 Y0.5 I0 J0.25
 G3 X0 Y0 I0 J-0.25
 G3 X0 Y0.5 I0 J0.25
 G3 X0 Y0 I0 J-0.25

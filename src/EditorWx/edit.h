@@ -69,7 +69,7 @@ public:
     void OnEditIndentRed (wxCommandEvent &event);
     void OnEditSelectAll (wxCommandEvent &event);
     void OnEditSelectLine (wxCommandEvent &event);
-    //! view
+	    //! view
     void OnHighlightLang (wxCommandEvent &event);
     void OnDisplayEOL (wxCommandEvent &event);
     void OnIndentGuide (wxCommandEvent &event);
@@ -99,8 +99,8 @@ public:
 	void OnChanged(wxStyledTextEvent &event);
 	void OnDwellStart(wxStyledTextEvent &event);
 	void OnDwellEnd(wxStyledTextEvent &event);
-
     void OnKeyDown(wxKeyEvent &event);
+	void OnKillFocus(wxFocusEvent &event);
 
     //! language/lexer
     wxString DeterminePrefs (const wxString &filename);

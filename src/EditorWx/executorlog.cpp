@@ -19,14 +19,19 @@ void ExecutorLogWnd::output(const std::string &str)
 		return;
 	num_outputs++;
 
-	wxString label = wxString::Format("LINE: %d <font color=#FF00FF>"
-		"%s</font>", nline, str.c_str());
-
-	if (num_outputs == 100)
-		label = wxString::Format("<font color=#FF0000> More then 100 outputs </font>");
-
 	wxThreadEvent *ev = new wxThreadEvent(wxEVT_THREAD, CHECK_GCODE_UPDATE);
-	ev->SetString(label);
+	if (num_outputs == 100)
+	{
+		ev->SetInt(LOG_INFORMATIONSUM);
+		ev->SetString("More then 100 outputs");
+		ev->SetExtraLong(-1);
+	}
+	else
+	{
+		ev->SetInt(LOG_INFORMATION);
+		ev->SetExtraLong(nline);
+		ev->SetString(str.c_str());
+	}
 	wxQueueEvent(handler, ev);
 
 }
@@ -36,20 +41,16 @@ void ExecutorLogWnd::output(const std::string &str, const Coords &position)
 	if (!handler || !doprint)
 		return;
 
-	if (num_outputs >= 100)
-		return;
-	num_outputs++;
-
-	wxString label = wxString::Format("LINE: %d <font color=#FF00FF>"
-		"%s %f %f %f </font>", nline, str.c_str(), position.x, position.y, position.z);
-
-	if (num_outputs == 100)
-		label = wxString::Format("<font color=#FF0000> More then 100 outputs </font>");
-
-	wxThreadEvent *ev = new wxThreadEvent(wxEVT_THREAD, CHECK_GCODE_UPDATE);
-	ev->SetString(label);
-	wxQueueEvent(handler, ev);
-
+	std::string strn(str);
+	strn += "[";
+	strn += std::to_string(position.x);
+	strn += " ";
+	strn += std::to_string(position.y);
+	strn += " ";
+	strn += std::to_string(position.z);
+	strn += "]";
+	
+	output(strn);
 }
 
 
@@ -84,21 +85,15 @@ double ExecutorLogWnd::distance(const Coords &cur_position, const Coords &positi
 }
 
 
-void LoggerWnd::log_string(int type, const char *s)
+void LoggerWnd::log_string(int type, int linen, const char *s)
 {
 	if (!handler)
 		return;
 
-	wxString label;
-	if (type == LOG_ERROR)
-		label = wxString::Format("<font color=#FF0000> %s </font>", s);
-	else  if (type == LOG_WARNING)
-		label = wxString::Format("<font color=#0000FF> %s </font>", s);
-	else
-		label = wxString::Format("<font color=#800000> %s </font>", s);
-
-
+	wxString label(s);
 	wxThreadEvent *ev = new wxThreadEvent(wxEVT_THREAD, CHECK_GCODE_UPDATE);
+	ev->SetInt(type);
+	ev->SetExtraLong(linen);
 	ev->SetString(label);
 	wxQueueEvent(handler, ev);
 }

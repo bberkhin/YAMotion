@@ -21,6 +21,7 @@ enum {
 	myID_SETVIEWLAST = myID_SETVIEWFIRST + 8,
 	myID_EDIT_FIRST,
     myID_INDENTINC = myID_EDIT_FIRST,
+	myID_SELECTLINE,
     myID_INDENTRED,
     myID_FINDNEXT,
     myID_REPLACE,
@@ -62,7 +63,6 @@ enum {
     myID_CHARSETMAC,
     myID_PAGEPREV,
     myID_PAGENEXT,
-    myID_SELECTLINE,
     myID_EDIT_LAST = myID_SELECTLINE,
     myID_WINDOW_MINIMAL,
     // other IDs
@@ -84,5 +84,16 @@ enum {
 // global items
 // ----------------------------------------------------------------------------
 
+class  IntClientData : public wxClientData
+{
+public:
+	IntClientData(int i = 0) : m_data(i) { }
+	virtual ~IntClientData() { }
+	void SetData(int &data) { m_data = data; }
+	int GetData() const { return m_data; }
+
+private:
+	int m_data;
+};
 
 #endif // _WX_DEFSEXT_H_

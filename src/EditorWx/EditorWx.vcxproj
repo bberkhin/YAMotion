@@ -40,6 +40,7 @@
     <ClCompile Include="executorview.cpp" />
     <ClCompile Include="LexGcmc.cxx" />
     <ClCompile Include="LexGCode.cxx" />
+    <ClCompile Include="logwindow.cpp" />
     <ClCompile Include="macroses.cpp" />
     <ClCompile Include="macrosesdlg.cpp" />
     <ClCompile Include="macrosparamdlg.cpp" />
@@ -71,6 +72,7 @@
     <ClInclude Include="executorlog.h" />
     <ClInclude Include="executorview.h" />
     <ClInclude Include="LexGCode.h" />
+    <ClInclude Include="logwindow.h" />
     <ClInclude Include="macroses.h" />
     <ClInclude Include="macrosesdlg.h" />
     <ClInclude Include="macrosparamdlg.h" />

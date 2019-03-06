@@ -27,26 +27,26 @@ const int ANNOTATION_STYLE = wxSTC_STYLE_LASTPREDEFINED + 1;
 //----------------------------------------------------------------------------
 
 wxBEGIN_EVENT_TABLE(Edit, wxStyledTextCtrl)
-// common
-EVT_SIZE(Edit::OnSize)
-// edit
-EVT_MENU(wxID_CLEAR, Edit::OnEditClear)
-EVT_MENU(wxID_CUT, Edit::OnEditCut)
-EVT_MENU(wxID_COPY, Edit::OnEditCopy)
-EVT_MENU(wxID_PASTE, Edit::OnEditPaste)
-EVT_MENU(wxID_SELECTALL, Edit::OnEditSelectAll)
-EVT_MENU(myID_SELECTLINE, Edit::OnEditSelectLine)
-EVT_MENU(wxID_REDO, Edit::OnEditRedo)
-EVT_MENU(wxID_UNDO, Edit::OnEditUndo)
-// find
-EVT_MENU(wxID_FIND, Edit::OnFind)
-EVT_MENU(myID_FINDNEXT, Edit::OnFindNext)
-EVT_MENU(myID_REPLACE, Edit::OnReplace)
-EVT_MENU(myID_REPLACENEXT, Edit::OnReplaceNext)
-EVT_MENU(myID_BRACEMATCH, Edit::OnBraceMatch)
-EVT_MENU(myID_GOTO, Edit::OnGoto)
-// view
-EVT_MENU_RANGE(myID_HIGHLIGHTFIRST, myID_HIGHLIGHTLAST,
+	// common
+	EVT_SIZE(Edit::OnSize)
+	// edit
+	EVT_MENU(wxID_CLEAR, Edit::OnEditClear)
+	EVT_MENU(wxID_CUT, Edit::OnEditCut)
+	EVT_MENU(wxID_COPY, Edit::OnEditCopy)
+	EVT_MENU(wxID_PASTE, Edit::OnEditPaste)
+	EVT_MENU(wxID_SELECTALL, Edit::OnEditSelectAll)
+	EVT_MENU(myID_SELECTLINE, Edit::OnEditSelectLine)
+	EVT_MENU(wxID_REDO, Edit::OnEditRedo)
+	EVT_MENU(wxID_UNDO, Edit::OnEditUndo)
+	// find
+	EVT_MENU(wxID_FIND, Edit::OnFind)
+	EVT_MENU(myID_FINDNEXT, Edit::OnFindNext)
+	EVT_MENU(myID_REPLACE, Edit::OnReplace)
+	EVT_MENU(myID_REPLACENEXT, Edit::OnReplaceNext)
+	EVT_MENU(myID_BRACEMATCH, Edit::OnBraceMatch)
+	EVT_MENU(myID_GOTO, Edit::OnGoto)
+	// view
+	EVT_MENU_RANGE(myID_HIGHLIGHTFIRST, myID_HIGHLIGHTLAST,
 	Edit::OnHighlightLang)
 	EVT_MENU(myID_DISPLAYEOL, Edit::OnDisplayEOL)
 	EVT_MENU(myID_INDENTGUIDE, Edit::OnIndentGuide)
@@ -82,9 +82,10 @@ EVT_MENU_RANGE(myID_HIGHLIGHTFIRST, myID_HIGHLIGHTLAST,
 
 	EVT_STC_DWELLSTART(wxID_ANY, Edit::OnDwellStart)
 	EVT_STC_DWELLEND(wxID_ANY, Edit::OnDwellEnd)
-	
+		
+	//EVT_KILL_FOCUS(Edit::OnKillFocus)
 
-    EVT_KEY_DOWN( Edit::OnKeyDown )
+	EVT_KEY_DOWN( Edit::OnKeyDown )
 wxEND_EVENT_TABLE()
 
 Edit::Edit (wxWindow *parent, wxWindowID id,
@@ -245,10 +246,21 @@ void Edit::OnEditSelectAll (wxCommandEvent &WXUNUSED(event)) {
     SetSelection (0, GetTextLength ());
 }
 
-void Edit::OnEditSelectLine (wxCommandEvent &WXUNUSED(event)) {
-    int lineStart = PositionFromLine (GetCurrentLine());
-    int lineEnd = PositionFromLine (GetCurrentLine() + 1);
-    SetSelection (lineStart, lineEnd);
+void Edit::OnEditSelectLine (wxCommandEvent &event ) 
+{
+	IntClientData *data = dynamic_cast<IntClientData *>(event.GetClientObject());
+	
+	if (data && data->GetData() >= 0)
+	{
+		int n = data->GetData() - 1 ;
+		int lineStart = PositionFromLine(n);
+		int lineEnd = PositionFromLine(n + 1);
+		EnsureVisibleEnforcePolicy(n);
+		SetFocus();
+		SetCurrentPos(lineStart);
+		//SetSelection(lineStart, lineEnd);
+		
+	}
 }
 
 void Edit::OnHighlightLang (wxCommandEvent &event) {
@@ -256,7 +268,7 @@ void Edit::OnHighlightLang (wxCommandEvent &event) {
 }
 
 void Edit::OnDisplayEOL (wxCommandEvent &WXUNUSED(event)) {
-    SetViewEOL (!GetViewEOL());
+    SetViewEOL(!GetViewEOL());
 }
 
 void Edit::OnIndentGuide (wxCommandEvent &WXUNUSED(event)) {
@@ -465,6 +477,9 @@ void Edit::OnChanged(wxStyledTextEvent &event)
 
 void Edit::OnDwellStart(wxStyledTextEvent &event)
 {
+	if (!HasFocus())
+		return;
+
 	int pos = event.GetPosition();
 	int x = event.GetX();
 	int y = event.GetX();
@@ -478,8 +493,9 @@ void Edit::OnDwellStart(wxStyledTextEvent &event)
 		code_description.reset( new CodeDescription() );
 	}
 
-	str = code_description->get_description(str.c_str());
-	CallTipShow(pos, str );
+	wxString strOut = code_description->get_description(str.c_str());
+	if (strOut.size() > 1 )
+		CallTipShow(pos, strOut);
 }
 void Edit::OnDwellEnd(wxStyledTextEvent &event)
 {
@@ -487,6 +503,12 @@ void Edit::OnDwellEnd(wxStyledTextEvent &event)
 		CallTipCancel();
 }
 
+
+void Edit::OnKillFocus(wxFocusEvent &event)
+{
+	if (CallTipActive())
+		CallTipCancel();
+}
 
 //----------------------------------------------------------------------------
 // private functions

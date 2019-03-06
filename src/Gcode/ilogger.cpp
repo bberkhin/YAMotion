@@ -16,5 +16,15 @@ void ILogger::log(int type, const char *format, ...)
     va_list args; 
 	va_start(args, format);
     vsprintf(buffer, format, args);
-	log_string(type, buffer);
+	log_string(type, -1,  buffer);
+}
+
+void ILogger::log(int type, int linen, const char *format, ...)
+{
+	char buffer[MAX_MESSAGE_SIZE];
+	va_list args;
+	va_start(args, format);
+	vsprintf(buffer, format, args);
+	log_string(type, linen, buffer);
+
 }

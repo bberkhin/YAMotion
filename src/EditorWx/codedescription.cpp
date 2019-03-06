@@ -26,6 +26,7 @@ CodeDescription::CodeDescription()
 	{
 		if( fgetws(line, 512, file) == NULL )
 			break;
+		line[511] = 0;
 		c = wcschr(line, L'=');
 		if (c == NULL)
 			continue;
@@ -135,7 +136,8 @@ std::wstring CodeDescription::get_description(const char *src)
 	
 	if (!parser.parse(line))
 	{
-		out.assign(parser.get_state().description.begin(), parser.get_state().description.end());
+		wxString s( parser.get_state().description.c_str());
+		out = s.wc_str();
 		return out;
 	}
 

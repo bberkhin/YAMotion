@@ -132,11 +132,10 @@ parms = {
 	[17,  5, 3],
 	[ 7, 13, 5]
 };
-
 /*
  * Trace both hypo- and epi-trochoid for each parameter set
  */
-i = -2.5;
+i = -2.5; 
 foreach(parms; p) {
 	maxw = p[0] + p[1] + p[2];	// Estimate parametric size
 	// Calculate the paths

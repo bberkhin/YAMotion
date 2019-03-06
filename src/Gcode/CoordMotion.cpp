@@ -500,7 +500,7 @@ int CCoordMotion::ArcFeedAccel(double DesiredFeedRate_in_per_sec, double Desired
 	if (FeedRateToUse <= 0.0)
 	{
 		SetAbort();
-		logger->log_string(LOG_ERROR, "Arc Feed with Feed Rate Zero or Negative");
+		logger->log(LOG_ERROR, "Arc Feed with Feed Rate Zero or Negative");
 		return 1;
 	}
 
@@ -596,7 +596,7 @@ int CCoordMotion::ArcFeedAccel(double DesiredFeedRate_in_per_sec, double Desired
 	{
 		if ((MP->ArcsToSegs || MP->UseOnlyLinearSegments) && MP->CollinearTol==0.0)
 		{
-			logger->log_string(LOG_ERROR,"Error Arcs To Segs selected with Zero Collinear Tolerance");
+			logger->log(LOG_ERROR,"Error Arcs To Segs selected with Zero Collinear Tolerance");
 			SetAbort();
 			return 1;
 		}
@@ -1615,7 +1615,7 @@ int CCoordMotion::CheckMotionHalt(bool Coord)
 			if (i==-1)
 			{
 				SetAbort();
-				logger->log_string(LOG_ERROR, "Invalid buffer times on Halt");
+				logger->log(LOG_ERROR, "Invalid buffer times on Halt");
 				return 1;
 			}
 
@@ -2213,7 +2213,7 @@ int CCoordMotion::OutputSegment(int iseg)
 		}
 		if (i!=0)
 		{
-			logger->log_string(LOG_ERROR,"Wrong Buffer Times",MB_ICONEXCLAMATION|MB_OK);   
+			logger->log(LOG_ERROR,"Wrong Buffer Times",MB_ICONEXCLAMATION|MB_OK);   
 			return 1;
 		}
 	}
@@ -2267,7 +2267,7 @@ int CCoordMotion::OutputSegment(int iseg)
 				}
 				else
 				{
-					logger->log_string(LOG_ERROR, "Unexpected Coordinated Motion Buffer Underflow!\r"
+					logger->log(LOG_ERROR, "Unexpected Coordinated Motion Buffer Underflow!\r"
 						"(Consider increasing the Trajectory Planner Lookahead time in the Configuration Screen)\r\r"
 						"Press OK to attempt to continue motion\r");
 /*					result = AfxMessageBox("Unexpected Coordinated Motion Buffer Underflow!\r"
@@ -2369,7 +2369,7 @@ int CCoordMotion::UpdateRealTimeState(double T)
 		if (i==-1)
 		{
 			SetAbort();
-			logger->log_string(LOG_ERROR, "Invalid buffer times in Trajectry Planner");
+			logger->log(LOG_ERROR, "Invalid buffer times in Trajectry Planner");
 			return 1;
 		}
 

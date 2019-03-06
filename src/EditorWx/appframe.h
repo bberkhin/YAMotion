@@ -8,6 +8,7 @@ class wxToolBar;
 class IntGCodeThread;
 class SimulateGCodeThread;
 class ViewGCode;
+class LogWindow;
 
 // declare a new type of event, to be used by our MyThread class:
 //wxDECLARE_EVENT(wxEVT_COMMAND_GCODETHREAD_COMPLETED, wxThreadEvent);
@@ -62,7 +63,7 @@ public:
 	void OnSimulateCompletion(wxThreadEvent&);
 
 
-	wxSimpleHtmlListBox *getLogWnd() { return m_hlbox; }
+	LogWindow *getLogWnd() { return logwnd; }
 	wxString GetText();
 private:
 	wxString GetSavedFileName();
@@ -74,7 +75,7 @@ private:
 private:
 	// edit object
 	Edit *m_edit;
-	wxSimpleHtmlListBox *m_hlbox;
+	LogWindow *logwnd;
 	ViewGCode *m_view;
 
 	IntGCodeThread *checkThread;
