@@ -3,6 +3,8 @@
 #include "wx/splitter.h"
 #include "wx/event.h"
 #include <wx/thread.h>
+#include "wx/process.h"
+#include "wx/txtstrm.h"
 
 
 //! application headers
@@ -110,6 +112,59 @@ protected:
 };
 
 
+// A specialization of MyProcess for redirecting the output
+class GcmcProcess : public wxProcess
+{
+public:
+	GcmcProcess(AppFrame *parent, const wchar_t *dstfn, DoAfterConvertGcmc todo)
+		: m_parent(parent), dst_file(dstfn), what_to_do(todo), wxProcess(parent)
+	{
+		Redirect();
+	}
+	virtual void OnTerminate(int pid, int status) wxOVERRIDE;
+	virtual bool HasInput();
+	
+private:
+	AppFrame *m_parent;
+	DoAfterConvertGcmc what_to_do;
+	std::wstring dst_file;
+};
+
+void GcmcProcess::OnTerminate(int pid, int status)
+{
+	// show the rest of the output
+	while (HasInput())
+		;
+
+	m_parent->GcmcProcessTerminated(status, dst_file.c_str(), what_to_do );
+}
+
+bool GcmcProcess::HasInput()
+{
+	bool hasInput = false;
+
+	if (IsInputAvailable())
+	{
+		wxTextInputStream tis(*GetInputStream());
+		// this assumes that the output is always line buffered
+		wxString msg;
+		msg << tis.ReadLine();
+		m_parent->AppendGcmcError(msg);
+		hasInput = true;
+	}
+
+	if (IsErrorAvailable())
+	{
+		wxTextInputStream tis(*GetErrorStream());
+		// this assumes that the output is always line buffered
+		wxString msg;
+		msg << tis.ReadLine();
+		m_parent->AppendGcmcError(msg);
+		hasInput = true;
+	}
+	return hasInput;
+}
+
 //----------------------------------------------------------------------------
 // AppFrame
 //----------------------------------------------------------------------------
@@ -178,6 +233,7 @@ AppFrame::AppFrame (const wxString &title)
     SetIcon(wxICON(sample));
 	checkThread = NULL;
 	simulateThread = NULL;
+	gcmcProcess = NULL;
 	
 	// initialize important variables
     m_edit = NULL;
@@ -389,13 +445,7 @@ void AppFrame::OnProperties (wxCommandEvent &WXUNUSED(event)) {
 	std::wstring src_fname = StandartPaths::Get()->GetMacrosPath( desc.gcmcfile.c_str() );
 	std::wstring dst_fname = StandartPaths::Get()->GetTemporaryPath(L"tmp.nc");
 	
-	int code = RunGcmc(src_fname.c_str(), dst_fname.c_str(), args.c_str());
-
-	if (code != 0) // error
-		return;
-	
-
-	m_edit->PasteFile( dst_fname );
+	RunGcmc(src_fname.c_str(), dst_fname.c_str(), args.c_str(), ConvertGcmcPasteFile);
 }
 
 // edit events
@@ -768,7 +818,7 @@ void  AppFrame::OnCheck(wxCommandEvent &event)
 	}
 	else if (m_edit->GetFileType() == FILETYPE_GCMC)
 	{
-		DoConvertGcmc(0);		
+		DoConvertGcmc(ConvertGcmcNothing);
 	}
 }
 
@@ -781,25 +831,12 @@ void  AppFrame::OnSimulate(wxCommandEvent &event)
 
 	if (m_edit->GetFileType() == FILETYPE_NC)
 	{
-		simulateThread = new SimulateGCodeThread(this, fname.c_str());
+		DoSimulate( fname.c_str() );
 	}
 	else if (m_edit->GetFileType() == FILETYPE_GCMC)
 	{
-		wxString dst_fname;
-		int ret = DoConvertGcmc( &dst_fname );
-		if (ret == 0)
-			simulateThread = new SimulateGCodeThread(this, dst_fname.c_str());
+		DoConvertGcmc( ConvertGcmcRunSimilate );
 	}
-	else
-		return;
-
-	if (simulateThread->Run() != wxTHREAD_NO_ERROR)
-	{
-		wxLogError("Can't create the thread!");
-		delete simulateThread;
-		simulateThread = NULL;
-	}
-	return;
 }
 
 
@@ -814,7 +851,72 @@ bool AppFrame::CheckFileExist(const wchar_t *fname)
 
 }
 
-int AppFrame::RunGcmc(const wchar_t *src_fname, const  wchar_t *dst_fname, const wchar_t *args)
+// Source format:
+// FILENAME:LINE:CHAR: ERRORTYPE: MSG\n
+// ERRORTYPE = { "error", "internal error", "fatal","warning"  }
+//or
+// MSG \n
+//
+//static size_t find_colon(const wchar_t *src, size_t start)
+//{
+//	bool skeep = false;
+//	for (const wchar_t *c = src + start; *c != 0 && *c != '\n'; c++, start++)
+//	{
+//		if (*c == '"')
+//			skeep = !skeep;
+//		else if (*c == ':' && !skeep)
+//			return start;
+//
+//	}
+//	return std::string::npos;
+//}
+
+void AppFrame::AppendGcmcError(wxString &src)
+{
+	bool formated = false;
+	size_t colon1 = wxString::npos, colon2 = wxString::npos, colon3 = wxString::npos, colon4 = wxString::npos;
+	if ((colon1 = src.find(':', 0)) != wxString::npos)
+	{
+		if ((colon2 = src.find(':', colon1 + 1)) != wxString::npos)
+		{
+			if ((colon3 = src.find(':', colon2 + 1)) != wxString::npos)
+			{
+				if ((colon4 = src.find(':', colon3 + 1)) != wxString::npos)
+				{
+					formated = true;
+				}
+			}
+		}
+	}
+	if (!formated)
+	{
+		logwnd->Append(MSLError, src);
+	}
+	else
+	{
+		std::wstring output;
+		std::wstring tmp;
+		std::filesystem::path path = src.SubString(0, colon1).wc_str();
+		if (path.has_filename())
+		{
+			output = L"File: ";
+			output += path.filename();
+			output += L" ";
+		}
+		tmp = src.SubString(colon1 + 1, colon2).wc_str();
+		int linen = _wtoi(tmp.c_str());
+		tmp = src.SubString(colon3 + 2, colon4).wc_str(); // Erro type
+		MsgStatusLevel lvl = MSLError;
+		if (tmp.compare(L"warning") == 0)
+			lvl = MSLWarning;
+
+		output += src.Mid(colon4 + 1).wc_str(); // get message
+		logwnd->Append(lvl, output.c_str(),linen);
+	}
+
+}
+
+int AppFrame::RunGcmc(const wchar_t *src_fname, const  wchar_t *dst_fname, const wchar_t *args, DoAfterConvertGcmc what_to_do)
 {
 
 	logwnd->Clear();
@@ -825,40 +927,84 @@ int AppFrame::RunGcmc(const wchar_t *src_fname, const  wchar_t *dst_fname, const
 	wxExecuteEnv env;
 	
 	env.cwd = StandartPaths::Get()->GetDirFromFName(src_fname).c_str();
+	// get file name without path
+	std::filesystem::path src_fname_no_path = std::filesystem::path(src_fname).filename();
+	std::filesystem::path dst_fname_no_path;
+
+	if (StandartPaths::Get()->GetDirFromFName(dst_fname).compare(env.cwd) == 0)
+		dst_fname_no_path = std::filesystem::path(dst_fname).filename();
+	else
+		dst_fname_no_path = dst_fname;
+
+
 	wxString arg = StandartPaths::Get()->GetExecutablePath( L"gcmc_vc.exe" ).c_str();
 
 	if (!CheckFileExist(arg))
 		return 1;
 
 	arg += " -o ";
-	arg += dst_fname;
+	arg += dst_fname_no_path.c_str();
 	arg += " ";
 	if (args)
 		arg += args;
 	arg += " ";
-	arg += src_fname;
+	arg += src_fname_no_path.c_str();
 
 	wxArrayString output;
 	wxArrayString errors;
 
 	
-	wxString inf = wxString::Format("Process: %s is running...", arg.c_str());
-	logwnd->Append(MSLInfo, inf);
-
+#if 0 
+	logwnd->Append(MSLInfo, L"Start converting...");
+	logwnd->Append(MSLInfo, arg.c_str());
 	int code = wxExecute(arg, output, errors, wxEXEC_SYNC | wxEXEC_HIDE_CONSOLE, &env);
-	for( size_t i = 0; i < errors.Count(); ++i )
-		logwnd->Append(MSLError, errors[i]);
+	for (size_t i = 0; i < errors.Count(); ++i)
+	{
+		AppendGcmcError(errors[i]);
+	}
 
-	inf = wxString::Format("Process terminated with exit code %d</font>", code);
+	wxString inf = wxString::Format("Process terminated with exit code %d", code);
 	logwnd->Append(code == 0 ? MSLInfo : MSLError, inf);
-
 	
+	return code;
+#endif
+
+	if (gcmcProcess)
+	{
+		logwnd->Append(MSLInfo, L"gcmc_vc.exe already running");
+		return 1;
+	}
+	logwnd->Append(MSLInfo, L"Start converting...");
+	logwnd->Append(MSLInfo, arg.c_str());
+	gcmcProcess = new GcmcProcess(this, dst_fname, what_to_do);
+	int code = wxExecute(arg, wxEXEC_ASYNC| wxEXEC_HIDE_CONSOLE | wxEXEC_NODISABLE, gcmcProcess, &env);
 	return code;
 
 }
 
 
-int AppFrame::DoConvertGcmc(wxString *pdst_fname)
+void AppFrame::GcmcProcessTerminated(int status, const wchar_t *dst_fname, DoAfterConvertGcmc what_to_do)
+{
+
+	if (gcmcProcess)
+	{
+		wxString inf = wxString::Format("Process terminated with exit code %d", status);
+		logwnd->Append(status == 0 ? MSLInfo : MSLError, inf);
+		if (status == 0)
+		{
+			if (what_to_do == ConvertGcmcOpenFile)
+				FileOpen(dst_fname);
+			else if (what_to_do == ConvertGcmcPasteFile)
+				m_edit->PasteFile(dst_fname) ;
+			else if (what_to_do == ConvertGcmcRunSimilate)
+				DoSimulate(dst_fname);
+		}
+		delete gcmcProcess;
+		gcmcProcess = NULL;
+	}
+}
+
+int AppFrame::DoConvertGcmc(DoAfterConvertGcmc what_to_do)
 {
 	wxString src_fname = m_edit->GetFilename();
 	if (src_fname.IsEmpty())
@@ -867,9 +1013,8 @@ int AppFrame::DoConvertGcmc(wxString *pdst_fname)
 	if (dst_fname.IsEmpty())
 		dst_fname = src_fname;
 	dst_fname += wxString(".nc");
-	if (pdst_fname)
-		*pdst_fname = dst_fname;
-	return RunGcmc(src_fname, dst_fname, 0);
+
+	return RunGcmc(src_fname, dst_fname, 0, what_to_do);
 }
 
 
@@ -878,10 +1023,8 @@ void AppFrame::OnConvertGcmc(wxCommandEvent &event)
 	if (!DoFileSave(false, false))
 		return;
 
-	wxString dst_fname;
-	int code = DoConvertGcmc(&dst_fname);
-	if (code == 0)// Ok
-		FileOpen(dst_fname);
+	DoConvertGcmc(ConvertGcmcOpenFile);
+	
 }
 
 
@@ -892,5 +1035,21 @@ void AppFrame::OnUpdateConvertGcmc(wxUpdateUIEvent& event)
 }
 
 
+
+void AppFrame::DoSimulate(const wchar_t *fname)
+{
+
+	if (simulateThread == NULL)
+	{
+		simulateThread = new SimulateGCodeThread(this, fname);
+		if (simulateThread->Run() != wxTHREAD_NO_ERROR)
+		{
+			logwnd->Append(MSLError, L"Can't create the thread to run simulate");
+			delete simulateThread;
+			simulateThread = NULL;
+
+		}
+	}
+}
 
 

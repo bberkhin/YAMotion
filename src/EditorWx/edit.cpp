@@ -6,6 +6,12 @@
 #include "edit.h"        // edit module
 #include "codedescription.h"
 
+#if wxUSE_FFILE
+#include "wx/ffile.h"
+#elif wxUSE_FILE
+#include "wx/file.h"
+#endif
+
 //----------------------------------------------------------------------------
 // resources
 //----------------------------------------------------------------------------
@@ -122,6 +128,7 @@ Edit::Edit (wxWindow *parent, wxWindowID id,
     StyleSetForeground (wxSTC_STYLE_LINENUMBER, wxColour ("DARK GREY"));
     StyleSetBackground (wxSTC_STYLE_LINENUMBER, *wxWHITE);
     StyleSetForeground(wxSTC_STYLE_INDENTGUIDE, wxColour ("DARK GREY"));
+
 
 	// margin
 	m_LineNrMargin = TextWidth(wxSTC_STYLE_LINENUMBER, "_99999");
@@ -257,8 +264,8 @@ void Edit::OnEditSelectLine (wxCommandEvent &event )
 		int lineEnd = PositionFromLine(n + 1);
 		EnsureVisibleEnforcePolicy(n);
 		SetFocus();
-		SetCurrentPos(lineStart);
-		//SetSelection(lineStart, lineEnd);
+		//SetCurrentPos(lineStart);
+		SetSelection(lineStart, lineEnd);
 		
 	}
 }
@@ -477,7 +484,7 @@ void Edit::OnChanged(wxStyledTextEvent &event)
 
 void Edit::OnDwellStart(wxStyledTextEvent &event)
 {
-	if (!HasFocus())
+	if ( !HasFocus() || GetFileType() != FILETYPE_NC )
 		return;
 
 	int pos = event.GetPosition();
@@ -575,9 +582,11 @@ bool Edit::InitializePrefs (const wxString &name) {
 
     // default fonts for all styles!
     int Nr;
-    for (Nr = 0; Nr < wxSTC_STYLE_LASTPREDEFINED; Nr++) {
+    for (Nr = 0; Nr < wxSTC_STYLE_LASTPREDEFINED; Nr++) 
+	{
         wxFont font(wxFontInfo(10).Family(wxFONTFAMILY_MODERN));
         StyleSetFont (Nr, font);
+		StyleSetFontEncoding(Nr, wxFONTENCODING_CP1251);
     }
 
     // set common styles
@@ -593,8 +602,8 @@ bool Edit::InitializePrefs (const wxString &name) {
             wxFont font(wxFontInfo(curType.fontsize)
                             .Family(wxFONTFAMILY_MODERN)
                             .FaceName(curType.fontname));
-			//font.SetEncoding(wxFONTENCODING_CP1251);
             StyleSetFont (Nr, font);
+			StyleSetFontEncoding(Nr, wxFONTENCODING_CP1251);
             if (curType.foreground.length()) {
                 StyleSetForeground (Nr, wxColour (curType.foreground));
             }
@@ -780,3 +789,54 @@ void Edit::PasteFile(std::wstring fname, bool toend)
 }
 
 
+
+
+
+bool Edit::DoLoadFile(const wxString& filename, int WXUNUSED(fileType))
+{
+#if wxUSE_FFILE || wxUSE_FILE
+
+#if wxUSE_FFILE
+	// As above, we want to read the real EOLs from the file, e.g. without
+	// translating them to just LFs under Windows, so that the original CR LF
+	// are preserved when it's written back.
+	wxFFile file(filename, wxS("rb"));
+#else
+	wxFile file(filename);
+#endif
+
+	if (file.IsOpened())
+	{
+		wxString text;
+		if (file.ReadAll(&text, *wxConvCurrent))
+		{
+			// Detect the EOL: we use just the first line because there is not
+			// much we can do if the file uses inconsistent EOLs anyhow, we'd
+			// need to ask the user about the one we should really use and we
+			// don't currently provide a way to do it.
+			//
+			// We also only check for Unix and DOS EOLs but not classic Mac
+			// CR-only one as it's obsolete by now.
+			const wxString::size_type posLF = text.find('\n');
+			if (posLF != wxString::npos)
+			{
+				// Set EOL mode to ensure that the new lines inserted into the
+				// text use the same EOLs as the existing ones.
+				if (posLF > 0 && text[posLF - 1] == '\r')
+					SetEOLMode(wxSTC_EOL_CRLF);
+				else
+					SetEOLMode(wxSTC_EOL_LF);
+			}
+			//else: Use the default EOL for the current platform.
+
+			SetValue(text);
+			EmptyUndoBuffer();
+			SetSavePoint();
+
+			return true;
+		}
+	}
+#endif // !wxUSE_FFILE && !wxUSE_FILE
+
+	return false;
+}

@@ -2,6 +2,15 @@
 
 #include "appframe.h"
 
+
+enum DoAfterConvertGcmc
+{
+	ConvertGcmcNothing,
+	ConvertGcmcOpenFile,
+	ConvertGcmcPasteFile,
+	ConvertGcmcRunSimilate
+};
+
 class Edit;
 class wxSimpleHtmlListBox;
 class wxToolBar;
@@ -9,10 +18,8 @@ class IntGCodeThread;
 class SimulateGCodeThread;
 class ViewGCode;
 class LogWindow;
+class MyGcmcProcess;
 
-// declare a new type of event, to be used by our MyThread class:
-//wxDECLARE_EVENT(wxEVT_COMMAND_GCODETHREAD_COMPLETED, wxThreadEvent);
-//wxDECLARE_EVENT(wxEVT_COMMAND_GCODETHREAD_UPDATE, wxThreadEvent);
 
 //----------------------------------------------------------------------------
 //! frame of the application APP_VENDOR-APP_NAME.
@@ -20,6 +27,7 @@ class AppFrame : public wxFrame {
 
 	friend class IntGCodeThread;
 	friend class SimulateGCodeThread;
+	friend class GcmcProcess;
 
 public:
 	//! constructor
@@ -69,9 +77,13 @@ private:
 	wxString GetSavedFileName();
 	bool DoFileSave(bool askToSave, bool bSaveAs);
 	void FileChanged();
-	int DoConvertGcmc(wxString *out_dst_fname);
-	int RunGcmc(const wchar_t *src_fname, const  wchar_t *dst_fname, const wchar_t *args);
+	void DoSimulate(const wchar_t *fname);
+	int DoConvertGcmc(DoAfterConvertGcmc what_to_do);
+	int RunGcmc(const wchar_t *src_fname, const  wchar_t *dst_fname, const wchar_t *args, DoAfterConvertGcmc what_to_do);
 	bool CheckFileExist(const wchar_t *fname);
+	void AppendGcmcError(wxString &src);
+	void GcmcProcessTerminated(int status, const wchar_t *dst_fname, DoAfterConvertGcmc what_to_do);
+	
 private:
 	// edit object
 	Edit *m_edit;
@@ -81,6 +93,7 @@ private:
 	IntGCodeThread *checkThread;
 	SimulateGCodeThread *simulateThread;
 	wxCriticalSection critsect;
+	GcmcProcess *gcmcProcess;
 
 	void FileOpen(wxString fname);
 	void UpdateTitle();

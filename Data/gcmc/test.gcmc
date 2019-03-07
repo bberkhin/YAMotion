@@ -1,4 +1,19 @@
+
+function CutRect(start, sizex, sizey)
+{
+
+goto(start);
+move_r([-,sizey,-] );
+move_r([sizex,-,-]);
+mov  e_r([-,-sizey,-]);
+move(start);
+}
+
+
 feedrate(2000.0mm);
-feedrate(2000.0mm);
-feedrate(2000.0mm);
-iufeedrate(2000.0mm);
+CutRect([0,0,0],100,79);
+CutRect([10,10,0],80,50);
+CutRect([30,30,0],50,30);
+
+
+

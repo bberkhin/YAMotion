@@ -117,7 +117,7 @@ public:
     wxString GetFilename () {return m_filename;}
     void SetFilename (const wxString &filename) {m_filename = filename;}
 	void PasteFile(std::wstring fname, bool toend = false);
-
+	bool DoLoadFile(const wxString& filename, int WXUNUSED(fileType));
 private:
     // file
     wxString m_filename;
