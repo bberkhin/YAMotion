@@ -57,6 +57,7 @@ public:
 	void OnContextMenu(wxContextMenuEvent& evt);
 	//! 3DViewevents
 	void On3DView(wxCommandEvent &event);
+	void On3DViewUpdate(wxUpdateUIEvent& event);
 	//Gcode
 	void OnCheck(wxCommandEvent &event);
 	void OnSimulate(wxCommandEvent &event);

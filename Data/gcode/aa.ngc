@@ -1,5 +1,5 @@
-G0 X0 Y0 Z0  
-G0 X-10 Y-10 Z0  		(move somewhere)
+G0 X-500 Y-500 Z0  
+G0 X500 Y500 Z0  		(move somewhere)
 M2
 
 

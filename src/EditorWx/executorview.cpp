@@ -49,6 +49,7 @@ void ExecutorView::output(const std::string &str, const Coords &position)
 	 TrackPoint point;
 	 point.type = type;
 	 point.pt = position;
+	 point.line = nline;
 	 trj.push_back(point);
 	 cur_position = position;
  }

@@ -8,6 +8,7 @@
 struct TrackPoint
 {
 	TypeMove type;
+	int line;
 	Coords pt;
 };
 

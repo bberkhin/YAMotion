@@ -20,21 +20,54 @@ void make_cylinder(Object3d& edge, int divs); //из границы в плоскости XZ создаЄ
 void make_tool_simple(Object3d& tool); //создаeт объект сверло
 void make_axis(const glm::vec4 &color, const glm::vec3 &rot, float len, Object3d& axis);
 
+class SimulateCutting : public wxThread
+{
+public:
+	SimulateCutting(ViewGCode *handler)
+		: view(handler), wxThread(wxTHREAD_DETACHED)
+	{
+
+	}
+	~SimulateCutting();
+
+protected:
+	virtual wxThread::ExitCode Entry();
+	ViewGCode *view;
+};
+
+
+
 wxBEGIN_EVENT_TABLE(ViewGCode, wxGLCanvas)
 	EVT_SIZE(ViewGCode::OnSize)
 	EVT_PAINT(ViewGCode::OnPaint)
 	EVT_CHAR(ViewGCode::OnChar)
 	EVT_MOUSE_EVENTS(ViewGCode::OnMouseEvent)
 	EVT_MENU_RANGE(myID_SETVIEWFIRST, myID_SETVIEWLAST, ViewGCode::OnSetView)
+	EVT_MENU(myID_SEMULATE_START, ViewGCode::OnSemulateStart)
+	EVT_MENU(myID_SEMULATE_PAUSE, ViewGCode::OnSemulatePause)
+	EVT_MENU(myID_SEMULATE_STOP, ViewGCode::OnSemulateStop)
+
+	EVT_UPDATE_UI_RANGE(myID_SETVIEWFIRST, myID_SETVIEWLAST, ViewGCode::OnSetViewUpdate)
+	EVT_UPDATE_UI(myID_SEMULATE_START, ViewGCode::OnCmdUpdateSimulateStart)
+	EVT_UPDATE_UI(myID_SEMULATE_PAUSE, ViewGCode::OnCmdUpdateSimulatePause)
+	EVT_UPDATE_UI(myID_SEMULATE_STOP, ViewGCode::OnCmdUpdateSimulateStop)
+	EVT_UPDATE_UI(myID_SEMULATE_GOTOBEGIN, ViewGCode::OnCmdUpdateSimulateStop)
+	EVT_UPDATE_UI(myID_SEMULATE_GOTOEND, ViewGCode::OnCmdUpdateSimulateStop)
+	
 	//EVT_KEY_DOWN(ViewGCode::OnKeyDown)
+
+	EVT_THREAD(CUTTING_SIMULATE_UPDATE, ViewGCode::OnSimulateUpdate)
+	EVT_THREAD(CUTTING_SIMULATE_COMPLETE, ViewGCode::OnSimulateCompletion)
+
 wxEND_EVENT_TABLE()
 
-ViewGCode::ViewGCode(wxWindow *parent,
-	wxWindowID id,
-	int* gl_attrib)
-	: wxGLCanvas(parent, id, gl_attrib, wxDefaultPosition, wxDefaultSize, wxWANTS_CHARS | wxFULL_REPAINT_ON_RESIZE)
+ViewGCode::ViewGCode(wxWindow *frame, wxWindow *parent,wxWindowID id, int* gl_attrib)
+	: appframe(frame), wxGLCanvas(parent, id, gl_attrib, wxDefaultPosition, wxDefaultSize, wxWANTS_CHARS | wxFULL_REPAINT_ON_RESIZE)
 	
 {
+	simulateCut = NULL;
+	tickdelay = 50;
+	distancefortick = 5.;
 
 	// Explicitly create a new rendering context instance for this canvas.
 	m_glRC = new wxGLContext(this);	
@@ -175,22 +208,25 @@ void ViewGCode::OnMouseEvent(wxMouseEvent& event)
 	static int dragging = 0;
 	static float last_x, last_y;
 
+
 	// Allow default processing to happen, or else the canvas cannot gain focus
 	// (for key events).
 	event.Skip();
+	if (event.LeftIsDown() && event.RightIsDown() && dragging == 0)
+		return;
 
 	if (event.LeftIsDown() || event.RightIsDown() )
 	{
 		if (!dragging)
 		{
-			dragging = 1;
+			dragging = event.RightIsDown() ? 1 : 2;
 		}
-		else if (event.RightIsDown())
+		else if (dragging == 1)//event.RightIsDown())
 		{
 			camera.rotate_cursor(event.GetX(), event.GetY(), last_x, last_y);
 			Refresh(false);
 		}
-		else if (event.LeftIsDown())
+		else if (dragging == 2) //if (event.LeftIsDown())
 		{
 			camera.move_drag_cursor(event.GetX()- last_x, last_y - event.GetY() );
 			Refresh(false);
@@ -220,6 +256,7 @@ void ViewGCode::OnMouseEvent(wxMouseEvent& event)
 
 void ViewGCode::clear()
 {
+	wxCriticalSectionLocker enter(critsect);
 	track.clear();
 	camera.set_box(CoordsBox(Coords(0, 0, 0), Coords(1000, 1000, 300)));
 	camera.set_view(TOP);
@@ -238,13 +275,23 @@ void ViewGCode::setBox(const CoordsBox &bx)
 }
 
 void ViewGCode::setTrack(std::vector<TrackPoint> *ptr)
-{
+{	
+	
+	if (simulateCut)
+	{
+		wxCriticalSectionLocker enter(critsect);
+		simulateCut->Delete();
+		simulateCut = NULL;
+	}
+		
+
 	std::vector<TrackPointGL> &tr = track;
 	int i = 0;
 	tr.resize(ptr->size());
 	std::for_each(ptr->begin(), ptr->end(), // lambda
 		[&tr,&i](TrackPoint &p) {  
 		tr[i].isFast = p.type == fast ? true : false;
+		tr[i].line = p.line;
 		tr[i].position.x = p.pt.x;
 		tr[i].position.y = p.pt.y;
 		tr[i].position.z = p.pt.z;
@@ -271,9 +318,23 @@ void ViewGCode::draw_fps()
 //--------------------------------------------------------------------
 void ViewGCode::draw_track()
 {
+	wxCriticalSectionLocker enter(critsect);
 	glBegin(GL_LINES);
 	for (size_t i = 1; i < track.size(); ++i)
 	{
+		if ( simulateCut && i > simulateLastIndex)
+		{
+			// end last
+			if ( end_simulate_point.isFast )
+				glColor3f(1.0f, 0.0f, 0.0f );
+			else
+				glColor3f(1.0f, 1.0f, 1.0f);
+
+			glVertex3f(track[i - 1].position.x, track[i - 1].position.y, track[i - 1].position.z);
+			glVertex3f(end_simulate_point.position.x, end_simulate_point.position.y, end_simulate_point.position.z);
+			break;
+		}
+
 		if (track[i].isFast)
 		{
 			//continue;
@@ -286,14 +347,14 @@ void ViewGCode::draw_track()
 	}
 	glEnd();
 
-	glBegin(GL_POINTS);
-	glColor3f(0.7f, 0.2f, 0.9f);
-	glPointSize(3.0f);
-	for (size_t i = 0; i < track.size(); ++i)
-	{
-		glVertex3f(track[i].position.x, track[i].position.y, track[i].position.z);
-	}
-	glEnd();
+	//glBegin(GL_POINTS);
+	//glColor3f(0.7f, 0.2f, 0.9f);
+	//glPointSize(3.0f);
+	//for (size_t i = 0; i < track.size(); ++i)
+	//{
+	//	glVertex3f(track[i].position.x, track[i].position.y, track[i].position.z);
+	//}
+	//glEnd();
 }
 
 //--------------------------------------------------------------------
@@ -683,8 +744,217 @@ void ViewGCode::OnSetView(wxCommandEvent &event)
 	Refresh(false);
 }
 
+void ViewGCode::OnSetViewUpdate(wxUpdateUIEvent& event)
+{
+	event.Enable(true);
+}
+
+class SimulateThreadEvent : public wxThreadEvent
+{
+public:
+	SimulateThreadEvent(int tillIndex_, TrackPointGL &end_point_) :
+		tillindex(tillIndex_), end_point(end_point_), wxThreadEvent(wxEVT_THREAD, CUTTING_SIMULATE_UPDATE)
+	{
+	}
+	~SimulateThreadEvent() 
+	{ 
+	}
+	wxThreadEvent *Clone() { return new SimulateThreadEvent(tillindex, end_point); }
+	int get_index() { return tillindex; }
+	TrackPointGL &get_end_point() { return end_point;  }
+private:
+	int tillindex;
+	TrackPointGL end_point;
+};
+
+wxThread::ExitCode SimulateCutting::Entry()
+{
+
+	size_t tracksize;
+	TrackPointGL end_point;
+	std::vector<TrackPointGL> &track = view->getTrack();
+	tracksize = track.size();
+	if (tracksize < 2) // nothing to do
+	{
+		wxQueueEvent(view, new wxThreadEvent(wxEVT_THREAD, CUTTING_SIMULATE_COMPLETE));
+		return 0;
+	}
+	end_point = track[0];
+	
+	int tickdelay = view->get_tick_delay();
+	double distancefortick = view->get_tick_distance();
+	double segmentdist = 0;
+	double currentdistoftick = 0;
+	TrackPointGL second;
+	
+	size_t i = 1;
+	while( i < tracksize )
+	{
+		{
+			wxCriticalSectionLocker enter(view->critsect);
+			second = track[i];
+		}
+
+		if (TestDestroy())
+			break;
+		
+		segmentdist = glm::distance(end_point.position, second.position);
+		if (currentdistoftick + segmentdist < distancefortick) // add point to the step
+		{
+			//int segmentdelay = static_cast<int>(tickdelay * (segmentdist / distancefortick));
+			//currentdistoftick = 0;	
+			//end_point = second;
+			//SimulateThreadEvent event(i - 1, end_point);
+			//wxQueueEvent(view, event.Clone());
+			//if (segmentdelay > 1 )
+			//	wxMilliSleep(segmentdelay);
+			//++i;
 
 
+			currentdistoftick += segmentdist;
+			end_point = second;
+			++i;
+		}
+		else // we should fine next end_point on the same segment
+		{
+			double needdistanse = (currentdistoftick + segmentdist) - distancefortick;
+			float k = 1.f - float(needdistanse / segmentdist);
+
+			glm::vec3 move = k*(second.position - end_point.position);
+			end_point.position = end_point.position + move;
+			end_point.line = second.line;
+			currentdistoftick = 0;
+			wxMilliSleep(tickdelay);
+
+			SimulateThreadEvent event(i-1, end_point);
+			wxQueueEvent(view, event.Clone());
+		}
+	}
+	SimulateThreadEvent event(i - 1, second);
+	wxQueueEvent(view, event.Clone());
+
+	wxQueueEvent(view, new wxThreadEvent(wxEVT_THREAD, CUTTING_SIMULATE_COMPLETE));
+	return 0;
+}
+
+SimulateCutting::~SimulateCutting()
+{
+	wxCriticalSectionLocker enter(view->critsect);
+	view->simulateCut = NULL;
+}
+
+void ViewGCode::setSimulationSpeed(double mm_per_sec)
+{
+	// tickdelay will safe th coonstsnt 
+	distancefortick = mm_per_sec * (tickdelay / 1000.f);
+}
+
+void ViewGCode::processClosing()
+{
+	{
+		wxCriticalSectionLocker enter(critsect);
+		if (simulateCut)         // does the thread still exist?
+		{
+			simulateCut->Delete();
+		}
+	}       // exit from the critical section to give the thread
+			// the possibility to enter its destructor
+			// (which is guarded with m_pThreadCS critical section!)
+	while (1)
+	{
+		{ // was the ~MyThread() function executed?
+			wxCriticalSectionLocker enter(critsect);
+			if (!simulateCut ) break;
+		}
+		// wait for thread completion
+		wxThread::This()->Sleep(1);
+	}
+}
+
+void ViewGCode::OnSemulateStart(wxCommandEvent &event)
+{
+	if (simulateCut)
+	{
+		if ( !simulateCut->IsRunning() )
+			simulateCut->Resume();
+		return;
+	}
+
+	simulateLastIndex = 0;
+	cur_gcode_line = 0;
+	simulateCut = new SimulateCutting(this);
+	
+	if (simulateCut->Run() != wxTHREAD_NO_ERROR)
+	{
+		delete simulateCut;
+		simulateCut = NULL;
+	}
+
+	Refresh(false);
+
+}
+
+void ViewGCode::OnSimulateUpdate(wxThreadEvent& ev)
+{
+	static IntClientData dataCmd;
+	SimulateThreadEvent &evs = dynamic_cast<SimulateThreadEvent &>(ev);
+	simulateLastIndex = evs.get_index();
+	end_simulate_point = evs.get_end_point();
+
+	if (cur_gcode_line != end_simulate_point.line)
+	{
+		cur_gcode_line = end_simulate_point.line;
+		dataCmd.SetData(cur_gcode_line);
+		wxCommandEvent *ev = new wxCommandEvent(wxEVT_MENU, myID_SELECTLINE);
+		ev->SetClientObject(&dataCmd);
+		wxQueueEvent(appframe, ev);
+	}
+	Refresh(false);
+}
+
+
+void ViewGCode::OnCmdUpdateSimulateStart(wxUpdateUIEvent& event)
+{
+	if (track.empty() || (simulateCut && simulateCut->IsRunning()) )
+		event.Enable(false);
+	else
+		event.Enable(true);
+}
+
+void ViewGCode::OnCmdUpdateSimulateStop(wxUpdateUIEvent& event)
+{
+	if (simulateCut )
+		event.Enable(true);
+	else
+		event.Enable(false);
+}
+
+
+void ViewGCode::OnCmdUpdateSimulatePause(wxUpdateUIEvent& event)
+{
+	if (simulateCut && simulateCut->IsRunning())
+		event.Enable(true);
+	else
+		event.Enable(false);
+}
+
+
+void ViewGCode::OnSimulateCompletion(wxThreadEvent&)
+{
+	; // do somt
+}
+
+void ViewGCode::OnSemulatePause(wxCommandEvent &event)
+{
+	if (simulateCut && simulateCut->IsRunning())
+		simulateCut->Pause();
+}
+
+void ViewGCode::OnSemulateStop(wxCommandEvent &event)
+{
+	if ( simulateCut )
+		simulateCut->Delete();
+}
 
 //--------------------------------------------------------------------
 void Object3d::draw()

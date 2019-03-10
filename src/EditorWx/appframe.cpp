@@ -37,6 +37,10 @@
 #include "bitmaps/undo.xpm"
 #include "bitmaps/redo.xpm"
 
+#include "bitmaps/simulate.xpm"
+#include "bitmaps/pause.xpm"
+#include "bitmaps/stop.xpm"
+
 
 
 
@@ -193,8 +197,8 @@ wxBEGIN_EVENT_TABLE (AppFrame, wxFrame)
     EVT_MENU (wxID_UNDO,             AppFrame::OnEdit)
     EVT_MENU (wxID_FIND,             AppFrame::OnEdit)
     // And all our edit-related menu commands.
-    EVT_MENU_RANGE (myID_EDIT_FIRST, myID_EDIT_LAST,
-                                     AppFrame::OnEdit)
+    EVT_MENU_RANGE (myID_EDIT_FIRST, myID_EDIT_LAST, AppFrame::OnEdit)
+	
     // help
     EVT_MENU (wxID_ABOUT,            AppFrame::OnAbout)
   //  EVT_CONTEXT_MENU(                AppFrame::OnContextMenu)
@@ -210,7 +214,8 @@ wxBEGIN_EVENT_TABLE (AppFrame, wxFrame)
 	
 
 	
-	EVT_MENU_RANGE(myID_SETVIEWFIRST, myID_SETVIEWLAST, AppFrame::On3DView)
+	EVT_MENU_RANGE(myID_3D_FIRST, myID_3D_LAST, AppFrame::On3DView)
+	EVT_UPDATE_UI_RANGE(myID_3D_FIRST, myID_3D_LAST, AppFrame::On3DViewUpdate)
 	
 
 	EVT_THREAD(CHECK_GCODE_UPDATE, AppFrame::OnThreadUpdate)
@@ -266,7 +271,7 @@ AppFrame::AppFrame (const wxString &title)
 	//int gl_attrib[20] =	{ WX_GL_RGBA, WX_GL_MIN_RED, 1, WX_GL_MIN_GREEN, 1,
 		//				WX_GL_MIN_BLUE, 1, WX_GL_DEPTH_SIZE, 1, WX_GL_DOUBLEBUFFER, GL_NONE };
 
-	m_view = new ViewGCode(splitterV, wxID_ANY/*, gl_attrib*/ );
+	m_view = new ViewGCode(this, splitterV, wxID_ANY/*, gl_attrib*/ );
 	
 	logwnd = new LogWindow(splitter, this, wxID_ANY);
 	
@@ -279,6 +284,7 @@ AppFrame::AppFrame (const wxString &title)
 
 	m_edit->SetFocus();
 	m_view->initializeGL();
+	m_view->setSimulationSpeed(20);
 	//m_view->SetFocus();
 }
 
@@ -289,6 +295,7 @@ AppFrame::~AppFrame () {
 void AppFrame::OnClose (wxCloseEvent &event)
 {
 
+	m_view->processClosing();
 	{
 		wxCriticalSectionLocker enter(critsect);
 		if (checkThread)         // does the thread still exist?
@@ -449,11 +456,18 @@ void AppFrame::OnProperties (wxCommandEvent &WXUNUSED(event)) {
 }
 
 // edit events
-void AppFrame::OnEdit (wxCommandEvent &event) {
+void AppFrame::OnEdit (wxCommandEvent &event) 
+{
     if (m_edit) m_edit->GetEventHandler()->ProcessEvent (event);
 }
 
+
 void AppFrame::On3DView(wxCommandEvent &event) {
+	if (m_view) m_view->GetEventHandler()->ProcessEvent(event);
+}
+
+
+void AppFrame::On3DViewUpdate(wxUpdateUIEvent& event) {
 	if (m_view) m_view->GetEventHandler()->ProcessEvent(event);
 }
 
@@ -580,9 +594,11 @@ void AppFrame::CreateMenu ()
 	menu3D->Append(myID_SETVIEWFIRST+3,   _("&Right"));
 	menu3D->Append(myID_SETVIEWFIRST+4,   _("&Front"));
 	menu3D->Append(myID_SETVIEWFIRST+5,   _("&Back"));
-	
-	
-	 
+	menuView->AppendSeparator();
+	menu3D->Append(myID_SEMULATE_START, _("&Start Simulate"));
+	menu3D->Append(myID_SEMULATE_PAUSE,_("Sto&p Simulate"));
+	menu3D->Append(myID_SEMULATE_STOP, _("Pause"));
+		 
      // Help menu
     wxMenu *menuHelp = new wxMenu;
     menuHelp->Append (wxID_ABOUT, _("&About ..\tCtrl+D"));
@@ -616,6 +632,10 @@ wxToolBar *AppFrame::CreateToolBar()
 	toolBar->AddTool(ID_GCODE_CHECK, wxEmptyString, wxBitmap(check_xpm), _("Check"));
 	toolBar->AddTool(ID_GCODE_SIMULATE, wxEmptyString, wxBitmap(find_xpm), _("Simulate"));
 	toolBar->AddTool(ID_GCODE_CONVERTGCMC, wxEmptyString, wxBitmap(new_xpm), _("Convert"));
+	toolBar->AddSeparator();
+	toolBar->AddTool(myID_SEMULATE_START, wxEmptyString, wxBitmap(simulate_xpm), _("simulate"));
+	toolBar->AddTool(myID_SEMULATE_PAUSE, wxEmptyString, wxBitmap(pause_xpm), _("pause"));
+	toolBar->AddTool(myID_SEMULATE_STOP, wxEmptyString, wxBitmap(stop_xpm), _("stop"));
 	
 //	toolBar->Realize();
 	return toolBar;

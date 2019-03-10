@@ -25,6 +25,7 @@
 struct TrackPointGL
 {
 	bool isFast;
+	int line;
 	glm::vec3 position;
 };
 
@@ -100,11 +101,13 @@ struct Object3d
 };
 
 
+class SimulateCutting;
 
 class ViewGCode : public wxGLCanvas
 {
+	friend class SimulateCutting;
 public:
-	ViewGCode(wxWindow *parent,
+	ViewGCode(wxWindow *frame, wxWindow *parent,
 		wxWindowID id = wxID_ANY,
 		int *gl_attrib = NULL);
 
@@ -114,6 +117,8 @@ public:
 	void setTrack(std::vector<TrackPoint> *ptr);	
 	void setBox(const CoordsBox &bx);
 	void clear();
+	void processClosing();
+	void setSimulationSpeed(double mm_per_sec);
 	
 	void OnPaint(wxPaintEvent& event);
 	void OnSize(wxSizeEvent& event);
@@ -122,6 +127,17 @@ public:
 	void initializeGL();
 //command
 	void OnSetView(wxCommandEvent &event);
+	void OnSemulateStart(wxCommandEvent &event);
+	void OnSemulatePause(wxCommandEvent &event);
+	void OnSemulateStop(wxCommandEvent &event);
+	void OnSimulateUpdate(wxThreadEvent&);
+	void OnSimulateCompletion(wxThreadEvent&);
+	void OnSetViewUpdate(wxUpdateUIEvent& event);
+	void OnCmdUpdateSimulateStart(wxUpdateUIEvent& event);
+	void OnCmdUpdateSimulateStop(wxUpdateUIEvent& event);
+	void OnCmdUpdateSimulatePause(wxUpdateUIEvent& event);
+
+
 
 private:
 	void resizeGL(int nWidth, int nHeight);
@@ -134,18 +150,18 @@ private:
 	void draw_fps();
 	void draw_axis();
 	void update_tool_coords(float x, float y, float z);
-
+	std::vector<TrackPointGL> &getTrack() { return track; }
+	int get_tick_delay() { return tickdelay; }
+	double get_tick_distance() { return distancefortick; }
+	//int tickdelay = 50;
+	//double distancefortick = 5.f;
+	
 private:
+	wxWindow *appframe;
 	wxGLContext* m_glRC;
 	std::vector<TrackPointGL> track;
 	std::vector<glm::vec3> realTrack; //пройденна¤ фрезой траектори¤
-	
-	//int    m_windowWidth;  //размеры окна
-	//int    m_windowHeight;
 
-	//float  m_zoneWidth;  //размеры зоны станка
-	//float  m_zoneHeight;
-	//float  m_zoneTop;
 	bool   m_showGrid;   //показывать ли сетку масштаба
 	float  m_gridStep;   //размер ¤чейки сетки
 	
@@ -157,6 +173,15 @@ private:
 
     int _drawCalls; //вызовов отрисовки за последнюю секунду
     int _fps;
+	// sinulation stuff
+	SimulateCutting *simulateCut;
+	size_t simulateLastIndex;
+	int cur_gcode_line;
+	TrackPointGL end_simulate_point;
+	wxCriticalSection critsect;
+	int tickdelay;
+	double distancefortick;
+	
 
 	wxDECLARE_NO_COPY_CLASS(ViewGCode);
 	wxDECLARE_EVENT_TABLE();
