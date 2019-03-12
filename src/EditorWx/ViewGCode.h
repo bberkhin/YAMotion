@@ -149,10 +149,13 @@ private:
 	void draw_border();
 	void draw_fps();
 	void draw_axis();
+	void draw_axis_letters();
 	void update_tool_coords(float x, float y, float z);
+	void print_string(const glm::vec4 &color, int x, int y, char *s, int len);
 	std::vector<TrackPointGL> &getTrack() { return track; }
 	int get_tick_delay() { return tickdelay; }
 	double get_tick_distance() { return distancefortick; }
+	
 	//int tickdelay = 50;
 	//double distancefortick = 5.f;
 	
@@ -181,6 +184,7 @@ private:
 	wxCriticalSection critsect;
 	int tickdelay;
 	double distancefortick;
+	GLuint fontOffset;
 	
 
 	wxDECLARE_NO_COPY_CLASS(ViewGCode);
