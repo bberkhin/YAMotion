@@ -51,6 +51,14 @@ wxBEGIN_EVENT_TABLE(Edit, wxStyledTextCtrl)
 	EVT_MENU(myID_REPLACENEXT, Edit::OnReplaceNext)
 	EVT_MENU(myID_BRACEMATCH, Edit::OnBraceMatch)
 	EVT_MENU(myID_GOTO, Edit::OnGoto)
+	
+	EVT_FIND(wxID_ANY, Edit::OnFindDialog)
+	EVT_FIND_NEXT(wxID_ANY, Edit::OnFindDialog)
+	EVT_FIND_REPLACE(wxID_ANY, Edit::OnFindDialog)
+	EVT_FIND_REPLACE_ALL(wxID_ANY, Edit::OnFindDialog)
+	EVT_FIND_CLOSE(wxID_ANY, Edit::OnFindDialog)
+
+
 	// view
 	EVT_MENU_RANGE(myID_HIGHLIGHTFIRST, myID_HIGHLIGHTLAST,
 	Edit::OnHighlightLang)
@@ -92,12 +100,11 @@ wxBEGIN_EVENT_TABLE(Edit, wxStyledTextCtrl)
 	//EVT_KILL_FOCUS(Edit::OnKillFocus)
 
 	EVT_KEY_DOWN( Edit::OnKeyDown )
+	EVT_LEAVE_WINDOW(Edit::OnMouseLeave)
+
 wxEND_EVENT_TABLE()
 
-Edit::Edit (wxWindow *parent, wxWindowID id,
-            const wxPoint &pos,
-            const wxSize &size,
-            long style)
+Edit::Edit (wxWindow *parent, wxWindowID id,  const wxPoint &pos, const wxSize &size, long style)
     : wxStyledTextCtrl (parent, id, pos, size, style) 
 {
 
@@ -109,6 +116,8 @@ Edit::Edit (wxWindow *parent, wxWindowID id,
 
     // initialize language
     m_language = NULL;
+	dlg_find = NULL;
+	find_data.SetFlags(wxFR_DOWN);
 
     // default font for all styles
     SetViewEOL (g_CommonPrefs.displayEOLEnable);
@@ -191,6 +200,13 @@ void Edit::OnEditClear (wxCommandEvent &WXUNUSED(event)) {
     Clear ();
 }
 
+void Edit::OnMouseLeave(wxMouseEvent &event)
+{
+	if (CallTipActive())
+		CallTipCancel();
+	event.Skip();
+}
+
 void Edit::OnKeyDown (wxKeyEvent &event)
 {
     if (CallTipActive())
@@ -213,32 +229,6 @@ void Edit::OnEditCopy (wxCommandEvent &WXUNUSED(event)) {
 void Edit::OnEditPaste (wxCommandEvent &WXUNUSED(event)) {
     if (!CanPaste()) return;
     Paste ();
-}
-
-void Edit::OnFind (wxCommandEvent &WXUNUSED(event)) {
-}
-
-void Edit::OnFindNext (wxCommandEvent &WXUNUSED(event)) {
-}
-
-void Edit::OnReplace (wxCommandEvent &WXUNUSED(event)) {
-}
-
-void Edit::OnReplaceNext (wxCommandEvent &WXUNUSED(event)) {
-}
-
-void Edit::OnBraceMatch (wxCommandEvent &WXUNUSED(event)) {
-    int min = GetCurrentPos ();
-    int max = BraceMatch (min);
-    if (max > (min+1)) {
-        BraceHighlight (min+1, max);
-        SetSelection (min+1, max);
-    }else{
-        BraceBadLight (min);
-    }
-}
-
-void Edit::OnGoto (wxCommandEvent &WXUNUSED(event)) {
 }
 
 void Edit::OnEditIndentInc (wxCommandEvent &WXUNUSED(event)) {
@@ -839,4 +829,129 @@ bool Edit::DoLoadFile(const wxString& filename, int WXUNUSED(fileType))
 #endif // !wxUSE_FFILE && !wxUSE_FILE
 
 	return false;
+}
+
+
+
+void Edit::OnFindNext(wxCommandEvent &WXUNUSED(event)) {
+}
+
+
+void Edit::OnReplaceNext(wxCommandEvent &WXUNUSED(event)) {
+}
+
+
+void Edit::OnReplace(wxCommandEvent& WXUNUSED(event))
+{
+	if (dlg_find)
+	{
+		wxDELETE(dlg_find);
+	}
+	else
+	{
+		dlg_find = new wxFindReplaceDialog(	this,&find_data,_("Find and replace"),	wxFR_REPLACEDIALOG);
+
+		dlg_find->Show(true);
+	}
+}
+
+void Edit::OnFind(wxCommandEvent& WXUNUSED(event))
+{
+	if (dlg_find)
+	{
+		wxDELETE(dlg_find);
+	}
+	else
+	{
+		dlg_find = new wxFindReplaceDialog(	this,&find_data, _("Find"),wxFR_NOWHOLEWORD );
+		dlg_find->Show(true);
+	}
+}
+
+void Edit::OnFindDialog(wxFindDialogEvent& event)
+{
+	wxEventType type = event.GetEventType();
+	if (type == wxEVT_FIND || type == wxEVT_FIND_NEXT)
+	{
+		//flags & wxFR_DOWN wxFR_WHOLEWORD & wxFR_MATCHCASE
+		DoFind(type, event.GetFlags(), event.GetFindString() );		
+	}
+	else if (type == wxEVT_FIND_REPLACE ||
+		type == wxEVT_FIND_REPLACE_ALL)
+	{
+		DoReplace(type, event.GetFlags(), event.GetFindString(), event.GetReplaceString() );		
+	}
+	else if (type == wxEVT_FIND_CLOSE)
+	{
+		wxFindReplaceDialog *dlg = event.GetDialog();
+		if (dlg == dlg_find)
+			dlg_find = NULL;
+		dlg->Destroy();
+	}
+	else
+	{
+		wxLogError("Unknown find dialog event!");
+	}
+}
+
+
+
+
+void Edit::OnBraceMatch(wxCommandEvent &WXUNUSED(event)) {
+	int min = GetCurrentPos();
+	int max = BraceMatch(min);
+	if (max > (min + 1)) {
+		BraceHighlight(min + 1, max);
+		SetSelection(min + 1, max);
+	}
+	else {
+		BraceBadLight(min);
+	}
+}
+
+void Edit::OnGoto(wxCommandEvent &WXUNUSED(event)) {
+}
+
+
+void Edit::DoFind(wxEventType type, int flag, const wxString &strfind)
+{
+	int pos = GetCurrentPos();
+	int	maxPos = GetTextLength();
+	
+	//flag = find_data.GetFlags();
+	int flag_cts = 0;
+	//if (flag & wxFR_DOWN) flag_cts |= wxSTC_FIND_MATCHCASE;
+	if (flag & wxFR_WHOLEWORD) flag_cts |= wxSTC_FIND_WHOLEWORD;
+	if (flag & wxFR_MATCHCASE) flag_cts |= wxSTC_FIND_MATCHCASE;
+
+	if (!(flag & wxFR_DOWN))
+	{
+		pos -= strfind.Length();
+		if (pos < 0) pos = 0;
+	}
+	SetSelection(pos, pos);
+	
+	SearchAnchor();
+	if (flag & wxFR_DOWN)
+		pos = SearchNext(flag, strfind);
+	else
+		pos = SearchPrev(flag, strfind);
+	//pos = FindText(pos, maxPos, find_data.GetFindString(), flag);
+	if (pos != wxSTC_INVALID_POSITION)
+	{
+		SetSelection(pos, pos + strfind.Length());
+		if (flag & wxFR_DOWN)
+			;//	SetCurrentPos(pos + strfind.Length());
+		else
+			;// SetCurrentPos(pos);
+		EnsureCaretVisible();
+	}
+	else
+	{
+		wxMessageBox(wxString::Format(_("\"%s\" Not found"), strfind), _("Find result"), wxOK | wxICON_INFORMATION, this);
+	}
+}
+
+void Edit::DoReplace(wxEventType type, int flag, const wxString &strfind, const wxString &strReplace)
+{
 }

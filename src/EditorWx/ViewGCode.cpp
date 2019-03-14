@@ -22,6 +22,9 @@ void make_axis(const glm::vec4 &color, const glm::vec3 &rot, float len, Object3d
 
 GLubyte space[] =
 { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
+//46
+GLubyte dotsym[] =
+{ 0x00, 0x00, 0x18, 0x18, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
 
 GLubyte letters[][13] = {
 {0x00, 0x00, 0xc3, 0xc3, 0xc3, 0xc3, 0xff, 0xc3, 0xc3, 0xc3, 0x66, 0x3c, 0x18},
@@ -124,8 +127,6 @@ ViewGCode::ViewGCode(wxWindow *frame, wxWindow *parent,wxWindowID id, int* gl_at
 	make_axis(glm::vec4(1, 0, 0, 1), glm::vec3(0, 1, 0), 1.0f, axisX);
 	make_axis(glm::vec4(0, 1, 0, 1), glm::vec3(-1, 0, 0), 1.0f, axisY);
 	make_axis(glm::vec4(0, 0, 1, 1), glm::vec3(0, 0, 1), 1.0f, axisZ);
-	_drawCalls = 0;
-	_fps = 0;
 	
 }
 
@@ -142,9 +143,9 @@ void ViewGCode::initializeGL()
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE);
 
+	// prepare font
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-	// makeRasters font
-
+	
 	GLuint i, j;
 	fontOffset = glGenLists(128);
 	for (i = 0, j = 'A'; i < 26; i++, j++) 
@@ -155,6 +156,14 @@ void ViewGCode::initializeGL()
 	}
 	glNewList(fontOffset + ' ', GL_COMPILE);
 	glBitmap(8, 13, 0.0, 2.0, 10.0, 0.0, space);
+	glEndList();
+	
+	glNewList(fontOffset + '.', GL_COMPILE);
+	glBitmap(8, 13, 0.0, 2.0, 10.0, 0.0, dotsym);
+	glEndList();
+	
+	glNewList(fontOffset + ',', GL_COMPILE);
+	glBitmap(8, 13, 0.0, 2.0, 10.0, 0.0, dotsym);
 	glEndList();
 
 	for (i = 0, j = '0'; i < 10; i++, j++)
@@ -194,7 +203,7 @@ void ViewGCode::OnPaint(wxPaintEvent& WXUNUSED(event))
 	glLoadIdentity();
 
 	glEnable(GL_DEPTH_TEST);
-	//draw_bounds();
+	draw_bounds();
 	
 	//draw_3d_grid();
 	
@@ -204,10 +213,7 @@ void ViewGCode::OnPaint(wxPaintEvent& WXUNUSED(event))
 
 	draw_axis();
 
-	
-
 	glDisable(GL_DEPTH_TEST);
-
 
 	camera.screen_matrix();
 
@@ -215,9 +221,7 @@ void ViewGCode::OnPaint(wxPaintEvent& WXUNUSED(event))
 		draw_grid();
 
 	draw_axis_letters();
-
-	//draw_fps();
-	
+		
 	if ( HasFocus() )
 		draw_border();
 	
@@ -289,6 +293,7 @@ void ViewGCode::OnMouseEvent(wxMouseEvent& event)
 		if (!dragging)
 		{
 			dragging = event.RightIsDown() ? 1 : 2;
+			CaptureMouse();
 		}
 		else if (dragging == 1)//event.RightIsDown())
 		{
@@ -303,8 +308,9 @@ void ViewGCode::OnMouseEvent(wxMouseEvent& event)
 		last_x = event.GetX();
 		last_y = event.GetY();
 	}
-	else
+	else if ( dragging )
 	{
+		ReleaseMouse();
 		dragging = 0;
 	}
 
@@ -367,22 +373,6 @@ void ViewGCode::setTrack(std::vector<TrackPoint> *ptr)
 		++i; } );
 }
 
-
-//--------------------------------------------------------------------
-void ViewGCode::draw_fps()
-{
-	//++_drawCalls;
-	//if (time.elapsed() > 1000)
-	//{
-	//	_fps = _drawCalls;
-	//	_drawCalls = 0;
-	//	time.restart();
-	//}
-
-	//QString text = QString::number(_fps);
-	//QFont font("Arial", 15, QFont::Bold);
-//	renderText(5, 20, text, font);
-}
 
 //--------------------------------------------------------------------
 void ViewGCode::draw_track()
@@ -707,16 +697,16 @@ void ViewGCode::draw_grid()
 	float offsetY = -pos0.y + floor(pos0.y / quadSize) * quadSize;
 
 	char s[128];
-	sprintf(s, "HELLO WORD 1234579");
-	print_string(glm::vec4(1, 1, 0, 1), 0, 0, s, strlen(s));
+
 
 	glBegin(GL_LINES);
 	float quadSizeS = quadSize / 10;
 
-	if (quadSizeS >= 10)
+	if (quadSizeS >= 30)
 	{
-		//мелкая сетка
+	//мелкая сетка
 		float alpha = 0.1f;// +quadSize / maxSize * 0.7;
+		glColor4f(0.8f, 0.5f, 0.0f, alpha);
 		glColor4f(0.8f, 0.5f, 0.0f, alpha );
 		for (float x = wMin + offsetX; x < wMax + quadSize; x += quadSizeS)
 		{
@@ -739,6 +729,7 @@ void ViewGCode::draw_grid()
 		{
 			glVertex2f(x, hMin);
 			glVertex2f(x, hMax);
+			
 		}
 
 		for (float y = hMin + offsetY; y < hMax + quadSize; y += quadSize)
@@ -747,8 +738,29 @@ void ViewGCode::draw_grid()
 			glVertex2f(wMax, y);
 		}
 	}
-
 	glEnd();
+
+	// draw scale
+	int n;
+	if (quadSize >= 100)
+	{
+		glm::vec4 clr(1, 1, 0, 1);
+		int offset = 2;
+		for (float x = wMin + offsetX; x < wMax + quadSize; x += quadSize)
+		{
+			sprintf(s, "%.2f", x );
+			n = strlen(s);
+			print_string(clr, x - (n >> 1) * 8, hMin + offset, s, n );
+
+		}
+
+		for (float y = hMin + offsetY; y < hMax + quadSize; y += quadSize)
+		{
+			sprintf(s, "%.2f", y);
+			n = strlen(s);
+			print_string(clr, wMin + offset, y-6, s, n);
+		}
+	}
 }
 
 
@@ -1220,6 +1232,8 @@ void Camera::reset_matrix(float scale_add_)
 
 void Camera::recalc_matrix()
 {
+//	wxLogMessage("recalc_matrix: look: %f %f %f", look.x, look.y, look.z);
+
 	if (box.isEmpty())
 		return;
 
@@ -1277,14 +1291,20 @@ void Camera::screen_matrix()
 
 //--------------------------------------------------------------------
 void Camera::rotate_cursor(int xc, int yc, int xprev, int yprev)
-//(float x, float y, float deltaX, float deltaY)
 {
-// some magic
+	// some magic
+//	wxLogMessage("befor: x=%d y=%d xprev=%d yprev=%d look: %f %f %f", xc, yc, xprev,yprev, look.x, look.y, look.z);
 	float scl = 5.1f;
 	float x = (float(xprev) / width_vp - 0.5) * 2;
 	float y = (1 - float(yprev) / height_vp - 0.5) * 2;
 	float newX = (float(xc) / width_vp - 0.5) * 2;
 	float newY = (1 - float(yc) / height_vp - 0.5) * 2;
+	if (newX == x || newY == y)
+	{
+		// do nothing
+		//wxLogMessage("(newX == x || newY == y) == true");
+		return;
+	}
 	float deltaX = scl * (newX - x);
 	float deltaY = scl * (newY - y);
 	
@@ -1306,17 +1326,14 @@ void Camera::rotate_cursor(int xc, int yc, int xprev, int yprev)
 	look = glm::vec3(glm::vec4(look, 0) * rotation);
 	//position = glm::vec3(glm::vec4(position,0) * rotation);
 	top = glm::vec3(glm::vec4(top, 0) * rotation);
+	//wxLogMessage("after: x=%d y=%d xprev=%d yprev=%d look: %f %f %f", xc, yc, xprev, yprev, look.x, look.y, look.z);
+	
 }
 
 //--------------------------------------------------------------------
 void Camera::set_view(View view)
 {
 	glm::vec3 x(1, 0, 0), y(0, 1, 0), z(0, 0, 1);
-
-	//position(0, 0, 0),  //находится сверху
-	//look(0, 0, -1), //смотрит вниз
-	//top(0, 1, 0)  //смотрит ровно
-
 	switch (view)
 	{
 		case View::TOP: look = -z; top = y; break;

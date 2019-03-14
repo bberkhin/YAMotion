@@ -147,7 +147,6 @@ private:
 	void draw_track();
 	void draw_real_track();
 	void draw_border();
-	void draw_fps();
 	void draw_axis();
 	void draw_axis_letters();
 	void update_tool_coords(float x, float y, float z);
@@ -174,8 +173,6 @@ private:
 	Object3d axisY;
 	Object3d axisZ;
 
-    int _drawCalls; //вызовов отрисовки за последнюю секунду
-    int _fps;
 	// sinulation stuff
 	SimulateCutting *simulateCut;
 	size_t simulateLastIndex;

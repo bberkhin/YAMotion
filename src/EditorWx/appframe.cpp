@@ -286,6 +286,12 @@ AppFrame::AppFrame (const wxString &title)
 	m_view->initializeGL();
 	m_view->setSimulationSpeed(20);
 	//m_view->SetFocus();
+
+
+		//Open a log window, don't show it though
+	wxLogWindow *m_LogWin = new wxLogWindow(this, "Pyramid log window", true, false);
+	wxLog::SetActiveTarget(m_LogWin);
+	
 }
 
 AppFrame::~AppFrame () {
@@ -534,14 +540,10 @@ void AppFrame::CreateMenu ()
     menuEdit->Append (wxID_PASTE, _("&Paste\tCtrl+V"));
     menuEdit->Append (wxID_CLEAR, _("&Delete\tDel"));
     menuEdit->AppendSeparator();
-    menuEdit->Append (wxID_FIND, _("&Find\tCtrl+F"));
-    menuEdit->Enable (wxID_FIND, false);
+    menuEdit->Append (wxID_FIND, _("&Find\tCtrl+F"));    
     menuEdit->Append (myID_FINDNEXT, _("Find &next\tF3"));
-    menuEdit->Enable (myID_FINDNEXT, false);
     menuEdit->Append (myID_REPLACE, _("&Replace\tCtrl+H"));
-    menuEdit->Enable (myID_REPLACE, false);
     menuEdit->Append (myID_REPLACENEXT, _("Replace &again\tShift+F4"));
-    menuEdit->Enable (myID_REPLACENEXT, false);
     menuEdit->AppendSeparator();
     menuEdit->Append (wxID_SELECTALL, _("&Select all\tCtrl+A"));
     menuEdit->Append (myID_SELECTLINE, _("Select &line\tCtrl+L"));

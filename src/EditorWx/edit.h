@@ -3,6 +3,7 @@
 #define _EDIT_H_
 
 #include <memory>
+#include <wx/fdrepdlg.h>
 
 //----------------------------------------------------------------------------
 // information
@@ -65,6 +66,8 @@ public:
     void OnReplaceNext (wxCommandEvent &event);
     void OnBraceMatch (wxCommandEvent &event);
     void OnGoto (wxCommandEvent &event);
+	void OnFindDialog(wxFindDialogEvent& event);
+
     void OnEditIndentInc (wxCommandEvent &event);
     void OnEditIndentRed (wxCommandEvent &event);
     void OnEditSelectAll (wxCommandEvent &event);
@@ -101,6 +104,7 @@ public:
 	void OnDwellEnd(wxStyledTextEvent &event);
     void OnKeyDown(wxKeyEvent &event);
 	void OnKillFocus(wxFocusEvent &event);
+	void OnMouseLeave(wxMouseEvent &event);
 
     //! language/lexer
     wxString DeterminePrefs (const wxString &filename);
@@ -118,6 +122,10 @@ public:
     void SetFilename (const wxString &filename) {m_filename = filename;}
 	void PasteFile(std::wstring fname, bool toend = false);
 	bool DoLoadFile(const wxString& filename, int WXUNUSED(fileType));
+
+	//find
+	void DoFind(wxEventType type, int flag, const wxString &strfind);
+	void DoReplace(wxEventType type, int flag, const wxString &strfind, const wxString &strReplace);
 private:
     // file
     wxString m_filename;
@@ -132,7 +140,11 @@ private:
     int m_FoldingMargin;
     int m_DividerID;
 	std::shared_ptr<CodeDescription> code_description;
+	//find
+	wxFindReplaceDialog *dlg_find;
+	wxFindReplaceData find_data;
 
+	
     wxDECLARE_EVENT_TABLE();
 };
 
