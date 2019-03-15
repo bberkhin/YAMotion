@@ -897,7 +897,8 @@ void Edit::OnFindDialog(wxFindDialogEvent& event)
 
 
 
-void Edit::OnBraceMatch(wxCommandEvent &WXUNUSED(event)) {
+void Edit::OnBraceMatch(wxCommandEvent &WXUNUSED(event)) 
+{
 	int min = GetCurrentPos();
 	int max = BraceMatch(min);
 	if (max > (min + 1)) {
@@ -909,18 +910,16 @@ void Edit::OnBraceMatch(wxCommandEvent &WXUNUSED(event)) {
 	}
 }
 
-void Edit::OnGoto(wxCommandEvent &WXUNUSED(event)) {
+void Edit::OnGoto(wxCommandEvent &WXUNUSED(event)) 
+{
 }
 
 
 void Edit::DoFind(wxEventType type, int flag, const wxString &strfind)
 {
-	int pos = GetCurrentPos();
-	int	maxPos = GetTextLength();
+	int pos = GetCurrentPos();	
 	
-	//flag = find_data.GetFlags();
 	int flag_cts = 0;
-	//if (flag & wxFR_DOWN) flag_cts |= wxSTC_FIND_MATCHCASE;
 	if (flag & wxFR_WHOLEWORD) flag_cts |= wxSTC_FIND_WHOLEWORD;
 	if (flag & wxFR_MATCHCASE) flag_cts |= wxSTC_FIND_MATCHCASE;
 
@@ -930,20 +929,14 @@ void Edit::DoFind(wxEventType type, int flag, const wxString &strfind)
 		if (pos < 0) pos = 0;
 	}
 	SetSelection(pos, pos);
-	
 	SearchAnchor();
 	if (flag & wxFR_DOWN)
 		pos = SearchNext(flag, strfind);
 	else
 		pos = SearchPrev(flag, strfind);
-	//pos = FindText(pos, maxPos, find_data.GetFindString(), flag);
 	if (pos != wxSTC_INVALID_POSITION)
 	{
 		SetSelection(pos, pos + strfind.Length());
-		if (flag & wxFR_DOWN)
-			;//	SetCurrentPos(pos + strfind.Length());
-		else
-			;// SetCurrentPos(pos);
 		EnsureCaretVisible();
 	}
 	else
@@ -954,4 +947,55 @@ void Edit::DoFind(wxEventType type, int flag, const wxString &strfind)
 
 void Edit::DoReplace(wxEventType type, int flag, const wxString &strfind, const wxString &strReplace)
 {
+	int pos = GetCurrentPos();
+	int flag_cts = 0;
+	if (flag & wxFR_WHOLEWORD) flag_cts |= wxSTC_FIND_WHOLEWORD;
+	if (flag & wxFR_MATCHCASE) flag_cts |= wxSTC_FIND_MATCHCASE;
+	bool done = false;
+
+	if (type == wxEVT_FIND_REPLACE_ALL)
+		pos = 0;
+
+	do
+	{	
+		if (GetSelectionEnd() == pos)
+			pos -= strfind.Length();
+
+		if (pos < 0) 
+			pos = 0;
+
+		SetSelection(pos, pos);
+		SearchAnchor();
+		pos = SearchNext(flag, strfind);
+		if (pos != wxSTC_INVALID_POSITION)
+		{
+			SetTargetRange(pos, pos + strfind.Length());
+			ReplaceTarget(strReplace);
+			if (type != wxEVT_FIND_REPLACE_ALL) // search the next
+			{
+				//SetSelection(pos, pos);
+
+				SetSelection(pos, strReplace.Length() );
+				SearchAnchor();
+				pos = SearchNext(flag, strfind);
+				if (pos != wxSTC_INVALID_POSITION)
+				{
+					SetSelection(pos, pos + strfind.Length());
+					EnsureCaretVisible();
+				}
+			}		
+			done = true;
+		}
+	} while ((type == wxEVT_FIND_REPLACE_ALL) && (pos != wxSTC_INVALID_POSITION));
+	
+	if ( !done )
+	{
+		wxMessageBox(wxString::Format(_("\"%s\" Not found"), strfind), _("Find result"), wxOK | wxICON_INFORMATION, this);
+	}
+	else if (type == wxEVT_FIND_REPLACE_ALL)
+	{
+		SetEmptySelection(0);
+	}
+
+	
 }

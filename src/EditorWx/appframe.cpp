@@ -287,10 +287,11 @@ AppFrame::AppFrame (const wxString &title)
 	m_view->setSimulationSpeed(20);
 	//m_view->SetFocus();
 
-
+#ifdef DOWX_LOGGING
 		//Open a log window, don't show it though
-	wxLogWindow *m_LogWin = new wxLogWindow(this, "Pyramid log window", true, false);
+	wxLogWindow *m_LogWin = new wxLogWindow(this, "YAMotion Gcode Editor", true, false);
 	wxLog::SetActiveTarget(m_LogWin);
+#endif
 	
 }
 
@@ -434,7 +435,8 @@ void AppFrame::OnFileClose (wxCommandEvent &event)
 }
 
 // properties event handlers
-void AppFrame::OnProperties (wxCommandEvent &WXUNUSED(event)) {
+void AppFrame::OnProperties (wxCommandEvent &WXUNUSED(event)) 
+{
     if (!m_edit) return;
     //EditProperties dlg(m_edit, 0);
 	Macroses msc;
@@ -876,22 +878,8 @@ bool AppFrame::CheckFileExist(const wchar_t *fname)
 // Source format:
 // FILENAME:LINE:CHAR: ERRORTYPE: MSG\n
 // ERRORTYPE = { "error", "internal error", "fatal","warning"  }
-//or
+//or just
 // MSG \n
-//
-//static size_t find_colon(const wchar_t *src, size_t start)
-//{
-//	bool skeep = false;
-//	for (const wchar_t *c = src + start; *c != 0 && *c != '\n'; c++, start++)
-//	{
-//		if (*c == '"')
-//			skeep = !skeep;
-//		else if (*c == ':' && !skeep)
-//			return start;
-//
-//	}
-//	return std::string::npos;
-//}
 
 void AppFrame::AppendGcmcError(wxString &src)
 {
