@@ -4,6 +4,9 @@
 
 #include "appdefs.h"
 #include "appframe.h"
+#include "configdata.h"
+
+
 
 
 #include "..\..\src\stc\scintilla\include\ILexer.h"
@@ -56,7 +59,8 @@ wxEND_EVENT_TABLE()
 #define LINK_LEXER(lexer) extern LexerModule lexer; Catalogue::AddLexerModule(&lexer);
 
 
-bool App::OnInit() {
+bool App::OnInit() 
+{
 
 	wxInitAllImageHandlers();
 
@@ -68,6 +72,10 @@ bool App::OnInit() {
 	LINK_LEXER(lmGcode)
 	LINK_LEXER(lmGcmc)
 		// create application frame
+
+		
+	wxConfigBase::Set( new ConfigData() ); //wxConfig
+
 	m_frame = new AppFrame(APP_NAME);
 
 	// open application frame
@@ -79,5 +87,8 @@ bool App::OnInit() {
 
 int App::OnExit()
 {
+	wxConfigBase *config = wxConfigBase::Set(NULL);
+	if ( config )
+		delete config;
 	return 0;
 }

@@ -24,6 +24,7 @@
 #include "macrosparamdlg.h"
 #include "standartpaths.h"
 #include "logwindow.h"
+#include "configdata.h"
 
 //Bitmaps
 #include "bitmaps/new.xpm"
@@ -247,6 +248,11 @@ AppFrame::AppFrame (const wxString &title)
     SetTitle (APP_NAME);
     SetBackgroundColour ("WHITE");
 
+
+	ConfigData *config;
+	if ((config = dynamic_cast<ConfigData *>(wxConfigBase::Get())) != NULL)
+		config->ReadFileNames();
+
     // create menu
     m_menuBar = new wxMenuBar;
     CreateMenu ();
@@ -286,6 +292,10 @@ AppFrame::AppFrame (const wxString &title)
 	m_view->initializeGL();
 	m_view->setSimulationSpeed(20);
 	//m_view->SetFocus();
+
+
+	
+
 
 #ifdef DOWX_LOGGING
 		//Open a log window, don't show it though
@@ -333,6 +343,12 @@ void AppFrame::OnClose (wxCloseEvent &event)
  //       if (event.CanVeto()) event.Veto (true);
  //       return;
  //   }
+
+
+	ConfigData *config;
+	if ((config = dynamic_cast<ConfigData *>(wxConfigBase::Get())) != NULL)
+		config->WriteFileNames();
+
     Destroy();
 }
 
@@ -370,6 +386,9 @@ bool AppFrame::DoFileSave(bool askToSave, bool bSaveAs )
 			return false;
 		filename = dlg.GetPath();
 		m_edit->SaveFile(filename);
+		ConfigData *config;
+		if ((config = dynamic_cast<ConfigData *>(wxConfigBase::Get())) != NULL)
+			config->AddFileNameToSaveList(filename);
 	}
 	else //  fname exist && not save as  - just save
 	{
@@ -516,7 +535,20 @@ void AppFrame::CreateMenu ()
     menuFile->Append (wxID_PRINT_SETUP, _("Print Set&up .."));
     menuFile->Append (wxID_PREVIEW, _("Print Pre&view\tCtrl+Shift+P"));
     menuFile->Append (wxID_PRINT, _("&Print ..\tCtrl+P"));
-    menuFile->AppendSeparator();
+	menuFile->AppendSeparator();
+
+	wxMenu *menuLastFiles = new wxMenu;
+	ConfigData *config = dynamic_cast<ConfigData *>(wxConfigBase::Get());
+	if (config)
+	{
+		const FileNamesList &files = config->GetFiles();
+		std::for_each( files.begin(), files.end(), 
+			[menuLastFiles](const wxString &p) {
+			menuLastFiles->Append(wxID_OPEN, p); });
+	}
+	menuFile->Append(myID_HIGHLIGHTLANG, _("&Last Files"), menuLastFiles);
+
+	menuFile->AppendSeparator();
     menuFile->Append (wxID_EXIT, _("&Quit\tCtrl+Q"));
 
 
@@ -651,9 +683,10 @@ void AppFrame::FileOpen (wxString fname)
     m_edit->LoadFile (fname);
     m_edit->SelectNone();
 	FileChanged();
+	ConfigData *config;
+	if ((config = dynamic_cast<ConfigData *>(wxConfigBase::Get())) != NULL)
+		config->AddFileNameToSaveList(fname);
 }
-
-
 
 
 void AppFrame::UpdateTitle()

@@ -5,6 +5,8 @@
 #include "defsext.h"     // additional definitions
 #include "edit.h"        // edit module
 #include "codedescription.h"
+#include "configdata.h"
+
 
 #if wxUSE_FFILE
 #include "wx/ffile.h"
@@ -118,6 +120,9 @@ Edit::Edit (wxWindow *parent, wxWindowID id,  const wxPoint &pos, const wxSize &
     m_language = NULL;
 	dlg_find = NULL;
 	find_data.SetFlags(wxFR_DOWN);
+	ConfigData *config = dynamic_cast<ConfigData *>(wxConfigBase::Get());
+	if (config)
+		config->ReadFindAndReplase(&find_data);
 
     // default font for all styles
     SetViewEOL (g_CommonPrefs.displayEOLEnable);
@@ -172,6 +177,9 @@ Edit::Edit (wxWindow *parent, wxWindowID id,  const wxPoint &pos, const wxSize &
 
 Edit::~Edit () 
 {
+	ConfigData *config = dynamic_cast<ConfigData *>(wxConfigBase::Get());
+	if (config)
+		config->WriteFindAndReplase(&find_data);
 }
 
 //----------------------------------------------------------------------------

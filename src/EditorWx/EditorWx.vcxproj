@@ -35,6 +35,7 @@
     <ClCompile Include="about.cpp" />
     <ClCompile Include="app.cpp" />
     <ClCompile Include="codedescription.cpp" />
+    <ClCompile Include="configdata.cpp" />
     <ClCompile Include="edit.cpp" />
     <ClCompile Include="executorlog.cpp" />
     <ClCompile Include="executorview.cpp" />
@@ -67,6 +68,7 @@
     <ClInclude Include="appdefs.h" />
     <ClInclude Include="appframe.h" />
     <ClInclude Include="codedescription.h" />
+    <ClInclude Include="configdata.h" />
     <ClInclude Include="defsext.h" />
     <ClInclude Include="edit.h" />
     <ClInclude Include="executorlog.h" />
