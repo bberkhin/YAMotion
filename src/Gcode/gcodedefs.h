@@ -193,6 +193,7 @@ namespace Interpreter
 		PARAM_L,
 		PARAM_H,
 		PARAM_T,
+		PARAM_N,
 		PARAM_MAX
 	};
 

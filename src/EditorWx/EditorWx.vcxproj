@@ -36,6 +36,7 @@
     <ClCompile Include="app.cpp" />
     <ClCompile Include="codedescription.cpp" />
     <ClCompile Include="configdata.cpp" />
+    <ClCompile Include="domath.cpp" />
     <ClCompile Include="edit.cpp" />
     <ClCompile Include="executorlog.cpp" />
     <ClCompile Include="executorview.cpp" />
@@ -70,6 +71,7 @@
     <ClInclude Include="codedescription.h" />
     <ClInclude Include="configdata.h" />
     <ClInclude Include="defsext.h" />
+    <ClInclude Include="domath.h" />
     <ClInclude Include="edit.h" />
     <ClInclude Include="executorlog.h" />
     <ClInclude Include="executorview.h" />
