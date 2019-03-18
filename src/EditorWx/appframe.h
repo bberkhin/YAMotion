@@ -50,8 +50,10 @@ public:
 	void OnFileSave(wxCommandEvent &event);
 	void OnFileSaveAs(wxCommandEvent &event);
 	void OnFileClose(wxCommandEvent &event);
-	//! properties
+	//! dialogs
 	void OnProperties(wxCommandEvent &event);
+	void OnMacroses(wxCommandEvent &event);
+	void OnMathCalc(wxCommandEvent &event);
 	//! edit events
 	void OnEdit(wxCommandEvent &event);
 	void OnContextMenu(wxContextMenuEvent& evt);

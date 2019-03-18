@@ -46,6 +46,7 @@
     <ClCompile Include="macroses.cpp" />
     <ClCompile Include="macrosesdlg.cpp" />
     <ClCompile Include="macrosparamdlg.cpp" />
+    <ClCompile Include="mathdlg.cpp" />
     <ClCompile Include="prefs.cpp" />
     <ClCompile Include="propertiesdlg.cpp" />
     <ClCompile Include="appframe.cpp" />
@@ -80,6 +81,7 @@
     <ClInclude Include="macroses.h" />
     <ClInclude Include="macrosesdlg.h" />
     <ClInclude Include="macrosparamdlg.h" />
+    <ClInclude Include="mathdlg.h" />
     <ClInclude Include="prefs.h" />
     <ClInclude Include="propertiesdlg.h" />
     <ClInclude Include="resource.h" />

@@ -25,6 +25,7 @@
 #include "standartpaths.h"
 #include "logwindow.h"
 #include "configdata.h"
+#include "mathdlg.h"
 
 //Bitmaps
 #include "bitmaps/new.xpm"
@@ -185,7 +186,10 @@ wxBEGIN_EVENT_TABLE (AppFrame, wxFrame)
     EVT_MENU (wxID_SAVEAS,           AppFrame::OnFileSaveAs)
     EVT_MENU (wxID_CLOSE,            AppFrame::OnFileClose)
     // properties
-    EVT_MENU (myID_PROPERTIES,       AppFrame::OnProperties)
+    //EVT_MENU (myID_PROPERTIES,       AppFrame::OnProperties)
+	EVT_MENU (ID_MACROSES,			 AppFrame::OnMacroses)
+	EVT_MENU(ID_MATHCALC,			 AppFrame::OnMathCalc)
+
     // print and exit
     EVT_MENU (wxID_EXIT,             AppFrame::OnExit)
     // Menu items with standard IDs forwarded to the editor.
@@ -454,7 +458,9 @@ void AppFrame::OnFileClose (wxCommandEvent &event)
 }
 
 // properties event handlers
-void AppFrame::OnProperties (wxCommandEvent &WXUNUSED(event)) 
+void AppFrame::OnProperties(wxCommandEvent &WXUNUSED(event))
+{}
+void AppFrame::OnMacroses(wxCommandEvent &WXUNUSED(event))
 {
     if (!m_edit) return;
     //EditProperties dlg(m_edit, 0);
@@ -481,6 +487,33 @@ void AppFrame::OnProperties (wxCommandEvent &WXUNUSED(event))
 	
 	RunGcmc(src_fname.c_str(), dst_fname.c_str(), args.c_str(), ConvertGcmcPasteFile);
 }
+
+
+// properties event handlers
+void AppFrame::OnMathCalc(wxCommandEvent &WXUNUSED(event))
+{
+	if (!m_edit) return;
+	//EditProperties dlg(m_edit, 0);
+	DoMath mth;	
+	MathDlg dlg(&mth, this);
+	if (dlg.ShowModal() != wxID_OK)
+		return;
+
+	int nlines = m_edit->GetLineCount();
+	char strOut[MAX_GCODE_LINELEN];
+	for (int i = 0; i < nlines; i++)
+	{
+		wxString str = m_edit->GetLine(i);
+		if (mth.Process(str.c_str(), strOut))
+		{
+			long 	from = m_edit->PositionFromLine(i);
+			long 	to =  i < nlines-1 ? m_edit->PositionFromLine(i+1)-1 : m_edit->GetLength();
+			m_edit->Replace(from, to, strOut );
+		}
+	}	
+}
+
+
 
 // edit events
 void AppFrame::OnEdit (wxCommandEvent &event) 
@@ -531,7 +564,7 @@ void AppFrame::CreateMenu ()
     menuFile->Append (wxID_CLOSE, _("&Close\tCtrl+W"));
     menuFile->AppendSeparator();
     menuFile->Append (myID_PROPERTIES, _("Proper&ties ..\tCtrl+I"));
-    menuFile->AppendSeparator();
+	menuFile->AppendSeparator();
     menuFile->Append (wxID_PRINT_SETUP, _("Print Set&up .."));
     menuFile->Append (wxID_PREVIEW, _("Print Pre&view\tCtrl+Shift+P"));
     menuFile->Append (wxID_PRINT, _("&Print ..\tCtrl+P"));
@@ -619,7 +652,8 @@ void AppFrame::CreateMenu ()
 	menuGCode->Append(ID_GCODE_CHECK, _("&Check"));
 	menuGCode->Append(ID_GCODE_SIMULATE, _("&Simulate"));
 	menuGCode->Append(ID_GCODE_CONVERTGCMC, _("&Convert Gcmc"));
-
+	menuGCode->Append(ID_MACROSES, _("Run Macros"));
+	menuGCode->Append(ID_MATHCALC, _("Calculator"));
 
 	// 3dView menu
 	wxMenu *menu3D = new wxMenu;

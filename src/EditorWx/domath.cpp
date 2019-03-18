@@ -1,21 +1,84 @@
+//#include "wx/wx.h"
 #include "domath.h"
 #include <iostream>
 #include <sstream>
 #include <stdio.h>
 
+#pragma warning(disable:4996)
+#include "configdata.h"
+
 
 using namespace Interpreter;
-#pragma warning(disable:4996)
 
 
 DoMath::DoMath()
 {
+	minvalue = -1000000.0;
+	maxvalue = 1000000.0;
+	LoadConfig();	
 }
 
 
 DoMath::~DoMath()
 {
 }
+
+
+void DoMath::LoadConfig()
+{
+	ConfigData *config;
+	if ((config = dynamic_cast<ConfigData *>(wxConfigBase::Get())) == NULL)	
+		return;
+	params.clear();
+
+	wxString strKey;
+	wxString strval;
+	long dummy;
+	long val;
+	wxString strOldPath = config->GetPath();
+	config->SetPath("/DoMath");
+
+	minvalue = config->ReadDouble("MinValue", minvalue);
+	maxvalue = config->ReadDouble("MaxValue", maxvalue);
+	operation = static_cast<MathOperationType>(config->Read("Operation", static_cast<long>(operation)));
+	operand = config->ReadDouble("Operand", operand);	
+	
+	config->SetPath("/DoMath/Params");
+	bool bCont = config->GetFirstEntry(strKey, dummy);
+	while (bCont)
+	{
+		if (config->Read(strKey, &strval))
+		{			
+			strval.ToLong(&val);
+			params.push_back( static_cast<IndexParam>(val));
+			bCont = config->GetNextEntry(strKey, dummy);
+		}
+	}
+	config->SetPath(strOldPath);
+}
+
+void DoMath::SaveConfig()
+{
+	ConfigData *config;
+	if ((config = dynamic_cast<ConfigData *>(wxConfigBase::Get())) == NULL)
+		return;
+
+	wxString strOldPath = config->GetPath();
+	config->SetPath("/DoMath");
+
+	config->Write("MinValue", minvalue);
+	config->Write("MaxValue", maxvalue);
+	config->Write("Operation", static_cast<long>(operation) );
+	config->Write("Operand", operand);
+	config->SetPath("/DoMath/Params");
+
+	int n = 1;
+	std::for_each(params.begin(), params.end(), [config, &n](IndexParam &p)
+	{ config->Write(wxString::Format("Param%d",n), static_cast<int>(p));  ++n; });
+
+	config->SetPath(strOldPath);
+}
+
 
 void DoMath::AddParam(Interpreter::IndexParam param)
 {
@@ -35,7 +98,7 @@ bool DoMath::Process(const char *strin, char *strout)
 	bool isint;
 
 	
-
+	*strout = 0;
 	for (; position < length;)
 	{
 		if (line[position] == '/' && line[position + 1] == '/')
@@ -84,6 +147,7 @@ bool DoMath::Process(const char *strin, char *strout)
 			}
 		}		
 	}
+	strout[outpos] = 0;
 	return didit;
 
 }
@@ -153,14 +217,17 @@ bool DoMath::is_param_letter(char c, bool *isint)
 
 double DoMath::do_math(double val)
 {
+	double result;
 	switch (operation)
 	{
-	case MOT_PLUS: return operand + val;
-	case MOT_MINUS:  return val - operand;
-	case MOT_DIVIDE: return operand == 0.0 ? val : (val/operand);
-	case MOT_MULTIPLY: return val *operand;
+		case MOT_PLUS:      result = operand + val; break;
+		case MOT_MINUS:     result = val - operand; break;
+		case MOT_DIVIDE:	result = operand == 0.0 ? val : (val/operand); break;
+		case MOT_MULTIPLY:  result = val *operand; break;
 	}
-	return val;
+	result = std::max(result, minvalue);
+	result = std::min(result, maxvalue);
+	return result;
 }
 
 void DoMath::write_result(char *strout, int &outpos, double val, bool isint)
@@ -178,7 +245,6 @@ void DoMath::write_result(char *strout, int &outpos, double val, bool isint)
 		if (!(s << val))
 			return;
 	}
-	
-	outpos = static_cast<int>(outpos + st.length() );
-	strcat(strout, st.c_str());
+	strcpy(strout + outpos, s.str().c_str());
+	outpos = static_cast<int>(outpos + s.str().length() );	
 }

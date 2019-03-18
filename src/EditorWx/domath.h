@@ -24,6 +24,8 @@ public:
 	void SetMinMax(double minv, double maxv) { minvalue = minv; maxvalue = maxv; }
 
 	bool Process(const char *strin, char *strout);
+	void LoadConfig();
+	void SaveConfig();
 private:
 	bool read_real(const char *line, int &position, double *pdbl);
 	bool is_param_letter(char c, bool *isint);
