@@ -12,7 +12,8 @@ MathDlg::MathDlg(DoMath *dm, wxWindow *parent)
 	SetTitle(_("GCode calculator"));
 	wxBoxSizer *inputpane = new wxBoxSizer(wxHORIZONTAL);
 	wxStaticText *Info = new wxStaticText(this, wxID_ANY, _("Input value:"));
-	wxTextCtrl *Input = new wxTextCtrl(this, wxID_HIGHEST, _("0.0"));
+	
+	wxTextCtrl *Input = new wxTextCtrl(this, wxID_HIGHEST, wxString::FromDouble(domath->GetOperand()) );
 	inputpane->Add(Info);
 	inputpane->Add(Input);
 

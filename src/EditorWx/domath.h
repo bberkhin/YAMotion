@@ -22,6 +22,9 @@ public:
 	void SetOperation(MathOperationType op) { operation = op; }
 	void SetOperand(double val) { operand = val; }
 	void SetMinMax(double minv, double maxv) { minvalue = minv; maxvalue = maxv; }
+	double GetOperand() { return operand;  }
+	MathOperationType GetOperation() { return operation; }
+	void GetMinMax(double *pminv, double *pmaxv) { *pminv = minvalue; *pmaxv = maxvalue; }
 
 	bool Process(const char *strin, char *strout);
 	void LoadConfig();

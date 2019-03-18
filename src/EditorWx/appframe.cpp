@@ -506,8 +506,9 @@ void AppFrame::OnMathCalc(wxCommandEvent &WXUNUSED(event))
 		wxString str = m_edit->GetLine(i);
 		if (mth.Process(str.c_str(), strOut))
 		{
-			long 	from = m_edit->PositionFromLine(i);
-			long 	to =  i < nlines-1 ? m_edit->PositionFromLine(i+1)-1 : m_edit->GetLength();
+			long from = m_edit->PositionFromLine(i);
+			long to = from + str.length();
+//			m_edit->Replace(from, to, str);
 			m_edit->Replace(from, to, strOut );
 		}
 	}	
