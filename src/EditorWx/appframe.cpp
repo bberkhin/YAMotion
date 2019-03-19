@@ -26,6 +26,7 @@
 #include "logwindow.h"
 #include "configdata.h"
 #include "mathdlg.h"
+#include "mathexpressiondlg.h"
 
 //Bitmaps
 #include "bitmaps/new.xpm"
@@ -189,6 +190,7 @@ wxBEGIN_EVENT_TABLE (AppFrame, wxFrame)
     //EVT_MENU (myID_PROPERTIES,       AppFrame::OnProperties)
 	EVT_MENU (ID_MACROSES,			 AppFrame::OnMacroses)
 	EVT_MENU(ID_MATHCALC,			 AppFrame::OnMathCalc)
+	EVT_MENU(ID_MATHEXPRESSION, AppFrame::OnMathExpression)
 
     // print and exit
     EVT_MENU (wxID_EXIT,             AppFrame::OnExit)
@@ -514,6 +516,14 @@ void AppFrame::OnMathCalc(wxCommandEvent &WXUNUSED(event))
 	}	
 }
 
+// properties event handlers
+void AppFrame::OnMathExpression(wxCommandEvent &WXUNUSED(event))
+{
+	if (!m_edit) return;
+	MathExpressionDlg dlg(this);
+	if (dlg.ShowModal() != wxID_OK)
+		return;
+}
 
 
 // edit events
@@ -655,6 +665,7 @@ void AppFrame::CreateMenu ()
 	menuGCode->Append(ID_GCODE_CONVERTGCMC, _("&Convert Gcmc"));
 	menuGCode->Append(ID_MACROSES, _("Run Macros"));
 	menuGCode->Append(ID_MATHCALC, _("Calculator"));
+	menuGCode->Append(ID_MATHEXPRESSION, _("Calc by Expression"));
 
 	// 3dView menu
 	wxMenu *menu3D = new wxMenu;

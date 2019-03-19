@@ -47,6 +47,9 @@
     <ClCompile Include="macrosesdlg.cpp" />
     <ClCompile Include="macrosparamdlg.cpp" />
     <ClCompile Include="mathdlg.cpp" />
+    <ClCompile Include="mathexpressiondlg.cpp">
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">/bigobj %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
     <ClCompile Include="prefs.cpp" />
     <ClCompile Include="propertiesdlg.cpp" />
     <ClCompile Include="appframe.cpp" />
@@ -82,6 +85,7 @@
     <ClInclude Include="macrosesdlg.h" />
     <ClInclude Include="macrosparamdlg.h" />
     <ClInclude Include="mathdlg.h" />
+    <ClInclude Include="mathexpressiondlg.h" />
     <ClInclude Include="prefs.h" />
     <ClInclude Include="propertiesdlg.h" />
     <ClInclude Include="resource.h" />
@@ -162,7 +166,7 @@
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
       <PreprocessorDefinitions>_UNICODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(SolutionDir)GCode;C:\WxWidgets\include;C:\WxWidgets\include\msvc;$(SolutionDir)rapidxml;$(SolutionDir)..\..\glm</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)GCode;C:\WxWidgets\include;C:\WxWidgets\include\msvc;$(SolutionDir)rapidxml;$(SolutionDir)..\..\glm;$(SolutionDir)..\..\</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
   </ItemDefinitionGroup>
@@ -173,7 +177,7 @@
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
-      <AdditionalIncludeDirectories>$(SolutionDir)GCode;C:\WxWidgets\include;C:\WxWidgets\include\msvc;$(SolutionDir)rapidxml;$(SolutionDir)..\..\glm</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)GCode;C:\WxWidgets\include;C:\WxWidgets\include\msvc;$(SolutionDir)rapidxml;$(SolutionDir)..\..\glm;$(SolutionDir)..\..\</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_UNICODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
   </ItemDefinitionGroup>
@@ -185,7 +189,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)/GCode;C:\WxWidgets\include;C:\WxWidgets\include\msvc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)/GCode;C:\WxWidgets\include;C:\WxWidgets\include\msvc;$(SolutionDir)rapidxml;$(SolutionDir)..\..\glm;$(SolutionDir)..\..\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <PreprocessorDefinitions>_UNICODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
@@ -202,7 +206,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)/GCode;C:\WxWidgets\include;C:\WxWidgets\include\msvc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)/GCode;C:\WxWidgets\include;C:\WxWidgets\include\msvc;$(SolutionDir)rapidxml;$(SolutionDir)..\..\glm;$(SolutionDir)..\..\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <PreprocessorDefinitions>_UNICODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>

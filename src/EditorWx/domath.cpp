@@ -70,6 +70,8 @@ void DoMath::SaveConfig()
 	config->Write("MaxValue", maxvalue);
 	config->Write("Operation", static_cast<long>(operation) );
 	config->Write("Operand", operand);
+
+	config->DeleteGroup("/DoMath/Params");
 	config->SetPath("/DoMath/Params");
 
 	int n = 1;
@@ -79,6 +81,11 @@ void DoMath::SaveConfig()
 	config->SetPath(strOldPath);
 }
 
+
+void DoMath::ClearParams()
+{
+	params.clear();
+}
 
 void DoMath::AddParam(Interpreter::IndexParam param)
 {
@@ -214,6 +221,10 @@ bool DoMath::is_param_letter(char c, bool *isint)
 	return ( std::find(params.begin(), params.end(), index) != params.end() );
 }
 
+bool DoMath::HasParemeter(Interpreter::IndexParam index)
+{
+	return (std::find(params.begin(), params.end(), index) != params.end());
+}
 
 double DoMath::do_math(double val)
 {

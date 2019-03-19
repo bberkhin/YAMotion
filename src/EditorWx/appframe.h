@@ -54,6 +54,7 @@ public:
 	void OnProperties(wxCommandEvent &event);
 	void OnMacroses(wxCommandEvent &event);
 	void OnMathCalc(wxCommandEvent &event);
+	void OnMathExpression(wxCommandEvent &event);
 	//! edit events
 	void OnEdit(wxCommandEvent &event);
 	void OnContextMenu(wxContextMenuEvent& evt);

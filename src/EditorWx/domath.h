@@ -8,8 +8,8 @@ enum MathOperationType
 {
 	MOT_PLUS,
 	MOT_MINUS,
-	MOT_DIVIDE,
-	MOT_MULTIPLY
+	MOT_MULTIPLY,
+	MOT_DIVIDE
 };
 
 
@@ -25,6 +25,8 @@ public:
 	double GetOperand() { return operand;  }
 	MathOperationType GetOperation() { return operation; }
 	void GetMinMax(double *pminv, double *pmaxv) { *pminv = minvalue; *pmaxv = maxvalue; }
+	void ClearParams();
+	bool HasParemeter(Interpreter::IndexParam p);
 
 	bool Process(const char *strin, char *strout);
 	void LoadConfig();

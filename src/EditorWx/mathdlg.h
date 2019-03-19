@@ -8,5 +8,7 @@ public:
 	~MathDlg();
 	virtual int ShowModal();
 private:
+	bool GetEditDouble(int id, double *val);
+private:
 	DoMath *domath;
 };
