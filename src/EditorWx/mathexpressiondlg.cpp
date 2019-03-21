@@ -1,9 +1,15 @@
 #include "wx/wx.h"
 #include "mathexpressiondlg.h"
 
-#define USE_EXPRTK 1
+//#define USE_EXPRTK 0
 #ifdef USE_EXPRTK
 #include <exprtk/exprtk.hpp>
+#endif
+
+#define USE_EXPMUPP 1
+#ifdef USE_EXPMUPP 
+#include <muParser.h>
+//#import "muParser.lib"
 #endif
 
 
@@ -57,7 +63,7 @@ MathExpressionDlg::~MathExpressionDlg()
 }
 
 
-void trig_function(const char *s)
+void trig_function(const wchar_t *s)
 {
 #ifdef USE_EXPRTK
 	typedef exprtk::symbol_table<double> symbol_table_t;
@@ -93,6 +99,37 @@ void trig_function(const char *s)
 	x = 10;
 	double xres = expression.value();
 	wxMessageBox(wxString::Format("xresult = %f", xres));
+#else if USE_EXPMUPP
+	try
+	{
+		mu::Parser  parser;
+		double x,y, xr, yr;
+		parser.DefineVar(L"X", &x);
+		parser.DefineVar(L"Y", &y);
+		parser.DefineVar(L"X_", &xr);
+		parser.DefineVar(L"Y_", &yr);
+		//parser.DefineVar(L"õ", &x);	
+		mu::string_type sLine(s);
+		parser.SetExpr(sLine);
+		xr = x = 10;
+		yr = y = 20;
+		int n = parser.GetNumResults();
+		double *xres = parser.Eval(n);
+		for (int i = 0; i < n; i++)
+		{
+			wxMessageBox(wxString::Format("xresult %d = %f", i, xres[i]));
+		}
+	}
+	catch (mu::Parser::exception_type &e)
+	{
+		wxString errMsg;
+		errMsg += wxString::Format("Error%s pos: %d\n", e.GetMsg().c_str(), (int)e.GetPos() );
+		wxMessageBox(errMsg);		
+	}	
+	catch (...)
+	{
+		wxMessageBox(L"Uups some erorr");
+	}
 #endif
 }
 
@@ -110,7 +147,7 @@ int MathExpressionDlg::ShowModal()
 		if (pedit)
 		{
 			label = pedit->GetValue();
-			trig_function(label.c_str());
+			trig_function(label.wc_str());
 		}
 	}
 	return ret;
