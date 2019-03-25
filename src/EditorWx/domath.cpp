@@ -11,7 +11,7 @@
 using namespace Interpreter;
 
 
-DoMath::DoMath()
+DoMathBase::DoMathBase()
 {
 	minvalue = -1000000.0;
 	maxvalue = 1000000.0;
@@ -19,45 +19,26 @@ DoMath::DoMath()
 }
 
 
-DoMath::~DoMath()
+DoMathBase::~DoMathBase()
 {
 }
 
 
-void DoMath::LoadConfig()
+void DoMathBase::LoadConfig()
 {
 	ConfigData *config;
 	if ((config = dynamic_cast<ConfigData *>(wxConfigBase::Get())) == NULL)	
 		return;
-	params.clear();
-
-	wxString strKey;
-	wxString strval;
-	long dummy;
-	long val;
 	wxString strOldPath = config->GetPath();
 	config->SetPath("/DoMath");
 
 	minvalue = config->ReadDouble("MinValue", minvalue);
 	maxvalue = config->ReadDouble("MaxValue", maxvalue);
-	operation = static_cast<MathOperationType>(config->Read("Operation", static_cast<long>(operation)));
-	operand = config->ReadDouble("Operand", operand);	
-	
-	config->SetPath("/DoMath/Params");
-	bool bCont = config->GetFirstEntry(strKey, dummy);
-	while (bCont)
-	{
-		if (config->Read(strKey, &strval))
-		{			
-			strval.ToLong(&val);
-			params.push_back( static_cast<IndexParam>(val));
-			bCont = config->GetNextEntry(strKey, dummy);
-		}
-	}
+	do_load_config(config);
 	config->SetPath(strOldPath);
 }
 
-void DoMath::SaveConfig()
+void DoMathBase::SaveConfig()
 {
 	ConfigData *config;
 	if ((config = dynamic_cast<ConfigData *>(wxConfigBase::Get())) == NULL)
@@ -68,31 +49,100 @@ void DoMath::SaveConfig()
 
 	config->Write("MinValue", minvalue);
 	config->Write("MaxValue", maxvalue);
-	config->Write("Operation", static_cast<long>(operation) );
-	config->Write("Operand", operand);
-
-	config->DeleteGroup("/DoMath/Params");
-	config->SetPath("/DoMath/Params");
-
-	int n = 1;
-	std::for_each(params.begin(), params.end(), [config, &n](IndexParam &p)
-	{ config->Write(wxString::Format("Param%d",n), static_cast<int>(p));  ++n; });
-
+	do_save_config(config);
 	config->SetPath(strOldPath);
 }
 
+bool DoMathBase::ScanParameters(const char *line)
+{	
+	int length = static_cast<int>(strlen(line));
+	bool comment = false;
+	double val;
+	bool isint;
+	bool hasparam = false;
+	int pos_start;
+	for (int position = 0; position < length;)
+	{
+		if (line[position] == '/' && line[position + 1] == '/')
+		{
+			break;
+		}
+		if (line[position] == '(')
+		{
+			comment = true;
+			position++; 
+		}
+		else if (comment)
+		{
+			position++;
+			if (line[position] == ')')
+				comment = false;
+		}
+		else
+		{
 
-void DoMath::ClearParams()
-{
-	params.clear();
+			//skip spaces
+			while (line[position] == ' ' || line[position] == '\t' || line[position] == '\r')
+			{				
+				position++;
+			}
+			// check letter
+			if ((position == 0 || !isalpha(line[position - 1])) && position + 1 < length && !isalpha(line[position + 1]) && is_param_letter(line[position], &index, &isint))
+			{
+				position++; 
+				pos_start = position;
+				if (read_real(line, position, &val))
+				{
+					origin_params[index].val = val;
+					origin_params[index].posstart = pos_start;
+					origin_params[index].posend = position;
+					origin_params[index].exist = true;
+					origin_params[index]changed = false;
+					hasparam = true;
+				}
+			}
+			else //just move
+			{
+				position++;
+			}
+		}
+	}
+	return hasparam;
 }
 
-void DoMath::AddParam(Interpreter::IndexParam param)
+bool DoMathBase::Process(const char *strin, char *strout)
 {
-	params.push_back(param);
+	if (!ScanParameters(strin))
+		return false;
+	
+	if ( !do_math() )
+		return false;
+
+	*strout = 0;
+	int outpos = 0, inpos = 0, n = 0;
+	memset(strout, 0, MAX_GCODE_LINELEN);
+
+
+	for (auto it = origin_params.begin(); it != origin_params.end(); ++it)
+	{
+		if ( !it->changed )
+			continue;
+		// copy beforo
+		n = it->posstart - inpos;
+		strncpy(strout + outpos, strin + inpos, n);
+		outpos += n;
+		inpos += n;
+		//insert new result
+		n = it->posend - it->posstart;
+		write_result(strout, outpos, it->val, it->isint);
+		inpos += n;
+	}
+	// write down the end of string
+	strcat(strout, strin + inpos);
 }
 
-bool DoMath::Process(const char *strin, char *strout)
+/*
+bool DoMathBase::Process(const char *strin, char *strout)
 {
 
 	const char *line = strin;
@@ -104,6 +154,8 @@ bool DoMath::Process(const char *strin, char *strout)
 	double valnew, val;
 	bool isint;
 
+	// first scan all pareneters
+	ScanParameters(strin);
 	
 	*strout = 0;
 	for (; position < length;)
@@ -136,13 +188,13 @@ bool DoMath::Process(const char *strin, char *strout)
 				position++; outpos++;
 			}
 			// check letter
-			if ( (position == 0 || !isalpha(line[position-1])) && position + 1 < length && !isalpha(line[position + 1]) && is_param_letter(line[position], &isint) )
+			if ( (position == 0 || !isalpha(line[position-1])) && position + 1 < length && !isalpha(line[position + 1]) && is_param_letter(line[position],&index, &isint) )
 			{
 				strout[outpos] = line[position];
 				position++; outpos++;
-				if (read_real(line, position, &val))
+				//if (read_real(line, position, &val))
 				{
-					valnew = do_math(val);
+					valnew = do_math(index, val);
 					write_result(strout, outpos, valnew, isint);
 					didit = true;
 				}
@@ -158,9 +210,9 @@ bool DoMath::Process(const char *strin, char *strout)
 	return didit;
 
 }
+*/
 
-
-bool DoMath::read_real(const char *line, int &position, double *pdbl)
+bool DoMathBase::read_real(const char *line, int &position, double *pdbl)
 {
 	const char *start = line + position;
 	size_t after;
@@ -183,50 +235,50 @@ bool DoMath::read_real(const char *line, int &position, double *pdbl)
 	return true;
 }
 
-bool DoMath::is_param_letter(char c, bool *isint)
+bool DoMathBase::is_param_letter(char c, IndexParam *index, bool *isint)
 {
 	if ((64 < c) && (c < 91))   /* downcase upper case letters */
 		c += 32;
-	IndexParam index = PARAM_MAX;
 	*isint = false;
 	switch (c)
 	{
-		case 'a':	index = PARAM_A; break;
-		case 'b':	index = PARAM_B; break;
-		case 'c':	index = PARAM_C; break;
-		case 'x':	index = PARAM_X; break;
-		case 'y':	index = PARAM_Y; break;
-		case 'z':	index = PARAM_Z; break;
-		case '@':	index = PARAM_AT; break;
-		case 'd':   index = PARAM_D; break;
-		case 'e':   index = PARAM_E; break;
-		case 'f':   index = PARAM_F; break;
-		case 'i':   index = PARAM_I; break;
-		case 'j':   index = PARAM_J; break;
-		case 'k':   index = PARAM_K; break;
-		case 'p':   index = PARAM_P; break;
-		case 'q':   index = PARAM_Q; break;
-		case 'r':   index = PARAM_R; break;
-		case 's':   index = PARAM_S; break;
-		case 'u':   index = PARAM_U; break;
-		case 'v':   index = PARAM_V; break;
-		case 'w':   index = PARAM_W; break;
-		case 't':   index = PARAM_T; *isint = true; break;
-		case 'h':   index = PARAM_H; *isint = true; break;
-		case 'l':   index = PARAM_L; *isint = true; break;
-		case 'n':   index = PARAM_N; *isint = true; break;
+		case 'a':	*index = PARAM_A; break;
+		case 'b':	*index = PARAM_B; break;
+		case 'c':	*index = PARAM_C; break;
+		case 'x':	*index = PARAM_X; break;
+		case 'y':	*index = PARAM_Y; break;
+		case 'z':	*index = PARAM_Z; break;
+		case '@':	*index = PARAM_AT; break;
+		case 'd':   *index = PARAM_D; break;
+		case 'e':   *index = PARAM_E; break;
+		case 'f':   *index = PARAM_F; break;
+		case 'i':   *index = PARAM_I; break;
+		case 'j':   *index = PARAM_J; break;
+		case 'k':   *index = PARAM_K; break;
+		case 'p':   *index = PARAM_P; break;
+		case 'q':   *index = PARAM_Q; break;
+		case 'r':   *index = PARAM_R; break;
+		case 's':   *index = PARAM_S; break;
+		case 'u':   *index = PARAM_U; break;
+		case 'v':   *index = PARAM_V; break;
+		case 'w':   *index = PARAM_W; break;
+		case 't':   *index = PARAM_T; *isint = true; break;
+		case 'h':   *index = PARAM_H; *isint = true; break;
+		case 'l':   *index = PARAM_L; *isint = true; break;
+		case 'n':   *index = PARAM_N; *isint = true; break;
 		default:
 			return false;
 	}
-	return ( std::find(params.begin(), params.end(), index) != params.end() );
+	return true;
 }
 
-bool DoMath::HasParemeter(Interpreter::IndexParam index)
+
+bool DoMathSimple::HasParemeter(Interpreter::IndexParam index)
 {
 	return (std::find(params.begin(), params.end(), index) != params.end());
 }
 
-double DoMath::do_math(double val)
+double DoMathSimple::do_math(double val)
 {
 	double result;
 	switch (operation)
@@ -241,7 +293,7 @@ double DoMath::do_math(double val)
 	return result;
 }
 
-void DoMath::write_result(char *strout, int &outpos, double val, bool isint)
+void DoMathBase::write_result(char *strout, int &outpos, double val, bool isint)
 {
 	//size_t len = after - start;
 	std::string st;
@@ -258,4 +310,62 @@ void DoMath::write_result(char *strout, int &outpos, double val, bool isint)
 	}
 	strcpy(strout + outpos, s.str().c_str());
 	outpos = static_cast<int>(outpos + s.str().length() );	
+}
+
+
+
+DoMathSimple::DoMathSimple()
+{
+
+}
+DoMathSimple::~DoMathSimple()
+{
+
+}
+
+void DoMathSimple::ClearParams()
+{
+	params.clear();
+}
+
+void DoMathSimple::AddParam(Interpreter::IndexParam param)
+{
+	params.push_back(param);
+}
+
+void DoMathSimple::do_load_config(ConfigData *config)
+{
+	params.clear();
+	wxString strKey;
+	wxString strval;
+	long dummy;
+	long val;
+
+	operation = static_cast<MathOperationType>(config->Read("Operation", static_cast<long>(operation)));
+	operand = config->ReadDouble("Operand", operand);
+
+	config->SetPath("/DoMath/Params");
+	bool bCont = config->GetFirstEntry(strKey, dummy);
+	while (bCont)
+	{
+		if (config->Read(strKey, &strval))
+		{
+			strval.ToLong(&val);
+			params.push_back(static_cast<IndexParam>(val));
+			bCont = config->GetNextEntry(strKey, dummy);
+		}
+	}
+}
+
+void DoMathSimple::do_save_config(ConfigData *config)
+{
+	config->Write("Operation", static_cast<long>(operation));
+	config->Write("Operand", operand);
+
+	config->DeleteGroup("/DoMath/Params");
+	config->SetPath("/DoMath/Params");
+
+	int n = 1;
+	std::for_each(params.begin(), params.end(), [config, &n](IndexParam &p)
+	{ config->Write(wxString::Format("Param%d", n), static_cast<int>(p));  ++n; });
 }
