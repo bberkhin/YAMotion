@@ -496,7 +496,7 @@ void AppFrame::OnMathCalc(wxCommandEvent &WXUNUSED(event))
 {
 	if (!m_edit) return;
 	//EditProperties dlg(m_edit, 0);
-	DoMath mth;	
+	DoMathSimple mth;
 	MathDlg dlg(&mth, this);
 	if (dlg.ShowModal() != wxID_OK)
 		return;
@@ -510,7 +510,6 @@ void AppFrame::OnMathCalc(wxCommandEvent &WXUNUSED(event))
 		{
 			long from = m_edit->PositionFromLine(i);
 			long to = from + str.length();
-//			m_edit->Replace(from, to, str);
 			m_edit->Replace(from, to, strOut );
 		}
 	}	
@@ -520,9 +519,38 @@ void AppFrame::OnMathCalc(wxCommandEvent &WXUNUSED(event))
 void AppFrame::OnMathExpression(wxCommandEvent &WXUNUSED(event))
 {
 	if (!m_edit) return;
-	MathExpressionDlg dlg(this);
-	if (dlg.ShowModal() != wxID_OK)
-		return;
+
+	try
+	{
+		DoMathExpression mth;
+		MathExpressionDlg dlg(&mth, this);
+		if (dlg.ShowModal() != wxID_OK)
+			return;
+
+		int nlines = m_edit->GetLineCount();
+		char strOut[MAX_GCODE_LINELEN];
+		for (int i = 0; i < nlines; i++)
+		{
+			wxString str = m_edit->GetLine(i);
+			if (mth.Process(str.c_str(), strOut))
+			{
+				long from = m_edit->PositionFromLine(i);
+				long to = from + str.length();
+				m_edit->Replace(from, to, strOut);
+			}
+		}
+	}
+	catch (mu::Parser::exception_type &e)
+	{
+		wxString errMsg;
+		errMsg += wxString::Format("Error%s pos: %d\n", e.GetMsg().c_str(), (int)e.GetPos());
+		wxMessageBox(errMsg);
+	}
+	catch (...)
+	{
+		wxMessageBox(L"Uups some erorr");
+	}
+
 }
 
 

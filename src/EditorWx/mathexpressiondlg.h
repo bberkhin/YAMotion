@@ -1,10 +1,17 @@
 #pragma once
+#include "gcodedefs.h"
+
+class DoMathExpression;
 
 class MathExpressionDlg :	public wxDialog
 {
 public:
-	MathExpressionDlg(wxWindow *parent);
+	MathExpressionDlg(DoMathExpression *pmth, wxWindow *parent);
 	~MathExpressionDlg();
 	virtual int ShowModal();
+private:
+	void AddExpressionParam(int id, Interpreter::IndexParam p);
+private:
+	DoMathExpression *mth;
 };
 

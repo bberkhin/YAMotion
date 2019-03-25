@@ -1,16 +1,24 @@
 #pragma once
 #include <vector>
+#include <map>
+#include <memory>
 #include "gcodedefs.h"
+#include <tchar.h>
+#include <muParser.h>
 
 
-typedef std::vector<Interpreter::IndexParam>  ParamList;
-enum MathOperationType
+struct ORIGIN_PARAM
 {
-	MOT_PLUS,
-	MOT_MINUS,
-	MOT_MULTIPLY,
-	MOT_DIVIDE
+	Interpreter::IndexParam index;
+	double val;
+	double val_new;
+	int posstart;
+	int posend;
+	bool changed;
 };
+
+typedef std::vector<ORIGIN_PARAM>  OriginParamList;
+
 
 class ConfigData;
 
@@ -28,18 +36,31 @@ protected:
 	virtual void do_load_config(ConfigData *config) = 0;
 	virtual void do_save_config(ConfigData *config) = 0;
 	virtual bool do_math() = 0;
-private:
+	ORIGIN_PARAM *get_origin(Interpreter::IndexParam index);
+protected:
 	bool read_real(const char *line, int &position, double *pdbl);
-	bool is_param_letter(char c, Interpreter::IndexParam *index, bool *isint);
+	bool is_param_letter(char c, Interpreter::IndexParam *index );
+	bool is_int_param(Interpreter::IndexParam index);
 	void write_result(char *strout, int &outpos, double valnew, bool isint);
 	bool ScanParameters(const char *line);
 protected:
 	double minvalue;
 	double maxvalue;
+	OriginParamList origin_params;
 };
 
 
-class DoMathSimple
+
+typedef std::vector<Interpreter::IndexParam>  ParamList;
+enum MathOperationType
+{
+	MOT_PLUS,
+	MOT_MINUS,
+	MOT_MULTIPLY,
+	MOT_DIVIDE
+};
+
+class DoMathSimple : public DoMathBase
 {
 public:
 	DoMathSimple();
@@ -60,5 +81,28 @@ private:
 	ParamList  params;
 	MathOperationType operation;
 	double operand;
+};
+
+
+typedef std::map<Interpreter::IndexParam,std::wstring>  ParamExpressionList;
+
+
+class DoMathExpression : public DoMathBase
+{
+public:
+	DoMathExpression();
+	~DoMathExpression();
+	void ClearParams();
+	void AddParam(Interpreter::IndexParam param,const  wchar_t *s);
+	bool HasParemeter(Interpreter::IndexParam p, std::wstring &str_expr);
+	double *create_new_variable(const wchar_t *a_szName);
+
+protected:
+	virtual void do_load_config(ConfigData *config);
+	virtual void do_save_config(ConfigData *config);
+	virtual bool do_math();
+private:
+	ParamExpressionList  params;
+	mu::Parser  parser;
 };
 

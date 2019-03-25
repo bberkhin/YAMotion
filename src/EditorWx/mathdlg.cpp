@@ -30,7 +30,7 @@ ParamName param_names[] = {
 {"K", PARAM_K}, { "P", PARAM_P }, { "Q", PARAM_Q }, { "R", PARAM_R }, { "S", PARAM_S }, { "N", PARAM_N } };
 
 
-MathDlg::MathDlg(DoMath *dm, wxWindow *parent)
+MathDlg::MathDlg(DoMathSimple *dm, wxWindow *parent)
 	: domath(dm), wxDialog(parent, wxID_ANY, wxEmptyString,
 		wxDefaultPosition, wxDefaultSize,
 		wxDEFAULT_DIALOG_STYLE)//| wxRESIZE_BORDER) 

@@ -4,11 +4,11 @@
 class MathDlg : public wxDialog
 {
 public:
-	MathDlg(DoMath *dm, wxWindow *parent);
+	MathDlg(DoMathSimple *dm, wxWindow *parent);
 	~MathDlg();
 	virtual int ShowModal();
 private:
 	bool GetEditDouble(int id, double *val);
 private:
-	DoMath *domath;
+	DoMathSimple *domath;
 };

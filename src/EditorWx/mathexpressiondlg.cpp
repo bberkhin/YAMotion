@@ -1,5 +1,6 @@
 #include "wx/wx.h"
 #include "mathexpressiondlg.h"
+#include "domath.h"
 
 //#define USE_EXPRTK 0
 #ifdef USE_EXPRTK
@@ -16,8 +17,8 @@
 enum { ID_XEXPR = wxID_HIGHEST, ID_YEXPR, ID_ZEXPR };
 
 
-MathExpressionDlg::MathExpressionDlg(wxWindow *parent)
-	:  wxDialog(parent, wxID_ANY, wxEmptyString,
+MathExpressionDlg::MathExpressionDlg(DoMathExpression *pmth, wxWindow *parent)
+	: mth(pmth),wxDialog(parent, wxID_ANY, wxEmptyString,
 		wxDefaultPosition, wxDefaultSize,
 		wxDEFAULT_DIALOG_STYLE)//| wxRESIZE_BORDER) 
 {
@@ -28,14 +29,17 @@ MathExpressionDlg::MathExpressionDlg(wxWindow *parent)
 	
 	wxBoxSizer *inputexp = new wxBoxSizer(wxHORIZONTAL);
 	inputexp->Add(new wxStaticText(this, wxID_ANY, _("X=")));
-	inputexp->Add(new wxTextCtrl(this, ID_XEXPR, "X" ));
+
+	mu::string_type str_expr;
+	inputexp->Add(new wxTextCtrl(this, ID_XEXPR, mth->HasParemeter(Interpreter::PARAM_X, str_expr) ? str_expr.c_str() : wxEmptyString));
 	
 	inputpane->Add(inputexp);
 	inputpane->Add(0, 10);
 	
 	inputexp = new wxBoxSizer(wxHORIZONTAL);
 	inputexp->Add(new wxStaticText(this, wxID_ANY, _("Y=")));
-	inputexp->Add(new wxTextCtrl(this, ID_YEXPR, "Y"));
+	//inputexp->Add(new wxTextCtrl(this, ID_YEXPR, "Y"));
+	inputexp->Add(new wxTextCtrl(this, ID_YEXPR, mth->HasParemeter(Interpreter::PARAM_Y, str_expr) ? str_expr.c_str(): wxEmptyString));
 
 	inputpane->Add(inputexp);
 	inputpane->Add(0, 10);
@@ -43,7 +47,9 @@ MathExpressionDlg::MathExpressionDlg(wxWindow *parent)
 
 	inputexp = new wxBoxSizer(wxHORIZONTAL);
 	inputexp->Add(new wxStaticText(this, wxID_ANY, _("Z=")));
-	inputexp->Add(new wxTextCtrl(this, ID_ZEXPR, "Z"));
+	//inputexp->Add(new wxTextCtrl(this, ID_ZEXPR, "Z"));
+	inputexp->Add(new wxTextCtrl(this, ID_ZEXPR, mth->HasParemeter(Interpreter::PARAM_Z, str_expr) ? str_expr.c_str() : wxEmptyString));
+
 	inputpane->Add(inputexp);
 	inputpane->Add(0, 10);
 
@@ -133,22 +139,31 @@ void trig_function(const wchar_t *s)
 #endif
 }
 
+void MathExpressionDlg::AddExpressionParam(int id, Interpreter::IndexParam p)
+{
+
+	wxTextCtrl *pedit = dynamic_cast<wxTextCtrl *>(FindWindow(id));
+	if (pedit)
+	{
+		wxString label = pedit->GetValue();
+		if ( !label.empty() )
+			mth->AddParam(p, label.wc_str());
+	}
+}
 
 
 int MathExpressionDlg::ShowModal()
 {
 	int ret = wxDialog::ShowModal();
-
-	wxString label;
+	
 	std::string str;
 	if (ret == wxID_OK)
 	{	
-		wxTextCtrl *pedit = dynamic_cast<wxTextCtrl *>(FindWindow(ID_XEXPR));
-		if (pedit)
-		{
-			label = pedit->GetValue();
-			trig_function(label.wc_str());
-		}
+		mth->ClearParams();
+		AddExpressionParam(ID_XEXPR, Interpreter::PARAM_X);
+		AddExpressionParam(ID_YEXPR, Interpreter::PARAM_Y);
+		AddExpressionParam(ID_ZEXPR, Interpreter::PARAM_Z);
+		mth->SaveConfig();
 	}
 	return ret;
 }
