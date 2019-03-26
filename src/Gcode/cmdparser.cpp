@@ -328,7 +328,7 @@ bool CmdParser::getIParam(IndexParam param, int *pi) const
 {
 	if (params[param])
 	{
-		if (param > PARAM_MAX_R_PARAM)
+		if (param < PARAM_MAX_R_PARAM)
 		{
 			double dv = params[param].value().dval;
 			real_to_int(&dv, pi);
