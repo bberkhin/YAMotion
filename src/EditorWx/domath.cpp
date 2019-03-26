@@ -73,6 +73,12 @@ bool DoMathBase::ScanParameters(const char *line)
 	origin_params.clear();
 	for (int position = 0; position < length;)
 	{
+		//skip spaces
+		while (line[position] == ' ' || line[position] == '\t' || line[position] == '\r')
+		{
+			position++;
+		}
+
 		if (line[position] == '/' && line[position + 1] == '/')
 		{
 			break;
@@ -90,12 +96,6 @@ bool DoMathBase::ScanParameters(const char *line)
 		}
 		else
 		{
-
-			//skip spaces
-			while (line[position] == ' ' || line[position] == '\t' || line[position] == '\r')
-			{				
-				position++;
-			}
 			// check letter
 			if ((position == 0 || !isalpha(line[position - 1])) && position + 1 < length && !isalpha(line[position + 1]) && is_param_letter(line[position], &index))
 			{
@@ -269,6 +269,7 @@ bool DoMathSimple::do_math()
 	double result;
 	double val;
 	bool did = false;
+
 	for (auto it = params.begin(); it != params.end(); ++it)
 	{
 		ORIGIN_PARAM *p = get_origin(*it);
@@ -375,6 +376,22 @@ double *DoMathExpression::create_new_variable( const wchar_t *a_szName )
 		throw mu::ParserError(L"Unknown variable.");
 	}
 	ORIGIN_PARAM *p = get_origin(index);
+	if (!p)
+	{
+		// check this in saved param
+		
+		if (saved_val.find(index) != saved_val.end())
+		{
+			return &(saved_val[index]);
+		}
+		else
+		{
+			mu::string_type str(a_szName);
+			str += L"does not exist in the input string";
+			throw mu::ParserError(str);
+		}
+		
+	}
 	return &(p->val);
 }
 
@@ -382,6 +399,13 @@ bool DoMathExpression::do_math()
 {
 	double result;
 	bool did = false;
+	// saved all param 
+
+	SavedParam *sav = &saved_val;
+	std::for_each(origin_params.begin(), origin_params.end(), [sav](ORIGIN_PARAM &p)
+	{ (*sav)[p.index] = p.val; });
+
+
 	for (auto it = params.begin(); it != params.end(); ++it)
 	{
 		ORIGIN_PARAM *p = get_origin((*it).first);
@@ -392,6 +416,7 @@ bool DoMathExpression::do_math()
 			result = std::max(result, minvalue);
 			result = std::min(result, maxvalue);
 			p->val_new = result;
+			(*sav)[p->index] = result;
 			p->changed = true;
 			did = true;
 		}

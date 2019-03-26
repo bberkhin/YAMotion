@@ -203,7 +203,7 @@ void ViewGCode::OnPaint(wxPaintEvent& WXUNUSED(event))
 	glLoadIdentity();
 
 	glEnable(GL_DEPTH_TEST);
-	draw_bounds();
+	//draw_bounds();
 	
 	//draw_3d_grid();
 	

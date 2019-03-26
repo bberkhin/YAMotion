@@ -85,6 +85,7 @@ private:
 
 
 typedef std::map<Interpreter::IndexParam,std::wstring>  ParamExpressionList;
+typedef std::map<Interpreter::IndexParam, double>  SavedParam;
 
 
 class DoMathExpression : public DoMathBase
@@ -103,6 +104,8 @@ protected:
 	virtual bool do_math();
 private:
 	ParamExpressionList  params;
+	SavedParam saved_val;
 	mu::Parser  parser;
+
 };
 
