@@ -19,6 +19,7 @@ class SimulateGCodeThread;
 class ViewGCode;
 class LogWindow;
 class MyGcmcProcess;
+class DoMathBase;
 
 
 //----------------------------------------------------------------------------
@@ -87,6 +88,7 @@ private:
 	bool CheckFileExist(const wchar_t *fname);
 	void AppendGcmcError(wxString &src);
 	void GcmcProcessTerminated(int status, const wchar_t *dst_fname, DoAfterConvertGcmc what_to_do);
+	void DoMathCalc(DoMathBase &mth);
 	
 private:
 	// edit object

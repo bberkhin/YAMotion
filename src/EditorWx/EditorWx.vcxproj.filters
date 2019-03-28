@@ -114,10 +114,10 @@
     <ClCompile Include="domath.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
-    <ClCompile Include="mathdlg.cpp">
+    <ClCompile Include="mathexpressiondlg.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
-    <ClCompile Include="mathexpressiondlg.cpp">
+    <ClCompile Include="mathsimpledlg.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
   </ItemGroup>
@@ -218,10 +218,10 @@
     <ClInclude Include="domath.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
-    <ClInclude Include="mathdlg.h">
+    <ClInclude Include="mathexpressiondlg.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
-    <ClInclude Include="mathexpressiondlg.h">
+    <ClInclude Include="mathsimpledlg.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
   </ItemGroup>

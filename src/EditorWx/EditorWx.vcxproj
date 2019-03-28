@@ -46,7 +46,7 @@
     <ClCompile Include="macroses.cpp" />
     <ClCompile Include="macrosesdlg.cpp" />
     <ClCompile Include="macrosparamdlg.cpp" />
-    <ClCompile Include="mathdlg.cpp" />
+    <ClCompile Include="mathsimpledlg.cpp" />
     <ClCompile Include="mathexpressiondlg.cpp">
       <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">/bigobj %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
@@ -84,7 +84,7 @@
     <ClInclude Include="macroses.h" />
     <ClInclude Include="macrosesdlg.h" />
     <ClInclude Include="macrosparamdlg.h" />
-    <ClInclude Include="mathdlg.h" />
+    <ClInclude Include="mathsimpledlg.h" />
     <ClInclude Include="mathexpressiondlg.h" />
     <ClInclude Include="prefs.h" />
     <ClInclude Include="propertiesdlg.h" />

@@ -29,6 +29,8 @@ public:
 	virtual ~DoMathBase();
 	void SetMinMax(double minv, double maxv) { minvalue = minv; maxvalue = maxv; }
 	void GetMinMax(double *pminv, double *pmaxv) { *pminv = minvalue; *pmaxv = maxvalue; }	
+	bool InSelected() { return in_selected;  }
+	void SetSelected(bool insel) { in_selected = insel; }
 	bool Process(const char *strin, char *strout);
 	void LoadConfig();
 	void SaveConfig();
@@ -46,6 +48,7 @@ protected:
 protected:
 	double minvalue;
 	double maxvalue;
+	bool in_selected;
 	OriginParamList origin_params;
 };
 
@@ -57,7 +60,8 @@ enum MathOperationType
 	MOT_PLUS,
 	MOT_MINUS,
 	MOT_MULTIPLY,
-	MOT_DIVIDE
+	MOT_DIVIDE,
+	MOT_ASSIGN
 };
 
 class DoMathSimple : public DoMathBase

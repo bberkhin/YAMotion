@@ -16,6 +16,7 @@ DoMathBase::DoMathBase()
 {
 	minvalue = -1000000.0;
 	maxvalue = 1000000.0;
+	in_selected = false;
 }
 
 
@@ -34,6 +35,7 @@ void DoMathBase::LoadConfig()
 
 	minvalue = config->ReadDouble("MinValue", minvalue);
 	maxvalue = config->ReadDouble("MaxValue", maxvalue);
+	in_selected = config->ReadBool ("InSelected", in_selected);
 	do_load_config(config);
 	config->SetPath(strOldPath);
 }
@@ -49,6 +51,7 @@ void DoMathBase::SaveConfig()
 
 	config->Write("MinValue", minvalue);
 	config->Write("MaxValue", maxvalue);
+	config->Write("InSelected", in_selected);
 	do_save_config(config);
 	config->SetPath(strOldPath);
 }
@@ -282,6 +285,7 @@ bool DoMathSimple::do_math()
 			case MOT_MINUS:     result = val - operand; break;
 			case MOT_DIVIDE:	result = operand == 0.0 ? val : (val / operand); break;
 			case MOT_MULTIPLY:  result = val * operand; break;
+			case MOT_ASSIGN:  result = operand; break;
 			}
 			result = std::max(result, minvalue);
 			result = std::min(result, maxvalue);

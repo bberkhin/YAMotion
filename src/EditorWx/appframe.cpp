@@ -25,7 +25,7 @@
 #include "standartpaths.h"
 #include "logwindow.h"
 #include "configdata.h"
-#include "mathdlg.h"
+#include "mathsimpledlg.h"
 #include "mathexpressiondlg.h"
 
 //Bitmaps
@@ -491,28 +491,59 @@ void AppFrame::OnMacroses(wxCommandEvent &WXUNUSED(event))
 }
 
 
-// properties event handlers
-void AppFrame::OnMathCalc(wxCommandEvent &WXUNUSED(event))
+void AppFrame::DoMathCalc( DoMathBase &mth )
 {
-	if (!m_edit) return;
-	//EditProperties dlg(m_edit, 0);
-	DoMathSimple mth;
-	MathDlg dlg(&mth, this);
-	if (dlg.ShowModal() != wxID_OK)
-		return;
-
-	int nlines = m_edit->GetLineCount();
 	char strOut[MAX_GCODE_LINELEN];
-	for (int i = 0; i < nlines; i++)
+	int line_start;
+	int line_end;
+
+	long from, to;
+
+	if (mth.InSelected())
+	{
+		m_edit->GetSelection(&from, &to);
+		if (from == to)
+		{
+			wxMessageBox(L"Uups there is no any selection");
+			return;
+		}
+		line_start = m_edit->LineFromPosition(from);
+		line_end = m_edit->LineFromPosition(to);
+	}
+	else
+	{
+		line_start = 0;
+		line_end = m_edit->GetLineCount() - 1;
+	}
+
+	for (int i = line_start; i <= line_end; i++)
 	{
 		wxString str = m_edit->GetLine(i);
 		if (mth.Process(str.c_str(), strOut))
 		{
 			long from = m_edit->PositionFromLine(i);
 			long to = from + str.length();
-			m_edit->Replace(from, to, strOut );
+			m_edit->Replace(from, to, strOut);
 		}
-	}	
+	}
+	if (mth.InSelected())
+	{
+		to = m_edit->PositionFromLine(line_end + 1);
+		m_edit->SetSelection(from, m_edit->PositionBefore(to));
+	}
+
+}
+
+// properties event handlers
+void AppFrame::OnMathCalc(wxCommandEvent &WXUNUSED(event))
+{
+	if (!m_edit) return;
+	//EditProperties dlg(m_edit, 0);
+	DoMathSimple mth;
+	MathSimpleDlg dlg(&mth, this, m_edit->HasSelection() );
+	if (dlg.ShowModal() != wxID_OK)
+		return;
+	DoMathCalc(mth);
 }
 
 // properties event handlers
@@ -523,22 +554,10 @@ void AppFrame::OnMathExpression(wxCommandEvent &WXUNUSED(event))
 	try
 	{
 		DoMathExpression mth;
-		MathExpressionDlg dlg(&mth, this);
+		MathExpressionDlg dlg(&mth, this, m_edit->HasSelection());
 		if (dlg.ShowModal() != wxID_OK)
 			return;
-
-		int nlines = m_edit->GetLineCount();
-		char strOut[MAX_GCODE_LINELEN];
-		for (int i = 0; i < nlines; i++)
-		{
-			wxString str = m_edit->GetLine(i);
-			if (mth.Process(str.c_str(), strOut))
-			{
-				long from = m_edit->PositionFromLine(i);
-				long to = from + str.length();
-				m_edit->Replace(from, to, strOut);
-			}
-		}
+		DoMathCalc(mth);
 	}
 	catch (mu::Parser::exception_type &e)
 	{

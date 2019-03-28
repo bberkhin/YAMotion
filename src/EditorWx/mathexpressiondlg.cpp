@@ -17,7 +17,7 @@
 enum { ID_XEXPR = wxID_HIGHEST, ID_YEXPR, ID_ZEXPR };
 
 
-MathExpressionDlg::MathExpressionDlg(DoMathExpression *pmth, wxWindow *parent)
+MathExpressionDlg::MathExpressionDlg(DoMathExpression *pmth, wxWindow *parent, bool hasenabled)
 	: mth(pmth),wxDialog(parent, wxID_ANY, wxEmptyString,
 		wxDefaultPosition, wxDefaultSize,
 		wxDEFAULT_DIALOG_STYLE)//| wxRESIZE_BORDER) 

@@ -6,7 +6,7 @@ class DoMathExpression;
 class MathExpressionDlg :	public wxDialog
 {
 public:
-	MathExpressionDlg(DoMathExpression *pmth, wxWindow *parent);
+	MathExpressionDlg(DoMathExpression *pmth, wxWindow *parent, bool hasselection);
 	~MathExpressionDlg();
 	virtual int ShowModal();
 private:

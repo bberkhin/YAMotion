@@ -2,7 +2,7 @@
 #include <wx/textctrl.h>
 #include <wx/statline.h>
 
-#include "mathdlg.h"
+#include "mathsimpledlg.h"
 
 
 enum
@@ -14,7 +14,8 @@ ID_MINUSBT,
 ID_MULTISBT,
 ID_DEVIDEBT, 
 ID_MAXVALUE,
-ID_MINVALUE
+ID_MINVALUE,
+ID_INSELECTED
 };
 
 using namespace Interpreter;
@@ -26,11 +27,11 @@ struct ParamName
 };
 ParamName param_names[] = {
 {"X", PARAM_X}, { "Y", PARAM_Y }, { "Z", PARAM_Z }, { "A", PARAM_A }, { "B", PARAM_B }, { "C", PARAM_C },
-{"D", PARAM_D }, { "E", PARAM_E }, { "F", PARAM_T }, { "I", PARAM_I }, { "J", PARAM_J },
+{"D", PARAM_D }, { "E", PARAM_E }, { "F", PARAM_F }, { "I", PARAM_I }, { "J", PARAM_J },
 {"K", PARAM_K}, { "P", PARAM_P }, { "Q", PARAM_Q }, { "R", PARAM_R }, { "S", PARAM_S }, { "N", PARAM_N } };
 
 
-MathDlg::MathDlg(DoMathSimple *dm, wxWindow *parent)
+MathSimpleDlg::MathSimpleDlg(DoMathSimple *dm, wxWindow *parent, bool hasselection)
 	: domath(dm), wxDialog(parent, wxID_ANY, wxEmptyString,
 		wxDefaultPosition, wxDefaultSize,
 		wxDEFAULT_DIALOG_STYLE)//| wxRESIZE_BORDER) 
@@ -54,7 +55,7 @@ MathDlg::MathDlg(DoMathSimple *dm, wxWindow *parent)
 
 	// Add operands
 
-	const wxString operation[] = { "+", "-", "*","/" };
+	const wxString operation[] = { "+", "-", "*","/","=" };
 	wxRadioBox *operands = new wxRadioBox(this, ID_PLUSBT,
 		"Operation",	wxDefaultPosition, wxDefaultSize,
 		WXSIZEOF(operation), operation, 0, wxRA_SPECIFY_ROWS);
@@ -78,6 +79,13 @@ MathDlg::MathDlg(DoMathSimple *dm, wxWindow *parent)
 	inputpane->Add(new wxTextCtrl(this, ID_MINVALUE, wxString::FromDouble(minv) ));
 	inputpane->Add(new wxStaticText(this, wxID_ANY, _("Max value:")));
 	inputpane->Add(new wxTextCtrl(this, ID_MAXVALUE, wxString::FromDouble(maxv)));
+
+
+	wxCheckBox *pinsel = new wxCheckBox(this, ID_INSELECTED, _("In selected"));
+	pinsel->SetValue(hasselection ? dm->InSelected() : false);
+	pinsel->Enable(hasselection);
+	inputpane->Add(pinsel);
+
 	clientarea->Add(inputpane);
 
 	// total pane
@@ -90,11 +98,11 @@ MathDlg::MathDlg(DoMathSimple *dm, wxWindow *parent)
 }
 
 
-MathDlg::~MathDlg()
+MathSimpleDlg::~MathSimpleDlg()
 {
 }
 
-bool MathDlg::GetEditDouble(int id, double *val)
+bool MathSimpleDlg::GetEditDouble(int id, double *val)
 {
 	wxWindow *pwnd = FindWindow(id);
 	if (pwnd)
@@ -111,7 +119,7 @@ bool MathDlg::GetEditDouble(int id, double *val)
 
 }
 
-int MathDlg::ShowModal()
+int MathSimpleDlg::ShowModal()
 {
 	bool ok = false;
 	double val,minv,maxv;
@@ -121,9 +129,9 @@ int MathDlg::ShowModal()
 
 	if (ret == wxID_OK)
 	{
-		if ( GetEditDouble(ID_OPERAND, &val) )
+		if (GetEditDouble(ID_OPERAND, &val))
 			domath->SetOperand(val);
-		
+
 		pwnd = FindWindow(ID_PARAMETERSLIST);
 		if (pwnd)
 		{
@@ -132,7 +140,7 @@ int MathDlg::ShowModal()
 			{
 				domath->ClearParams();
 				int n = params->GetCount();
-				
+
 				for (int i = 0; i < n; ++i)
 				{
 					if (params->IsChecked(i))
@@ -159,6 +167,10 @@ int MathDlg::ShowModal()
 
 		if (GetEditDouble(ID_MINVALUE, &minv) && GetEditDouble(ID_MAXVALUE, &maxv))
 			domath->SetMinMax(minv, maxv);
+
+		wxCheckBox *pinsel = dynamic_cast<wxCheckBox *>(FindWindow(ID_INSELECTED));
+		if (pinsel && pinsel->IsEnabled() )
+			domath->SetSelected( pinsel->GetValue() );
 
 		domath->SaveConfig();
 	}

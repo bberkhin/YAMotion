@@ -1,11 +1,11 @@
 #pragma once
 #include "domath.h"
 
-class MathDlg : public wxDialog
+class MathSimpleDlg : public wxDialog
 {
 public:
-	MathDlg(DoMathSimple *dm, wxWindow *parent);
-	~MathDlg();
+	MathSimpleDlg(DoMathSimple *dm, wxWindow *parent, bool hasselection);
+	~MathSimpleDlg();
 	virtual int ShowModal();
 private:
 	bool GetEditDouble(int id, double *val);
