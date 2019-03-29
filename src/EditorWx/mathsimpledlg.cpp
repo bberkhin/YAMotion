@@ -80,7 +80,8 @@ MathSimpleDlg::MathSimpleDlg(DoMathSimple *dm, wxWindow *parent, bool hasselecti
 	inputpane->Add(new wxStaticText(this, wxID_ANY, _("Max value:")));
 	inputpane->Add(new wxTextCtrl(this, ID_MAXVALUE, wxString::FromDouble(maxv)));
 
-
+	inputpane->Add(10, 10);
+	inputpane->Add(new wxStaticLine(this), wxSizerFlags().Expand());	
 	wxCheckBox *pinsel = new wxCheckBox(this, ID_INSELECTED, _("In selected"));
 	pinsel->SetValue(hasselection ? dm->InSelected() : false);
 	pinsel->Enable(hasselection);

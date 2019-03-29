@@ -1,0 +1,1 @@
+E:\Projects\getetxutils\bin\msginit.exe --input=po/messages.pot --locale=ru --output=po/ru/messages.po

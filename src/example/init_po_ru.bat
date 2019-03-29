@@ -1,0 +1,1 @@
+msginit --input=po/messages.pot --locale=ru --output=po/ru/messages.po
