@@ -62,6 +62,7 @@
     <ClInclude Include="..\Gcode\CoordMotion.h" />
     <ClInclude Include="..\Gcode\environmentsimple.h" />
     <ClInclude Include="..\Gcode\gcodedefs.h" />
+    <ClInclude Include="..\Gcode\gcodeerrors.h" />
     <ClInclude Include="..\Gcode\GCodeInterpreter.h" />
     <ClInclude Include="..\Gcode\ienvironment.h" />
     <ClInclude Include="..\Gcode\Iexecutor.h" />

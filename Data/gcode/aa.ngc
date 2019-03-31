@@ -1,10 +1,1 @@
-G0z5 X-980 Y-0 z13  
-G0 X20 Y0 z5  		(move somewhere)
-G0 X20 Y0   
-G0 X20 Y0 z5  
-//G0 X20 Y0 z5  
-G0 X20 Y0 z5  
-G0 X20 Y0 z5  
-M2
-
-
+M300

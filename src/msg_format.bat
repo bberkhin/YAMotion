@@ -1,0 +1,1 @@
+..\..\getetxutils\bin\msgfmt.exe --output-file=po/ru/messages.mo po/ru/messages.po

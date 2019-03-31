@@ -45,6 +45,7 @@
 #include "bitmaps/stop.xpm"
 
 
+#define YA_WRONG_N _("Wrong N value")
 
 
 
@@ -893,7 +894,7 @@ wxThread::ExitCode SimulateGCodeThread::Entry()
 	{
 		if (!ppret->open_nc_file(fname.c_str()))
 		{
-			plogger->log(LOG_ERROR, "Can not open file: %s", fname.c_str());
+			plogger->log(LOG_ERROR, _("Can not open file: %s"), fname.c_str());
 			return NULL;
 		}
 		ppret->execute_file();

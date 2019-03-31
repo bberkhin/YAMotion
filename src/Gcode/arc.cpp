@@ -1,6 +1,7 @@
 #include <math.h>
 #include "GCodeInterpreter.h"
 #include "cmdparser.h"
+#include "gcodeerrors.h"
 
 using namespace Interpreter;
 
@@ -98,9 +99,9 @@ bool GCodeInterpreter::arc_to(int motion, const Coords &position, const CmdParse
 
 	first = runner.cutter_comp_firstmove;
 
-	IF_T_RET_F_SETSTATE((!parser.hasParam(PARAM_R) && (!ijk_flag)), PARAMETER_ERROR, "R i j k words all missing for arc");
+	IF_T_RET_F_SETSTATE((!parser.hasParam(PARAM_R) && (!ijk_flag)), PARAMETER_ERROR, YM_R_I_J_K_WORDS_ALL_MISSING_FOR_ARC);
 
-	IF_T_RET_F_SETSTATE((parser.hasParam(PARAM_R) && (ijk_flag)), PARAMETER_ERROR, "Mixed radius ijk format for arc");
+	IF_T_RET_F_SETSTATE((parser.hasParam(PARAM_R) && (ijk_flag)), PARAMETER_ERROR, YA_MIXED_RADIUS_IJK_FORMAT_FOR_ARC);
 
 	//if (settings->feed_mode == UNITS_PER_MINUTE) {
 	//	CHKS((settings->feed_rate == 0.0),
@@ -121,31 +122,31 @@ bool GCodeInterpreter::arc_to(int motion, const Coords &position, const CmdParse
 	{
 		if (runner.plane == Plane_XY)
 		{
-			IF_T_RET_F_SETSTATE(parser.hasParam(PARAM_K), PARAMETER_ERROR, "K word given for arc in XY plane");
+			IF_T_RET_F_SETSTATE(parser.hasParam(PARAM_K), PARAMETER_ERROR, YA_SOMEWORD_GIVEN_FOR_ARC_IN_XZ_PLANE, 'K');
 			if (!parser.hasParam(PARAM_I))
-				RET_F_SETSTATE(PARAMETER_ERROR, "I word missing in absolute center arc");
+				RET_F_SETSTATE(PARAMETER_ERROR, YA_SOMEWORDS_MISSING_IN_ABS_CENTERARC,'I');
 			else if (!parser.hasParam(PARAM_J))
-				RET_F_SETSTATE(PARAMETER_ERROR, "J word missing in absolute center arc");
+				RET_F_SETSTATE(PARAMETER_ERROR, YA_SOMEWORDS_MISSING_IN_ABS_CENTERARC, 'J');
 		}
 		else if (runner.plane == Plane_YZ)
 		{
-			IF_T_RET_F_SETSTATE(parser.hasParam(PARAM_I), PARAMETER_ERROR, "I word given for arc in YZ plane");
+			IF_T_RET_F_SETSTATE(parser.hasParam(PARAM_I), PARAMETER_ERROR, YA_SOMEWORD_GIVEN_FOR_ARC_IN_XZ_PLANE, 'I' );
 			if (!parser.hasParam(PARAM_J))
-				RET_F_SETSTATE(PARAMETER_ERROR, "J word missing in absolute center arc");
+				RET_F_SETSTATE(PARAMETER_ERROR, YA_SOMEWORDS_MISSING_IN_ABS_CENTERARC, 'J');
 			else if (!parser.hasParam(PARAM_K))
-				RET_F_SETSTATE(PARAMETER_ERROR, "K word missing in absolute center arc");
+				RET_F_SETSTATE(PARAMETER_ERROR, YA_SOMEWORDS_MISSING_IN_ABS_CENTERARC, 'K');
 		}
 		else if (runner.plane == Plane_XZ)
 		{
-			IF_T_RET_F_SETSTATE(parser.hasParam(PARAM_J), PARAMETER_ERROR, "J word given for arc in XZ plane");
+			IF_T_RET_F_SETSTATE(parser.hasParam(PARAM_J), PARAMETER_ERROR, YA_SOMEWORD_GIVEN_FOR_ARC_IN_XZ_PLANE, 'J' );
 			if (!parser.hasParam(PARAM_I))
-				RET_F_SETSTATE(PARAMETER_ERROR, "I word missing in absolute center arc");
+				RET_F_SETSTATE(PARAMETER_ERROR, YA_SOMEWORDS_MISSING_IN_ABS_CENTERARC, 'I');
 			else if (!parser.hasParam(PARAM_K))
-				RET_F_SETSTATE(PARAMETER_ERROR, "K word missing in absolute center arc");
+				RET_F_SETSTATE(PARAMETER_ERROR, YA_SOMEWORDS_MISSING_IN_ABS_CENTERARC, 'K');
 		}
 		else
 		{
-			RET_F_SETSTATE(PARAMETER_ERROR, "XY, XZ or YZ plane not defined");
+			RET_F_SETSTATE(PARAMETER_ERROR, YA_BUG_PLANE_NOT_XY_YZ_OR_XZ );
 		}
 	}
 	else 	// in R format, we need some XYZ words specified because a full circle is not allowed.
@@ -154,15 +155,15 @@ bool GCodeInterpreter::arc_to(int motion, const Coords &position, const CmdParse
 		if (runner.plane == Plane_XY)
 		{
 			IF_T_RET_F_SETSTATE(((!parser.hasParam(PARAM_X)) && (!parser.hasParam(PARAM_Y))), ///* && (!block->radius_flag) && (!block->theta_flag)*/
-				PARAMETER_ERROR, "X and Z words missing for arc in xy plane");
+				PARAMETER_ERROR, YA_X_AND_Y_WORDS_MISSING_FOR_ARC_IN_XY_PLANE);
 		}
 		else if (runner.plane == Plane_YZ) {
 			IF_T_RET_F_SETSTATE(((!parser.hasParam(PARAM_Y)) && (!parser.hasParam(PARAM_Z))),
-				PARAMETER_ERROR, "Y and Z words missing for arc in YZ plane");
+				PARAMETER_ERROR, YA_Y_AND_Z_WORDS_MISSING_FOR_ARC_IN_YZ_PLANE);
 		}
 		else if (runner.plane == Plane_XZ) {
 			IF_T_RET_F_SETSTATE(((!parser.hasParam(PARAM_X)) && (parser.hasParam(PARAM_Z))),
-				PARAMETER_ERROR, "X and Z words missing for arc in XZ plane");
+				PARAMETER_ERROR, YA_X_AND_Z_WORDS_MISSING_FOR_ARC_IN_XZ_PLANE);
 		}
 	}
 
@@ -234,7 +235,7 @@ bool GCodeInterpreter::arc_to(int motion, const Coords &position, const CmdParse
 			end_y, end_z, end_x, AA_end, BB_end, CC_end, u_end, v_end, w_end, j, k));
 	}
 	else
-		RET_F_SETSTATE(PARAMETER_ERROR, "Bug plane not xy yz or xz");
+		RET_F_SETSTATE(PARAMETER_ERROR, YA_BUG_PLANE_NOT_XY_YZ_OR_XZ);
 	return true;
 }
 
@@ -384,7 +385,7 @@ bool GCodeInterpreter::arc_data_ijk(int motion,       //!< either G_2 (cw arc) o
 	radius2 = hypot((*center_x - end_x), (*center_y - end_y));
 
 	IF_T_RET_F_SETSTATE(((radius < radius_tolerance) || (radius2 < radius_tolerance)), PARAMETER_ERROR,
-		"Zero-radius arc: start=(%c%.4f,%c%.4f) center=(%c%.4f,%c%.4f) end=(%c%.4f,%c%.4f) r1=%.4f r2=%.4f",
+		YA_ZERO_RADIUS_ARC_WITHARGS,
 		a, current_x, b, current_y,
 		a, *center_x, b, *center_y,
 		a, end_x, b, end_y, radius, radius2);
@@ -393,7 +394,7 @@ bool GCodeInterpreter::arc_data_ijk(int motion,       //!< either G_2 (cw arc) o
 	double rel_err = abs_err / std::max(radius, radius2);
 	IF_T_RET_F_SETSTATE((abs_err > spiral_abs_tolerance * 100.0) ||
 		(rel_err > spiral_rel_tolerance && abs_err > spiral_abs_tolerance), PARAMETER_ERROR,
-		"Radius to end of arc differs from radius to start: start=(%c%.4f,%c%.4f) center=(%c%.4f,%c%.4f) end=(%c%.4f,%c%.4f) r1=%.4f r2=%.4f abs_err=%.4g rel_err=%.4f%%",
+		YA_RADIUS_TO_STARTARC_DIF_RADIUS_FROM_END,
 		a, current_x, b, current_y, a, *center_x, b, *center_y, a, end_x, b, end_y, radius, radius2, abs_err, rel_err * 100);
 
 	if (motion == G_2)
@@ -460,13 +461,13 @@ bool GCodeInterpreter::arc_data_r(int motion, //!< either G_2 (cw arc) or G_3 (c
 	double theta;                 /* angle of line from M to center */
 	double turn2;                 /* absolute value of half of turn */
 
-	IF_T_RET_F_SETSTATE(((end_x == current_x) && (end_y == current_y)), PARAMETER_ERROR, "Current point same as end point of arc");
+	IF_T_RET_F_SETSTATE(((end_x == current_x) && (end_y == current_y)), PARAMETER_ERROR, YA_CURRENT_POINT_SAME_AS_END_POINT_OF_ARC);
 	abs_radius = fabs(radius);
 	mid_x = (end_x + current_x) / 2.0;
 	mid_y = (end_y + current_y) / 2.0;
 	half_length = hypot((mid_x - end_x), (mid_y - end_y));
 
-	IF_T_RET_F_SETSTATE(((half_length - abs_radius) > tolerance), PARAMETER_ERROR, "Arc radius too small to reach end point");
+	IF_T_RET_F_SETSTATE(((half_length - abs_radius) > tolerance), PARAMETER_ERROR, YA_ARC_RADIUS_TOO_SMALL_TO_REACH_END_POINT);
 
 	if ((half_length / abs_radius) > (1 - TINY))
 		half_length = abs_radius;   /* allow a small error for semicircle */
@@ -540,8 +541,7 @@ bool GCodeInterpreter::convert_arc_comp1(int move,  //!< either G_2 (cw arc) or 
 
 	comp_get_current(&cx, &cy, &cz);
 
-	IF_T_RET_F_SETSTATE((hypot((end_x - cx), (end_y - cy)) <= tool_radius),PARAMETER_ERROR,
-		"Radius of cutter compensation entry arc is not greater than the tool radius");
+	IF_T_RET_F_SETSTATE((hypot((end_x - cx), (end_y - cy)) <= tool_radius),PARAMETER_ERROR, YA_RADIUS_OF_COMPENSTION_IS_NOT_GRATE_TOOL_RADIUS);
 
 	int p_number = 1;
 	parser.getIParam(PARAM_P, &p_number);
@@ -591,8 +591,7 @@ bool GCodeInterpreter::convert_arc_comp1(int move,  //!< either G_2 (cw arc) or 
 	double AB_ang = atan2(center_y - end_y, center_x - end_x);
 	double A_ang = atan2(cy - end_y, cx - end_x) - AB_ang;
 
-	IF_T_RET_F_SETSTATE((fabs(cos(A_ang)) < TOLERANCE_EQUAL), PARAMETER_ERROR,
-		"Tool radius have to be not less than arc radius with compesation");
+	IF_T_RET_F_SETSTATE((fabs(cos(A_ang)) < TOLERANCE_EQUAL), PARAMETER_ERROR, YA_TOOL_RADIUS_NOT_LESS_THAN_ARC_RADIUS_WITH_COMP);
 	
 	double c_len = b_len / cos(A_ang);
 
@@ -602,8 +601,7 @@ bool GCodeInterpreter::convert_arc_comp1(int move,  //!< either G_2 (cw arc) or 
 
 	/* center to endpoint distances matched before - they still should. */
 	IF_T_RET_F_SETSTATE((fabs(hypot(center_x - end_x, center_y - end_y) -
-		hypot(center_x - cx, center_y - cy)) > spiral_abs_tolerance), PARAMETER_ERROR,
-		"Bug in tool radius comp");
+		hypot(center_x - cx, center_y - cy)) > spiral_abs_tolerance), PARAMETER_ERROR, YA_BUG_IN_TOOL_RADIUS_COMP);
 
 	// need this move for lathes to move the tool origin first.  otherwise, the arc isn't an arc.
 	//if (runner.cutter_comp_orientation != 0 && runner.cutter_comp_orientation != 9) 
@@ -731,8 +729,7 @@ bool GCodeInterpreter::convert_arc_comp2(int move,  //!< either G_2 (cw arc) or 
 	if (((side == CutterCompType_LEFT) && (move == G_3)) || ((side == CutterCompType_RIGHT) && (move == G_2))) {
 		// we are cutting inside the arc
 		gamma = atan2((centery - end_y), (centerx - end_x));
-		IF_T_RET_F_SETSTATE((arc_radius <= tool_radius),PARAMETER_ERROR,
-			"Tool radius have to be not less than arc radius with compesation");
+		IF_T_RET_F_SETSTATE((arc_radius <= tool_radius),PARAMETER_ERROR, YA_TOOL_RADIUS_NOT_LESS_THAN_ARC_RADIUS_WITH_COMP);
 	}
 	else 
 	{
@@ -764,7 +761,7 @@ bool GCodeInterpreter::convert_arc_comp2(int move,  //!< either G_2 (cw arc) or 
 				dist_from_center = arc_radius - tool_radius;
 				toward_nominal = cy + tool_radius;
 				double l = toward_nominal / dist_from_center;
-				IF_T_RET_F_SETSTATE((l > 1.0 || l < -1.0), PARAMETER_ERROR, "Arc move in concave corner cannot be reached by the tool without gouging");
+				IF_T_RET_F_SETSTATE((l > 1.0 || l < -1.0), PARAMETER_ERROR, YA_ARC_MOVE_IN_CORNER_CANATBEREACH);
 				if (turn > 0) 
 				{
 					angle_from_center = theta + asin(l);
@@ -779,7 +776,7 @@ bool GCodeInterpreter::convert_arc_comp2(int move,  //!< either G_2 (cw arc) or 
 				dist_from_center = arc_radius + tool_radius;
 				toward_nominal = cy - tool_radius;
 				double l = toward_nominal / dist_from_center;
-				IF_T_RET_F_SETSTATE((l > 1.0 || l < -1.0), PARAMETER_ERROR, "Arc move in concave corner cannot be reached by the tool without gouging");
+				IF_T_RET_F_SETSTATE((l > 1.0 || l < -1.0), PARAMETER_ERROR, YA_ARC_MOVE_IN_CORNER_CANATBEREACH);
 				if (turn > 0)
 				{
 					angle_from_center = theta + M_PIl - asin(l);
@@ -812,10 +809,10 @@ bool GCodeInterpreter::convert_arc_comp2(int move,  //!< either G_2 (cw arc) or 
 			double arc_cc, pullback, cc_dir, a;
 			arc_cc = hypot(prev.center2 - centery, prev.center1 - centerx);
 
-			IF_T_RET_F_SETSTATE((oldrad == 0 || arc_cc == 0), PARAMETER_ERROR, "Arc to arc motion is invalid because the arcs have the same center");
+			IF_T_RET_F_SETSTATE((oldrad == 0 || arc_cc == 0), PARAMETER_ERROR, YA_ARC_TO_ARC_INVALID_ARC_HAVE_SME_CENTERS);
 			a = (SQ(oldrad) + SQ(arc_cc) - SQ(newrad)) / (2 * oldrad * arc_cc);
 
-			IF_T_RET_F_SETSTATE((a > 1.0 || a < -1.0), PARAMETER_ERROR, "Arc to arc motion makes a corner the compensated tool can't fit in without gouging");
+			IF_T_RET_F_SETSTATE((a > 1.0 || a < -1.0), PARAMETER_ERROR, YA_ARC_TO_ARC_MAKE_CORNER_OFCOMP);
 			pullback = acos(a);
 			cc_dir = atan2(centery - prev.center2, centerx - prev.center1);
 
@@ -938,7 +935,7 @@ bool GCodeInterpreter::arc_data_comp_ijk(int move,  //!<either G_2 (cw arc) or G
 	arc_radius = hypot((*center_x - current_x), (*center_y - current_y));
 	radius2 = hypot((*center_x - end_x), (*center_y - end_y));
 	IF_T_RET_F_SETSTATE(((arc_radius < radius_tolerance) || (radius2 < radius_tolerance)),PARAMETER_ERROR,
-		"Zero-radius arc: start=(%c%.4f,%c%.4f) center=(%c%.4f,%c%.4f) end=(%c%.4f,%c%.4f) r1=%.4f r2=%.4f",
+		YA_ZERO_RADIUS_ARC_WITHARGS,
 		a, current_x, b, current_y,
 		a, *center_x, b, *center_y,
 		a, end_x, b, end_y, arc_radius, radius2);
@@ -948,15 +945,14 @@ bool GCodeInterpreter::arc_data_comp_ijk(int move,  //!<either G_2 (cw arc) or G
 
 	IF_T_RET_F_SETSTATE((abs_err > spiral_abs_tolerance * 100.0) ||
 		(rel_err > spiral_rel_tolerance && abs_err > spiral_abs_tolerance), PARAMETER_ERROR,
-		"Radius to end of arc differs from radius to start: start=(%c%.4f,%c%.4f) center=(%c%.4f,%c%.4f) end=(%c%.4f,%c%.4f) "
-			"r1=%.4f r2=%.4f abs_err=%.4g rel_err=%.4f%%",
+		YA_RADIUS_TO_STARTARC_DIF_RADIUS_FROM_END,
 		a, current_x, b, current_y,
 		a, *center_x, b, *center_y,
 		a, end_x, b, end_y, arc_radius, radius2,
 		abs_err, rel_err * 100);
 
 	IF_T_RET_F_SETSTATE(((arc_radius <= tool_radius) && (((side == CutterCompType_LEFT) && (move == G_3)) ||
-		((side == CutterCompType_RIGHT) && (move == G_2)))), PARAMETER_ERROR, "Tool radius not less than arc radius with com");
+		((side == CutterCompType_RIGHT) && (move == G_2)))), PARAMETER_ERROR, YA_TOOL_RADIUS_NOT_LESS_THAN_ARC_RADIUS_WITH_COMP);
 
 	/* This catches an arc too small for the tool, also */
 	if (move == G_2)
@@ -964,7 +960,7 @@ bool GCodeInterpreter::arc_data_comp_ijk(int move,  //!<either G_2 (cw arc) or G
 	else if (move == G_3)
 		*turn = 1 * p_number;
 	else
-		RET_F_SETSTATE(INTERNAL_ERROR,"Arc CODE_NOT_G2 or G3");
+		RET_F_SETSTATE(INTERNAL_ERROR,YA_BUG_CODE_NOT_G2_OR_G3);
 
 	return true;
 }
@@ -1045,7 +1041,7 @@ bool GCodeInterpreter::arc_data_comp_r(int move,    //!< either G_2 (cw arc) or 
 
 	abs_radius = fabs(big_radius);
 	IF_T_RET_F_SETSTATE(((abs_radius <= tool_radius) && (((side == CutterCompType_LEFT) && (move == G_3)) ||
-		((side == CutterCompType_RIGHT) && (move == G_2)))), PARAMETER_ERROR, "Tool radius not less than arc radius with com");
+		((side == CutterCompType_RIGHT) && (move == G_2)))), PARAMETER_ERROR, YA_TOOL_RADIUS_NOT_LESS_THAN_ARC_RADIUS_WITH_COMP);
 
 
 	return arc_data_r(move, current_x, current_y, end_x, end_y, big_radius, p_number,

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-03-29 13:15+0700\n"
+"POT-Creation-Date: 2019-03-31 02:07+0700\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -22,220 +22,561 @@ msgstr ""
 msgid "\"%s\" Not found"
 msgstr ""
 
-#: appframe.cpp:740
+#: gcodeerrors.h:87
+#, c-format
+msgid "%c word given for arc in xz plane"
+msgstr ""
+
+#: gcodeerrors.h:88
+#, c-format
+msgid "%c word missing in absolute center arc"
+msgstr ""
+
+#: appframe.cpp:741
 msgid "&3DView"
 msgstr ""
 
-#: appframe.cpp:692
+#: appframe.cpp:693
 msgid "&ANSI (Windows)"
 msgstr ""
 
-#: appframe.cpp:733
+#: appframe.cpp:734
 msgid "&About ..\tCtrl+D"
 msgstr ""
 
-#: appframe.cpp:725
+#: appframe.cpp:726
 msgid "&Back"
 msgstr ""
 
-#: appframe.cpp:721
+#: appframe.cpp:722
 msgid "&Bottom"
 msgstr ""
 
-#: appframe.cpp:710
+#: appframe.cpp:711
 msgid "&Check"
 msgstr ""
 
-#: appframe.cpp:622
+#: appframe.cpp:623
 msgid "&Close\tCtrl+W"
 msgstr ""
 
-#: appframe.cpp:712
+#: appframe.cpp:713
 msgid "&Convert Gcmc"
 msgstr ""
 
-#: appframe.cpp:664
+#: appframe.cpp:665
 msgid "&Copy\tCtrl+C"
 msgstr ""
 
-#: appframe.cpp:666
+#: appframe.cpp:667
 msgid "&Delete\tDel"
 msgstr ""
 
-#: appframe.cpp:737
+#: appframe.cpp:738
 msgid "&Edit"
 msgstr ""
 
 #. construct menu
-#: appframe.cpp:736
+#: appframe.cpp:737
 msgid "&File"
 msgstr ""
 
-#: appframe.cpp:668
+#: appframe.cpp:669
 msgid "&Find\tCtrl+F"
 msgstr ""
 
-#: appframe.cpp:724
+#: appframe.cpp:725
 msgid "&Front"
 msgstr ""
 
-#: appframe.cpp:739
+#: appframe.cpp:740
 msgid "&GCode"
 msgstr ""
 
-#: appframe.cpp:741
+#: appframe.cpp:742
 msgid "&Help"
 msgstr ""
 
-#: appframe.cpp:697
+#: appframe.cpp:698
 msgid "&Highlight language .."
 msgstr ""
 
-#: appframe.cpp:719
+#: appframe.cpp:720
 msgid "&Isometric"
 msgstr ""
 
-#: appframe.cpp:640
+#: appframe.cpp:641
 msgid "&Last Files"
 msgstr ""
 
-#: appframe.cpp:722
+#: appframe.cpp:723
 msgid "&Left"
 msgstr ""
 
-#: appframe.cpp:650
+#: appframe.cpp:651
 msgid "&Lower case"
 msgstr ""
 
-#: appframe.cpp:693
+#: appframe.cpp:694
 msgid "&MAC (Macintosh)"
 msgstr ""
 
-#: appframe.cpp:618
+#: appframe.cpp:619
 msgid "&New ..\tCtrl+O"
 msgstr ""
 
-#: appframe.cpp:619
+#: appframe.cpp:620
 msgid "&Open ..\tCtrl+O"
 msgstr ""
 
-#: appframe.cpp:665
+#: appframe.cpp:666
 msgid "&Paste\tCtrl+V"
 msgstr ""
 
-#: appframe.cpp:628
+#: appframe.cpp:629
 msgid "&Print ..\tCtrl+P"
 msgstr ""
 
-#: appframe.cpp:643
+#: appframe.cpp:644
 msgid "&Quit\tCtrl+Q"
 msgstr ""
 
-#: appframe.cpp:679
+#: appframe.cpp:680
 msgid "&Readonly mode"
 msgstr ""
 
-#: appframe.cpp:661
+#: appframe.cpp:662
 msgid "&Redo\tCtrl+Shift+Z"
 msgstr ""
 
-#: appframe.cpp:670
+#: appframe.cpp:671
 msgid "&Replace\tCtrl+H"
 msgstr ""
 
-#: appframe.cpp:723
+#: appframe.cpp:724
 msgid "&Right"
 msgstr ""
 
-#: appframe.cpp:620
+#: appframe.cpp:621
 msgid "&Save\tCtrl+S"
 msgstr ""
 
-#: appframe.cpp:673
+#: appframe.cpp:674
 msgid "&Select all\tCtrl+A"
 msgstr ""
 
-#: appframe.cpp:711
+#: appframe.cpp:712
 msgid "&Simulate"
 msgstr ""
 
-#: appframe.cpp:727
+#: appframe.cpp:728
 msgid "&Start Simulate"
 msgstr ""
 
-#: appframe.cpp:720
+#: appframe.cpp:721
 msgid "&Top"
 msgstr ""
 
-#: appframe.cpp:660
+#: appframe.cpp:661
 msgid "&Undo\tCtrl+Z"
 msgstr ""
 
-#: appframe.cpp:649
+#: appframe.cpp:650
 msgid "&Upper case"
 msgstr ""
 
-#: appframe.cpp:738
+#: appframe.cpp:739
 msgid "&View"
 msgstr ""
 
-#: appframe.cpp:654
-msgid "CR (&Linux)"
+#: gcodeerrors.h:19
+msgid "A file is already open"
+msgstr ""
+
+#: gcodeerrors.h:20
+msgid "All axes missing with g52 or g92"
+msgstr ""
+
+#: gcodeerrors.h:21
+msgid "All axes missing with motion code"
+msgstr ""
+
+#: gcodeerrors.h:205
+msgid "Analog input selected out of bounds"
+msgstr ""
+
+#: gcodeerrors.h:94
+msgid ""
+"Arc move in concave corner cannot be reached by the tool without gouging"
+msgstr ""
+
+#: gcodeerrors.h:22
+msgid "Arc radius too small to reach end point"
+msgstr ""
+
+#: gcodeerrors.h:95
+msgid "Arc to arc motion is invalid because the arcs have the same center"
+msgstr ""
+
+#: gcodeerrors.h:96
+msgid ""
+"Arc to arc motion makes a corner the compensated tool can't fit in without "
+"gouging"
+msgstr ""
+
+#: gcodeerrors.h:23
+msgid "Argument to acos out of range"
+msgstr ""
+
+#: gcodeerrors.h:24
+msgid "Argument to asin out of range"
+msgstr ""
+
+#: gcodeerrors.h:25
+msgid "Attempt to divide by zero"
+msgstr ""
+
+#: gcodeerrors.h:26
+msgid "Attempt to raise negative to non integer power"
+msgstr ""
+
+#: gcodeerrors.h:27
+msgid "Bad format integer"
+msgstr ""
+
+#: gcodeerrors.h:28
+msgid "Bad number format"
+msgstr ""
+
+#: gcodeerrors.h:16
+#, c-format
+msgid "Bad number format parsing '%s'"
+msgstr ""
+
+#: gcodeerrors.h:29
+msgid "Bug bad g code modal group 0"
+msgstr ""
+
+#: gcodeerrors.h:30
+msgid "Bug code not g0 or g1"
+msgstr ""
+
+#: gcodeerrors.h:31
+msgid "Bug code not g17 g18 or g19"
+msgstr ""
+
+#: gcodeerrors.h:34
+msgid "Bug code not g2 or g3"
+msgstr ""
+
+#: gcodeerrors.h:32
+msgid "Bug code not g20 or g21"
+msgstr ""
+
+#: gcodeerrors.h:33
+msgid "Bug code not g28 or g30"
+msgstr ""
+
+#: gcodeerrors.h:35
+msgid "Bug code not g4 g10 g28 g30 g52 g53 or g92 series"
+msgstr ""
+
+#: gcodeerrors.h:36
+msgid "Bug code not g61 g61.1 or g64"
+msgstr ""
+
+#: gcodeerrors.h:37
+msgid "Bug code not g90 or g91"
+msgstr ""
+
+#: gcodeerrors.h:38
+msgid "Bug code not g98 or g99"
+msgstr ""
+
+#: gcodeerrors.h:39
+msgid "Bug code not in g52 or g92 series"
+msgstr ""
+
+#: gcodeerrors.h:40
+msgid "Bug code not in range g54 to g593"
+msgstr ""
+
+#: gcodeerrors.h:41
+msgid "Bug code not m0 m1 m2 m30 m60 m99"
+msgstr ""
+
+#: gcodeerrors.h:42
+msgid "Bug distance mode not g90 or g91"
+msgstr ""
+
+#: gcodeerrors.h:43
+msgid "Bug function should not have been called"
+msgstr ""
+
+#: gcodeerrors.h:44
+msgid "Bug in tool radius comp"
+msgstr ""
+
+#: gcodeerrors.h:45
+msgid "Bug plane not xy yz or xz"
+msgstr ""
+
+#: gcodeerrors.h:46
+msgid "Bug side not right or left"
+msgstr ""
+
+#: gcodeerrors.h:47
+msgid "Bug unknown motion code"
+msgstr ""
+
+#: gcodeerrors.h:48
+msgid "Bug unknown operation"
+msgstr ""
+
+#: gcodeerrors.h:180
+msgid "Bug: call stack underrun"
 msgstr ""
 
 #: appframe.cpp:655
+msgid "CR (&Linux)"
+msgstr ""
+
+#: appframe.cpp:656
 msgid "CR+LF (&Windows)"
 msgstr ""
 
-#: appframe.cpp:715
+#: appframe.cpp:716
 msgid "Calc by Expression"
 msgstr ""
 
-#: appframe.cpp:714
+#: gcodeerrors.h:15
+msgid "Calculation resulted is 'infinity'"
+msgstr ""
+
+#: gcodeerrors.h:14
+msgid "Calculation resulted is 'not a number'"
+msgstr ""
+
+#: appframe.cpp:715
 msgid "Calculator"
 msgstr ""
 
-#: appframe.cpp:676
-msgid "Change &case to .."
+#: appframe.cpp:897
+#, c-format
+msgid "Can not open file: %s"
 msgstr ""
 
-#: appframe.cpp:761
-msgid "Check"
+#: gcodeerrors.h:199
+msgid "Can't select analog input with wait type != immediate return"
 msgstr ""
 
-#: appframe.cpp:919
-msgid "Checking completed"
+#: gcodeerrors.h:49
+msgid "Cannot change axis offsets with cutter radius comp"
 msgstr ""
 
-#: appframe.cpp:404
-msgid "Close abort"
+#: gcodeerrors.h:189
+msgid "Cannot change planes with cutter radius compensation on"
 msgstr ""
 
-#: appframe.cpp:763
-msgid "Convert"
+#: gcodeerrors.h:50
+msgid "Cannot create backup file"
+msgstr ""
+
+#: gcodeerrors.h:51
+msgid "Cannot do g1 with zero feed rate"
+msgstr ""
+
+#: gcodeerrors.h:52
+msgid "Cannot do zero repeats of cycle"
+msgstr ""
+
+#: gcodeerrors.h:53
+msgid "Cannot make arc with zero feed rate"
+msgstr ""
+
+#: gcodeerrors.h:193
+msgid "Cannot move rotary axes with G76"
+msgstr ""
+
+#: gcodeerrors.h:54
+msgid "Cannot open backup file"
+msgstr ""
+
+#: gcodeerrors.h:55
+msgid "Cannot open variable file"
+msgstr ""
+
+#: gcodeerrors.h:56
+msgid "Cannot probe with cutter radius comp on"
+msgstr ""
+
+#: gcodeerrors.h:57
+msgid "Cannot probe with zero feed rate"
+msgstr ""
+
+#: gcodeerrors.h:58
+msgid "Cannot put a b in canned cycle"
+msgstr ""
+
+#: gcodeerrors.h:59
+msgid "Cannot put a c in canned cycle"
+msgstr ""
+
+#: gcodeerrors.h:60
+msgid "Cannot put an a in canned cycle"
+msgstr ""
+
+#: gcodeerrors.h:61
+msgid "Cannot turn cutter radius comp on when on"
+msgstr ""
+
+#: gcodeerrors.h:62
+msgid "Cannot use axis values with g80"
+msgstr ""
+
+#: gcodeerrors.h:63
+msgid "Cannot use axis values without a g code that uses them"
+msgstr ""
+
+#: gcodeerrors.h:64
+msgid "Cannot use g28 or g30 with cutter radius comp"
+msgstr ""
+
+#: gcodeerrors.h:65
+msgid "Cannot use g53 incremental"
+msgstr ""
+
+#: gcodeerrors.h:66
+msgid "Cannot use g53 with cutter radius comp"
+msgstr ""
+
+#: gcodeerrors.h:67
+msgid "Cannot use two g codes that both use axis values"
 msgstr ""
 
 #: appframe.cpp:677
+msgid "Change &case to .."
+msgstr ""
+
+#: appframe.cpp:762
+msgid "Check"
+msgstr ""
+
+#: appframe.cpp:920
+msgid "Checking completed"
+msgstr ""
+
+#: appframe.cpp:405
+msgid "Close abort"
+msgstr ""
+
+#: gcodeerrors.h:9
+msgid "CmdParser::read_set_parameter can not called here"
+msgstr ""
+
+#: gcodeerrors.h:68
+msgid "Command too long"
+msgstr ""
+
+#: gcodeerrors.h:8
+#, c-format
+msgid "Conflict M%d modal group"
+msgstr ""
+
+#: appframe.cpp:764
+msgid "Convert"
+msgstr ""
+
+#: appframe.cpp:678
 msgid "Convert line &endings to .."
 msgstr ""
 
-#: appframe.cpp:758
+#: appframe.cpp:759
 msgid "Copy"
 msgstr ""
 
-#: appframe.cpp:663
+#: app.cpp:181
+#, c-format
+msgid "Couldn't find/load the 'messages' catalog for locale '%s'."
+msgstr ""
+
+#: appframe.cpp:664
 msgid "Cu&t\tCtrl+X"
 msgstr ""
 
-#: appframe.cpp:754 appframe.cpp:755
+#: gcodeerrors.h:69
+msgid "Current point same as end point of arc"
+msgstr ""
+
+#: appframe.cpp:755 appframe.cpp:756
 msgid "Cut"
+msgstr ""
+
+#: gcodeerrors.h:190
+msgid "Cutter radius compensation allowed only in XY, XZ planes"
+msgstr ""
+
+#: gcodeerrors.h:204
+msgid "Digital input selected out of bounds"
+msgstr ""
+
+#: gcodeerrors.h:70
+msgid "Dwell time missing with g4"
+msgstr ""
+
+#: gcodeerrors.h:71
+msgid "Dwell time p word missing with g82"
+msgstr ""
+
+#: gcodeerrors.h:72
+msgid "Dwell time p word missing with g86"
+msgstr ""
+
+#: gcodeerrors.h:73
+msgid "Dwell time p word missing with g88"
+msgstr ""
+
+#: gcodeerrors.h:74
+msgid "Dwell time p word missing with g89"
+msgstr ""
+
+#: gcodeerrors.h:75
+msgid "Equal sign missing in parameter setting"
+msgstr ""
+
+#: gcodeerrors.h:76
+msgid "F word missing with inverse time arc move"
+msgstr ""
+
+#: gcodeerrors.h:77
+msgid "F word missing with inverse time g1 move"
+msgstr ""
+
+#: gcodeerrors.h:173
+msgid "F word used with a g33/g33.1"
+msgstr ""
+
+#: gcodeerrors.h:78
+msgid "File ended with no percent sign"
+msgstr ""
+
+#: gcodeerrors.h:79
+msgid "File ended with no percent sign or program end"
+msgstr ""
+
+#: gcodeerrors.h:80
+msgid "File name too long"
+msgstr ""
+
+#: gcodeerrors.h:186
+msgid "File not open"
 msgstr ""
 
 #: edit.cpp:874
 msgid "Find"
 msgstr ""
 
-#: appframe.cpp:669
+#: appframe.cpp:670
 msgid "Find &next\tF3"
 msgstr ""
 
@@ -245,6 +586,10 @@ msgstr ""
 
 #: edit.cpp:952 edit.cpp:1001
 msgid "Find result"
+msgstr ""
+
+#: gcodeerrors.h:81
+msgid "G code out of range"
 msgstr ""
 
 #. sets the application title
@@ -257,6 +602,14 @@ msgstr ""
 msgid "GCode expression calculator"
 msgstr ""
 
+#: gcodeerrors.h:192
+msgid "I J or K words missing with G76"
+msgstr ""
+
+#: gcodeerrors.h:83
+msgid "I word missing with g87"
+msgstr ""
+
 #: mathsimpledlg.cpp:85
 msgid "In selected"
 msgstr ""
@@ -265,11 +618,48 @@ msgstr ""
 msgid "Input value:"
 msgstr ""
 
-#: appframe.cpp:656
+#: gcodeerrors.h:201
+msgid "Invalid to select both a digital and an analog input with M66"
+msgstr ""
+
+#: gcodeerrors.h:84
+msgid "J word missing with g87"
+msgstr ""
+
+#: gcodeerrors.h:172
+msgid "K word missing with g33/g33.1"
+msgstr ""
+
+#: gcodeerrors.h:85
+msgid "K word missing with g87"
+msgstr ""
+
+#: appframe.cpp:657
 msgid "LF (&Macintosh)"
 msgstr ""
 
-#: appframe.cpp:757
+#: app.cpp:152
+msgid "Language"
+msgstr ""
+
+#: gcodeerrors.h:98
+msgid "Left bracket missing after slash with atan"
+msgstr ""
+
+#: gcodeerrors.h:99
+msgid "Left bracket missing after unary operation name"
+msgstr ""
+
+#: gcodeerrors.h:11
+msgid "Letter $ - multishpindle not supported"
+msgstr ""
+
+#: gcodeerrors.h:100
+#, c-format
+msgid "M code greater than 199: M%d"
+msgstr ""
+
+#: appframe.cpp:758
 msgid "Macroses"
 msgstr ""
 
@@ -281,118 +671,561 @@ msgstr ""
 msgid "Min value:"
 msgstr ""
 
-#: appframe.cpp:750
-msgid "New"
+#: gcodeerrors.h:101
+msgid "Mixed radius ijk format for arc"
+msgstr ""
+
+#: gcodeerrors.h:194
+msgid "Multiple e words on one line"
+msgstr ""
+
+#: gcodeerrors.h:102
+msgid "Multiple spindle choice ($) words on one line"
+msgstr ""
+
+#: gcodeerrors.h:13
+#, c-format
+msgid "Multiply word %c is defened"
+msgstr ""
+
+#: gcodeerrors.h:103
+msgid "Must use g0 or g1 with g53"
+msgstr ""
+
+#: gcodeerrors.h:10
+msgid "Named parameter does not support yet"
+msgstr ""
+
+#: gcodeerrors.h:195
+msgid "Named parameter not terminated"
+msgstr ""
+
+#: gcodeerrors.h:202
+msgid "Need to have either a valid P or a valid E word with M66"
+msgstr ""
+
+#: gcodeerrors.h:188
+msgid "Need tool prepared -Txx- for toolchange"
+msgstr ""
+
+#: gcodeerrors.h:104
+msgid "Negative argument to sqrt"
+msgstr ""
+
+#: gcodeerrors.h:105
+msgid "Negative d word tool radius index used"
+msgstr ""
+
+#: gcodeerrors.h:106
+msgid "Negative f word used"
+msgstr ""
+
+#: gcodeerrors.h:107
+msgid "Negative g code used"
+msgstr ""
+
+#: gcodeerrors.h:108
+msgid "Negative h word used"
+msgstr ""
+
+#: gcodeerrors.h:109
+msgid "Negative l word used"
+msgstr ""
+
+#: gcodeerrors.h:110
+msgid "Negative m code used"
+msgstr ""
+
+#: gcodeerrors.h:111
+msgid "Negative or zero q value used"
+msgstr ""
+
+#: gcodeerrors.h:112
+msgid "Negative p word used"
+msgstr ""
+
+#: gcodeerrors.h:113
+msgid "Negative spindle speed used"
+msgstr ""
+
+#: gcodeerrors.h:114
+msgid "Negative tool id used"
+msgstr ""
+
+#: gcodeerrors.h:115
+msgid "Nested comment found"
+msgstr ""
+
+#: gcodeerrors.h:184
+msgid "Nested subroutine definition"
 msgstr ""
 
 #: appframe.cpp:751
+msgid "New"
+msgstr ""
+
+#: gcodeerrors.h:116
+msgid "No characters found in reading real value"
+msgstr ""
+
+#: gcodeerrors.h:117
+msgid "Non integer value for integer"
+msgstr ""
+
+#: gcodeerrors.h:185
+msgid "Not in subroutine definition"
+msgstr ""
+
+#: gcodeerrors.h:118
+msgid "Null missing after newline"
+msgstr ""
+
+#: appframe.cpp:752
 msgid "Open"
 msgstr ""
 
-#: appframe.cpp:759
+#: gcodeerrors.h:196
+msgid "Out of memory"
+msgstr ""
+
+#: gcodeerrors.h:191
+msgid "P word missing with G76"
+msgstr ""
+
+#: gcodeerrors.h:119
+msgid "Parameter file out of order"
+msgstr ""
+
+#: gcodeerrors.h:121
+msgid "Parameter is readonly"
+msgstr ""
+
+#: gcodeerrors.h:120
+msgid "Parameter number out of range"
+msgstr ""
+
+#: appframe.cpp:760
 msgid "Paste"
 msgstr ""
 
-#: appframe.cpp:729
+#: appframe.cpp:730
 msgid "Pause"
+msgstr ""
+
+#: app.cpp:151
+msgid "Please choose language:"
 msgstr ""
 
 #: mathsimpledlg.cpp:157
 msgid "Please, select at least one parameter"
 msgstr ""
 
-#: appframe.cpp:627
+#: gcodeerrors.h:138
+msgid "Pocket max too large"
+msgstr ""
+
+#: appframe.cpp:628
 msgid "Print Pre&view\tCtrl+Shift+P"
 msgstr ""
 
-#: appframe.cpp:626
+#: appframe.cpp:627
 msgid "Print Set&up .."
 msgstr ""
 
-#: appframe.cpp:624
+#: appframe.cpp:625
 msgid "Proper&ties ..\tCtrl+I"
 msgstr ""
 
-#: appframe.cpp:671
+#: gcodeerrors.h:203
+msgid "Q word missing with g73"
+msgstr ""
+
+#: gcodeerrors.h:122
+msgid "Q word missing with g83"
+msgstr ""
+
+#: gcodeerrors.h:198
+msgid "Queue is not empty after external input"
+msgstr ""
+
+#: gcodeerrors.h:123
+msgid "Queue is not empty after probing"
+msgstr ""
+
+#: gcodeerrors.h:124
+msgid "R clearance plane unspecified in cycle"
+msgstr ""
+
+#: gcodeerrors.h:125
+msgid "R i j k words all missing for arc"
+msgstr ""
+
+#: gcodeerrors.h:210
+msgid "R less than U in cycle in VW plane"
+msgstr ""
+
+#: gcodeerrors.h:211
+msgid "R less than V in cycle in UW plane"
+msgstr ""
+
+#: gcodeerrors.h:209
+msgid "R less than W in cycle in UV plane"
+msgstr ""
+
+#: gcodeerrors.h:126
+msgid "R less than x in cycle in yz plane"
+msgstr ""
+
+#: gcodeerrors.h:127
+msgid "R less than y in cycle in xz plane"
+msgstr ""
+
+#: gcodeerrors.h:128
+msgid "R less than z in cycle in xy plane"
+msgstr ""
+
+#: gcodeerrors.h:129
+msgid "R word with no g code that uses it"
+msgstr ""
+
+#: gcodeerrors.h:93
+msgid ""
+"Radius of cutter compensation entry arc is not greater than the tool radius"
+msgstr ""
+
+#: gcodeerrors.h:91
+#, c-format
+msgid ""
+"Radius to end of arc differs from radius to start: start=(%c%.4f,%c%.4f) "
+"center=(%c%.4f,%c%.4f) end=(%c%.4f,%c%.4f) r1=%.4f r2=%.4f abs_err=%.4g "
+"rel_err=%.4f%%"
+msgstr ""
+
+#: appframe.cpp:672
 msgid "Replace &again\tShift+F4"
 msgstr ""
 
-#: appframe.cpp:713
+#: appframe.cpp:714
 msgid "Run Macros"
 msgstr ""
 
-#: appframe.cpp:752
+#: gcodeerrors.h:197
+msgid "S word missing with G96"
+msgstr ""
+
+#: appframe.cpp:753
 msgid "Save"
 msgstr ""
 
-#: appframe.cpp:621
+#: appframe.cpp:622
 msgid "Save &as ..\tCtrl+Shift+S"
 msgstr ""
 
-#: appframe.cpp:378
+#: appframe.cpp:379
 msgid "Save file"
 msgstr ""
 
-#: appframe.cpp:674
+#: appframe.cpp:675
 msgid "Select &line\tCtrl+L"
 msgstr ""
 
-#: appframe.cpp:700
+#: appframe.cpp:701
 msgid "Show &indent guides"
 msgstr ""
 
-#: appframe.cpp:699
+#: appframe.cpp:700
 msgid "Show line &endings"
 msgstr ""
 
-#: appframe.cpp:701
+#: appframe.cpp:702
 msgid "Show line &numbers"
 msgstr ""
 
-#: appframe.cpp:702
+#: appframe.cpp:703
 msgid "Show white&space"
 msgstr ""
 
-#: appframe.cpp:762
+#: appframe.cpp:763
 msgid "Simulate"
 msgstr ""
 
-#: appframe.cpp:728
+#: gcodeerrors.h:130
+msgid "Slash missing after first atan argument"
+msgstr ""
+
+#: gcodeerrors.h:131
+msgid "Spindle not turning clockwise in g84"
+msgstr ""
+
+#: gcodeerrors.h:132
+msgid "Spindle not turning in g86"
+msgstr ""
+
+#: gcodeerrors.h:133
+msgid "Spindle not turning in g87"
+msgstr ""
+
+#: gcodeerrors.h:134
+msgid "Spindle not turning in g88"
+msgstr ""
+
+#: gcodeerrors.h:135
+msgid "Sscanf failed"
+msgstr ""
+
+#: gcodeerrors.h:136
+msgid "Start point too close to probe point"
+msgstr ""
+
+#: appframe.cpp:729
 msgid "Sto&p Simulate"
 msgstr ""
 
-#: appframe.cpp:404
+#: gcodeerrors.h:12
+msgid "Subritine name does not supported"
+msgstr ""
+
+#: appframe.cpp:405
 msgid "Text could not be saved!"
 msgstr ""
 
-#: appframe.cpp:378
+#: appframe.cpp:379
 msgid "Text is not saved, save before closing?"
 msgstr ""
 
-#: appframe.cpp:704
+#: app.cpp:166
+msgid "This language is not supported by the system."
+msgstr ""
+
+#: gcodeerrors.h:137
+msgid "Too many m codes on line"
+msgstr ""
+
+#: gcodeerrors.h:182
+msgid "Too many oword labels"
+msgstr ""
+
+#: gcodeerrors.h:179
+msgid "Too many subroutine levels"
+msgstr ""
+
+#: gcodeerrors.h:178
+msgid "Too many subroutine parameters"
+msgstr ""
+
+#: gcodeerrors.h:139
+msgid "Tool radius not less than arc radius with comp"
+msgstr ""
+
+#: gcodeerrors.h:140
+#, c-format
+msgid "Two g codes used from same modal group: G%d"
+msgstr ""
+
+#: gcodeerrors.h:141
+msgid "Two m codes used from same modal group"
+msgstr ""
+
+#: gcodeerrors.h:207
+msgid "U value unspecified in VW plane canned cycle"
+msgstr ""
+
+#: gcodeerrors.h:142
+#, c-format
+msgid "Unable to open file <%s>"
+msgstr ""
+
+#: gcodeerrors.h:143
+msgid "Unclosed comment found"
+msgstr ""
+
+#: gcodeerrors.h:144
+msgid "Unclosed expression"
+msgstr ""
+
+#: gcodeerrors.h:181
+msgid "Unknown control command in o word"
+msgstr ""
+
+#: gcodeerrors.h:145
+#, c-format
+msgid "Unknown g code used: G%d"
+msgstr ""
+
+#: gcodeerrors.h:146
+#, c-format
+msgid "Unknown m code used: M%d"
+msgstr ""
+
+#: gcodeerrors.h:147
+msgid "Unknown operation"
+msgstr ""
+
+#: gcodeerrors.h:148
+msgid "Unknown operation name starting with a"
+msgstr ""
+
+#: gcodeerrors.h:174
+msgid "Unknown operation name starting with e"
+msgstr ""
+
+#: gcodeerrors.h:176
+msgid "Unknown operation name starting with g"
+msgstr ""
+
+#: gcodeerrors.h:177
+msgid "Unknown operation name starting with l"
+msgstr ""
+
+#: gcodeerrors.h:149
+msgid "Unknown operation name starting with m"
+msgstr ""
+
+#: gcodeerrors.h:175
+msgid "Unknown operation name starting with n"
+msgstr ""
+
+#: gcodeerrors.h:150
+msgid "Unknown operation name starting with o"
+msgstr ""
+
+#: gcodeerrors.h:151
+msgid "Unknown operation name starting with x"
+msgstr ""
+
+#: gcodeerrors.h:183
+msgid "Unknown oword number"
+msgstr ""
+
+#: gcodeerrors.h:152
+msgid "Unknown word starting with a"
+msgstr ""
+
+#: gcodeerrors.h:153
+msgid "Unknown word starting with c"
+msgstr ""
+
+#: gcodeerrors.h:154
+msgid "Unknown word starting with e"
+msgstr ""
+
+#: gcodeerrors.h:155
+msgid "Unknown word starting with f"
+msgstr ""
+
+#: gcodeerrors.h:156
+msgid "Unknown word starting with l"
+msgstr ""
+
+#: gcodeerrors.h:157
+msgid "Unknown word starting with r"
+msgstr ""
+
+#: gcodeerrors.h:158
+msgid "Unknown word starting with s"
+msgstr ""
+
+#: gcodeerrors.h:159
+msgid "Unknown word starting with t"
+msgstr ""
+
+#: gcodeerrors.h:160
+msgid "Unknown word where unary operation could be"
+msgstr ""
+
+#: appframe.cpp:705
 msgid "Use &code page of .."
+msgstr ""
+
+#: gcodeerrors.h:208
+msgid "V value unspecified in UW plane canned cycle"
+msgstr ""
+
+#: gcodeerrors.h:206
+msgid "W value unspecified in UV plane canned cycle"
+msgstr ""
+
+#: appframe.cpp:48 gcodeerrors.h:6
+msgid "Wrong N value"
+msgstr ""
+
+#: gcodeerrors.h:7
+#, c-format
+msgid "Wrong letter: %c"
+msgstr ""
+
+#: gcodeerrors.h:162
+msgid "X and y words missing for arc in xy plane"
+msgstr ""
+
+#: gcodeerrors.h:163
+msgid "X and z words missing for arc in xz plane"
+msgstr ""
+
+#: gcodeerrors.h:166
+msgid "X value unspecified in yz plane canned cycle"
 msgstr ""
 
 #: mathexpressiondlg.cpp:31
 msgid "X="
 msgstr ""
 
+#: gcodeerrors.h:164
+msgid "Y and z words missing for arc in yz plane"
+msgstr ""
+
+#: gcodeerrors.h:168
+msgid "Y value unspecified in xz plane canned cycle"
+msgstr ""
+
 #: mathexpressiondlg.cpp:40
 msgid "Y="
+msgstr ""
+
+#: gcodeerrors.h:169
+msgid "Z value unspecified in xy plane canned cycle"
 msgstr ""
 
 #: mathexpressiondlg.cpp:49
 msgid "Z="
 msgstr ""
 
-#: appframe.cpp:766
-msgid "pause"
+#: gcodeerrors.h:170
+msgid "Zero or negative argument to ln"
 msgstr ""
 
-#: appframe.cpp:765
-msgid "simulate"
+#: gcodeerrors.h:171
+msgid "Zero radius arc"
+msgstr ""
+
+#: gcodeerrors.h:200
+msgid "Zero timeout with wait type != immediate return"
+msgstr ""
+
+#: gcodeerrors.h:90
+#, c-format
+msgid ""
+"Zero-radius arc: start=(%c%.4f,%c%.4f) center=(%c%.4f,%c%.4f) end=(%c%.4f,%c"
+"%.4f) r1=%.4f r2=%.4f"
+msgstr ""
+
+#: gcodeerrors.h:187
+#, c-format
+msgid "cannot reopen file %s - removed or renamed? (%s)"
 msgstr ""
 
 #: appframe.cpp:767
+msgid "pause"
+msgstr ""
+
+#: appframe.cpp:766
+msgid "simulate"
+msgstr ""
+
+#: appframe.cpp:768
 msgid "stop"
+msgstr ""
+
+#: app.cpp:182
+msgid "unknown"
 msgstr ""

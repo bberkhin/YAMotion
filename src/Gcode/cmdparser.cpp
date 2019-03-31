@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <stdarg.h>
 #include "ienvironment.h"
+#include "gcodeerrors.h"
 
 
 namespace Interpreter
@@ -94,14 +95,14 @@ bool CmdParser::read_n_number()
 {
 	int value;
 	position++;
-	IF_F_RET_F_SETSTATE( read_integer(&value), WRONG_VALUE, "wrong N value ");
+	IF_F_RET_F_SETSTATE( read_integer(&value), WRONG_VALUE, YA_WRONG_N);
 
 	n_number = value;
 
 	if (line[position] == '.')
 	{
 		position++;
-		IF_F_RET_F_SETSTATE(read_integer(&value), WRONG_VALUE, "wrong N value ");
+		IF_F_RET_F_SETSTATE(read_integer(&value), WRONG_VALUE, YA_WRONG_N);
 	}
 	return true;
 }
@@ -174,7 +175,7 @@ bool CmdParser::parse_code()
 
 		default:
 			position++;
-			RET_F_SETSTATE(WRONG_LETTER, "wrong letter: %c", letter);
+			RET_F_SETSTATE(WRONG_LETTER, YA_WRONG_LETTER, letter);
 
 	}; // reads z or ASCII 0x7A
 	if (state.code)
@@ -244,7 +245,7 @@ bool CmdParser::check_modal_group() const
 		if (group > 0)
 		{
 			if ((flag & (1 << group)) != 0)   //встретили два оператора из одной группы
-				RET_F_SETSTATE(DOUBLE_DEFINITION, "conflict M%d modal group", *iter);
+				RET_F_SETSTATE(DOUBLE_DEFINITION, YA_CONFLICT_MMODAL_GROUP, *iter);
 			flag |= (1 << group);
 		}
 	}
@@ -351,23 +352,23 @@ bool CmdParser::read_set_param()
 	int index;
 	double value;
 
-	IF_F_RET_F_SETSTATE((line[position] == '#'), INTERNAL_ERROR, "read_parameter can not called here");
+	IF_F_RET_F_SETSTATE((line[position] == '#'), INTERNAL_ERROR,YA_CAN_NOT_CALLED_HERE);
 	position++;
 
 	// named parameters look like '<letter...>' or '<_letter.....>'
 	if (line[position] == '<')
 	{
 		position++;
-		RET_F_SETSTATE(NOTSUPPORTEDYET, "Named paramtr does not support yet");
+		RET_F_SETSTATE(NOTSUPPORTEDYET, YA_NAMED_PARAMETER_NOT_SUPPORTED);
 	}
 	else
 	{
 		IF_F_RET_F(read_int_value(&index));
-		IF_F_RET_F_SETSTATE(((index >= 1) && (index < RS274NGC_MAX_PARAMETERS)), PARAMETER_ERROR, "Parameter number is out of range");
+		IF_F_RET_F_SETSTATE(((index >= 1) && (index < RS274NGC_MAX_PARAMETERS)), PARAMETER_ERROR, YA_PARAMETER_NUMBER_OUT_OF_RANGE);
 		
-		IF_F_RET_F_SETSTATE((!isreadonly_param(index)), PARAMETER_ERROR, "Try to write to read only parametr");
+		IF_F_RET_F_SETSTATE((!isreadonly_param(index)), PARAMETER_ERROR, YA_PARAMETER_NUMBER_READONLY);
 			
-		IF_F_RET_F_SETSTATE((line[position] == '='),PARAMETER_ERROR, "'=' missing in parameter string");
+		IF_F_RET_F_SETSTATE((line[position] == '='),PARAMETER_ERROR, YA_EQUAL_SIGN_MISSING_IN_PARAMETER_SETTING);
 		position++;
 		IF_F_RET_F( read_real_value(&value) );
 		if ( env )
@@ -383,7 +384,7 @@ bool CmdParser::read_set_param()
 bool CmdParser::read_dollars()
 {
 	position++;
-	RET_F_SETSTATE(NOTSUPPORTEDYET, "Letter $ - multishpindle not supported");
+	RET_F_SETSTATE(NOTSUPPORTEDYET, YA_MUILTISPINDLE_NOT_SUPPORTED);
 }
 
 bool CmdParser::read_semicolon()
@@ -410,7 +411,7 @@ bool CmdParser::read_subrotinue()
 	position++;
 	if (line[position] == '<')
 	{
-		RET_F_SETSTATE(PARAMETER_ERROR, "Subritine name does not supported ");
+		RET_F_SETSTATE(PARAMETER_ERROR, YA_SUBNAME_NOT_SUPPORTED);
 		//read_name(oNameBuf);
 	}
 	else
@@ -481,10 +482,10 @@ bool CmdParser::read_m()
 	position++;
 	IF_F_RET_F(read_int_value(&ival) );
 	if (ival < 0)
-		RET_F_SETSTATE(WRONG_VALUE, "Negative M value %d", ival);
+		RET_F_SETSTATE(WRONG_VALUE, YA_NEGATIVE_M_CODE_USED);
 
 	if (ival > 199 )
-		RET_F_SETSTATE(WRONG_VALUE, "M value %d more then 199", ival);
+		RET_F_SETSTATE(WRONG_VALUE, YA_M_CODE_GREATER_THAN_199, ival);
 
 	mcodes.push_back(ival);
 	return true;
@@ -504,18 +505,18 @@ bool CmdParser::read_g()
 	if ((value_read - value) > 0.999)
 		value = (int)ceil(value_read);
 	else if ((value_read - value) > 0.001)
-		RET_F_SETSTATE(WRONG_VALUE, "G value out of range ");
+		RET_F_SETSTATE(WRONG_VALUE, YA_G_CODE_OUT_OF_RANGE);
 
 	if( value > 999 )
-		RET_F_SETSTATE(WRONG_VALUE, "G value out of range ");
+		RET_F_SETSTATE(WRONG_VALUE, YA_G_CODE_OUT_OF_RANGE);
 
 	if (value < 0)
-		RET_F_SETSTATE(WRONG_VALUE, "Negative G value");
+		RET_F_SETSTATE(WRONG_VALUE, YA_NEGATIVE_G_CODE_USED);
 
-	IF_F_RET_F_SETSTATE(acsept_gcode(value), WRONG_VALUE, "Uknown G code %d", static_cast<int>(value/10));
+	IF_F_RET_F_SETSTATE(acsept_gcode(value), WRONG_VALUE, YA_UNKNOWN_G_CODE_USED, static_cast<int>(value/10));
 
 	GModalGroup grp = get_gmodal_group( value );
-	IF_T_RET_F_SETSTATE( hasGCode(grp) , DOUBLE_DEFINITION, "conflict G%d modal group", static_cast<int>(value / 10) );
+	IF_T_RET_F_SETSTATE( hasGCode(grp) , DOUBLE_DEFINITION, YA_TWO_G_CODES_USED_FROM_SAME_MODAL_GROUP, static_cast<int>(value / 10) );
 	g_mode[grp] = value;
 	return false;
 }
@@ -525,7 +526,7 @@ bool CmdParser::read_real_param(IndexParam param)
 {
 	ParamType value;
 	if (params[param])
-		RET_F_SETSTATE(MUITYPLIE_PARAM, "Multiply parameter %c is defened", line[position]);
+		RET_F_SETSTATE(MUITYPLIE_PARAM, YA_MULTIPLE_WORDS_ON_ONE_LINE, line[position]);
 
 	position++;
 	IF_F_RET_F(read_real_value(&(value.dval)));
@@ -538,7 +539,7 @@ bool CmdParser::read_int_param(IndexParam param)
 {
 	ParamType value;
 	if (params[param])
-		RET_F_SETSTATE(MUITYPLIE_PARAM, "Multiply parameter %c is defened", line[position]);
+		RET_F_SETSTATE(MUITYPLIE_PARAM, YA_MULTIPLE_WORDS_ON_ONE_LINE, line[position]);
 
 	position++;
 	IF_F_RET_F(read_int_value(&(value.ival)));
@@ -563,7 +564,7 @@ bool CmdParser::real_to_int(double *pdbl, int *pint) const
 	if ((*pdbl - *pint) > 0.9999)
 		*pint = static_cast<int>(ceil(*pdbl));
 	else if ((*pdbl - *pint) > 0.0001)
-		RET_F_SETSTATE(WRONG_VALUE, "Non ineger value for integer");
+		RET_F_SETSTATE(WRONG_VALUE, YA_NON_INTEGER_VALUE_FOR_INTEGER);
 	return true;
 }
 
@@ -572,7 +573,7 @@ bool CmdParser::read_real_value( double *pdbl )
 	char c, c1;
 	c = line[position];
 	if (c == 0)
-		RET_F_SETSTATE(NO_VALUE, " No value - real expected");
+		RET_F_SETSTATE(NO_VALUE, YA_NO_CHARACTERS_FOUND_IN_READING_REAL_VALUE);
 	c1 = line[position + 1];
 
 	if (c == '[')
@@ -598,10 +599,10 @@ bool CmdParser::read_real_value( double *pdbl )
 		IF_F_RET_F(read_real(pdbl));
 
 	if(std::isnan( *pdbl) )
-		RET_F_SETSTATE(NO_VALUE, "Calculation resulted in 'not a number'");
+		RET_F_SETSTATE(NO_VALUE, YA_CALC_RESULT_NOT_NUMBER);
 
 	if ( std::isinf(*pdbl) )
-		RET_F_SETSTATE(NO_VALUE, "Calculation resulted in 'not a infinity'");
+		RET_F_SETSTATE(NO_VALUE, YA_CALC_RESULT_INFINITY);
 
 	return true;
 }
@@ -620,7 +621,7 @@ bool CmdParser::read_integer( int *pint )
 			break;
 	}
 	if (n == position || (sscanf(line + position, "%d", pint) == 0))
-		RET_F_SETSTATE(WRONG_VALUE, "wrong integer value ");
+		RET_F_SETSTATE(WRONG_VALUE, YA_BAD_FORMAT_INTEGER);
 
 	position = n;
 	return true;
@@ -640,10 +641,10 @@ bool CmdParser::read_real( double *pdbl )
 	std::stringstream s( st );
 	double val;
 	if ( !(s >> val) ) 
-		RET_F_SETSTATE(WRONG_VALUE,"bad number format (conversion failed) parsing '%s'", st.c_str());
+		RET_F_SETSTATE(WRONG_VALUE, YA_BAD_NUMBER_FORMAT1, st.c_str());
 
 	if ( s.get() != std::char_traits<char>::eof() ) 
-		RET_F_SETSTATE(WRONG_VALUE,"bad number format (trailing characters) parsing '%s'", st.c_str());
+		RET_F_SETSTATE(WRONG_VALUE, YA_BAD_NUMBER_FORMAT1, st.c_str());
 
 	*pdbl = val;
 	position = static_cast<int>(start + after - line);
