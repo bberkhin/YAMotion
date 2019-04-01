@@ -447,8 +447,25 @@ void AppFrame::OnFileOpen (wxCommandEvent &WXUNUSED(event))
 
 void AppFrame::OnOpenLastFile(wxCommandEvent &event)
 {
-	int n = wxID_FILE - event.GetId();
-	//FileOpen(fname);
+	if (!DoFileSave(true, false))
+		return;
+
+	ConfigData *config = dynamic_cast<ConfigData *>(wxConfigBase::Get());
+	if (config)
+	{
+		int n = event.GetId() - wxID_FILE;
+		const FileNamesList &files = config->GetFiles();
+		if (n >= 0 && n < static_cast<int>(files.size()) )
+		{
+			auto it = files.begin();
+			for (int i = 0; i < n; i++, it++) ;
+			FileOpen( *it );
+			return;
+		}
+
+	}
+// if somthing wrong call standart file open dialog;
+	OnFileOpen(event);
 }
 
 void AppFrame::OnFileSave (wxCommandEvent &WXUNUSED(event)) 

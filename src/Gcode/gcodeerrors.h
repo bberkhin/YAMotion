@@ -96,7 +96,7 @@ extern const char *gcode_gettext(const char *s);
 #define YA_DWELL_TIME_P_WORD_MISSING_WITH_G82 _("Dwell time p word missing with g82")
 #define YA_EQUAL_SIGN_MISSING_IN_PARAMETER_SETTING _("Equal sign missing in parameter setting")
 #define YA_G_CODE_OUT_OF_RANGE _("G code out of range")
-#define YA_SOMEWORD_GIVEN_FOR_ARC_IN_XZ_PLANE _("%c word given for arc in xz plane")
+#define YA_SOMEWORD_GIVEN_FOR_ARC_IN_THE_PLANE _("%c word given for arc in %s plane")
 #define YA_SOMEWORDS_MISSING_IN_ABS_CENTERARC _("%c word missing in absolute center arc")
 #define YA_ZERO_RADIUS_ARC_WITHARGS _("Zero-radius arc: start=(%c%.4f,%c%.4f) center=(%c%.4f,%c%.4f) end=(%c%.4f,%c%.4f) r1=%.4f r2=%.4f")
 #define YA_RADIUS_TO_STARTARC_DIF_RADIUS_FROM_END _("Radius to end of arc differs from radius to start: start=(%c%.4f,%c%.4f) center=(%c%.4f,%c%.4f) end=(%c%.4f,%c%.4f) r1=%.4f r2=%.4f abs_err=%.4g rel_err=%.4f%%")

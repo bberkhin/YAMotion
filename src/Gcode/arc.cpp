@@ -122,7 +122,7 @@ bool GCodeInterpreter::arc_to(int motion, const Coords &position, const CmdParse
 	{
 		if (runner.plane == Plane_XY)
 		{
-			IF_T_RET_F_SETSTATE(parser.hasParam(PARAM_K), PARAMETER_ERROR, YA_SOMEWORD_GIVEN_FOR_ARC_IN_XZ_PLANE, 'K');
+			IF_T_RET_F_SETSTATE(parser.hasParam(PARAM_K), PARAMETER_ERROR, YA_SOMEWORD_GIVEN_FOR_ARC_IN_THE_PLANE, 'K',"XY");
 			if (!parser.hasParam(PARAM_I))
 				RET_F_SETSTATE(PARAMETER_ERROR, YA_SOMEWORDS_MISSING_IN_ABS_CENTERARC,'I');
 			else if (!parser.hasParam(PARAM_J))
@@ -130,7 +130,7 @@ bool GCodeInterpreter::arc_to(int motion, const Coords &position, const CmdParse
 		}
 		else if (runner.plane == Plane_YZ)
 		{
-			IF_T_RET_F_SETSTATE(parser.hasParam(PARAM_I), PARAMETER_ERROR, YA_SOMEWORD_GIVEN_FOR_ARC_IN_XZ_PLANE, 'I' );
+			IF_T_RET_F_SETSTATE(parser.hasParam(PARAM_I), PARAMETER_ERROR, YA_SOMEWORD_GIVEN_FOR_ARC_IN_THE_PLANE, 'I',"YZ" );
 			if (!parser.hasParam(PARAM_J))
 				RET_F_SETSTATE(PARAMETER_ERROR, YA_SOMEWORDS_MISSING_IN_ABS_CENTERARC, 'J');
 			else if (!parser.hasParam(PARAM_K))
@@ -138,7 +138,7 @@ bool GCodeInterpreter::arc_to(int motion, const Coords &position, const CmdParse
 		}
 		else if (runner.plane == Plane_XZ)
 		{
-			IF_T_RET_F_SETSTATE(parser.hasParam(PARAM_J), PARAMETER_ERROR, YA_SOMEWORD_GIVEN_FOR_ARC_IN_XZ_PLANE, 'J' );
+			IF_T_RET_F_SETSTATE(parser.hasParam(PARAM_J), PARAMETER_ERROR, YA_SOMEWORD_GIVEN_FOR_ARC_IN_THE_PLANE, 'J', "XZ" );
 			if (!parser.hasParam(PARAM_I))
 				RET_F_SETSTATE(PARAMETER_ERROR, YA_SOMEWORDS_MISSING_IN_ABS_CENTERARC, 'I');
 			else if (!parser.hasParam(PARAM_K))
