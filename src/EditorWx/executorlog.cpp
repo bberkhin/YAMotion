@@ -23,7 +23,7 @@ void ExecutorLogWnd::output(const std::string &str)
 	if (num_outputs == 100)
 	{
 		ev->SetInt(LOG_INFORMATIONSUM);
-		ev->SetString("More then 100 outputs");
+		ev->SetString(_("More then 100 outputs"));
 		ev->SetExtraLong(-1);
 	}
 	else

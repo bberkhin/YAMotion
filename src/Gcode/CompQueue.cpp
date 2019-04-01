@@ -1,4 +1,5 @@
 #include "CompQueue.h"
+#include "gcodeerrors.h"
 
 
 using namespace Interpreter;
@@ -212,10 +213,10 @@ bool CompQueue::move_endpoint_and_flush(double x, double y)
 				x, y);
 		
 			if (fabs(r1 - r2) > .01)
-				RET_F_SETSTATE(PARAMETER_ERROR,"Cutter compensation has generated an invalid arc with mismatched radii r1 %f r2 %f\n", r1, r2);
+				RET_F_SETSTATE(PARAMETER_ERROR, YA_CUTER_COMP_INVALID_ARC, r1, r2);
 			if (l1 && endpoint_valid && fabs(l2) > (fabs(l1) + 0.0254)) 
 			{
-				RET_F_SETSTATE(PARAMETER_ERROR, "Arc move in concave corner cannot be reached by the tool without gouging");
+				RET_F_SETSTATE(PARAMETER_ERROR, YA_CUTER_COMP_ARC_MOVE);
 			}
 			q.data.arc_feed.end1 = x;
 			q.data.arc_feed.end2 = y;
@@ -237,14 +238,14 @@ bool CompQueue::move_endpoint_and_flush(double x, double y)
 			}
 			else
 			{
-				RET_F_SETSTATE(PARAMETER_ERROR, "Unsupported plane in cutter compensation");
+				RET_F_SETSTATE(PARAMETER_ERROR, YA_CUTER_COMP_UNSUPPORTED_PLANE);
 			}
 			dot = x1 * x2 + y1 * y2; // not normalized; we only care about the angle
 			if (endpoint_valid && dot < 0) {
 				// oops, the move is the wrong way.  this means the
 				// path has crossed because we backed up further
 				// than the line is long.  this will gouge.
-				RET_F_SETSTATE(PARAMETER_ERROR, "Straight traverse in concave corner cannot be reached by the tool without gouging");
+				RET_F_SETSTATE(PARAMETER_ERROR, YA_CUTER_COMP_STRAIGHT_TRAVERSE);
 			}
 			if (rd->plane == Plane_XY)
 			{
@@ -274,7 +275,7 @@ bool CompQueue::move_endpoint_and_flush(double x, double y)
 			}
 			else
 			{
-				RET_F_SETSTATE(PARAMETER_ERROR, "Unsupported plane in cutter compensation");
+				RET_F_SETSTATE(PARAMETER_ERROR, YA_CUTER_COMP_UNSUPPORTED_PLANE);
 			}
 
 			dot = x1 * x2 + y1 * y2;
@@ -283,7 +284,7 @@ bool CompQueue::move_endpoint_and_flush(double x, double y)
 				// oops, the move is the wrong way.  this means the
 				// path has crossed because we backed up further
 				// than the line is long.  this will gouge.
-				RET_F_SETSTATE(PARAMETER_ERROR, "Straight feed in concave corner cannot be reached by the tool without gouging");
+				RET_F_SETSTATE(PARAMETER_ERROR, YA_CUTER_COMP_STRAIGHT_FEED );
 			}
 			if (rd->plane == Plane_XY)
 			{

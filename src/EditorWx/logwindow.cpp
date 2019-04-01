@@ -28,15 +28,15 @@ void LogWindow::Append(MsgStatusLevel lvl, const wchar_t *str, int linen, bool u
 	wxString label = L"<font color=";
 	switch (lvl)
 	{
-		case MSLError: label += L"#880000> Error! "; break;
+		case MSLError: label += _("#880000> Error! "); break;
 		case MSLFileStatus: label += L"#008888>"; break;
 		case MSLInfo: label += L"#008800>"; break;
 		case MSLUndefened: label += L"#000000>"; break;
-		case MSLWarning: label += L"#000088>Warning! "; break;	
+		case MSLWarning: label += _("#000088>Warning! "); break;	
 	}
 	if (linen > 0)
 	{
-		label += ::wxString::Format("Line %d: ", linen);
+		label += ::wxString::Format(_("Line %d: "), linen);
 	}
 	label += str;
 	label += L"</font>";

@@ -4,14 +4,15 @@
 //#include <fstream>
 #include "GCodeInterpreter.h"
 #include "cmdparser.h"
+#include "gcodeerrors.h"
 
 using namespace Interpreter;
 
 bool GCodeInterpreter::run_cycle(int motion, const Coords &position, const CmdParser &parser)
 {
-	IF_T_RET_F_SETSTATE((runner.feed == 0.0), PARAMETER_ERROR, "Cannot feed with zero feed rate");
+	IF_T_RET_F_SETSTATE((runner.feed == 0.0), PARAMETER_ERROR, YA_CANNOT_FEED_WITH_ZERO_FEED_RATE);
 	//CHKS((settings->feed_mode == INVERSE_TIME), _("Cannot use inverse time feed with canned cycles"));
-	IF_T_RET_F_SETSTATE((runner.cutter_comp_side), PARAMETER_ERROR, "Cannot use canned cycles with cutter compensation on");
+	IF_T_RET_F_SETSTATE((runner.cutter_comp_side), PARAMETER_ERROR, YA_CYCLES_WITH_CUT_COMP_ON);
 
 
 	if (parser.hasParam(PARAM_R))
@@ -30,7 +31,7 @@ bool GCodeInterpreter::run_cycle(int motion, const Coords &position, const CmdPa
 	if (parser.hasParam(PARAM_L))
 	{
 		parser.getIParam(PARAM_L, &l_number);
-		IF_T_RET_F_SETSTATE((l_number == 0 || l_number < 0), PARAMETER_ERROR, "Cannot do zero repeats of cycle");
+		IF_T_RET_F_SETSTATE((l_number == 0 || l_number < 0), PARAMETER_ERROR, YA_CANNOT_DO_ZERO_REPEATS_OF_CYCLE);
 	}
 	runner.cycle_l = l_number;
 
@@ -47,8 +48,8 @@ bool GCodeInterpreter::run_cycle(int motion, const Coords &position, const CmdPa
 		IF_F_RET_F(run_cycle_xz(motion, position, parser));
 	}
 	else
-		RET_F_SETSTATE(INTERNAL_ERROR, "Cannot use canned cycles for this plane (shoul be XY, YZ or XZ)");
-
+		RET_F_SETSTATE(INTERNAL_ERROR, YA_BUG_PLANE_NOT_XY_YZ_OR_XZ);
+	
 	runner.motion_mode = motion;
 	return true;
 }
@@ -66,7 +67,7 @@ bool GCodeInterpreter::run_cycle_xy(int motion, const Coords &position, const Cm
 
 	if (runner.motion_mode != motion)
 	{
-		IF_T_RET_F_SETSTATE(!parser.hasParam(PARAM_Z), PARAMETER_ERROR, "Unspesified Z value for XY plane in cycle");
+		IF_T_RET_F_SETSTATE(!parser.hasParam(PARAM_Z), PARAMETER_ERROR, YA_Z_VALUE_UNSPECIFIED_IN_XY_PLANE_CANNED_CYCLE);
 	}
 
 	double z_number = runner.cycle_cc;
@@ -103,7 +104,7 @@ bool GCodeInterpreter::run_cycle_xy(int motion, const Coords &position, const Cm
 	}
 
 
-	IF_T_RET_F_SETSTATE((r < cc), PARAMETER_ERROR, "R less then Z for XY plane in cycle");
+	IF_T_RET_F_SETSTATE((r < cc), PARAMETER_ERROR, YA_R_LESS_THAN_Z_IN_CYCLE_IN_XY_PLANE );
 
 	// First motion of a canned cycle (maybe): if we're below the R plane,
 	// rapid straight up to the R plane.
@@ -121,14 +122,14 @@ bool GCodeInterpreter::run_cycle_xy(int motion, const Coords &position, const Cm
 	if (parser.hasParam(PARAM_P))
 		parser.getRParam(PARAM_P, &runner.cycle_p);
 	else if (motion == G_82 && runner.motion_mode != G_82) // first time 82
-		RET_F_SETSTATE(INTERNAL_ERROR, "Dwell time (P) missing with G82 ");
+		RET_F_SETSTATE(INTERNAL_ERROR, YA_DWELL_TIME_P_WORD_MISSING_WITH_G82);
 
 	if (parser.hasParam(PARAM_Q))
 		parser.getRParam(PARAM_Q, &runner.cycle_q);
 	else if (motion == G_73 && runner.motion_mode != G_73) // first time 73
-		RET_F_SETSTATE(INTERNAL_ERROR, "Q missing with G73 ");
+		RET_F_SETSTATE(INTERNAL_ERROR, YA_Q_WORD_MISSING_WITH_G73);
 	else if (motion == G_83 && runner.motion_mode != G_83) // first time 83
-		RET_F_SETSTATE(INTERNAL_ERROR, "Q missing with G83 ");
+		RET_F_SETSTATE(INTERNAL_ERROR, YA_Q_WORD_MISSING_WITH_G83 );
 
 	//save_mode = GET_EXTERNAL_MOTION_CONTROL_MODE();
 	//save_tolerance = GET_EXTERNAL_MOTION_CONTROL_TOLERANCE();
@@ -167,14 +168,14 @@ bool GCodeInterpreter::run_cycle_xy(int motion, const Coords &position, const Cm
 			break;
 		case G_74:
 		case G_84:
-			RET_F_SETSTATE(INTERNAL_ERROR, "G_74 & G_84 not supported yet");
+			RET_F_SETSTATE(INTERNAL_ERROR, YA_G74_G84_NOTSUPPORTED);
 			break;
 		case G_85:
 		case G_86:
 		case G_87:
 		case G_89:
 		case G_88:
-			RET_F_SETSTATE(INTERNAL_ERROR, "[G85, G88] not supported yet");
+			RET_F_SETSTATE(INTERNAL_ERROR, YA_G85_G88_NOTSUPPORTED);
 			break;
 		default:
 			RET_F_SETSTATE(INTERNAL_ERROR, "run_cycle_xy internal error can not be called");
@@ -204,7 +205,7 @@ bool GCodeInterpreter::run_cycle_xz(int motion, const Coords &position, const Cm
 
 	if (runner.motion_mode != motion)
 	{
-		IF_T_RET_F_SETSTATE(!parser.hasParam(PARAM_Y), PARAMETER_ERROR, "Unspesified Y value for XZ (G18) plane in cycle");
+		IF_T_RET_F_SETSTATE(!parser.hasParam(PARAM_Y), PARAMETER_ERROR, YA_Y_VALUE_UNSPECIFIED_IN_XZ_PLANE_CANNED_CYCLE );
 	}
 
 	double y_number = runner.cycle_cc;
@@ -240,7 +241,7 @@ bool GCodeInterpreter::run_cycle_xz(int motion, const Coords &position, const Cm
 		bb = position.x;
 	}
 
-	IF_T_RET_F_SETSTATE((r < cc), PARAMETER_ERROR, "R less then Y for ZX (G18) plane in cycle");
+	IF_T_RET_F_SETSTATE((r < cc), PARAMETER_ERROR, YA_R_LESS_THAN_Y_IN_CYCLE_IN_XZ_PLANE);
 
 
 
@@ -260,14 +261,14 @@ bool GCodeInterpreter::run_cycle_xz(int motion, const Coords &position, const Cm
 	if (parser.hasParam(PARAM_P))
 		parser.getRParam(PARAM_P, &runner.cycle_p);
 	else if (motion == G_82 && runner.motion_mode != G_82) // first time 82
-		RET_F_SETSTATE(INTERNAL_ERROR, "Dwell time (P) missing with G82 ");
+		RET_F_SETSTATE(INTERNAL_ERROR, YA_DWELL_TIME_P_WORD_MISSING_WITH_G82);
 
 	if (parser.hasParam(PARAM_Q))
 		parser.getRParam(PARAM_Q, &runner.cycle_q);
 	else if (motion == G_73 && runner.motion_mode != G_73) // first time 73
-		RET_F_SETSTATE(INTERNAL_ERROR, "Q missing with G73 ");
+		RET_F_SETSTATE(INTERNAL_ERROR, YA_Q_WORD_MISSING_WITH_G73);
 	else if (motion == G_83 && runner.motion_mode != G_83) // first time 83
-		RET_F_SETSTATE(INTERNAL_ERROR, "Q missing with G83 ");
+		RET_F_SETSTATE(INTERNAL_ERROR, YA_Q_WORD_MISSING_WITH_G83);
 
 	//save_mode = GET_EXTERNAL_MOTION_CONTROL_MODE();
 	//save_tolerance = GET_EXTERNAL_MOTION_CONTROL_TOLERANCE();
@@ -306,14 +307,14 @@ bool GCodeInterpreter::run_cycle_xz(int motion, const Coords &position, const Cm
 			break;
 		case G_74:
 		case G_84:
-			RET_F_SETSTATE(INTERNAL_ERROR, "G_74 & G_84 not supported yet");
+			RET_F_SETSTATE(INTERNAL_ERROR, YA_G74_G84_NOTSUPPORTED);
 			break;
 		case G_85:
 		case G_86:
 		case G_87:
 		case G_89:
 		case G_88:
-			RET_F_SETSTATE(INTERNAL_ERROR, "[G85, G88] not supported yet");
+			RET_F_SETSTATE(INTERNAL_ERROR, YA_G85_G88_NOTSUPPORTED);
 			break;
 		default:
 			RET_F_SETSTATE(INTERNAL_ERROR, "run_cycle_xy internal error can not be called");
@@ -345,7 +346,7 @@ bool GCodeInterpreter::run_cycle_yz(int motion, const Coords &position, const Cm
 
 	if (runner.motion_mode != motion)
 	{
-		IF_T_RET_F_SETSTATE(!parser.hasParam(PARAM_X), PARAMETER_ERROR, "Unspesified X value for YZ (G19) plane in cycle");
+		IF_T_RET_F_SETSTATE(!parser.hasParam(PARAM_X), PARAMETER_ERROR, YA_X_VALUE_UNSPECIFIED_IN_YZ_PLANE_CANNED_CYCLE);
 	}
 
 	double x_number = runner.cycle_cc;
@@ -381,7 +382,7 @@ bool GCodeInterpreter::run_cycle_yz(int motion, const Coords &position, const Cm
 		bb = position.z;
 	}
 
-	IF_T_RET_F_SETSTATE((r < cc), PARAMETER_ERROR, "R less then Y for ZX (G18) plane in cycle");
+	IF_T_RET_F_SETSTATE((r < cc), PARAMETER_ERROR, YA_R_LESS_THAN_X_IN_CYCLE_IN_YZ_PLANE );
 
 
 
@@ -401,14 +402,14 @@ bool GCodeInterpreter::run_cycle_yz(int motion, const Coords &position, const Cm
 	if (parser.hasParam(PARAM_P))
 		parser.getRParam(PARAM_P, &runner.cycle_p);
 	else if (motion == G_82 && runner.motion_mode != G_82) // first time 82
-		RET_F_SETSTATE(INTERNAL_ERROR, "Dwell time (P) missing with G82 ");
+		RET_F_SETSTATE(INTERNAL_ERROR, YA_DWELL_TIME_P_WORD_MISSING_WITH_G82);
 
 	if (parser.hasParam(PARAM_Q))
 		parser.getRParam(PARAM_Q, &runner.cycle_q);
 	else if (motion == G_73 && runner.motion_mode != G_73) // first time 73
-		RET_F_SETSTATE(INTERNAL_ERROR, "Q missing with G73 ");
+		RET_F_SETSTATE(INTERNAL_ERROR, YA_Q_WORD_MISSING_WITH_G73);
 	else if (motion == G_83 && runner.motion_mode != G_83) // first time 83
-		RET_F_SETSTATE(INTERNAL_ERROR, "Q missing with G83 ");
+		RET_F_SETSTATE(INTERNAL_ERROR, YA_Q_WORD_MISSING_WITH_G83);
 
 	//save_mode = GET_EXTERNAL_MOTION_CONTROL_MODE();
 	//save_tolerance = GET_EXTERNAL_MOTION_CONTROL_TOLERANCE();
@@ -447,14 +448,14 @@ bool GCodeInterpreter::run_cycle_yz(int motion, const Coords &position, const Cm
 			break;
 		case G_74:
 		case G_84:
-			RET_F_SETSTATE(INTERNAL_ERROR, "G_74 & G_84 not supported yet");
+			RET_F_SETSTATE(INTERNAL_ERROR, YA_G74_G84_NOTSUPPORTED);
 			break;
 		case G_85:
 		case G_86:
 		case G_87:
 		case G_89:
 		case G_88:
-			RET_F_SETSTATE(INTERNAL_ERROR, "[G85, G88] not supported yet");
+			RET_F_SETSTATE(INTERNAL_ERROR, YA_G85_G88_NOTSUPPORTED);
 			break;
 		default:
 			RET_F_SETSTATE(INTERNAL_ERROR, "run_cycle_xy internal error can not be called");
@@ -524,7 +525,7 @@ bool GCodeInterpreter::run_cycle_g83(
 	/* Moved the check for negative Q values here as a sign
 		may be used with user defined M functions
 		Thanks to Billy Singleton for pointing it out... */
-	IF_T_RET_F_SETSTATE((delta <= 0.0), PARAMETER_ERROR, "Q value negative or zero for G73");
+	IF_T_RET_F_SETSTATE((delta <= 0.0), PARAMETER_ERROR, YA_NEGATIVE_OR_ZERO_Q_VALUE_USED );
 
 	double rapid_delta = G83_RAPID_DELTAMM;
 
@@ -552,7 +553,7 @@ bool GCodeInterpreter::run_cycle_g73(
 	   may be used with user defined M functions
 	   Thanks to Billy Singleton for pointing it out... */
 
-	IF_T_RET_F_SETSTATE((delta <= 0.0), PARAMETER_ERROR, "Q value negative or zero for G73");
+	IF_T_RET_F_SETSTATE((delta <= 0.0), PARAMETER_ERROR, YA_NEGATIVE_OR_ZERO_Q_VALUE_USED);
 
 	double rapid_delta = G83_RAPID_DELTAMM;
 

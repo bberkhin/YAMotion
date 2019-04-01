@@ -51,6 +51,7 @@ public:
 	void OnFileSave(wxCommandEvent &event);
 	void OnFileSaveAs(wxCommandEvent &event);
 	void OnFileClose(wxCommandEvent &event);
+	void OnOpenLastFile(wxCommandEvent &event);
 	//! dialogs
 	void OnProperties(wxCommandEvent &event);
 	void OnMacroses(wxCommandEvent &event);

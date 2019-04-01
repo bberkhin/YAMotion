@@ -99,7 +99,7 @@ bool GCodeInterpreter::arc_to(int motion, const Coords &position, const CmdParse
 
 	first = runner.cutter_comp_firstmove;
 
-	IF_T_RET_F_SETSTATE((!parser.hasParam(PARAM_R) && (!ijk_flag)), PARAMETER_ERROR, YM_R_I_J_K_WORDS_ALL_MISSING_FOR_ARC);
+	IF_T_RET_F_SETSTATE((!parser.hasParam(PARAM_R) && (!ijk_flag)), PARAMETER_ERROR, YA_R_I_J_K_WORDS_ALL_MISSING_FOR_ARC);
 
 	IF_T_RET_F_SETSTATE((parser.hasParam(PARAM_R) && (ijk_flag)), PARAMETER_ERROR, YA_MIXED_RADIUS_IJK_FORMAT_FOR_ARC);
 

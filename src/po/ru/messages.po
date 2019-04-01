@@ -6,31 +6,40 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: PACKAGE VERSION\n"
+"Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-03-31 02:07+0700\n"
-"PO-Revision-Date: 2019-03-31 02:18+0700\n"
+"POT-Creation-Date: 2019-04-01 17:53+0700\n"
+"PO-Revision-Date: 2019-04-01 17:58+0700\n"
 "Last-Translator: Boris Berkhin <bberkhin@gmail.com>\n"
 "Language-Team: Russian\n"
 "Language: ru\n"
 "MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=utf-8\n"
+"Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
-"X-Poedit-Basepath: C:\\Projects\\YAMotion\\src\\EditorWx\n"
+"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n"
+"%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
+"X-Poedit-Basepath: C:/Projects/YAMotion/src/EditorWx\n"
+"X-Generator: Poedit 2.2.1\n"
 
-#: edit.cpp:952
-#: edit.cpp:1001
+#: edit.cpp:952 edit.cpp:1001
 #, c-format
 msgid "\"%s\" Not found"
 msgstr "\"%s\" не найден"
 
-#: gcodeerrors.h:87
+#: logwindow.cpp:35
+msgid "#000088>Warning! "
+msgstr "#000088>Предупреждение!"
+
+#: logwindow.cpp:31
+msgid "#880000> Error! "
+msgstr "#880000>Ошибка!"
+
+#: gcodeerrors.h:99
 #, c-format
 msgid "%c word given for arc in xz plane"
 msgstr ""
 
-#: gcodeerrors.h:88
+#: gcodeerrors.h:100
 #, c-format
 msgid "%c word missing in absolute center arc"
 msgstr ""
@@ -102,7 +111,7 @@ msgstr "Помощь"
 
 #: appframe.cpp:698
 msgid "&Highlight language .."
-msgstr "Подсветка синтаксиса"
+msgstr "Подсветка синтаксиса..."
 
 #: appframe.cpp:720
 msgid "&Isometric"
@@ -192,60 +201,70 @@ msgstr "Все прописные"
 msgid "&View"
 msgstr "Вид"
 
-#: gcodeerrors.h:19
-msgid "A file is already open"
-msgstr ""
+#: appdefs.h:21
+msgid "<untitled>"
+msgstr "<Безымянный>"
 
-#: gcodeerrors.h:20
+#. sets the application title
+#: about.cpp:30
+msgid "About .."
+msgstr "О программе..."
+
+#: gcodeerrors.h:72
 msgid "All axes missing with g52 or g92"
 msgstr ""
 
-#: gcodeerrors.h:21
+#: gcodeerrors.h:73
 msgid "All axes missing with motion code"
 msgstr ""
 
-#: gcodeerrors.h:205
-msgid "Analog input selected out of bounds"
+#: appframe.cpp:439
+msgid "Any file (*)|*"
 msgstr ""
 
-#: gcodeerrors.h:94
-msgid "Arc move in concave corner cannot be reached by the tool without gouging"
+#: gcodeerrors.h:18 gcodeerrors.h:104
+msgid ""
+"Arc move in concave corner cannot be reached by the tool without gouging"
 msgstr ""
 
-#: gcodeerrors.h:22
+#: gcodeerrors.h:74
 msgid "Arc radius too small to reach end point"
 msgstr ""
 
-#: gcodeerrors.h:95
+#: gcodeerrors.h:105
 msgid "Arc to arc motion is invalid because the arcs have the same center"
 msgstr ""
 
-#: gcodeerrors.h:96
-msgid "Arc to arc motion makes a corner the compensated tool can't fit in without gouging"
+#: gcodeerrors.h:106
+msgid ""
+"Arc to arc motion makes a corner the compensated tool can't fit in without "
+"gouging"
 msgstr ""
 
-#: gcodeerrors.h:23
+#: gcodeerrors.h:60
+msgid ""
+"Arc to straight motion makes a corner the compensated tool can't fit in "
+"without gouging"
+msgstr ""
+
+#: gcodeerrors.h:75
 msgid "Argument to acos out of range"
 msgstr ""
 
-#: gcodeerrors.h:24
+#: gcodeerrors.h:76
 msgid "Argument to asin out of range"
 msgstr ""
 
-#: gcodeerrors.h:25
+#: gcodeerrors.h:77
 msgid "Attempt to divide by zero"
 msgstr ""
 
-#: gcodeerrors.h:26
+#: gcodeerrors.h:78
 msgid "Attempt to raise negative to non integer power"
 msgstr ""
 
-#: gcodeerrors.h:27
+#: gcodeerrors.h:79
 msgid "Bad format integer"
-msgstr ""
-
-#: gcodeerrors.h:28
-msgid "Bad number format"
 msgstr ""
 
 #: gcodeerrors.h:16
@@ -253,88 +272,24 @@ msgstr ""
 msgid "Bad number format parsing '%s'"
 msgstr ""
 
-#: gcodeerrors.h:29
-msgid "Bug bad g code modal group 0"
-msgstr ""
-
-#: gcodeerrors.h:30
+#: gcodeerrors.h:80
 msgid "Bug code not g0 or g1"
 msgstr ""
 
-#: gcodeerrors.h:31
-msgid "Bug code not g17 g18 or g19"
-msgstr ""
-
-#: gcodeerrors.h:34
+#: gcodeerrors.h:81
 msgid "Bug code not g2 or g3"
 msgstr ""
 
-#: gcodeerrors.h:32
-msgid "Bug code not g20 or g21"
-msgstr ""
-
-#: gcodeerrors.h:33
-msgid "Bug code not g28 or g30"
-msgstr ""
-
-#: gcodeerrors.h:35
-msgid "Bug code not g4 g10 g28 g30 g52 g53 or g92 series"
-msgstr ""
-
-#: gcodeerrors.h:36
-msgid "Bug code not g61 g61.1 or g64"
-msgstr ""
-
-#: gcodeerrors.h:37
-msgid "Bug code not g90 or g91"
-msgstr ""
-
-#: gcodeerrors.h:38
-msgid "Bug code not g98 or g99"
-msgstr ""
-
-#: gcodeerrors.h:39
-msgid "Bug code not in g52 or g92 series"
-msgstr ""
-
-#: gcodeerrors.h:40
-msgid "Bug code not in range g54 to g593"
-msgstr ""
-
-#: gcodeerrors.h:41
-msgid "Bug code not m0 m1 m2 m30 m60 m99"
-msgstr ""
-
-#: gcodeerrors.h:42
-msgid "Bug distance mode not g90 or g91"
-msgstr ""
-
-#: gcodeerrors.h:43
-msgid "Bug function should not have been called"
-msgstr ""
-
-#: gcodeerrors.h:44
+#: gcodeerrors.h:82
 msgid "Bug in tool radius comp"
 msgstr ""
 
-#: gcodeerrors.h:45
+#: gcodeerrors.h:83
 msgid "Bug plane not xy yz or xz"
 msgstr ""
 
-#: gcodeerrors.h:46
-msgid "Bug side not right or left"
-msgstr ""
-
-#: gcodeerrors.h:47
-msgid "Bug unknown motion code"
-msgstr ""
-
-#: gcodeerrors.h:48
+#: gcodeerrors.h:87
 msgid "Bug unknown operation"
-msgstr ""
-
-#: gcodeerrors.h:180
-msgid "Bug: call stack underrun"
 msgstr ""
 
 #: appframe.cpp:655
@@ -361,96 +316,71 @@ msgstr ""
 msgid "Calculator"
 msgstr "Калькулятор"
 
-#: appframe.cpp:897
+#: gcodeerrors.h:28
+#, c-format
+msgid "Can not find subroutinue: %s"
+msgstr ""
+
+#: gcodeerrors.h:26
+#, c-format
+msgid "Can not open file %s"
+msgstr ""
+
+#: appframe.cpp:859 appframe.cpp:897
 #, c-format
 msgid "Can not open file: %s"
 msgstr ""
 
-#: gcodeerrors.h:199
-msgid "Can't select analog input with wait type != immediate return"
+#: gcodeerrors.h:27
+#, c-format
+msgid "Can not seek to position %ld of file"
 msgstr ""
 
-#: gcodeerrors.h:49
+#: appframe.cpp:1184
+msgid "Can't create the thread to run simulate"
+msgstr ""
+
+#: gcodeerrors.h:88
 msgid "Cannot change axis offsets with cutter radius comp"
 msgstr ""
 
-#: gcodeerrors.h:189
-msgid "Cannot change planes with cutter radius compensation on"
+#: gcodeerrors.h:46
+msgid "Cannot change coordinate systems with cutter radius compensation on"
 msgstr ""
 
-#: gcodeerrors.h:50
-msgid "Cannot create backup file"
-msgstr ""
-
-#: gcodeerrors.h:51
-msgid "Cannot do g1 with zero feed rate"
-msgstr ""
-
-#: gcodeerrors.h:52
+#: gcodeerrors.h:86
 msgid "Cannot do zero repeats of cycle"
 msgstr ""
 
-#: gcodeerrors.h:53
-msgid "Cannot make arc with zero feed rate"
-msgstr ""
-
-#: gcodeerrors.h:193
-msgid "Cannot move rotary axes with G76"
+#: gcodeerrors.h:85
+msgid "Cannot feed with zero feed rate"
 msgstr ""
 
 #: gcodeerrors.h:54
-msgid "Cannot open backup file"
+msgid "Cannot feed with zero spindle speed in feed per rev mode"
 msgstr ""
 
-#: gcodeerrors.h:55
-msgid "Cannot open variable file"
-msgstr ""
-
-#: gcodeerrors.h:56
-msgid "Cannot probe with cutter radius comp on"
-msgstr ""
-
-#: gcodeerrors.h:57
-msgid "Cannot probe with zero feed rate"
-msgstr ""
-
-#: gcodeerrors.h:58
-msgid "Cannot put a b in canned cycle"
-msgstr ""
-
-#: gcodeerrors.h:59
-msgid "Cannot put a c in canned cycle"
-msgstr ""
-
-#: gcodeerrors.h:60
-msgid "Cannot put an a in canned cycle"
-msgstr ""
-
-#: gcodeerrors.h:61
+#: gcodeerrors.h:89
 msgid "Cannot turn cutter radius comp on when on"
 msgstr ""
 
-#: gcodeerrors.h:62
+#: gcodeerrors.h:90
 msgid "Cannot use axis values with g80"
 msgstr ""
 
-#: gcodeerrors.h:63
+#: gcodeerrors.h:91
 msgid "Cannot use axis values without a g code that uses them"
 msgstr ""
 
-#: gcodeerrors.h:64
-msgid "Cannot use g28 or g30 with cutter radius comp"
+#: gcodeerrors.h:22
+msgid "Cannot use canned cycles with cutter compensation on"
 msgstr ""
 
-#: gcodeerrors.h:65
-msgid "Cannot use g53 incremental"
-msgstr ""
-
-#: gcodeerrors.h:66
+#: gcodeerrors.h:92
 msgid "Cannot use g53 with cutter radius comp"
 msgstr ""
 
-#: gcodeerrors.h:67
+#: gcodeerrors.h:93
 msgid "Cannot use two g codes that both use axis values"
 msgstr ""
 
@@ -466,7 +396,7 @@ msgstr "Проверить"
 msgid "Checking completed"
 msgstr "Проверка завершена"
 
-#: appframe.cpp:405
+#: macroses.cpp:76 appframe.cpp:405
 msgid "Close abort"
 msgstr "Закрыть"
 
@@ -474,8 +404,12 @@ msgstr "Закрыть"
 msgid "CmdParser::read_set_parameter can not called here"
 msgstr ""
 
-#: gcodeerrors.h:68
+#: gcodeerrors.h:94
 msgid "Command too long"
+msgstr ""
+
+#: gcodeerrors.h:84
+msgid "Compensation type not left and no right"
 msgstr ""
 
 #: gcodeerrors.h:8
@@ -495,6 +429,10 @@ msgstr "Конвертировать конец строки в ..."
 msgid "Copy"
 msgstr "Копировать"
 
+#: about.cpp:46
+msgid "Copyright: "
+msgstr ""
+
 #: app.cpp:181
 #, c-format
 msgid "Couldn't find/load the 'messages' catalog for locale '%s'."
@@ -504,73 +442,57 @@ msgstr "Не возможно найти/закгрузить 'messages' кат�
 msgid "Cu&t\tCtrl+X"
 msgstr "Вырезать\tCtrl+X"
 
-#: gcodeerrors.h:69
+#: gcodeerrors.h:95
 msgid "Current point same as end point of arc"
 msgstr ""
 
-#: appframe.cpp:755
-#: appframe.cpp:756
+#: appframe.cpp:755 appframe.cpp:756
 msgid "Cut"
 msgstr "Отменить"
 
-#: gcodeerrors.h:190
-msgid "Cutter radius compensation allowed only in XY, XZ planes"
-msgstr ""
-
-#: gcodeerrors.h:204
-msgid "Digital input selected out of bounds"
-msgstr ""
-
-#: gcodeerrors.h:70
-msgid "Dwell time missing with g4"
+#: gcodeerrors.h:17
+#, c-format
+msgid ""
+"Cutter compensation has generated an invalid arc with mismatched radii r1 %f "
+"r2 %f"
 msgstr ""
 
 #: gcodeerrors.h:71
+msgid "Cutter radius compensation allowed only in XY, XZ planes"
+msgstr ""
+
+#: gcodeerrors.h:96
 msgid "Dwell time p word missing with g82"
 msgstr ""
 
-#: gcodeerrors.h:72
-msgid "Dwell time p word missing with g86"
-msgstr ""
-
-#: gcodeerrors.h:73
-msgid "Dwell time p word missing with g88"
-msgstr ""
-
-#: gcodeerrors.h:74
-msgid "Dwell time p word missing with g89"
-msgstr ""
-
-#: gcodeerrors.h:75
+#: gcodeerrors.h:97
 msgid "Equal sign missing in parameter setting"
 msgstr ""
 
-#: gcodeerrors.h:76
-msgid "F word missing with inverse time arc move"
+#: appframe.cpp:566
+#, c-format
+msgid "Error%s pos: %d"
 msgstr ""
 
-#: gcodeerrors.h:77
-msgid "F word missing with inverse time g1 move"
+#: gcodeerrors.h:51
+msgid "Expected # reading parameter"
 msgstr ""
 
-#: gcodeerrors.h:173
-msgid "F word used with a g33/g33.1"
+#: gcodeerrors.h:52
+msgid "Expected ] reading bracketed parameter"
 msgstr ""
 
-#: gcodeerrors.h:78
-msgid "File ended with no percent sign"
+#: appframe.cpp:864
+#, c-format
+msgid "Feed Lenght: %f"
+msgstr "Длина обработки: %f"
+
+#: gcodeerrors.h:25
+msgid "File name not specified"
 msgstr ""
 
-#: gcodeerrors.h:79
-msgid "File ended with no percent sign or program end"
-msgstr ""
-
-#: gcodeerrors.h:80
-msgid "File name too long"
-msgstr ""
-
-#: gcodeerrors.h:186
-msgid "File not open"
+#: macrosparamdlg.cpp:23
+msgid "Fill parameters:"
 msgstr ""
 
 #: edit.cpp:874
@@ -585,13 +507,54 @@ msgstr "Найти следующий\tF3"
 msgid "Find and replace"
 msgstr "Найти и заменить"
 
-#: edit.cpp:952
-#: edit.cpp:1001
+#: edit.cpp:952 edit.cpp:1001
 msgid "Find result"
 msgstr "Результаты поиска"
 
-#: gcodeerrors.h:81
+#: gcodeerrors.h:98
 msgid "G code out of range"
+msgstr ""
+
+#: gcodeerrors.h:48
+#, c-format
+msgid "G%d.1 with L word, but plane is not G18"
+msgstr ""
+
+#: gcodeerrors.h:47
+#, c-format
+msgid "G%d.1 with no D word"
+msgstr ""
+
+#: gcodeerrors.h:56
+msgid "G33 not supported"
+msgstr ""
+
+#: gcodeerrors.h:44
+msgid "G7 and G8 does not support yet"
+msgstr ""
+
+#: gcodeerrors.h:24
+msgid "G74 & G84 not supported yet"
+msgstr ""
+
+#: gcodeerrors.h:57
+msgid "G76 not supported"
+msgstr ""
+
+#: gcodeerrors.h:45
+msgid "G92.1 and G92.2 not implemented yet"
+msgstr ""
+
+#: gcodeerrors.h:30
+msgid "G93 Inverse Time Mode not supported"
+msgstr ""
+
+#: gcodeerrors.h:31
+msgid "G95 - is Units per Revolution Mode not supported"
+msgstr ""
+
+#: appframe.cpp:391
+msgid "GCode Files (*.ngc)|*.ngc"
 msgstr ""
 
 #. sets the application title
@@ -604,36 +567,24 @@ msgstr "Математический калькулятор"
 msgid "GCode expression calculator"
 msgstr "Калькулятор вырожений"
 
-#: gcodeerrors.h:192
-msgid "I J or K words missing with G76"
-msgstr ""
-
-#: gcodeerrors.h:83
-msgid "I word missing with g87"
-msgstr ""
-
 #: mathsimpledlg.cpp:85
 msgid "In selected"
 msgstr "В выделенном"
+
+#: gcodeerrors.h:32
+msgid "Incorrect feed value"
+msgstr ""
 
 #: mathsimpledlg.cpp:70
 msgid "Input value:"
 msgstr "Введите значения:"
 
-#: gcodeerrors.h:201
-msgid "Invalid to select both a digital and an analog input with M66"
+#: gcodeerrors.h:55
+msgid "Invalid plane for cutter compensation"
 msgstr ""
 
-#: gcodeerrors.h:84
-msgid "J word missing with g87"
-msgstr ""
-
-#: gcodeerrors.h:172
-msgid "K word missing with g33/g33.1"
-msgstr ""
-
-#: gcodeerrors.h:85
-msgid "K word missing with g87"
+#: gcodeerrors.h:42
+msgid "Invalid tool id used"
 msgstr ""
 
 #: appframe.cpp:657
@@ -644,25 +595,49 @@ msgstr "LF (&Macintosh)"
 msgid "Language"
 msgstr "Язык"
 
-#: gcodeerrors.h:98
+#: gcodeerrors.h:107
 msgid "Left bracket missing after slash with atan"
 msgstr ""
 
-#: gcodeerrors.h:99
+#: gcodeerrors.h:108
 msgid "Left bracket missing after unary operation name"
+msgstr ""
+
+#: gcodeerrors.h:58
+msgid ""
+"Length of cutter compensation entry move is not greater than the tool radius"
 msgstr ""
 
 #: gcodeerrors.h:11
 msgid "Letter $ - multishpindle not supported"
 msgstr ""
 
-#: gcodeerrors.h:100
+#: about.cpp:42
+msgid "Licence type: "
+msgstr ""
+
+#: logwindow.cpp:39
+#, c-format
+msgid "Line %d: "
+msgstr "Строка %d: "
+
+#: gcodeerrors.h:109
 #, c-format
 msgid "M code greater than 199: M%d"
 msgstr "M код больше чем 199: M%d"
 
+#. sets the application title
+#: macrosparamdlg.cpp:16
+msgid "Macros Parameter"
+msgstr "Параметры макроса"
+
 #: appframe.cpp:758
 msgid "Macroses"
+msgstr "Макросы"
+
+#. sets the application title
+#: macrosesdlg.cpp:14
+msgid "Macroses List"
 msgstr "Макросы"
 
 #: mathsimpledlg.cpp:80
@@ -673,16 +648,12 @@ msgstr "Максимальное значение:"
 msgid "Min value:"
 msgstr "Минимальное значение:"
 
-#: gcodeerrors.h:101
+#: gcodeerrors.h:110
 msgid "Mixed radius ijk format for arc"
 msgstr ""
 
-#: gcodeerrors.h:194
-msgid "Multiple e words on one line"
-msgstr ""
-
-#: gcodeerrors.h:102
-msgid "Multiple spindle choice ($) words on one line"
+#: executorlog.cpp:26
+msgid "More then 100 outputs"
 msgstr ""
 
 #: gcodeerrors.h:13
@@ -690,119 +661,59 @@ msgstr ""
 msgid "Multiply word %c is defened"
 msgstr ""
 
-#: gcodeerrors.h:103
-msgid "Must use g0 or g1 with g53"
-msgstr ""
-
-#: gcodeerrors.h:10
+#: gcodeerrors.h:10 gcodeerrors.h:49
 msgid "Named parameter does not support yet"
 msgstr ""
 
-#: gcodeerrors.h:195
-msgid "Named parameter not terminated"
-msgstr ""
-
-#: gcodeerrors.h:202
-msgid "Need to have either a valid P or a valid E word with M66"
-msgstr ""
-
-#: gcodeerrors.h:188
-msgid "Need tool prepared -Txx- for toolchange"
-msgstr ""
-
-#: gcodeerrors.h:104
-msgid "Negative argument to sqrt"
-msgstr ""
-
-#: gcodeerrors.h:105
+#: gcodeerrors.h:111
 msgid "Negative d word tool radius index used"
 msgstr ""
 
-#: gcodeerrors.h:106
-msgid "Negative f word used"
-msgstr ""
-
-#: gcodeerrors.h:107
+#: gcodeerrors.h:112
 msgid "Negative g code used"
 msgstr ""
 
-#: gcodeerrors.h:108
-msgid "Negative h word used"
-msgstr ""
-
-#: gcodeerrors.h:109
-msgid "Negative l word used"
-msgstr ""
-
-#: gcodeerrors.h:110
+#: gcodeerrors.h:113
 msgid "Negative m code used"
 msgstr ""
 
-#: gcodeerrors.h:111
-msgid "Negative or zero q value used"
-msgstr ""
-
-#: gcodeerrors.h:112
-msgid "Negative p word used"
-msgstr ""
-
-#: gcodeerrors.h:113
-msgid "Negative spindle speed used"
-msgstr ""
-
 #: gcodeerrors.h:114
-msgid "Negative tool id used"
-msgstr ""
-
-#: gcodeerrors.h:115
-msgid "Nested comment found"
-msgstr ""
-
-#: gcodeerrors.h:184
-msgid "Nested subroutine definition"
+msgid "Negative or zero q value used"
 msgstr ""
 
 #: appframe.cpp:751
 msgid "New"
 msgstr "Новый"
 
-#: gcodeerrors.h:116
+#: gcodeerrors.h:115
 msgid "No characters found in reading real value"
 msgstr ""
 
-#: gcodeerrors.h:117
+#: gcodeerrors.h:116
 msgid "Non integer value for integer"
 msgstr ""
 
-#: gcodeerrors.h:185
-msgid "Not in subroutine definition"
-msgstr ""
-
-#: gcodeerrors.h:118
-msgid "Null missing after newline"
+#: about.cpp:69
+msgid "OK"
 msgstr ""
 
 #: appframe.cpp:752
 msgid "Open"
 msgstr "Открыть"
 
-#: gcodeerrors.h:196
-msgid "Out of memory"
+#: appframe.cpp:439
+msgid "Open file"
+msgstr "Открыть файл"
+
+#: gcodeerrors.h:29
+msgid "P word missing with M98"
 msgstr ""
 
-#: gcodeerrors.h:191
-msgid "P word missing with G76"
-msgstr ""
-
-#: gcodeerrors.h:119
-msgid "Parameter file out of order"
-msgstr ""
-
-#: gcodeerrors.h:121
+#: gcodeerrors.h:123
 msgid "Parameter is readonly"
 msgstr ""
 
-#: gcodeerrors.h:120
+#: gcodeerrors.h:122
 msgid "Parameter number out of range"
 msgstr ""
 
@@ -822,10 +733,6 @@ msgstr "Выберите язык"
 msgid "Please, select at least one parameter"
 msgstr "Выберите хотя бы один параметр"
 
-#: gcodeerrors.h:138
-msgid "Pocket max too large"
-msgstr ""
-
 #: appframe.cpp:628
 msgid "Print Pre&view\tCtrl+Shift+P"
 msgstr "Предварительный просмотр печати\tCtrl+Shift+P"
@@ -834,69 +741,50 @@ msgstr "Предварительный просмотр печати\tCtrl+Shift
 msgid "Print Set&up .."
 msgstr "Установки печати"
 
+#: appframe.cpp:1128
+#, c-format
+msgid "Process terminated with exit code %d)"
+msgstr ""
+
 #: appframe.cpp:625
 msgid "Proper&ties ..\tCtrl+I"
 msgstr "Свойства ..\tCtrl+I"
 
-#: gcodeerrors.h:203
+#: gcodeerrors.h:67
 msgid "Q word missing with g73"
 msgstr ""
 
-#: gcodeerrors.h:122
+#: gcodeerrors.h:124
 msgid "Q word missing with g83"
 msgstr ""
 
-#: gcodeerrors.h:198
-msgid "Queue is not empty after external input"
-msgstr ""
-
-#: gcodeerrors.h:123
-msgid "Queue is not empty after probing"
-msgstr ""
-
-#: gcodeerrors.h:124
-msgid "R clearance plane unspecified in cycle"
-msgstr ""
-
-#: gcodeerrors.h:125
+#: gcodeerrors.h:117
 msgid "R i j k words all missing for arc"
 msgstr ""
 
-#: gcodeerrors.h:210
-msgid "R less than U in cycle in VW plane"
-msgstr ""
-
-#: gcodeerrors.h:211
-msgid "R less than V in cycle in UW plane"
-msgstr ""
-
-#: gcodeerrors.h:209
-msgid "R less than W in cycle in UV plane"
-msgstr ""
-
-#: gcodeerrors.h:126
+#: gcodeerrors.h:118
 msgid "R less than x in cycle in yz plane"
 msgstr ""
 
-#: gcodeerrors.h:127
+#: gcodeerrors.h:119
 msgid "R less than y in cycle in xz plane"
 msgstr ""
 
-#: gcodeerrors.h:128
+#: gcodeerrors.h:120
 msgid "R less than z in cycle in xy plane"
 msgstr ""
 
-#: gcodeerrors.h:129
-msgid "R word with no g code that uses it"
+#: gcodeerrors.h:103
+msgid ""
+"Radius of cutter compensation entry arc is not greater than the tool radius"
 msgstr ""
 
-#: gcodeerrors.h:93
-msgid "Radius of cutter compensation entry arc is not greater than the tool radius"
-msgstr ""
-
-#: gcodeerrors.h:91
+#: gcodeerrors.h:102
 #, c-format
-msgid "Radius to end of arc differs from radius to start: start=(%c%.4f,%c%.4f) center=(%c%.4f,%c%.4f) end=(%c%.4f,%c%.4f) r1=%.4f r2=%.4f abs_err=%.4g rel_err=%.4f%%"
+msgid ""
+"Radius to end of arc differs from radius to start: start=(%c%.4f,%c%.4f) "
+"center=(%c%.4f,%c%.4f) end=(%c%.4f,%c%.4f) r1=%.4f r2=%.4f abs_err=%.4g "
+"rel_err=%.4f%%"
 msgstr ""
 
 #: appframe.cpp:672
@@ -906,10 +794,6 @@ msgstr "Повторить замену\tShift+F4"
 #: appframe.cpp:714
 msgid "Run Macros"
 msgstr "Запустить макрос"
-
-#: gcodeerrors.h:197
-msgid "S word missing with G96"
-msgstr ""
 
 #: appframe.cpp:753
 msgid "Save"
@@ -923,9 +807,17 @@ msgstr "Сохранить как...\tCtrl+Shift+S"
 msgid "Save file"
 msgstr "Сохранитиь файл"
 
+#: appframe.cpp:391
+msgid "Save file As"
+msgstr "Сохранитиь файл как"
+
 #: appframe.cpp:675
 msgid "Select &line\tCtrl+L"
 msgstr "Выделить строку\tCtrl+L"
+
+#: macrosesdlg.cpp:21
+msgid "Select from the list:"
+msgstr ""
 
 #: appframe.cpp:701
 msgid "Show &indent guides"
@@ -947,37 +839,32 @@ msgstr "Показывать пробелы"
 msgid "Simulate"
 msgstr "Отобразить траекторию"
 
-#: gcodeerrors.h:130
+#: gcodeerrors.h:121
 msgid "Slash missing after first atan argument"
 msgstr ""
 
-#: gcodeerrors.h:131
-msgid "Spindle not turning clockwise in g84"
+#: gcodeerrors.h:41
+msgid "Spindle speed  is incorrect"
 msgstr ""
 
-#: gcodeerrors.h:132
-msgid "Spindle not turning in g86"
-msgstr ""
-
-#: gcodeerrors.h:133
-msgid "Spindle not turning in g87"
-msgstr ""
-
-#: gcodeerrors.h:134
-msgid "Spindle not turning in g88"
-msgstr ""
-
-#: gcodeerrors.h:135
-msgid "Sscanf failed"
-msgstr ""
-
-#: gcodeerrors.h:136
-msgid "Start point too close to probe point"
+#: appframe.cpp:1114
+msgid "Start converting..."
 msgstr ""
 
 #: appframe.cpp:729
 msgid "Sto&p Simulate"
 msgstr "Остановить симуляцию"
+
+#: gcodeerrors.h:21
+msgid ""
+"Straight feed in concave corner cannot be reached by the tool without gouging"
+msgstr ""
+
+#: gcodeerrors.h:20
+msgid ""
+"Straight traverse in concave corner cannot be reached by the tool without "
+"gouging"
+msgstr ""
 
 #: gcodeerrors.h:12
 msgid "Subritine name does not supported"
@@ -989,180 +876,128 @@ msgstr "Текст не может быть сохранен!"
 
 #: appframe.cpp:379
 msgid "Text is not saved, save before closing?"
-msgstr "Текстне сохранён. Сохранить изменения ?"
+msgstr "Текст не сохранён. Сохранить изменения ?"
 
 #: app.cpp:166
 msgid "This language is not supported by the system."
 msgstr "Выбранный язык не поддерживается."
 
-#: gcodeerrors.h:137
-msgid "Too many m codes on line"
+#: gcodeerrors.h:33
+msgid "Too many parameters for dwell G4"
 msgstr ""
 
-#: gcodeerrors.h:182
-msgid "Too many oword labels"
-msgstr ""
-
-#: gcodeerrors.h:179
-msgid "Too many subroutine levels"
-msgstr ""
-
-#: gcodeerrors.h:178
-msgid "Too many subroutine parameters"
-msgstr ""
-
-#: gcodeerrors.h:139
+#: gcodeerrors.h:125
 msgid "Tool radius not less than arc radius with comp"
 msgstr ""
 
-#: gcodeerrors.h:140
+#: appframe.cpp:865
+#, c-format
+msgid "Traverce Lenght: %f"
+msgstr "Длина холостого хода: %f"
+
+#: gcodeerrors.h:126
 #, c-format
 msgid "Two g codes used from same modal group: G%d"
 msgstr ""
 
-#: gcodeerrors.h:141
-msgid "Two m codes used from same modal group"
-msgstr ""
-
-#: gcodeerrors.h:207
-msgid "U value unspecified in VW plane canned cycle"
-msgstr ""
-
-#: gcodeerrors.h:142
-#, c-format
-msgid "Unable to open file <%s>"
-msgstr ""
-
-#: gcodeerrors.h:143
-msgid "Unclosed comment found"
-msgstr ""
-
-#: gcodeerrors.h:144
+#: gcodeerrors.h:127
 msgid "Unclosed expression"
 msgstr ""
 
-#: gcodeerrors.h:181
-msgid "Unknown control command in o word"
-msgstr ""
-
-#: gcodeerrors.h:145
+#: gcodeerrors.h:128
 #, c-format
 msgid "Unknown g code used: G%d"
 msgstr ""
 
-#: gcodeerrors.h:146
-#, c-format
-msgid "Unknown m code used: M%d"
-msgstr ""
-
-#: gcodeerrors.h:147
+#: gcodeerrors.h:61
 msgid "Unknown operation"
 msgstr ""
 
-#: gcodeerrors.h:148
-msgid "Unknown operation name starting with a"
+#: gcodeerrors.h:53
+#, c-format
+msgid "Unknown operation name starting with %c"
 msgstr ""
 
-#: gcodeerrors.h:174
-msgid "Unknown operation name starting with e"
+#: gcodeerrors.h:50
+#, c-format
+msgid "Unknown word starting with %c"
 msgstr ""
 
-#: gcodeerrors.h:176
-msgid "Unknown operation name starting with g"
-msgstr ""
-
-#: gcodeerrors.h:177
-msgid "Unknown operation name starting with l"
-msgstr ""
-
-#: gcodeerrors.h:149
-msgid "Unknown operation name starting with m"
-msgstr ""
-
-#: gcodeerrors.h:175
-msgid "Unknown operation name starting with n"
-msgstr ""
-
-#: gcodeerrors.h:150
-msgid "Unknown operation name starting with o"
-msgstr ""
-
-#: gcodeerrors.h:151
-msgid "Unknown operation name starting with x"
-msgstr ""
-
-#: gcodeerrors.h:183
-msgid "Unknown oword number"
-msgstr ""
-
-#: gcodeerrors.h:152
-msgid "Unknown word starting with a"
-msgstr ""
-
-#: gcodeerrors.h:153
-msgid "Unknown word starting with c"
-msgstr ""
-
-#: gcodeerrors.h:154
-msgid "Unknown word starting with e"
-msgstr ""
-
-#: gcodeerrors.h:155
-msgid "Unknown word starting with f"
-msgstr ""
-
-#: gcodeerrors.h:156
-msgid "Unknown word starting with l"
-msgstr ""
-
-#: gcodeerrors.h:157
-msgid "Unknown word starting with r"
-msgstr ""
-
-#: gcodeerrors.h:158
-msgid "Unknown word starting with s"
-msgstr ""
-
-#: gcodeerrors.h:159
-msgid "Unknown word starting with t"
-msgstr ""
-
-#: gcodeerrors.h:160
+#: gcodeerrors.h:62
 msgid "Unknown word where unary operation could be"
+msgstr ""
+
+#: gcodeerrors.h:19
+msgid "Unsupported plane in cutter compensation"
 msgstr ""
 
 #: appframe.cpp:705
 msgid "Use &code page of .."
 msgstr "Использовать кодировку"
 
-#: gcodeerrors.h:208
-msgid "V value unspecified in UW plane canned cycle"
+#: appframe.cpp:571
+msgid "Uups some erorr"
 msgstr ""
 
-#: gcodeerrors.h:206
-msgid "W value unspecified in UV plane canned cycle"
+#: appframe.cpp:508
+msgid "Uups there is no any selection"
 msgstr ""
 
-#: appframe.cpp:48
-#: gcodeerrors.h:6
-#, fuzzy
+#: about.cpp:38
+msgid "Version: "
+msgstr ""
+
+#: gcodeerrors.h:34
+msgid "Word 'D' must be defined for G96 (CSS mode)"
+msgstr ""
+
+#: gcodeerrors.h:40
+msgid "Word 'H' must be defined for G43 and G44"
+msgstr ""
+
+#: gcodeerrors.h:37
+msgid "Word 'L' must be defined for G10"
+msgstr ""
+
+#: gcodeerrors.h:39
+msgid "Word 'P' is out of range"
+msgstr ""
+
+#: gcodeerrors.h:36
+msgid "Word 'P' must be defined for G10"
+msgstr ""
+
+#: gcodeerrors.h:35
+msgid "Word 'S' must be defined for G96 (CSS mode)"
+msgstr ""
+
+#: about.cpp:34
+msgid "Written by: "
+msgstr ""
+
+#: appframe.cpp:48 gcodeerrors.h:6
 msgid "Wrong N value"
-msgstr "Минимальное значение:"
+msgstr "Неправильное значение N"
 
 #: gcodeerrors.h:7
 #, c-format
 msgid "Wrong letter: %c"
 msgstr ""
 
-#: gcodeerrors.h:162
+#: appframe.cpp:866
+#, c-format
+msgid "X Min: %f X Max %f"
+msgstr ""
+
+#: gcodeerrors.h:63
 msgid "X and y words missing for arc in xy plane"
 msgstr ""
 
-#: gcodeerrors.h:163
+#: gcodeerrors.h:64
 msgid "X and z words missing for arc in xz plane"
 msgstr ""
 
-#: gcodeerrors.h:166
+#: gcodeerrors.h:66
 msgid "X value unspecified in yz plane canned cycle"
 msgstr ""
 
@@ -1170,11 +1005,16 @@ msgstr ""
 msgid "X="
 msgstr "X="
 
-#: gcodeerrors.h:164
+#: appframe.cpp:867
+#, c-format
+msgid "Y Min: %f Y Max %f"
+msgstr ""
+
+#: gcodeerrors.h:65
 msgid "Y and z words missing for arc in yz plane"
 msgstr ""
 
-#: gcodeerrors.h:168
+#: gcodeerrors.h:68
 msgid "Y value unspecified in xz plane canned cycle"
 msgstr ""
 
@@ -1182,7 +1022,12 @@ msgstr ""
 msgid "Y="
 msgstr "Y="
 
-#: gcodeerrors.h:169
+#: appframe.cpp:868
+#, c-format
+msgid "Z Min: %f Z Max %f"
+msgstr ""
+
+#: gcodeerrors.h:69
 msgid "Z value unspecified in xy plane canned cycle"
 msgstr ""
 
@@ -1190,26 +1035,27 @@ msgstr ""
 msgid "Z="
 msgstr "Z="
 
-#: gcodeerrors.h:170
+#: gcodeerrors.h:59
+msgid "Zero degree inside corner is invalid for cutter compensation"
+msgstr ""
+
+#: gcodeerrors.h:70
 msgid "Zero or negative argument to ln"
 msgstr ""
 
-#: gcodeerrors.h:171
-msgid "Zero radius arc"
-msgstr ""
-
-#: gcodeerrors.h:200
-msgid "Zero timeout with wait type != immediate return"
-msgstr ""
-
-#: gcodeerrors.h:90
+#: gcodeerrors.h:101
 #, c-format
-msgid "Zero-radius arc: start=(%c%.4f,%c%.4f) center=(%c%.4f,%c%.4f) end=(%c%.4f,%c%.4f) r1=%.4f r2=%.4f"
+msgid ""
+"Zero-radius arc: start=(%c%.4f,%c%.4f) center=(%c%.4f,%c%.4f) end=(%c%.4f,%c"
+"%.4f) r1=%.4f r2=%.4f"
 msgstr ""
 
-#: gcodeerrors.h:187
-#, c-format
-msgid "cannot reopen file %s - removed or renamed? (%s)"
+#: gcodeerrors.h:23
+msgid "[G85;G88] not supported yet"
+msgstr ""
+
+#: appframe.cpp:1111
+msgid "gcmc_vc.exe already running"
 msgstr ""
 
 #: appframe.cpp:767
@@ -1227,4 +1073,3 @@ msgstr "Остановить симуляцию"
 #: app.cpp:182
 msgid "unknown"
 msgstr "unknown"
-

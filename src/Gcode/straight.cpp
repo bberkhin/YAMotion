@@ -1,5 +1,6 @@
 #include "GCodeInterpreter.h"
 #include "cmdparser.h"
+#include "gcodeerrors.h"
 
 
 using namespace Interpreter;
@@ -13,15 +14,15 @@ bool  GCodeInterpreter::move_to(int motion, const Coords &position, const CmdPar
 
 	if (motion == G_1)
 	{
-		IF_T_RET_F_SETSTATE((runner.feed == 0.0), PARAMETER_ERROR, "Ca not do G1 with  zero feed rate");
-		IF_T_RET_F_SETSTATE(((runner.feed_mode == FeedMode_UnitPerRevolution) && (runner.spindlespeed == 0.0)), PARAMETER_ERROR, "Can not feed with zero spindle speed in feed per rev mode");
+		IF_T_RET_F_SETSTATE((runner.feed == 0.0), PARAMETER_ERROR, YA_CANNOT_FEED_WITH_ZERO_FEED_RATE);
+		IF_T_RET_F_SETSTATE(((runner.feed_mode == FeedMode_UnitPerRevolution) && (runner.spindlespeed == 0.0)), PARAMETER_ERROR, YA_CANNOT_FEED_WITH_ZERO_SPINDLE);
 	}
 
 	runner.motion_mode = motion;
 
 	if ((runner.cutter_comp_side) && (runner.cutter_comp_radius > 0.0))    /* radius always is >= 0 */
 	{
-		IF_T_RET_F_SETSTATE((parser.getGCode(ModalGroup_MODAL_0) == G_53), PARAMETER_ERROR, "Can not use G53 with cutter radius compenstion");
+		IF_T_RET_F_SETSTATE((parser.getGCode(ModalGroup_MODAL_0) == G_53), PARAMETER_ERROR, YA_CANNOT_USE_G53_WITH_CUTTER_RADIUS_COMP);
 
 		if (runner.plane == Plane_XZ)
 		{
@@ -38,7 +39,7 @@ bool  GCodeInterpreter::move_to(int motion, const Coords &position, const CmdPar
 				IF_F_RET_F(run_straight_comp2(motion, position.x, position.y, position.z, position.a, position.b, position.c));
 		}
 		else
-			RET_F_SETSTATE(PARAMETER_ERROR, "Invalid plane for cutter compensation");
+			RET_F_SETSTATE(PARAMETER_ERROR, YA_INVALID_PLANE_FOR_CUT_COMP);
 	}
 	else if (motion == G_0)
 	{
@@ -52,19 +53,19 @@ bool  GCodeInterpreter::move_to(int motion, const Coords &position, const CmdPar
 	}
 	else if (motion == G_33)
 	{
-		RET_F_SETSTATE(PARAMETER_ERROR, "G33 not supported");
+		RET_F_SETSTATE(PARAMETER_ERROR, YA_G33_NOT_SUPPORTED );
 	}
 	else if (motion == G_33_1)
 	{
-		RET_F_SETSTATE(PARAMETER_ERROR, "G33.1 not supported");
+		RET_F_SETSTATE(PARAMETER_ERROR, YA_G33_NOT_SUPPORTED);
 	}
 	else if (motion == G_76)
 	{
-		RET_F_SETSTATE(PARAMETER_ERROR, "G76 not supported");
+		RET_F_SETSTATE(PARAMETER_ERROR, YA_G76_NOT_SUPPORTED);
 	}
 	else
 	{
-		RET_F_SETSTATE(PARAMETER_ERROR, "Undefened motion G%f", motion / 10.);
+		RET_F_SETSTATE(INTERNAL_ERROR, "Undefened motion G%d", motion / 10);
 	}
 	return true;
 }
@@ -176,8 +177,8 @@ bool GCodeInterpreter::run_straight_comp1(int move, double px, double py, double
 	double distance = hypot((px - cx), (py - cy));
 
 	IF_T_RET_F_SETSTATE(((side != CutterCompType_LEFT) && (side != CutterCompType_RIGHT)),
-		PARAMETER_ERROR, "Compensation type not left and not right");
-	IF_T_RET_F_SETSTATE((distance <= radius), PARAMETER_ERROR, "Length of cutter compensation entry move is not greater than the tool radius");
+		PARAMETER_ERROR, YA_SIDE_NOT_RIGHT_OR_LEFT);
+	IF_T_RET_F_SETSTATE((distance <= radius), PARAMETER_ERROR, YA_LENGHT_CUT_COMP_NOT_GREATER_TOOL_RADIUS);
 
 	alpha = atan2(py - cy, px - cx) + (side == CutterCompType_LEFT ? M_PI_2l : -M_PI_2l);
 
@@ -195,7 +196,7 @@ bool GCodeInterpreter::run_straight_comp1(int move, double px, double py, double
 		cq.enqueue_straight_feed(cos(alpha), sin(alpha), 0, end_x, end_y, pz, a, b, c);
 	}
 	else
-		RET_F_SETSTATE(INTERNAL_ERROR, "Not G0 nor G1");
+		RET_F_SETSTATE(INTERNAL_ERROR, YA_BUG_CODE_NOT_G0_OR_G1);
 
 	runner.cutter_comp_firstmove = false;
 
@@ -305,7 +306,7 @@ bool GCodeInterpreter::run_straight_comp2(int move,
 			cq.enqueue_straight_feed(px - opx, py - opy, pz - opz, cx, cy, pz, a, b, c);
 		}
 		else
-			RET_F_SETSTATE(INTERNAL_ERROR, "Not G0 nor G1");
+			RET_F_SETSTATE(INTERNAL_ERROR, YA_BUG_CODE_NOT_G0_OR_G1);
 		// end already filled out, above
 	}
 	else
@@ -331,7 +332,7 @@ bool GCodeInterpreter::run_straight_comp2(int move,
 			gamma = -M_PI_2l;
 		}
 		else
-			RET_F_SETSTATE(INTERNAL_ERROR, "Compensation type not left and not right");
+			RET_F_SETSTATE(INTERNAL_ERROR, YA_SIDE_NOT_RIGHT_OR_LEFT);
 		end_x = (px + (radius * cos(alpha + gamma)));
 		end_y = (py + (radius * sin(alpha + gamma)));
 		mid_x = (opx + (radius * cos(alpha + gamma)));
@@ -374,7 +375,7 @@ bool GCodeInterpreter::run_straight_comp2(int move,
 				double retreat;
 				// half the angle of the inside corner
 				double halfcorner = (beta + M_PIl) / 2.0;
-				IF_T_RET_F_SETSTATE((halfcorner == 0.0), PARAMETER_ERROR, "Zero degree inside corner is invalid for cutter compensation");
+				IF_T_RET_F_SETSTATE((halfcorner == 0.0), PARAMETER_ERROR, YA_ZERO_DEGREE_INSIDE_CORNER_IS_INVALID);
 				retreat = radius / tan(halfcorner);
 				// move back along the compensated path
 				// this should replace the endpoint of the previous move
@@ -420,7 +421,7 @@ bool GCodeInterpreter::run_straight_comp2(int move,
 				if TOOL_INSIDE_ARC(side, prev.turn) {
 					d2 = d - radius;
 					double l = d2 / oldrad;
-					IF_T_RET_F_SETSTATE((l > 1.0 || l < -1.0), PARAMETER_ERROR, "Arc to straight motion makes a corner the compensated tool can't fit in without gouging");
+					IF_T_RET_F_SETSTATE((l > 1.0 || l < -1.0), PARAMETER_ERROR, YA_ARC_STRAIGHT_MAKE_BAD_CORNER);
 					if (prev.turn > 0)
 						angle_from_center = -acos(l) + theta + M_PIl;
 					else
@@ -429,7 +430,7 @@ bool GCodeInterpreter::run_straight_comp2(int move,
 				else {
 					d2 = d + radius;
 					double l = d2 / oldrad;
-					IF_T_RET_F_SETSTATE((l > 1.0 || l < -1.0), PARAMETER_ERROR, "Arc to straight motion makes a corner the compensated tool can't fit in without gouging");
+					IF_T_RET_F_SETSTATE((l > 1.0 || l < -1.0), PARAMETER_ERROR, YA_ARC_STRAIGHT_MAKE_BAD_CORNER);
 					if (prev.turn > 0)
 						angle_from_center = acos(l) + theta + M_PIl;
 					else

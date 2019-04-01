@@ -4,6 +4,7 @@
 #include <fstream>
 #include "GCodeInterpreter.h"
 #include "cmdparser.h"
+#include "gcodeerrors.h"
 
 
 using namespace Interpreter;
@@ -41,7 +42,7 @@ void GCodeInterpreter::init()
 bool GCodeInterpreter::open_nc_file(const wchar_t *name)
 {
 	if ( file_name.empty() && name == NULL )
-		RET_F_SETSTATE( ERROR_FILEREAD, "File name not specified" );
+		RET_F_SETSTATE( ERROR_FILEREAD, YA_FILE_NAME_NOTSPECIFYED);
 	
 	//empty or new name
 	if (name != NULL && file_name != std::wstring(name) )
@@ -53,7 +54,7 @@ bool GCodeInterpreter::open_nc_file(const wchar_t *name)
 	if (gfile != NULL)
 		return true;
 	gfile = _wfopen(name,L"r");
-	IF_F_RET_F_SETSTATE((gfile != NULL), ERROR_FILEREAD, "Can not open file %s", name); 
+	IF_F_RET_F_SETSTATE((gfile != NULL), ERROR_FILEREAD, YA_CANNOT_OPEN_FILE, name);
 	init();
 	return true;
 }
@@ -106,7 +107,7 @@ bool GCodeInterpreter::execute_file_int( long pos, ExecFunction fun, int &lineNu
 	char line[MAX_GCODE_LINELEN];
 	size_t length;
 	IF_F_RET_F(open_nc_file());
-	IF_F_RET_F_SETSTATE((fseek(gfile, pos, SEEK_SET) == 0), ERROR_FILEREAD, "Can not seek to start of file");
+	IF_F_RET_F_SETSTATE((fseek(gfile, pos, SEEK_SET) == 0), ERROR_FILEREAD, YA_CANNOT_SEEK_IN_FILE, pos);
 
 	for (; true ; ++lineNumber)
 	{
@@ -116,7 +117,7 @@ bool GCodeInterpreter::execute_file_int( long pos, ExecFunction fun, int &lineNu
 		if (length == (MAX_GCODE_LINELEN - 1))    // line is too long. need to finish reading the line to recover
 		{
 			for (; fgetc(gfile) != '\n' && !feof(gfile););
-			logger->log(LOG_WARNING, lineNumber, "Line is too long.");
+			logger->log(LOG_WARNING, lineNumber, YA_COMMAND_TOO_LONG);
 		}
 		
 		fpos = ftell(gfile); 
@@ -183,7 +184,7 @@ bool GCodeInterpreter::find_subrotinue(const char *subname, SubratinInfo *psub )
 		cursubr_ = savesbn;
 		if (state.code != SUBROTINE_END)
 		{
-			RET_F_SETSTATE(SUBROUTINE_ERROR, "Can not find subroutinue: %s", subname);
+			RET_F_SETSTATE(SUBROUTINE_ERROR, YA_CANNOT_FIND_SUBRATINE, subname);
 		}
 
 		psub->nline = nline+1; //+1 becouse sekeep o100 string
@@ -198,7 +199,7 @@ bool GCodeInterpreter::execute_subrotinue( const  CmdParser parser )
 	std::string sname;
 
 	int ival;
-	IF_F_RET_F_SETSTATE(parser.getIParam(PARAM_P, &ival), PARAMETER_ERROR, "There is no 'P' parameter for m98");
+	IF_F_RET_F_SETSTATE(parser.getIParam(PARAM_P, &ival), PARAMETER_ERROR, YA_P_WORD_MISSING_WITH_M98);
 	sname = std::to_string(ival);
 	
 	SubratinInfo newsub;
@@ -223,7 +224,7 @@ bool GCodeInterpreter::execute_subrotinue( const  CmdParser parser )
 	
 	// rewind file to the position just after the call
 	long pos = substack.top().callfrom;
-	IF_F_RET_F_SETSTATE((fseek(gfile, pos, SEEK_SET) == 0), ERROR_FILEREAD, "Can not seek to right position %ld of file", pos);
+	IF_F_RET_F_SETSTATE((fseek(gfile, pos, SEEK_SET) == 0), ERROR_FILEREAD, YA_CANNOT_SEEK_IN_FILE , pos);
 
 	substack.pop();
 	if (!substack.empty())
@@ -355,27 +356,27 @@ bool GCodeInterpreter::enhance_frame(const CmdParser &parser)
 	{
 		if (mode1 == G_80) 
 		{
-			IF_T_RET_F_SETSTATE((axis_flag && !mode_zero_covets_axes), PARAMETER_ERROR, "Can not use axis values with G80");
-			IF_T_RET_F_SETSTATE(((!axis_flag) && (mode0 == G_52 || mode0 == G_92)), PARAMETER_ERROR, "All Axis missing with G52 or G92");		
+			IF_T_RET_F_SETSTATE((axis_flag && !mode_zero_covets_axes), PARAMETER_ERROR, YA_CANNOT_USE_AXIS_VALUES_WITH_G80);
+			IF_T_RET_F_SETSTATE(((!axis_flag) && (mode0 == G_52 || mode0 == G_92)), PARAMETER_ERROR, YA_ALL_AXES_MISSING_WITH_G52_OR_G92);
 		}
 		else 
 		{
-			IF_T_RET_F_SETSTATE(mode_zero_covets_axes, PARAMETER_ERROR, "Can not use two G codes that both use axis value");
+			IF_T_RET_F_SETSTATE(mode_zero_covets_axes, PARAMETER_ERROR, YA_CANNOT_USE_TWO_G_CODES_THAT_BOTH_USE_AXIS_VALUES);
 			IF_T_RET_F_SETSTATE((!axis_flag  && mode1 != G_0 && mode1 != G_1 &&
-				mode1 != G_2 && mode1 != G_3 && mode1 != G_5_2), PARAMETER_ERROR, "All Axis missing with motion code");
+				mode1 != G_2 && mode1 != G_3 && mode1 != G_5_2), PARAMETER_ERROR, YA_ALL_AXES_MISSING_WITH_MOTION_CODE );
 		}
 		motion_to_be = mode1;
 	}
 	else if (mode_zero_covets_axes) 
 	{   /* other 3 can get by without axes but not G92 */
 		IF_T_RET_F_SETSTATE(((!axis_flag) &&
-			(mode0 == G_52 || mode0 == G_92)), PARAMETER_ERROR, "All Axis missing with G52 or G92 code");
+			(mode0 == G_52 || mode0 == G_92)), PARAMETER_ERROR, YA_ALL_AXES_MISSING_WITH_G52_OR_G92);
 	}
 	else if (axis_flag ) 
 	{
 		IF_T_RET_F_SETSTATE(((runner.motion_mode == -1)
 			|| (runner.motion_mode == G_80)) && (parser.getGCode(ModalGroup_TOOL_LENGTH_CORRECTION) != G_43_1),
-				PARAMETER_ERROR, "Can not use axis values with out a G code");
+				PARAMETER_ERROR, YA_CANNOT_USE_AXIS_VALUES_WITHOUT_A_G_CODE_THAT_USES_THEM );
 
 		if (parser.getGCode(ModalGroup_TOOL_LENGTH_CORRECTION) != G_43_1) 
 		{
@@ -401,7 +402,7 @@ bool GCodeInterpreter::run_feed_mode( CmdParser &parser )
 	{
 		//G96 D2500 S250
 		runner.feed_mode = FeedMode_InverseTime;
-		RET_F_SETSTATE( NO_VALUE, "G93 Inverse Time Mode not supported");
+		RET_F_SETSTATE( NO_VALUE, YA_G93_NOT_SUPPORTED );
 	}
 	else if( gc == G_94 )
 	{
@@ -410,7 +411,7 @@ bool GCodeInterpreter::run_feed_mode( CmdParser &parser )
 	else if( gc == G_95 )
 	{
 		runner.feed_mode = FeedMode_UnitPerRevolution;
-		RET_F_SETSTATE(NO_VALUE, "G95 - is Units per Revolution Mode not supported");	
+		RET_F_SETSTATE(NO_VALUE, YA_G95_NOT_SUPPORTED);
 	}
 	return true;
 }
@@ -421,7 +422,7 @@ bool GCodeInterpreter::run_feed_rate(const  CmdParser &parser)
 	if (parser.getRParam(PARAM_F, &feed))
 	{
 		if (feed <= 0. || feed > MAX_FEED_RATE)
-			RET_F_SETSTATE(WRONG_VALUE, "feed value is incorrect ");
+			RET_F_SETSTATE(WRONG_VALUE, YA_INCORRECT_FEED_VALUE );
 		runner.feed = feed;
 		if (executor)
 			executor->set_feed_rate(feed);
@@ -452,7 +453,7 @@ bool GCodeInterpreter::run_dwell(CmdParser &parser)
 			millseconds = sec * 1000;
 		}
 		if (parser.params_count() != 1 )
-			RET_F_SETSTATE(WRONG_VALUE, "very many parameters for dwell G4 ");
+			RET_F_SETSTATE(WRONG_VALUE, YA_TOO_MANY_PARAM_G4);
 
 		executor->set_dwell(static_cast<long>(millseconds));
 		parser.remove_params();
@@ -469,8 +470,8 @@ bool GCodeInterpreter::run_spindle_mode( CmdParser &parser)
 	{
 		//G96 D2500 S250
 		double diam, speed;
-		IF_F_RET_F_SETSTATE(parser.getRParam(PARAM_D, &diam), NO_VALUE, "Parametr 'D' must be defined for G96 (CSS mode)");
-		IF_F_RET_F_SETSTATE(parser.getRParam(PARAM_S, &speed), NO_VALUE, "Parametr 'S' must be defined for G96 (CSS mode)");
+		IF_F_RET_F_SETSTATE(parser.getRParam(PARAM_D, &diam), NO_VALUE, YA_D_MUST_BE_SPECIFY_G96);
+		IF_F_RET_F_SETSTATE(parser.getRParam(PARAM_S, &speed), NO_VALUE, YA_S_MUST_BE_SPECIFY_G96 );
 		executor->set_css_spindlemode(diam, speed);		
 		parser.remove_param(PARAM_D);
 		parser.remove_param(PARAM_S);
@@ -491,11 +492,11 @@ bool GCodeInterpreter::run_input_mode( CmdParser &parser )
 		//now we can work only with L2  - setting coordinate sistem
 		int l;
 		double p;
-		IF_F_RET_F_SETSTATE(parser.getIParam(PARAM_L, &l), NO_VALUE, "Parametr 'L' must be defined for G10 ");
-		IF_F_RET_F_SETSTATE((l==2), WRONG_VALUE,"we can work only with L2 for G10 ");
-		IF_F_RET_F_SETSTATE(parser.getRParam(PARAM_P, &p), NO_VALUE, "Parametr 'p' must be defined for G10 ");
+		IF_F_RET_F_SETSTATE(parser.getIParam(PARAM_L, &l), NO_VALUE, YA_L_MUST_BE_SPECIFY_G10);
+		IF_F_RET_F_SETSTATE((l==2), WRONG_VALUE, YA_L_MUST_BE_2_G10);
+		IF_F_RET_F_SETSTATE(parser.getRParam(PARAM_P, &p), NO_VALUE, YA_P_MUST_BE_SPECIFY_G10);
 		int ip = static_cast<int>(p);
-		IF_F_RET_F_SETSTATE((ip >= 1 && ip <= 5), WRONG_VALUE, "Parametr 'p' out of range ");
+		IF_F_RET_F_SETSTATE((ip >= 1 && ip <= 5), WRONG_VALUE, YA_P_IS_OUT_OF_RANGE);
 		Coords newpos;
 		setcoordinates(newpos, parser,false);
 		env->SetG54G58(ip - 1, newpos );
@@ -518,7 +519,7 @@ bool GCodeInterpreter::run_cutter_comp(const CmdParser &parser)
 	else if (gc == G_42_1)
 		IF_F_RET_F(run_cutter_comp_on(CutterCompType_RIGHT, parser));
 	else
-		RET_F_SETSTATE(INTERNAL_ERROR, "GCodeInterpreter::run_cutter_comp can notbe called here");
+		RET_F_SETSTATE(INTERNAL_ERROR, "GCodeInterpreter::run_cutter_comp can not be called here");
 	return true;
 }
 	
@@ -537,7 +538,7 @@ bool GCodeInterpreter::run_tool_height_offset(const CmdParser &parser)
 	}
 	else if (gc == G_43)
 	{
-		IF_F_RET_F_SETSTATE(parser.getIParam(PARAM_H, &h), NO_VALUE, "Parametr 'H' must be defined for G43 ");
+		IF_F_RET_F_SETSTATE(parser.getIParam(PARAM_H, &h), NO_VALUE, YA_H_MUST_BE_SPECIFY_G43G44);
 		if  ( h > 0 )
 			runner.tool_length_offset = -h;
 		else
@@ -545,7 +546,7 @@ bool GCodeInterpreter::run_tool_height_offset(const CmdParser &parser)
 	}
 	else if (gc == G_44)
 	{
-		IF_F_RET_F_SETSTATE(parser.getIParam(PARAM_H, &h), NO_VALUE, "Parametr 'H' must be defined for G44 ");
+		IF_F_RET_F_SETSTATE(parser.getIParam(PARAM_H, &h), NO_VALUE, YA_H_MUST_BE_SPECIFY_G43G44);
 		runner.tool_length_offset = h;
 	}
 	else
@@ -579,7 +580,7 @@ bool GCodeInterpreter::run_speed(const CmdParser &parser)
 	if (parser.getRParam(PARAM_S, &speed))
 	{
 		if (speed <= 0. || speed > MAX_SPINDELSPEED)
-			RET_F_SETSTATE(WRONG_VALUE, "spindle speed  is incorrect ");
+			RET_F_SETSTATE(WRONG_VALUE, YA_SPINDLE_SPEED_IS_INCORRECT );
 		runner.spindlespeed = speed;
 		if (executor)
 			executor->set_spindle_speed(speed);
@@ -606,10 +607,10 @@ bool GCodeInterpreter::run_tool_cmd(const CmdParser &parser)
 				return true;
 			}
 			else
-				RET_F_SETSTATE(WRONG_VALUE, "invalid tool number");
+				RET_F_SETSTATE(WRONG_VALUE, YA_INVALID_TOOL_ID_USED);
 		}
 		else
-			RET_F_SETSTATE(WRONG_VALUE, "tool number is not spesified");
+			RET_F_SETSTATE(WRONG_VALUE, YA_TOOL_ID_NOTSPECIFYED_M6);
 	}
 	return true;
 }
@@ -646,7 +647,7 @@ bool GCodeInterpreter::run_mcode(const  CmdParser &parser)
 			return true;
 		case 98:
 		case 99:
-			RET_F_SETSTATE(WRONG_VALUE, "subroutines don't not support yet");			
+			RET_F_SETSTATE(INTERNAL_ERROR, "M98,M99 can not called hear");			
 		}
 		executor->run_mcode(*iter);
 	}
@@ -742,14 +743,14 @@ bool GCodeInterpreter::run_set_plane(int gc)
 	case G_17: runner.plane = Plane_XY; break;
 	case G_18: runner.plane = Plane_XZ; break;
 	case G_19: runner.plane = Plane_YZ; break;
-	default: RET_F_SETSTATE(INTERNAL_ERROR, "No g17, g18, g19");
+	default: RET_F_SETSTATE(INTERNAL_ERROR, YA_BUG_PLANE_NOT_XY_YZ_OR_XZ );
 	}
 	return true;
 }
 
 bool GCodeInterpreter::run_set_lathe_diam(const CmdParser &parser)
 {
-	RET_F_SETSTATE(INTERNAL_ERROR, "G7 and G8 does not support yet");
+	RET_F_SETSTATE(INTERNAL_ERROR, YA_G7G8_NOT_SUPPORTED);
 }
 
 
@@ -780,7 +781,7 @@ bool GCodeInterpreter::run_modal_0(CmdParser &parser)
 
 bool GCodeInterpreter::convert_axis_offsets(int gc, const CmdParser &parser)
 {
-	IF_T_RET_F_SETSTATE(runner.cutter_comp_side, PARAMETER_ERROR, " Can not change axis offset with cuitter compensation mode");
+	IF_T_RET_F_SETSTATE(runner.cutter_comp_side, PARAMETER_ERROR, YA_CANNOT_CHANGE_AXIS_OFFSETS_WITH_CUTTER_RADIUS_COMP);
 	
 	Coords axis_offset;
 	setcoordinates(axis_offset, parser, false);
@@ -840,7 +841,7 @@ bool GCodeInterpreter::convert_axis_offsets(int gc, const CmdParser &parser)
 	}
 	else
 	{
-		RET_F_SETSTATE(INTERNAL_ERROR, "G92.1 and G92.2 not implemented yet");	
+		RET_F_SETSTATE(INTERNAL_ERROR, YA_G921_G922_NOT_SUPPORTED);
 	}
 	return true;
 }
@@ -861,7 +862,7 @@ bool GCodeInterpreter::run_set_units(int gc)
 
 bool GCodeInterpreter::run_set_coord_sys(const CmdParser &parser)
 {
-	IF_T_RET_F_SETSTATE(runner.cutter_comp_side, PARAMETER_ERROR, " Cannot change coordinate systems with cuitter compensation mode");
+	IF_T_RET_F_SETSTATE(runner.cutter_comp_side, PARAMETER_ERROR, YA_CANNOT_CHANGE_AXIS_COORDSYS_WITH_CUTTER_RADIUS_COMP);
 
 	int origin;
 	int gc = parser.getGCode(ModalGroup_COORD_SYSTEM);
@@ -1224,19 +1225,19 @@ bool GCodeInterpreter::run_cutter_comp_on(CutterCompType side, const CmdParser &
 	int orientation;
 
 	IF_T_RET_F_SETSTATE((runner.plane != Plane_XY && runner.plane != Plane_XZ),
-		PARAMETER_ERROR, "Invalid plane for cutter compensation not XY no XZ");
-	IF_T_RET_F_SETSTATE((runner.cutter_comp_side), PARAMETER_ERROR, "Cutter radius compensation already ON");
+		PARAMETER_ERROR, YA_RADIUS_COMP_ONLY_IN_XY_OR_XZ);
+	IF_T_RET_F_SETSTATE((runner.cutter_comp_side), PARAMETER_ERROR, YA_CANNOT_TURN_CUTTER_RADIUS_COMP_ON_WHEN_ON);
 
 	int gc = parser.getGCode(ModalGroup_CUTTER_COMP);
 	if ( gc == G_41_1 || gc == G_42_1)
 	{
-		IF_F_RET_F_SETSTATE( parser.hasParam(PARAM_D), PARAMETER_ERROR, "G%d.1 with no D word",gc / 10);
+		IF_F_RET_F_SETSTATE( parser.hasParam(PARAM_D), PARAMETER_ERROR, YA_G41_1_G42_1_WITH_NO_D,gc / 10);
 		
 		parser.getRParam(PARAM_D, &radius);
 		radius = radius / 2;
 		if ( parser.hasParam(PARAM_L) )
 		{
-			IF_T_RET_F_SETSTATE((runner.plane != Plane_XZ), PARAMETER_ERROR, "G%d.1 with L word, but plane is not G18", gc / 10);
+			IF_T_RET_F_SETSTATE((runner.plane != Plane_XZ), PARAMETER_ERROR, YA_G41_1_G42_1_WITH_L_BUT_PLANE_NOT_G18, gc / 10);
 			parser.getIParam(PARAM_L, &orientation);
 		}
 		else {
@@ -1252,7 +1253,7 @@ bool GCodeInterpreter::run_cutter_comp_on(CutterCompType side, const CmdParser &
 		else 
 		{
 			parser.getIParam(PARAM_D, &tool);
-			IF_T_RET_F_SETSTATE((tool < 0), PARAMETER_ERROR, "Negative Value D for tool number");
+			IF_T_RET_F_SETSTATE((tool < 0), PARAMETER_ERROR, YA_NEGATIVE_D_WORD_TOOL_RADIUS_INDEX_USED);
 		}
 		radius = env->getToolById(tool).diameter / 2.0;
 		//orientation = settings->tool_table[pocket_number].orientation;

@@ -1,5 +1,6 @@
 #include "cmdparser.h"
 #include "ienvironment.h"
+#include "gcodeerrors.h"
 
 #include <math.h>
 
@@ -23,7 +24,7 @@ bool CmdParser::read_parameter(double *pdbl, bool check_exists)    //!< test for
 	// named parameters look like '<letter...>' or '<_.....>'
 	if (line[position] == '<')
 	{
-		RET_F_SETSTATE(NOTSUPPORTEDYET, "Named paramtr does not support yet");
+		RET_F_SETSTATE(NOTSUPPORTEDYET, YA_NAMED_PARAMETERS_NOT_SUPPORTED);
 	}
 	else
 	{
@@ -33,7 +34,7 @@ bool CmdParser::read_parameter(double *pdbl, bool check_exists)    //!< test for
 			*pdbl = index >= 1 && index < RS274NGC_MAX_PARAMETERS;
 			return true;
 		}
-		IF_F_RET_F_SETSTATE(((index >= 1) && (index < RS274NGC_MAX_PARAMETERS)), PARAMETER_ERROR, "Parameter number is out of range");
+		IF_F_RET_F_SETSTATE(((index >= 1) && (index < RS274NGC_MAX_PARAMETERS)), PARAMETER_ERROR, YA_PARAMETER_NUMBER_OUT_OF_RANGE);
 		//IF_F_RET_F_SETSTATE(((index < 5420) || (index <= 5428) && (true)), PARAMETER_ERROR, "Cannot read current position with cutter radius compensation on");
 		
 		*pdbl = env->GetVariable(index);
@@ -82,7 +83,7 @@ bool CmdParser::read_operation_unary( int *operation )
 			position += 3;
 		}
 		else
-			RET_F_SETSTATE(EXPRESSION_ERROR, "Unknown word starting with 'a'");
+			RET_F_SETSTATE(EXPRESSION_ERROR, YA_UNKNOWN_WORD, c );
 		break;
 	case 'c':
 		if ((line[position] == 'o') && (line[position + 1] == 's')) {
@@ -90,7 +91,7 @@ bool CmdParser::read_operation_unary( int *operation )
 			position += 2;
 		}
 		else
-			RET_F_SETSTATE(EXPRESSION_ERROR, "Unknown word starting with 'c'");
+			RET_F_SETSTATE(EXPRESSION_ERROR, YA_UNKNOWN_WORD, c);
 		break;
 	case 'e':
 		if ((line[position] == 'x') && (line[position + 1] == 'p')) {
@@ -107,7 +108,7 @@ bool CmdParser::read_operation_unary( int *operation )
 			*operation = EXISTS;
 		}
 		else {
-			RET_F_SETSTATE(EXPRESSION_ERROR, "Unknown word starting with 'e'");
+			RET_F_SETSTATE(EXPRESSION_ERROR, YA_UNKNOWN_WORD, c);
 		}
 		break;
 	case 'f':
@@ -120,7 +121,7 @@ bool CmdParser::read_operation_unary( int *operation )
 			position += 2;
 		}
 		else
-			RET_F_SETSTATE(EXPRESSION_ERROR, "Unknown word starting with 'f'");
+			RET_F_SETSTATE(EXPRESSION_ERROR, YA_UNKNOWN_WORD, c);
 		break;
 	case 'l':
 		if (line[position] == 'n') {
@@ -128,7 +129,7 @@ bool CmdParser::read_operation_unary( int *operation )
 			position++;
 		}
 		else
-			RET_F_SETSTATE(EXPRESSION_ERROR, "Unknown word starting with 'l'");
+			RET_F_SETSTATE(EXPRESSION_ERROR, YA_UNKNOWN_WORD, c);
 		break;
 	case 'r':
 		if (strncmp((line + position), "ound", 4) == 0) {
@@ -136,7 +137,7 @@ bool CmdParser::read_operation_unary( int *operation )
 			position += 4;
 		}
 		else
-			RET_F_SETSTATE(EXPRESSION_ERROR, "Unknown word starting with 'r'");
+			RET_F_SETSTATE(EXPRESSION_ERROR, YA_UNKNOWN_WORD, c);
 		break;
 	case 's':
 		if ((line[position] == 'i') && (line[position + 1] == 'n')) {
@@ -148,7 +149,7 @@ bool CmdParser::read_operation_unary( int *operation )
 			position += 3;
 		}
 		else
-			RET_F_SETSTATE(EXPRESSION_ERROR, "Unknown word starting with 's'");
+			RET_F_SETSTATE(EXPRESSION_ERROR, YA_UNKNOWN_WORD, c);
 		break;
 	case 't':
 		if ((line[position] == 'a') && (line[position + 1] == 'n')) {
@@ -156,10 +157,10 @@ bool CmdParser::read_operation_unary( int *operation )
 			position += 2;
 		}
 		else
-			RET_F_SETSTATE(EXPRESSION_ERROR, "Unknown word starting with 't'");
+			RET_F_SETSTATE(EXPRESSION_ERROR, YA_UNKNOWN_WORD, c);
 		break;
 	default:
-		RET_F_SETSTATE(EXPRESSION_ERROR, "Unknown word where unary operation could be");
+		RET_F_SETSTATE(EXPRESSION_ERROR, YA_UNKNOWN_WORD_WHERE_UNARY_OPERATION_COULD_BE );
 	}
 	return true;
 }
@@ -168,9 +169,9 @@ bool CmdParser::read_bracketed_parameter( double *double_ptr, bool check_exists)
 {
 	IF_F_RET_F_SETSTATE((line[position] == '['), INTERNAL_ERROR, "read_bracketed_parameter can not called here");
 	position++;
-	IF_F_RET_F_SETSTATE((line[position] == '#'), EXPRESSION_ERROR, "Expected # reading bracketed parameter");
+	IF_F_RET_F_SETSTATE((line[position] == '#'), EXPRESSION_ERROR, YA_EXPECTED_RESH);
 	IF_F_RET_F(read_parameter( double_ptr, check_exists));
-	IF_F_RET_F_SETSTATE((line[position] == ']'), EXPRESSION_ERROR, "Expected ] reading bracketed parameter");
+	IF_F_RET_F_SETSTATE((line[position] == ']'), EXPRESSION_ERROR, YA_EXPECTED_RIGHT_BRCKET);
 	position++;
 	return true;
 }
@@ -184,12 +185,12 @@ bool CmdParser::execute_unary(double *double_ptr, int operation)
 			*double_ptr = (-1.0 * *double_ptr);
 		break;
 	case ACOS:
-		IF_F_RET_F_SETSTATE(((*double_ptr >= -1.0) && (*double_ptr <= 1.0)), EXPRESSION_ERROR, "ACOS arcument is out of range");
+		IF_F_RET_F_SETSTATE(((*double_ptr >= -1.0) && (*double_ptr <= 1.0)), EXPRESSION_ERROR, YA_ARGUMENT_TO_ACOS_OUT_OF_RANGE);
 		*double_ptr = acos(*double_ptr);
 		*double_ptr = ((*double_ptr * 180.0) / M_PIl);
 		break;
 	case ASIN:
-		IF_F_RET_F_SETSTATE(((*double_ptr >= -1.0) && (*double_ptr <= 1.0)), EXPRESSION_ERROR, "ASIN arcument is out of range");
+		IF_F_RET_F_SETSTATE(((*double_ptr >= -1.0) && (*double_ptr <= 1.0)), EXPRESSION_ERROR, YA_ARGUMENT_TO_ASIN_OUT_OF_RANGE);
 		*double_ptr = asin(*double_ptr);
 		*double_ptr = ((*double_ptr * 180.0) / M_PIl);
 		break;
@@ -210,7 +211,7 @@ bool CmdParser::execute_unary(double *double_ptr, int operation)
 		*double_ptr = ceil(*double_ptr);
 		break;
 	case LN:
-		IF_F_RET_F_SETSTATE((*double_ptr <= 0.0), EXPRESSION_ERROR, "Zero or negative argument to LN");
+		IF_F_RET_F_SETSTATE((*double_ptr <= 0.0), EXPRESSION_ERROR, YA_ZERO_OR_NEGATIVE_ARGUMENT_TO_LN);
 		*double_ptr = log(*double_ptr);
 		break;
 	case ROUND:
@@ -221,14 +222,14 @@ bool CmdParser::execute_unary(double *double_ptr, int operation)
 		*double_ptr = sin((*double_ptr * M_PIl) / 180.0);
 		break;
 	case SQRT:
-		IF_F_RET_F_SETSTATE((*double_ptr >= 0.0), EXPRESSION_ERROR, "Zero or negative argument to LN");
+		IF_F_RET_F_SETSTATE((*double_ptr >= 0.0), EXPRESSION_ERROR, YA_ZERO_OR_NEGATIVE_ARGUMENT_TO_LN);
 		*double_ptr = sqrt(*double_ptr);
 		break;
 	case TAN:
 		*double_ptr = tan((*double_ptr * M_PIl) / 180.0);
 		break;
 	default:
-		RET_F_SETSTATE(EXPRESSION_ERROR, "Unknown operation");
+		RET_F_SETSTATE(EXPRESSION_ERROR, YA_BUG_UNKNOWN_OPERATION);
 	}
 	return true;
 }
@@ -236,9 +237,9 @@ bool CmdParser::execute_unary(double *double_ptr, int operation)
 bool CmdParser::read_atan(double *pdbl)
 {
 	double argument2;
-	IF_F_RET_F_SETSTATE((line[position] == '/'), EXPRESSION_ERROR, "Missing slash after first atan argument");
+	IF_F_RET_F_SETSTATE((line[position] == '/'), EXPRESSION_ERROR, YA_SLASH_MISSING_AFTER_FIRST_ATAN_ARGUMENT);
 	position++;
-	IF_F_RET_F_SETSTATE((line[position] == '['), EXPRESSION_ERROR, "Missing left bracket after slash with atan");
+	IF_F_RET_F_SETSTATE((line[position] == '['), EXPRESSION_ERROR, YA_LEFT_BRACKET_MISSING_AFTER_SLASH_WITH_ATAN);
   	IF_F_RET_F(read_real_expression( &argument2));
 	*pdbl = atan2(*pdbl, argument2);  /* value in radians */
 	*pdbl = ((*pdbl * 180.0) / M_PIl);   /* convert to degrees */
@@ -251,7 +252,7 @@ bool CmdParser::read_unary(double *pdbl)
 {
 	int operation;
 	IF_F_RET_F(read_operation_unary(&operation));
-	IF_F_RET_F_SETSTATE((line[position] == '['), EXPRESSION_ERROR, "Basket '[' missing after unary");
+	IF_F_RET_F_SETSTATE((line[position] == '['), EXPRESSION_ERROR, YA_LEFT_BRACKET_MISSING_AFTER_UNARY_OPERATION_NAME);
 
 	if (operation == EXISTS)
 	{
@@ -297,7 +298,7 @@ bool CmdParser::read_operation(int *operation)
 				position += 2;
 			}
 			else
-				RET_F_SETSTATE(UNKNOWN_OPERATOR, "Unknown operator starting with 'a'");
+				RET_F_SETSTATE(UNKNOWN_OPERATOR, YA_UNKNOWN_OPERATION_NAME_STARTING_WITH, c);
 			break;
 		case 'm':
 			if ((line[position] == 'o') && (line[position + 1] == 'd')) {
@@ -305,7 +306,7 @@ bool CmdParser::read_operation(int *operation)
 				position += 2;
 			}
 			else
-				RET_F_SETSTATE(UNKNOWN_OPERATOR, "Unknown operator starting with 'm'");
+				RET_F_SETSTATE(UNKNOWN_OPERATOR, YA_UNKNOWN_OPERATION_NAME_STARTING_WITH, c);
 			break;
 		case 'o':
 			if (line[position] == 'r') {
@@ -313,7 +314,7 @@ bool CmdParser::read_operation(int *operation)
 				position++;
 			}
 			else
-				RET_F_SETSTATE(UNKNOWN_OPERATOR, "Unknown operator starting with 'o'");
+				RET_F_SETSTATE(UNKNOWN_OPERATOR, YA_UNKNOWN_OPERATION_NAME_STARTING_WITH, c);
 			break;
 		case 'x':
 			if ((line[position] == 'o') && (line[position + 1] == 'r')) {
@@ -321,7 +322,7 @@ bool CmdParser::read_operation(int *operation)
 				position += 2;
 			}
 			else
-				RET_F_SETSTATE(UNKNOWN_OPERATOR, "Unknown operator starting with 'x'");
+				RET_F_SETSTATE(UNKNOWN_OPERATOR, YA_UNKNOWN_OPERATION_NAME_STARTING_WITH, c);
 			break;
 
 			/* relational operators */
@@ -332,7 +333,7 @@ bool CmdParser::read_operation(int *operation)
 				position++;
 			}
 			else
-				RET_F_SETSTATE(UNKNOWN_OPERATOR, "Unknown operator starting with 'e'");
+				RET_F_SETSTATE(UNKNOWN_OPERATOR, YA_UNKNOWN_OPERATION_NAME_STARTING_WITH, c);
 			break;
 		case 'n':
 			if (line[position] == 'e')
@@ -341,7 +342,7 @@ bool CmdParser::read_operation(int *operation)
 				position++;
 			}
 			else
-				RET_F_SETSTATE(UNKNOWN_OPERATOR, "Unknown operator starting with 'n'");
+				RET_F_SETSTATE(UNKNOWN_OPERATOR, YA_UNKNOWN_OPERATION_NAME_STARTING_WITH, c);
 			break;
 		case 'g':
 			if (line[position] == 'e')
@@ -355,7 +356,7 @@ bool CmdParser::read_operation(int *operation)
 				position++;
 			}
 			else
-				RET_F_SETSTATE(UNKNOWN_OPERATOR, "Unknown operator starting with 'g'");
+				RET_F_SETSTATE(UNKNOWN_OPERATOR, YA_UNKNOWN_OPERATION_NAME_STARTING_WITH, c);
 			break;
 		case 'l':
 			if (line[position] == 'e')
@@ -369,7 +370,7 @@ bool CmdParser::read_operation(int *operation)
 				position++;
 			}
 			else
-				RET_F_SETSTATE(UNKNOWN_OPERATOR, "Unknown operator starting with 'l'");
+				RET_F_SETSTATE(UNKNOWN_OPERATOR, YA_UNKNOWN_OPERATION_NAME_STARTING_WITH, c);
 			break;
 		case '<':
 			if (line[position] == '=') {
@@ -392,9 +393,9 @@ bool CmdParser::read_operation(int *operation)
 				*operation = GT;
 			break;
 		case 0:
-			RET_F_SETSTATE(UNKNOWN_OPERATOR, "Unclosed expression");
+			RET_F_SETSTATE(UNKNOWN_OPERATOR, YA_UNCLOSED_EXPRESSION);
 		default:
-			RET_F_SETSTATE(UNKNOWN_OPERATOR, "Unclosed operator");
+			RET_F_SETSTATE(UNKNOWN_OPERATOR, YA_UNKNOWN_OPERATION);
 	}
 	return true;
 
@@ -417,7 +418,7 @@ bool CmdParser::execute_binary1(double *left, int operation, double *right)
 	switch (operation) 
 	{
 	case DIVIDED_BY:
-		IF_F_RET_F_SETSTATE((*right != 0.0), EXPRESSION_ERROR, "Attempt to devide by zero");
+		IF_F_RET_F_SETSTATE((*right != 0.0), EXPRESSION_ERROR, YA_ATTEMPT_TO_DIVIDE_BY_ZERO);
 		*left = (*left / *right);
 		break;
 	case MODULO:                 /* always calculates a positive answer */
@@ -428,14 +429,14 @@ bool CmdParser::execute_binary1(double *left, int operation, double *right)
 		break;
 	case POWER:
 		if((*left < 0.0) && (floor(*right) != *right))
-			RET_F_SETSTATE(EXPRESSION_ERROR, "Attempt to raize negative to non integer power");
+			RET_F_SETSTATE(EXPRESSION_ERROR, YA_ATTEMPT_TO_RAISE_NEGATIVE_TO_NON_INTEGER_POWER);
 		*left = pow(*left, *right);
 		break;
 	case TIMES:
 		*left = (*left * *right);
 		break;
 	default:
-		RET_F_SETSTATE(EXPRESSION_ERROR, "Unknown operator");
+		RET_F_SETSTATE(EXPRESSION_ERROR, YA_BUG_UNKNOWN_OPERATION);
 	}
 	return true;
 }
@@ -486,7 +487,7 @@ bool CmdParser::execute_binary2(double *left, int operation,  double *right)
 		break;
 
 	default:
-		RET_F_SETSTATE(EXPRESSION_ERROR, "Unknown operator");
+		RET_F_SETSTATE(EXPRESSION_ERROR, YA_BUG_UNKNOWN_OPERATION);
 	}
 	return true;
 }

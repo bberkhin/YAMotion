@@ -18,12 +18,11 @@ MacrosesDlg::MacrosesDlg(Macroses *pm,wxWindow *parent)
 	list = new wxListBox(this, wxID_ANY);
 
 	wxStaticBoxSizer *textinfos = new wxStaticBoxSizer(
-		new wxStaticBox(this, wxID_ANY, _("Select from the list:")),
-		wxHORIZONTAL);
+		new wxStaticBox(this, wxID_ANY, _("Select from the list:")),	wxHORIZONTAL);
 	
 	textinfos->Add(list, 0, 0); //wxEXPAND
 	textinfos->Add(0, 6);
-	ptext = new wxStaticText(this, wxID_ANY, _(" Это описание к самому первому макросы оно может быть весьма длинным и довольно муторным.Тем не менее мы должны все внимательно  проверить.   "));
+	ptext = new wxStaticText(this, wxID_ANY, "Just to define place fo this we need vore space ");
 	textinfos->Add(ptext, 0, 0);
 	textinfos->Add(0, 6);
 

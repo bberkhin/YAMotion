@@ -187,6 +187,7 @@ wxBEGIN_EVENT_TABLE (AppFrame, wxFrame)
     EVT_MENU (wxID_SAVE,             AppFrame::OnFileSave)
     EVT_MENU (wxID_SAVEAS,           AppFrame::OnFileSaveAs)
     EVT_MENU (wxID_CLOSE,            AppFrame::OnFileClose)
+	EVT_MENU_RANGE(wxID_FILE, wxID_FILE9, AppFrame::OnOpenLastFile)
     // properties
     //EVT_MENU (myID_PROPERTIES,       AppFrame::OnProperties)
 	EVT_MENU (ID_MACROSES,			 AppFrame::OnMacroses)
@@ -206,6 +207,7 @@ wxBEGIN_EVENT_TABLE (AppFrame, wxFrame)
     EVT_MENU (wxID_FIND,             AppFrame::OnEdit)
     // And all our edit-related menu commands.
     EVT_MENU_RANGE (myID_EDIT_FIRST, myID_EDIT_LAST, AppFrame::OnEdit)
+	
 	
     // help
     EVT_MENU (wxID_ABOUT,            AppFrame::OnAbout)
@@ -388,7 +390,7 @@ bool AppFrame::DoFileSave(bool askToSave, bool bSaveAs )
 	if (bSaveAs || fname.empty())
 	{
 		wxString filename = wxEmptyString;
-		wxFileDialog dlg(this, "Save file As", wxEmptyString, wxEmptyString, "GCode Files (*.ngc)|*.ngc", wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
+		wxFileDialog dlg(this, _("Save file As"), wxEmptyString, wxEmptyString, _("GCode Files (*.ngc)|*.ngc"), wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
 		if (dlg.ShowModal() != wxID_OK)
 			return false;
 		filename = dlg.GetPath();
@@ -436,11 +438,17 @@ void AppFrame::OnFileOpen (wxCommandEvent &WXUNUSED(event))
 		return;
     
 	wxString fname;
-    wxFileDialog dlg (this, "Open file", wxEmptyString, wxEmptyString, "Any file (*)|*",
+    wxFileDialog dlg (this, _("Open file"), wxEmptyString, wxEmptyString, _("Any file (*)|*"),
                       wxFD_OPEN | wxFD_FILE_MUST_EXIST | wxFD_CHANGE_DIR);
     if (dlg.ShowModal() != wxID_OK) return;
     fname = dlg.GetPath ();
     FileOpen (fname);
+}
+
+void AppFrame::OnOpenLastFile(wxCommandEvent &event)
+{
+	int n = wxID_FILE - event.GetId();
+	//FileOpen(fname);
 }
 
 void AppFrame::OnFileSave (wxCommandEvent &WXUNUSED(event)) 
@@ -505,7 +513,7 @@ void AppFrame::DoMathCalc( DoMathBase &mth )
 		m_edit->GetSelection(&from, &to);
 		if (from == to)
 		{
-			wxMessageBox(L"Uups there is no any selection");
+			wxMessageBox(_("Uups there is no any selection"));
 			return;
 		}
 		line_start = m_edit->LineFromPosition(from);
@@ -563,12 +571,12 @@ void AppFrame::OnMathExpression(wxCommandEvent &WXUNUSED(event))
 	catch (mu::Parser::exception_type &e)
 	{
 		wxString errMsg;
-		errMsg += wxString::Format("Error%s pos: %d\n", e.GetMsg().c_str(), (int)e.GetPos());
+		errMsg += wxString::Format(_("Error%s pos: %d"), e.GetMsg().c_str(), (int)e.GetPos());
 		wxMessageBox(errMsg);
 	}
 	catch (...)
 	{
-		wxMessageBox(L"Uups some erorr");
+		wxMessageBox(_("Uups some erorr"));
 	}
 
 }
@@ -634,9 +642,10 @@ void AppFrame::CreateMenu ()
 	if (config)
 	{
 		const FileNamesList &files = config->GetFiles();
+		int n = 0;
 		std::for_each( files.begin(), files.end(), 
-			[menuLastFiles](const wxString &p) {
-			menuLastFiles->Append(wxID_OPEN, p); });
+			[menuLastFiles,&n](const wxString &p) {
+			if (n < 10) { menuLastFiles->Append(wxID_FILE + n, p); n++; } });
 	}
 	menuFile->Append(myID_HIGHLIGHTLANG, _("&Last Files"), menuLastFiles);
 
@@ -856,16 +865,16 @@ wxThread::ExitCode IntGCodeThread::Entry()
 	{
 		if (!ppret->open_nc_file(fname.c_str()))
 		{
-			plogger->log(LOG_ERROR, "Can not open file: %s", fname.c_str() );
+			plogger->log(LOG_ERROR, _("Can not open file: %s"), fname.c_str() );
 			return NULL;
 		}
 		ppret->execute_file();
 	}
-	plogger->log(LOG_INFORMATIONSUM, "Feed Lenght: %f", pexec->get_feed_len());
-	plogger->log(LOG_INFORMATIONSUM, "Traverce Lenght: %f", pexec->get_traverce_len());
-	plogger->log(LOG_INFORMATIONSUM, "X Min: %f X Max %f", pexec->getBox().Min.x, pexec->getBox().Max.x);
-	plogger->log(LOG_INFORMATIONSUM, "Y Min: %f Y Max %f", pexec->getBox().Min.y, pexec->getBox().Max.y);
-	plogger->log(LOG_INFORMATIONSUM, "Z Min: %f Z Max %f", pexec->getBox().Min.z, pexec->getBox().Max.z);
+	plogger->log(LOG_INFORMATIONSUM, _("Feed Lenght: %f"), pexec->get_feed_len());
+	plogger->log(LOG_INFORMATIONSUM, _("Traverce Lenght: %f"), pexec->get_traverce_len());
+	plogger->log(LOG_INFORMATIONSUM, _("X Min: %f X Max %f"), pexec->getBox().Min.x, pexec->getBox().Max.x);
+	plogger->log(LOG_INFORMATIONSUM, _("Y Min: %f Y Max %f"), pexec->getBox().Min.y, pexec->getBox().Max.y);
+	plogger->log(LOG_INFORMATIONSUM, _("Z Min: %f Z Max %f"), pexec->getBox().Min.z, pexec->getBox().Max.z);
 
 	wxQueueEvent(m_pHandler, new wxThreadEvent(wxEVT_THREAD, CHECK_GCODE_COMPLETE));
 	return NULL;
@@ -1108,10 +1117,10 @@ int AppFrame::RunGcmc(const wchar_t *src_fname, const  wchar_t *dst_fname, const
 
 	if (gcmcProcess)
 	{
-		logwnd->Append(MSLInfo, L"gcmc_vc.exe already running");
+		logwnd->Append(MSLInfo, _("gcmc_vc.exe already running"));
 		return 1;
 	}
-	logwnd->Append(MSLInfo, L"Start converting...");
+	logwnd->Append(MSLInfo, _("Start converting..."));
 	logwnd->Append(MSLInfo, arg.c_str());
 	gcmcProcess = new GcmcProcess(this, dst_fname, what_to_do);
 	int code = wxExecute(arg, wxEXEC_ASYNC| wxEXEC_HIDE_CONSOLE | wxEXEC_NODISABLE, gcmcProcess, &env);
@@ -1125,7 +1134,7 @@ void AppFrame::GcmcProcessTerminated(int status, const wchar_t *dst_fname, DoAft
 
 	if (gcmcProcess)
 	{
-		wxString inf = wxString::Format("Process terminated with exit code %d", status);
+		wxString inf = wxString::Format(_("Process terminated with exit code %d"), status);
 		logwnd->Append(status == 0 ? MSLInfo : MSLError, inf);
 		if (status == 0)
 		{
@@ -1181,7 +1190,7 @@ void AppFrame::DoSimulate(const wchar_t *fname)
 		simulateThread = new SimulateGCodeThread(this, fname);
 		if (simulateThread->Run() != wxTHREAD_NO_ERROR)
 		{
-			logwnd->Append(MSLError, L"Can't create the thread to run simulate");
+			logwnd->Append(MSLError, _("Can't create the thread to run simulate"));
 			delete simulateThread;
 			simulateThread = NULL;
 
