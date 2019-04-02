@@ -1,12 +1,11 @@
 
 #include "wx/wx.h"
 #include "wx/intl.h"
-
-
+#include "app.h"
 #include "appdefs.h"
 #include "appframe.h"
 #include "configdata.h"
-
+#include "standartpaths.h"
 
 
 
@@ -22,41 +21,12 @@
 // implementation
 //============================================================================
 
-class AppFrame;
-
-//----------------------------------------------------------------------------
-//
-class App : public wxApp
-{
-	friend class AppFrame;
-public:
-	App() { m_lang = wxLANGUAGE_UNKNOWN; }
-
-	//! the main function called during application start
-	virtual bool OnInit() wxOVERRIDE;
-
-	//! application exit function
-	virtual int OnExit() wxOVERRIDE;
-
-private:
-	//! frame window
-	AppFrame* m_frame;
-	
-protected:
-	// Lang support
-	wxLanguage m_lang;  // language specified by user
-	wxLocale m_locale;  // locale we'll be using
-	wxDECLARE_EVENT_TABLE();
-};
-
-// created dynamically by wxWidgets
-wxDECLARE_APP(App);
-
 
 wxIMPLEMENT_APP(App);
 
 
 wxBEGIN_EVENT_TABLE(App, wxApp)
+
 wxEND_EVENT_TABLE()
 
 //----------------------------------------------------------------------------
@@ -66,12 +36,12 @@ wxEND_EVENT_TABLE()
 
 
 // language data
-static const wxLanguage langIds[] =
+const wxLanguage g_langIds[] =
 {
 	wxLANGUAGE_DEFAULT,
 	wxLANGUAGE_RUSSIAN,
-/*
 	wxLANGUAGE_FRENCH,
+/*
 	wxLANGUAGE_ITALIAN,
 	wxLANGUAGE_GERMAN,
 	wxLANGUAGE_BULGARIAN,
@@ -94,12 +64,12 @@ static const wxLanguage langIds[] =
 
 // note that it makes no sense to translate these strings, they are
 // shown before we set the locale anyhow
-const wxString langNames[] =
+const wxString g_langNames[] =
 {
 	"English",
-	"Russian"
-/*
+	"Russian",
 	"French",
+/*
 	"Italian",
 	"German",	
 	"Bulgarian",
@@ -120,9 +90,23 @@ const wxString langNames[] =
 };
 
 // the arrays must be in sync
-wxCOMPILE_TIME_ASSERT(WXSIZEOF(langNames) == WXSIZEOF(langIds),
+wxCOMPILE_TIME_ASSERT(WXSIZEOF(g_langNames) == WXSIZEOF(g_langIds),
 	LangArraysMismatch);
 
+const int g_lang_count = WXSIZEOF(g_langNames);
+
+App::~App()
+{
+	if (m_restart)
+	{
+		// argv[0] contains the full path to the executable
+
+		wxExecuteEnv env;
+		env.cwd = StandartPaths::Get()->GetRootPath().c_str();
+		wxExecute(argv[0], wxEXEC_ASYNC, NULL, &env);
+	}
+
+}
 
 bool App::OnInit() 
 {
@@ -139,32 +123,38 @@ bool App::OnInit()
 	// GCode & Gcmc lexer
 	LINK_LEXER(lmGcode)
 	LINK_LEXER(lmGcmc)
-		// create application frame
-		
-	wxConfigBase::Set( new ConfigData() ); //wxConfig
+	// create application frame
 
-// Init lang	
+	ConfigData *config = new ConfigData();
+	wxConfigBase::Set(config); //wxConfig
+	wxLanguage m_lang = wxLANGUAGE_UNKNOWN;  // language specified by user
+
+	if ( !config->IsFirstTimeRun() )
+		m_lang = static_cast<wxLanguage>(config->GetLanguage(wxLANGUAGE_UNKNOWN));
+
+
+	// Init lang	
 	if (m_lang == wxLANGUAGE_UNKNOWN)
 	{
 		int lng = wxGetSingleChoiceIndex
 		(
 			_("Please choose language:"),
 			_("Language"),
-			WXSIZEOF(langNames),
-			langNames
+			g_lang_count,
+			g_langNames
 		);
-		m_lang = lng == -1 ? wxLANGUAGE_DEFAULT : langIds[lng];
+		m_lang = lng == -1 ? wxLANGUAGE_DEFAULT : g_langIds[lng];
+		config->SetLanguage(m_lang);
 	}
 
 	// do nothing if system
 	if (m_lang != wxLANGUAGE_DEFAULT)
 	{
 		// don't use wxLOCALE_LOAD_DEFAULT flag so that Init() doesn't return
-	   // false just because it failed to load wxstd catalog
+		// false just because it failed to load wxstd catalog
 		if (!m_locale.Init(m_lang, wxLOCALE_DONT_LOAD_DEFAULT))
 		{
 			wxMessageBox(_("This language is not supported by the system."));
-
 			// continue nevertheless
 		}
 
@@ -178,10 +168,12 @@ bool App::OnInit()
 		const wxLanguageInfo* pInfo = wxLocale::GetLanguageInfo(m_lang);
 		if (!m_locale.AddCatalog("messages"))
 		{
-			wxMessageBox(_("Couldn't find/load the 'messages' catalog for locale '%s'."),
-				pInfo ? pInfo->GetLocaleName() : _("unknown"));
+			wxMessageBox(wxString::Format(_("Couldn't find/load the 'messages' catalog for locale '%s'."),
+				pInfo ? pInfo->GetLocaleName() : _("unknown")));
+			config->SetLanguage(wxLANGUAGE_DEFAULT);
 		}
 	}
+	
 
 	m_frame = new AppFrame(APP_NAME);
 	// open application frame
@@ -189,6 +181,12 @@ bool App::OnInit()
 	m_frame->Show(true);
 
 	return true;
+}
+
+void App::Restart()
+{
+	m_restart = true;
+	ExitMainLoop();
 }
 
 int App::OnExit()

@@ -71,6 +71,7 @@
     <ClInclude Include="..\Gcode\logconsole.h" />
     <ClInclude Include="..\Gcode\TrajectoryPlanner.h" />
     <ClInclude Include="about.h" />
+    <ClInclude Include="app.h" />
     <ClInclude Include="appdefs.h" />
     <ClInclude Include="appframe.h" />
     <ClInclude Include="codedescription.h" />

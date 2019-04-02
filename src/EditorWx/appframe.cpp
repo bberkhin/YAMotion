@@ -8,6 +8,7 @@
 
 
 //! application headers
+#include "app.h"
 #include "appdefs.h"       // Prefs
 #include "defsext.h"     // Additional definitions
 #include "edit.h"        // Edit module
@@ -189,7 +190,7 @@ wxBEGIN_EVENT_TABLE (AppFrame, wxFrame)
     EVT_MENU (wxID_CLOSE,            AppFrame::OnFileClose)
 	EVT_MENU_RANGE(wxID_FILE, wxID_FILE9, AppFrame::OnOpenLastFile)
     // properties
-    //EVT_MENU (myID_PROPERTIES,       AppFrame::OnProperties)
+    EVT_MENU (myID_PROPERTIES,       AppFrame::OnProperties)
 	EVT_MENU (ID_MACROSES,			 AppFrame::OnMacroses)
 	EVT_MENU(ID_MATHCALC,			 AppFrame::OnMathCalc)
 	EVT_MENU(ID_MATHEXPRESSION, AppFrame::OnMathExpression)
@@ -211,6 +212,7 @@ wxBEGIN_EVENT_TABLE (AppFrame, wxFrame)
 	
     // help
     EVT_MENU (wxID_ABOUT,            AppFrame::OnAbout)
+
   //  EVT_CONTEXT_MENU(                AppFrame::OnContextMenu)
 //GCode
 	EVT_MENU(ID_GCODE_CHECK, AppFrame::OnCheck)
@@ -487,7 +489,15 @@ void AppFrame::OnFileClose (wxCommandEvent &event)
 
 // properties event handlers
 void AppFrame::OnProperties(wxCommandEvent &WXUNUSED(event))
-{}
+{
+	PropertiesDlg dlg(this);
+	if (dlg.NeedRestart())
+	{
+		if ( DoFileSave(true, false) )
+			wxGetApp().Restart();
+	}
+}
+
 void AppFrame::OnMacroses(wxCommandEvent &WXUNUSED(event))
 {
     if (!m_edit) return;

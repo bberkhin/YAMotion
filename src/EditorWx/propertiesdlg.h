@@ -1,16 +1,19 @@
 #pragma once
 
 //----------------------------------------------------------------------------
-//! EditProperties
-class Edit;
+//! PropertiesDlg
 
-class EditProperties : public wxDialog 
+
+class PropertiesDlg : public wxDialog
 {
 
 public:
-
 	//! constructor
-	EditProperties(Edit *edit, long style = 0);
+	PropertiesDlg(wxWindow *parent);
+	void InitLangList();
+	int ShowModal();
+	bool NeedRestart() { return need_restart; }
 private:
-
+	wxListBox *langlist;
+	bool need_restart;
 };

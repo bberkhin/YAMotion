@@ -1,109 +1,73 @@
 #include "wx/wx.h"
 #include "propertiesdlg.h"
-#include "edit.h"
+#include "app.h"
+#include "configdata.h"
 
 //----------------------------------------------------------------------------
-// EditProperties
+// PropertiesDlg
 //----------------------------------------------------------------------------
 
-EditProperties::EditProperties(Edit *edit,
-	long style)
-	: wxDialog(edit, wxID_ANY, wxEmptyString,
-		wxDefaultPosition, wxDefaultSize,
-		style | wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER) {
 
-	// sets the application title
-	SetTitle(_("Properties"));
-	wxString text;
+PropertiesDlg::PropertiesDlg(wxWindow *parent)
+	: need_restart(false), wxDialog(parent, wxID_ANY, ("Properties"))
+{
 
-	// full name
-	wxBoxSizer *fullname = new wxBoxSizer(wxHORIZONTAL);
-	fullname->Add(10, 0);
-	fullname->Add(new wxStaticText(this, wxID_ANY, _("Full filename"),
-		wxDefaultPosition, wxSize(80, wxDefaultCoord)),
-		0, wxALIGN_LEFT | wxALIGN_CENTER_VERTICAL);
-	fullname->Add(new wxStaticText(this, wxID_ANY, edit->GetFilename()),
-		0, wxALIGN_LEFT | wxALIGN_CENTER_VERTICAL);
-
-	// text info
-	wxGridSizer *textinfo = new wxGridSizer(4, 0, 2);
-	textinfo->Add(new wxStaticText(this, wxID_ANY, _("Language"),
-		wxDefaultPosition, wxSize(80, wxDefaultCoord)),
-		0, wxALIGN_LEFT | wxALIGN_CENTER_VERTICAL | wxLEFT, 4);
-	textinfo->Add(new wxStaticText(this, wxID_ANY, edit->m_language->name),
-		0, wxALIGN_LEFT | wxALIGN_CENTER_VERTICAL | wxRIGHT, 4);
-	textinfo->Add(new wxStaticText(this, wxID_ANY, _("Lexer-ID: "),
-		wxDefaultPosition, wxSize(80, wxDefaultCoord)),
-		0, wxALIGN_LEFT | wxALIGN_CENTER_VERTICAL | wxLEFT, 4);
-	text = wxString::Format("%d", edit->GetLexer());
-	textinfo->Add(new wxStaticText(this, wxID_ANY, text),
-		0, wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL | wxRIGHT, 4);
-	wxString EOLtype = wxEmptyString;
-	switch (edit->GetEOLMode()) {
-	case wxSTC_EOL_CR: {EOLtype = "CR (Unix)"; break; }
-	case wxSTC_EOL_CRLF: {EOLtype = "CRLF (Windows)"; break; }
-	case wxSTC_EOL_LF: {EOLtype = "CR (Macintosh)"; break; }
-	}
-	textinfo->Add(new wxStaticText(this, wxID_ANY, _("Line endings"),
-		wxDefaultPosition, wxSize(80, wxDefaultCoord)),
-		0, wxALIGN_LEFT | wxALIGN_CENTER_VERTICAL | wxLEFT, 4);
-	textinfo->Add(new wxStaticText(this, wxID_ANY, EOLtype),
-		0, wxALIGN_LEFT | wxALIGN_CENTER_VERTICAL | wxRIGHT, 4);
-
-	// text info box
-	wxStaticBoxSizer *textinfos = new wxStaticBoxSizer(
-		new wxStaticBox(this, wxID_ANY, _("Information")),
-		wxVERTICAL);
-	textinfos->Add(textinfo, 0, wxEXPAND);
-	textinfos->Add(0, 6);
-
-	// statistic
-	wxGridSizer *statistic = new wxGridSizer(4, 0, 2);
-	statistic->Add(new wxStaticText(this, wxID_ANY, _("Total lines"),
-		wxDefaultPosition, wxSize(80, wxDefaultCoord)),
-		0, wxALIGN_LEFT | wxALIGN_CENTER_VERTICAL | wxLEFT, 4);
-	text = wxString::Format("%d", edit->GetLineCount());
-	statistic->Add(new wxStaticText(this, wxID_ANY, text),
-		0, wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL | wxRIGHT, 4);
-	statistic->Add(new wxStaticText(this, wxID_ANY, _("Total chars"),
-		wxDefaultPosition, wxSize(80, wxDefaultCoord)),
-		0, wxALIGN_LEFT | wxALIGN_CENTER_VERTICAL | wxLEFT, 4);
-	text = wxString::Format("%d", edit->GetTextLength());
-	statistic->Add(new wxStaticText(this, wxID_ANY, text),
-		0, wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL | wxRIGHT, 4);
-	statistic->Add(new wxStaticText(this, wxID_ANY, _("Current line"),
-		wxDefaultPosition, wxSize(80, wxDefaultCoord)),
-		0, wxALIGN_LEFT | wxALIGN_CENTER_VERTICAL | wxLEFT, 4);
-	text = wxString::Format("%d", edit->GetCurrentLine());
-	statistic->Add(new wxStaticText(this, wxID_ANY, text),
-		0, wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL | wxRIGHT, 4);
-	statistic->Add(new wxStaticText(this, wxID_ANY, _("Current pos"),
-		wxDefaultPosition, wxSize(80, wxDefaultCoord)),
-		0, wxALIGN_LEFT | wxALIGN_CENTER_VERTICAL | wxLEFT, 4);
-	text = wxString::Format("%d", edit->GetCurrentPos());
-	statistic->Add(new wxStaticText(this, wxID_ANY, text),
-		0, wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL | wxRIGHT, 4);
-
-	// char/line statistics
-	wxStaticBoxSizer *statistics = new wxStaticBoxSizer(
-		new wxStaticBox(this, wxID_ANY, _("Statistics")),
-		wxVERTICAL);
-	statistics->Add(statistic, 0, wxEXPAND);
-	statistics->Add(0, 6);
-
-	// total pane
+	//Select Lang
+	langlist = new wxListBox(this, wxID_ANY);
 	wxBoxSizer *totalpane = new wxBoxSizer(wxVERTICAL);
-	totalpane->Add(fullname, 0, wxEXPAND | wxLEFT | wxRIGHT | wxTOP, 10);
-	totalpane->Add(0, 6);
-	totalpane->Add(textinfos, 0, wxEXPAND | wxLEFT | wxRIGHT, 10);
+
+	totalpane->Add(new wxStaticBox(this, wxID_ANY, _("Select language:")) );
+
+	totalpane->Add(langlist, 0, 0); //wxEXPAND
 	totalpane->Add(0, 10);
-	totalpane->Add(statistics, 0, wxEXPAND | wxLEFT | wxRIGHT, 10);
-	totalpane->Add(0, 6);
-	wxButton *okButton = new wxButton(this, wxID_OK, _("OK"));
-	okButton->SetDefault();
-	totalpane->Add(okButton, 0, wxALIGN_CENTER | wxALL, 10);
+	totalpane->Add(CreateStdDialogButtonSizer(wxOK | wxCANCEL), 0, wxALL | wxALIGN_RIGHT, 2);
+	InitLangList();
 
 	SetSizerAndFit(totalpane);
 
 	ShowModal();
+}
+
+void PropertiesDlg::InitLangList()
+{
+	int n = g_lang_count;
+	ConfigData *config = dynamic_cast<ConfigData *>(wxConfigBase::Get());
+	int lan = config ? config->GetLanguage(-1) : -1;
+	int select = 0;
+	for (int i = 0; i < n; i++)
+	{
+		langlist->Append(g_langNames[i], (void *)(&(g_langIds[i])));
+		if (g_langIds[i] == lan)
+			select = i;
+	}
+
+	langlist->SetSelection(select);
+}
+
+
+int PropertiesDlg::ShowModal()
+{	
+	int ret = wxDialog::ShowModal();
+	if (ret != wxID_OK)
+		return ret;
+
+	
+	int select = langlist->GetSelection();
+	if (select >= 0)
+	{
+		ConfigData *config = dynamic_cast<ConfigData *>(wxConfigBase::Get());
+		int lan = config ? config->GetLanguage(-1) : -1;
+		wxLanguage *pl = static_cast<wxLanguage *>(langlist->GetClientData(select));
+		if (*pl != lan)
+		{
+			need_restart = true;
+			config->SetLanguage(*pl);
+		}
+			
+	}
+	if (need_restart &&  wxMessageBox(_("The changes you did, will applay after restarting the program. Would you like to restart?"),
+		_("Properties changed"), wxOK | wxCANCEL | wxICON_QUESTION, this) == wxCANCEL)
+		need_restart = false;
+
+	return ret;
 }

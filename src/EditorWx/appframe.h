@@ -40,7 +40,7 @@ public:
 	//! event handlers
 	//! common
 	void OnClose(wxCloseEvent &event);
-	void OnAbout(wxCommandEvent &event);
+	void OnAbout(wxCommandEvent &event);	
 	void OnExit(wxCommandEvent &event);
 	void OnTimerEvent(wxTimerEvent &event);
 	//! file

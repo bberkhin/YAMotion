@@ -227,6 +227,9 @@
     <ClInclude Include="..\Gcode\gcodeerrors.h">
       <Filter>GCode</Filter>
     </ClInclude>
+    <ClInclude Include="app.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="EditorWx.rc">

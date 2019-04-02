@@ -18,6 +18,9 @@ public:
 	void ReadFileNames();
 	void WriteFileNames();
 	const FileNamesList &GetFiles() { return files; }
+	bool IsFirstTimeRun();
+	int GetLanguage(int deflang);
+	void SetLanguage(int lang);
 private:
 	FileNamesList files;	
 };

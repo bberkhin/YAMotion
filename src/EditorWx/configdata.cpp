@@ -12,6 +12,24 @@ ConfigData::~ConfigData()
 {
 }
 
+bool ConfigData::IsFirstTimeRun()
+{
+	SetPath("/YAMOTION");
+	return !HasEntry("Language");
+}
+int ConfigData::GetLanguage(int deflang)
+{
+	SetPath("/YAMOTION");
+	return static_cast<int>(ReadLong("Language", deflang ));
+}
+
+void ConfigData::SetLanguage(int lang)
+{
+	SetPath("/YAMOTION");
+	Write("Language", lang);
+}
+
+
 void ConfigData::WriteFindAndReplase(wxFindReplaceData *find_data)
 {
 	wxString strOldPath = GetPath();
