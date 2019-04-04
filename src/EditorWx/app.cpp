@@ -162,7 +162,7 @@ bool App::OnInit()
 		// in the default locations, but when the program is not installed the
 		// catalogs are in the build directory where we wouldn't find them by
 		// default
-		wxLocale::AddCatalogLookupPathPrefix(".");
+		wxLocale::AddCatalogLookupPathPrefix(wxString(".\\") + wxString(RESOURCES_DIR));
 
 		// Initialize the catalogs we'll be using
 		const wxLanguageInfo* pInfo = wxLocale::GetLanguageInfo(m_lang);
@@ -171,6 +171,11 @@ bool App::OnInit()
 			wxMessageBox(wxString::Format(_("Couldn't find/load the 'messages' catalog for locale '%s'."),
 				pInfo ? pInfo->GetLocaleName() : _("unknown")));
 			config->SetLanguage(wxLANGUAGE_DEFAULT);
+		}
+		else // language changed
+		{
+			wxString loc_name = pInfo->GetLocaleName();			
+			StandartPaths::Get()->SetLanguageCatalog( loc_name.BeforeFirst('-').c_str() );
 		}
 	}
 	

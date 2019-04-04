@@ -120,6 +120,9 @@
     <ClCompile Include="mathsimpledlg.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
+    <ClCompile Include="welcomewnd.cpp">
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h">
@@ -228,6 +231,9 @@
       <Filter>GCode</Filter>
     </ClInclude>
     <ClInclude Include="app.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="welcomewnd.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
   </ItemGroup>

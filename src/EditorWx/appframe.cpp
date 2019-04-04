@@ -28,6 +28,8 @@
 #include "configdata.h"
 #include "mathsimpledlg.h"
 #include "mathexpressiondlg.h"
+#include "welcomewnd.h"
+
 
 //Bitmaps
 #include "bitmaps/new.xpm"
@@ -314,6 +316,9 @@ AppFrame::AppFrame (const wxString &title)
 	wxLog::SetActiveTarget(m_LogWin);
 #endif
 	
+	WelcomeWnd *welcome = new WelcomeWnd(this);
+	welcome->ShowWelcome(true);
+
 }
 
 AppFrame::~AppFrame () {

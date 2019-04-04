@@ -55,6 +55,7 @@
     <ClCompile Include="appframe.cpp" />
     <ClCompile Include="standartpaths.cpp" />
     <ClCompile Include="ViewGCode.cpp" />
+    <ClCompile Include="welcomewnd.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Gcode\cmdparser.h" />
@@ -93,6 +94,7 @@
     <ClInclude Include="resource.h" />
     <ClInclude Include="standartpaths.h" />
     <ClInclude Include="ViewGCode.h" />
+    <ClInclude Include="welcomewnd.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="EditorWx.rc" />
