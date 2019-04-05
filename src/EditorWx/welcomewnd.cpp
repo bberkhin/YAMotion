@@ -1,9 +1,11 @@
 #include "wx/wx.h"
 #include "wx/html/htmlproc.h"
 
+#include "appdefs.h"
 #include "welcomewnd.h"
 #include "standartpaths.h"
 #include "configdata.h"
+#include "app.h"
 
 
 class WelcomProcessor : public wxHtmlProcessor
@@ -12,6 +14,11 @@ public:
 	virtual wxString Process(const wxString& s) const wxOVERRIDE
 	{
 		wxString r(s);
+		// set version info
+		r.Replace("<verinfo>", APP_VERSION);
+		wxString updateString;
+		if ( wxGetApp().GetUptadeInfo(updateString) )
+			r.Replace("<updateinfo>", updateString);
 		ConfigData *config = dynamic_cast<ConfigData *>(wxConfigBase::Get());
 		if (config)
 		{
@@ -72,6 +79,15 @@ wxEND_EVENT_TABLE()
 //EVT_HTML_LINK_CLICKED(wxID_ANY, MyFrame::OnHtmlLinkClicked)
 
 
+void WelcomeWnd::RunCommand(const wxString &url, int baseCmd)
+{
+	long n = 0;
+	if (url.After(':').ToLong(&n))
+	{
+		wxCommandEvent *ev = new wxCommandEvent(wxEVT_MENU, baseCmd + n);
+		wxQueueEvent(pWelcomeFrame->GetParent(), ev);
+	}
+}
 void WelcomeWnd::OnHtmlLinkClicked(wxHtmlLinkEvent &event)
 {
 	// skipping this event the default behaviour (load the clicked URL)
@@ -79,17 +95,15 @@ void WelcomeWnd::OnHtmlLinkClicked(wxHtmlLinkEvent &event)
 
 	const wxString &url = event.GetLinkInfo().GetHref();
 	//wxMessageBox(url);
-
-	if (url.BeforeFirst(':') == "gcode")
+	wxString cmdType = url.BeforeFirst(':');
+	if (cmdType == "gcode")
 	{
-
-		long n = 0;
-		if (url.After(':').ToLong(&n))
-		{
-			wxCommandEvent *ev = new wxCommandEvent(wxEVT_MENU, wxID_FILE + n);
-			wxQueueEvent(pWelcomeFrame->GetParent(), ev);
-			SetHomePage(); // need to reload last file table
-		}	
+		RunCommand(url,wxID_FILE);
+		SetHomePage(); // need to reload last file table	
+	}
+	else if (cmdType == "cmd")
+	{
+		RunCommand(url,0);
 	}
 	else
 		event.Skip();

@@ -214,6 +214,7 @@ wxBEGIN_EVENT_TABLE (AppFrame, wxFrame)
 	
     // help
     EVT_MENU (wxID_ABOUT,            AppFrame::OnAbout)
+	EVT_MENU(ID_DOWNLOADUPDATE,		AppFrame::OnDownloadUpdate)
 
   //  EVT_CONTEXT_MENU(                AppFrame::OnContextMenu)
 //GCode
@@ -368,6 +369,12 @@ void AppFrame::OnClose (wxCloseEvent &event)
     Destroy();
 }
 
+
+void AppFrame::OnDownloadUpdate(wxCommandEvent &WXUNUSED(event)) 
+{
+	wxMessageBox("Download update");
+}
+
 void AppFrame::OnAbout (wxCommandEvent &WXUNUSED(event)) {
     AppAbout dlg(this);
 }
@@ -508,8 +515,6 @@ void AppFrame::OnMacroses(wxCommandEvent &WXUNUSED(event))
     if (!m_edit) return;
     //EditProperties dlg(m_edit, 0);
 	Macroses msc;
-	std::wstring path = StandartPaths::Get()->GetMacrosPath();
-	msc.parse_dir(path.c_str(), true);
 	MacrosesDlg dlg(&msc, this);	
 	int indx = dlg.GetSelected();
 	if (indx < 0 || indx >= msc.count() )
@@ -772,6 +777,7 @@ void AppFrame::CreateMenu ()
 		 
      // Help menu
     wxMenu *menuHelp = new wxMenu;
+	menuHelp->Append(ID_DOWNLOADUPDATE, _("&About ..\tCtrl+D"));
     menuHelp->Append (wxID_ABOUT, _("&About ..\tCtrl+D"));
 
     // construct menu

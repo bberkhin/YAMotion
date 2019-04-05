@@ -41,6 +41,7 @@ public:
 	//! common
 	void OnClose(wxCloseEvent &event);
 	void OnAbout(wxCommandEvent &event);	
+	void OnDownloadUpdate(wxCommandEvent &event);
 	void OnExit(wxCommandEvent &event);
 	void OnTimerEvent(wxTimerEvent &event);
 	//! file

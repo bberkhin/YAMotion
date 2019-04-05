@@ -1,9 +1,11 @@
 ﻿<?xml version="1.0" encoding="UTF-8"?>
 <macroses>
   <macros>
-    <name>Drawing circle</name>
+    <name>Рисуем окружность</name>
     <desc>
-      circle from starttiung point and center center=[100,100,0];startpos=[0, 0,0];rate=400;
+      Окружность проходит через начальную точку  и центр
+      center=[100,100,0];startpos=[0, 0,0];rate=400;
+      
     </desc>
     <image>g0.jpg</image>
     <gcmc>g0.gcmc</gcmc>

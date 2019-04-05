@@ -22,25 +22,34 @@ public:
 	static StandartPathsTm<Ch> *Get() { return &global_paths; }
 	void SetLanguageCatalog(const Ch *lang) { lang_cat = lang;  }
 	std::filesystem::path GetRootPath(const Ch *finame = 0) {	return root_path;	}
-	std::filesystem::path GetMacrosPath(const Ch *finame = 0)
+	std::filesystem::path GetMacrosPath(const Ch *finame = 0, bool lan_sub_dir = false )
 	{
 		std::filesystem::path  path  = GetRootPath();
 		path.append(MACROSES_DIR);
+		if (lan_sub_dir && !lang_cat.empty())
+			path.append(lang_cat.c_str());
+
 		if (finame)
 		{
 			path.append(finame);
 		}
 		return path;
 	}
-	std::filesystem::path GetResourcesPath(const Ch *finame = 0)
+	std::filesystem::path GetResourcesPath(const Ch *finame )
 	{
 		std::filesystem::path  path = GetRootPath();
 		path.append(RESOURCES_DIR);
 		if ( !lang_cat.empty() )
 			path.append( lang_cat.c_str() );
-		if (finame)
+		if ( finame )
 		{
 			path.append(finame);
+			if( !lang_cat.empty() && !std::filesystem::exists(path) ) // file not found in lang catalog
+			{
+				path = GetRootPath();
+				path.append(RESOURCES_DIR);
+				path.append(finame);
+			}
 		}
 		return path;
 	}

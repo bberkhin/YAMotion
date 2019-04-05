@@ -46,9 +46,12 @@ MacrosParamDlg::MacrosParamDlg(MacrosDesc *pm, wxWindow *parent)
 		// add picture
 		if (!mdesc->imgfile.empty())
 		{
-			wxString imageFile = StandartPaths::Get()->GetMacrosPath(mdesc->imgfile.c_str()).c_str();
+			// check in lang directory
+			std::filesystem::path imagepath = StandartPaths::Get()->GetMacrosPath(mdesc->imgfile.c_str(), true);
+			if (!std::filesystem::exists(imagepath) )
+				imagepath = StandartPaths::Get()->GetMacrosPath(mdesc->imgfile.c_str(), false);
 			wxImage image;
-			if (image.LoadFile(imageFile))
+			if (image.LoadFile(imagepath.c_str()) )
 			{
 				wxBitmap bmp(image);
 				wxStaticBitmap *pbmpctrl = new wxStaticBitmap(this, wxID_ANY, bmp);

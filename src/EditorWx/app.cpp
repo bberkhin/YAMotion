@@ -202,6 +202,14 @@ int App::OnExit()
 	return 0;
 }
 
+
+bool App::GetUptadeInfo(wxString &out)
+{
+	out = _("There is new version of YAMotion. A lot of new features! Be in tuch");
+	return true;
+}
+
+
 const char *gcode_gettext(const char *s)
 {	
 	return wxGetTranslation(s);

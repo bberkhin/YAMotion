@@ -12,6 +12,8 @@ public:
 	void ShowWelcome(bool bShow);
 	void SetHomePage();
 	//void OnEraseBgEvent(wxEraseEvent& event);
+public:
+	void RunCommand(const wxString &url, int baseCmd);
 private:
 	wxDECLARE_EVENT_TABLE();
 	wxDECLARE_NO_COPY_CLASS(WelcomeWnd);

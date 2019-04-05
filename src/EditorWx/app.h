@@ -17,6 +17,7 @@ public:
 	//! application exit function
 	virtual int OnExit() wxOVERRIDE;
 	void Restart();
+	bool GetUptadeInfo(wxString &out);
 
 private:
 	//! frame window

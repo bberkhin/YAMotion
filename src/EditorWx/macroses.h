@@ -32,12 +32,12 @@ class Macroses
 public:
 	Macroses();
 	~Macroses();
-	void parse_dir(const wchar_t *path, bool fast);
-	void parse_file(const wchar_t *path, bool fast);
 	int count() { return mcrs.size(); }
 	MacrosDesc &get(int index) { return mcrs[index];  }
 	std::wstring build_commad_line(int indx);
 private:
+	void init();
+	void parse_file(const wchar_t *path);
 	void read_raw_data(const wchar_t *path, std::vector<char> &data);
 	void read_arguments(xml_nodew *node, MacrosDesc &mdesc);
 private:

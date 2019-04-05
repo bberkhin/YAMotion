@@ -1,10 +1,12 @@
 #include "wx/wx.h"
 #include "macroses.h"
+#include "standartpaths.h"
 #include <iostream>
 #include <fstream>
 #include <filesystem>
 #include <stdio.h>
 #include <string>
+#include <map>
 #include <string.h>
 
 
@@ -31,6 +33,7 @@ static bool toMBstring(const wchar_t *s, std::string & out)
 
 Macroses::Macroses()
 {
+	init();
 }
 
 
@@ -38,32 +41,40 @@ Macroses::~Macroses()
 {
 }
 
-
-void Macroses::parse_dir(const wchar_t *dirpath, bool fast)
+static void scan_xml_files(const std::filesystem::path &dirpath, std::map<std::wstring, std::filesystem::path> &namesList)
 {
+	std::filesystem::path ext(L".xml");
+	for (const auto & entry : fs::directory_iterator(dirpath))
+	{
+		if (!entry.is_regular_file())
+			continue;
+		std::filesystem::path path = entry.path();
+		if (path.extension() == ext)
+		{
+			namesList[path.filename()] = path;
+		}
+	}
+}
 
-	mcrs.clear();
+void Macroses::init()
+{
+	std::map<std::wstring, std::filesystem::path> namesList;
 	std::string errmsg;
+	mcrs.clear();
 	try
 	{
-
-		for (const auto & entry : fs::directory_iterator(dirpath))
+		std::filesystem::path dirpath = StandartPaths::Get()->GetMacrosPath();
+		scan_xml_files(dirpath, namesList);
+		std::filesystem::path dirpathLan = StandartPaths::Get()->GetMacrosPath(0, true);
+		if (dirpathLan != dirpath)
 		{
-			if (!entry.is_regular_file())
-				continue;
-
-			std::wstring wstrcrs = entry.path().filename().c_str();
-			std::wstring wstr;
-			wstr.resize(wstrcrs.size(), 0);
-			std::transform(wstrcrs.begin(), wstrcrs.end(), wstr.begin(), ::towlower);
-			size_t n = wstr.find_last_of(L'.');
-
-			if ((n == std::wstring::npos) || (wstr.compare(n + 1, 3, L"xml") != 0))
-				continue;
-
-			parse_file(entry.path().c_str(), fast);
+			scan_xml_files(dirpathLan, namesList); // rewrite def xml by language specific xml
 		}
-		return;
+		// read macroses from files
+		for (const auto & entry : namesList )
+		{
+			parse_file(entry.second.c_str());
+		}
 	}
 	catch (std::exception &e)
 	{
@@ -73,8 +84,11 @@ void Macroses::parse_dir(const wchar_t *dirpath, bool fast)
 	{
 		errmsg = "Uncknown exeption parsing file";
 	}
-	wxMessageBox(errmsg.c_str(), _("Close abort"), wxOK | wxICON_EXCLAMATION);
+	if( !errmsg.empty() )
+		wxMessageBox(errmsg.c_str(), _("Close abort"), wxOK | wxICON_EXCLAMATION);
+
 }
+
 
 
 void Macroses::read_raw_data(const wchar_t *path, std::vector<char> &data)
@@ -103,7 +117,7 @@ void Macroses::read_raw_data(const wchar_t *path, std::vector<char> &data)
 
 
 
-void Macroses::parse_file(const wchar_t *path, bool fast)
+void Macroses::parse_file(const wchar_t *path)
 {
 
 	std::vector<char> data;
