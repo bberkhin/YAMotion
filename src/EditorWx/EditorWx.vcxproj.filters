@@ -242,4 +242,7 @@
       <Filter>Файлы ресурсов</Filter>
     </ResourceCompile>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\resources\intro_gocde.htm" />
+  </ItemGroup>
 </Project>

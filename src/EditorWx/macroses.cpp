@@ -178,7 +178,7 @@ void Macroses::read_arguments(xml_nodew *node, MacrosDesc &mdesc)
 				if (strcmp(pattr->name(), "defvalue") == 0)
 					atr.defval = pattr->value();
 				else if (strcmp(pattr->name(), "type") == 0)
-					;//to do 
+					atr.type = pattr->value();
 				else if (strcmp(pattr->name(), "ref") == 0)
 					atr.ref = pattr->value();//to do 
 			}
@@ -192,6 +192,22 @@ void Macroses::read_arguments(xml_nodew *node, MacrosDesc &mdesc)
 				{
 					toWstring(cna->value(), atr.desc);
 				}
+				else if (strcmp(cna->name(), "list") == 0)
+				{
+					
+					std::string val;
+					std::wstring name;
+					for (rapidxml::xml_attribute<char> *pattr = cna->first_attribute(); pattr != 0; pattr = pattr->next_attribute())
+					{
+						if (strcmp(pattr->name(), "value") == 0)
+							val = pattr->value();
+						else if (strcmp(pattr->name(), "name") == 0)
+							toWstring(pattr->value(), name);							
+					}					
+					atr.vars.push_back(std::make_pair(val,name));
+				}
+
+				
 			}
 			mdesc.args.push_back(atr);
 		}

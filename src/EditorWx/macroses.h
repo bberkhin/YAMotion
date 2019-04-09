@@ -4,13 +4,16 @@
 #include <map>
 #include "rapidxml.hpp"
 
+typedef std::vector<std::pair<std::string, std::wstring>> VariantsList;
 struct ArgumentDesc
 {
 	std::string ref;
 	std::wstring name;
 	std::wstring desc;
 	std::string defval;
+	std::string type;
 	std::string val;
+	VariantsList vars;
 };
 
 typedef std::vector<ArgumentDesc> ArgumentMap;

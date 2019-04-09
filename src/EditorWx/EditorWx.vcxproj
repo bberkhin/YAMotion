@@ -99,6 +99,11 @@
   <ItemGroup>
     <ResourceCompile Include="EditorWx.rc" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\resources\intro_gocde.htm">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>
     <ProjectGuid>{561BBD13-7576-4AE1-A0F5-5ACD51D0D51F}</ProjectGuid>

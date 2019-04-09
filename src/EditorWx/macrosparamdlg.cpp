@@ -32,11 +32,26 @@ MacrosParamDlg::MacrosParamDlg(MacrosDesc *pm, wxWindow *parent)
 		{ 
 			wxStaticText *prompt = new wxStaticText(this, wxID_ANY, it->name);
 			sizer->Add(prompt, 0, 0);
-		//	textinfos->Add(0, 6);
-
-			wxTextCtrl *pedit = new wxTextCtrl(this, id_input , it->defval);
+		//	textinfos->Add(0, 6);	
+			if (it->type == "list" )
+			{
+				int select = 0, i = 0;
+				wxComboBox *plist = new wxComboBox(this, id_input);
+				for (auto itl = it->vars.begin(); itl != it->vars.end(); ++itl, ++i)
+				{
+					plist->Append(itl->second, (void *)itl->first.c_str() );
+					if (it->defval == itl->first)
+						select = i;
+				}
+				plist->SetSelection(select);
+				sizer->Add(plist, 0, 0);
+			}
+			else
+			{
+				wxTextCtrl *pedit = new wxTextCtrl(this, id_input, it->defval);
+				sizer->Add(pedit, 0, 0);
+			}
 			id_input++;
-			sizer->Add(pedit, 0, 0);
 			//textinfos->Add(0, 6);
 		}
 		textinfos->Add(sizer, 1, wxALL | wxEXPAND, 10);
@@ -88,11 +103,25 @@ int MacrosParamDlg::ShowModal()
 			wxWindow *pwnd = FindWindow(wxID_HIGHEST + i);
 			if (pwnd)
 			{
-				wxTextCtrl *pedit = dynamic_cast<wxTextCtrl *>(pwnd);
-				if (pedit)
+				if (mdesc->args[i].type == "list")
 				{
-					wxString label = pedit->GetValue();
-					mdesc->args[i].val = label;
+					wxComboBox *plist = dynamic_cast<wxComboBox *>(pwnd);
+					int select = plist->GetSelection();
+					if (select >= 0)
+					{
+						mdesc->args[i].val = mdesc->args[i].vars[select].first;
+					}
+					else
+						mdesc->args[i].val = mdesc->args[i].defval;
+				}
+				else
+				{
+					wxTextCtrl *pedit = dynamic_cast<wxTextCtrl *>(pwnd);
+					if (pedit)
+					{
+						wxString label = pedit->GetValue();
+						mdesc->args[i].val = label;
+					}
 				}
 			}
 		}

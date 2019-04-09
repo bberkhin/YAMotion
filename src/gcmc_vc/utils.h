@@ -30,6 +30,7 @@ void testalloc2(void **p, int n, int *na, size_t elemsize, size_t nelem);
 
 const char *planename(plane_et p);
 const char *unitshortname(unit_et u);
+const wchar_t *unitshortnameL(unit_et u);
 const char *unitprintname(unit_et u);
 
 wchar_t *mysprintf(wchar_t **s, size_t *ns, const wchar_t *fmt, ...);

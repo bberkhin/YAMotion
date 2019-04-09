@@ -569,7 +569,7 @@ static void sprintvector(wchar_t **s, size_t *ns, const node_t *ref, const value
 			mysprintf(s, ns, L",");
 		switch(v->v.vals[i]->type) {
 		case VAL_UNDEF:		mysprintf(s, ns, L"-"); break;
-		case VAL_INT:		mysprintf(s, ns, L"%d%s", v->v.vals[i]->i, unitshortname(v->v.vals[i]->unit)); break;
+		case VAL_INT:		mysprintf(s, ns, L"%d%s", v->v.vals[i]->i, unitshortnameL(v->v.vals[i]->unit)); break;
 		case VAL_FLOAT:		mysprintf(s, ns, L"%.*f%s", cl_decimals, v->v.vals[i]->d, unitshortname(v->v.vals[i]->unit)); break;
 		default:		rtinternal(ref, "Invalid value type %d in vector printing", v->v.vals[i]->type);
 		}
@@ -589,8 +589,8 @@ value_t *value_to_string(const node_t *ref, const value_t *v)
 
 	switch(v->type) {
 	case VAL_UNDEF:		mysprintf(&s, &ns, L"<undef>"); break;
-	case VAL_INT:		mysprintf(&s, &ns, L"%d%s", v->i, unitshortname(v->unit)); break;
-	case VAL_FLOAT:		mysprintf(&s, &ns, L"%.*f%s", cl_decimals, v->d, unitshortname(v->unit)); break;
+	case VAL_INT:		mysprintf(&s, &ns, L"%d%s", v->i, unitshortnameL(v->unit)); break;
+	case VAL_FLOAT:		mysprintf(&s, &ns, L"%.*f%s", cl_decimals, v->d, unitshortnameL(v->unit)); break;
 	case VAL_STRING:	mysprintf(&s, &ns, L"%ls", v->str.chs); break;
 	case VAL_VECTOR:	sprintvector(&s, &ns, ref, v); break;
 	case VAL_VECTORLIST:

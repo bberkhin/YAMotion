@@ -77,9 +77,21 @@ const char *planename(plane_et p)
 	return "<unknown plane>";
 }
 
-const char *unitshortname(unit_et u)
+const wchar_t *unitshortnameL(unit_et u)
 {
 	switch(u) {
+	case UNIT_NONE:	return L"";
+	case UNIT_MM:	return L"mm";
+	case UNIT_IN:	return L"in";
+	case UNIT_DEG:	return L"deg";
+	case UNIT_RAD:	return L"rad";
+	}
+	return L"<unknown units>";
+}
+
+const char *unitshortname(unit_et u)
+{
+	switch (u) {
 	case UNIT_NONE:	return "";
 	case UNIT_MM:	return "mm";
 	case UNIT_IN:	return "in";
