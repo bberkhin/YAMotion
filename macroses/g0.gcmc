@@ -1,4 +1,0 @@
-
-feedrate ( rate );
-move(startpos);
-circle_ccw( center );

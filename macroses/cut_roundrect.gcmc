@@ -1,0 +1,83 @@
+// input parameters 
+// rate - feed rate
+// radius - round of rect
+
+// xMin, yMin - start poiunt
+// xD, yD - width and height
+// xD, yD - width and height
+// d  - mill diameter 
+// trc - tool correction  1 - by contur, 2 inside, 3 ouside
+// ccw - clockwise  0 - clockwise, 2- counter clockwise 
+// zSave -  save z
+// zFull - deep
+
+if ( ((2*radius) > xD) || ((2*radius) > yD))
+{
+	error ( "Round radius  is very big." );
+	return 1;
+}
+
+comment("Starting point:" + to_string(xMin) +"," + to_string(yMin));
+comment("Width:" + to_string(xD));
+comment("Height:" + to_string(yD));
+comment("Mill dianetr:" + to_string(d));
+comment("Z save:" + to_string(zSave));
+comment("Z max:" + to_string(zFull));
+
+
+xMin_trc = xMin; 
+yMin_trc = yMin; 
+xMax_trc = xMin + xD; 
+yMax_trc = yMin + yD; 
+r = d/2;
+if( trc == 2 ) 
+{ 	
+	xMin_trc += r; 
+ 	yMin_trc += r; 
+	xMax_trc -= r;
+	yMax_trc -= r;
+}
+elif( trc == 3 ) 
+{ 	
+	xMin_trc -= r; 
+ 	yMin_trc -= r; 
+	xMax_trc += r;
+	yMax_trc += r;
+}
+
+
+goto([-,-,zSave]);
+goto([xMin_trc,yMin_trc+radius,-]);
+zCur = 0;
+zFull = -1*zFull;
+while(zFull < zCur) 
+{
+ zCur = zCur - zDelta;
+ if ( zCur < zFull){
+	zCur = zFull;
+ } 
+ move([-,-,zCur ], zRate); 
+ if ( ccw )
+ {
+	feedrate(rate);
+	arc_ccw ( [xMin_trc + radius ,yMin_trc,-], radius );
+	move([xMax_trc-radius, -,-],rate);
+	arc_ccw ( [xMax_trc,yMin_trc+radius,-], radius );
+	move([-,yMax_trc-radius,-]);
+	arc_ccw ( [xMax_trc-radius,yMax_trc,-], radius );
+	move([xMin_trc+radius,-,-]);
+	arc_ccw ( [xMin_trc,yMax_trc-radius,-], radius );
+	move([-,yMin_trc+radius,-]);
+ }
+ else 
+ {
+ 	move([-,yMax_trc-radius,-],rate);
+	arc_cw ( [xMin_trc+radius,yMax_trc,-], radius );
+	move([xMax_trc-radius, -,-]);
+	arc_cw ( [xMax_trc,yMax_trc-radius,-], radius );
+	move([-,yMin_trc+radius,-]);
+	arc_cw ( [xMax_trc-radius,yMin_trc,-], radius );
+	move([xMin_trc+radius,-,-]);
+	arc_cw ( [xMin_trc,yMin_trc+radius,-], radius );
+ }
+}

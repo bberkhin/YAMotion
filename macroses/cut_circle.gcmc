@@ -1,23 +1,23 @@
 // input parameters 
 // rate - feed rate
-// center - center of circle
+// xCenter, yCenter - center of circle
 // d  - mill diameter 
 // trc - tool correction  1 - by contur, 2 inside, 3 ouside
 // ccw - clockwise  0 - clockwise, 2- counter clockwise 
-
+// zSave -  save z
+// zFull - deep
 
 ccw = 1;
 
 comment("Center point:" + to_string(xCenter) +"," + to_string(yCenter));
 comment("Radius:" + to_string(r));
 comment("Mill dianetr:" + to_string(d));
-comment("Z save:" + to_string(d));
-comment("Z :" + to_string(zFull));
-
+comment("Z save:" + to_string(zSave));
+comment("Z max:" + to_string(zFull));
 
 xStartpos = xCenter - r; 
 if( trc == 2 ) 
-{ 	xStartpos += xStartpos ; 
+{ 	xStartpos += (d/2) ; 
 }
 elif( trc == 3 ) 
 { 	xStartpos -= (d/2); 
