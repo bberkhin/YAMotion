@@ -46,6 +46,9 @@ wxBEGIN_EVENT_TABLE(Edit, wxStyledTextCtrl)
 	EVT_MENU(myID_SELECTLINE, Edit::OnEditSelectLine)
 	EVT_MENU(wxID_REDO, Edit::OnEditRedo)
 	EVT_MENU(wxID_UNDO, Edit::OnEditUndo)
+	EVT_MENU(myID_INDENTINC, Edit::OnEditIndentInc)
+	EVT_MENU(myID_INDENTRED, Edit::OnEditIndentRed)
+
 	// find
 	EVT_MENU(wxID_FIND, Edit::OnFind)
 	EVT_MENU(myID_FINDNEXT, Edit::OnFindNext)
@@ -173,6 +176,8 @@ Edit::Edit (wxWindow *parent, wxWindowID id,  const wxPoint &pos, const wxSize &
 	CallTipSetBackground(*wxYELLOW);
 	CallTipSetForeground(*wxBLACK);
 	SetMouseDwellTime(2000);
+	int ntsb = GetTabWidth();
+	SetTabWidth(4);
 }
 
 Edit::~Edit () 
@@ -244,7 +249,7 @@ void Edit::OnEditIndentInc (wxCommandEvent &WXUNUSED(event)) {
 }
 
 void Edit::OnEditIndentRed (wxCommandEvent &WXUNUSED(event)) {
-    CmdKeyExecute (wxSTC_CMD_DELETEBACK);
+    CmdKeyExecute (wxSTC_CMD_BACKTAB);
 }
 
 void Edit::OnEditSelectAll (wxCommandEvent &WXUNUSED(event)) {

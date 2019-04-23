@@ -389,12 +389,10 @@ enum {
 	CMD_SVG_NO_GRID,
 	CMD_SVG_OPACITY,
 	CMD_DXF,
-	CMD_PEDANTIC,
-	CMD_VARIABLE
+	CMD_PEDANTIC
 };
 
 static const struct option lopts[] = {
-	{ "var",		required_argument,	NULL,	CMD_VARIABLE },
 	{ "bare",		no_argument,		NULL,	'q' },
 	{ "debug",		no_argument,		NULL,	'd' },
 	{ "define",		required_argument,	NULL,	'D' },
@@ -496,7 +494,6 @@ int main(int argc, char *argv[])
 	int proepi = 1;
 	int warnerror = 0;
 	char *asfuncname = NULL;
-	char *arguments_opt = NULL;
 
 	while (EOF != (optc = getopt_long(argc, argv, "a:b:c:D:dG:g:hI:io:p:P:qrUVWu:v:w:x:y:z:", lopts, &oidx))) {
 		switch (optc) {
@@ -674,10 +671,6 @@ int main(int argc, char *argv[])
 		case '?':
 			lose++;
 			break;
-		case CMD_VARIABLE:
-			arguments_opt = strdup(optarg);
-			lose++;
-			break;
 		default:
 			fprintf(stderr, "Unknown option character '%c' (%d) in option handling\n", isprint(optc) ? optc : ' ', optc);
 			lose++;
@@ -812,12 +805,6 @@ int main(int argc, char *argv[])
 
 	/* Setup the predefined constants (handled before command-line defines) */
 	define_setup(gcmcconsts, ngcmcconsts, "<gcmc-internal constants>");
-
-	//if (arguments_opt)
-	//{
-		//arguments_opt
-		//define_setup(arguments_opt, ngcmcconsts, "<gcmc-internal constants>");
-	//}
 
 	/* Parse the input script */
 	if (yyparse())

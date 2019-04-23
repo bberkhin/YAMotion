@@ -200,20 +200,24 @@ wxBEGIN_EVENT_TABLE (AppFrame, wxFrame)
 	EVT_MENU(ID_MATHEXPRESSION, AppFrame::OnMathExpression)
 
     // print and exit
-    EVT_MENU (wxID_EXIT,             AppFrame::OnExit)
-    // Menu items with standard IDs forwarded to the editor.
-    EVT_MENU (wxID_CLEAR,            AppFrame::OnEdit)
-    EVT_MENU (wxID_CUT,              AppFrame::OnEdit)
-    EVT_MENU (wxID_COPY,             AppFrame::OnEdit)
-    EVT_MENU (wxID_PASTE,            AppFrame::OnEdit)
-    EVT_MENU (wxID_SELECTALL,        AppFrame::OnEdit)
-    EVT_MENU (wxID_REDO,             AppFrame::OnEdit)
-    EVT_MENU (wxID_UNDO,             AppFrame::OnEdit)
-    EVT_MENU (wxID_FIND,             AppFrame::OnEdit)
-    // And all our edit-related menu commands.
-    EVT_MENU_RANGE (myID_EDIT_FIRST, myID_EDIT_LAST, AppFrame::OnEdit)
-	
-	
+	EVT_MENU(wxID_EXIT, AppFrame::OnExit)
+	// Menu items with standard IDs forwarded to the editor.
+	EVT_MENU(wxID_CLEAR, AppFrame::OnEdit)
+	EVT_MENU(wxID_CUT, AppFrame::OnEdit)
+	EVT_MENU(wxID_COPY, AppFrame::OnEdit)
+	EVT_MENU(wxID_PASTE, AppFrame::OnEdit)
+	EVT_MENU(wxID_SELECTALL, AppFrame::OnEdit)
+	EVT_MENU(wxID_REDO, AppFrame::OnEdit)
+	EVT_MENU(wxID_UNDO, AppFrame::OnEdit)
+	EVT_MENU(wxID_FIND, AppFrame::OnEdit)
+	//EVT_MENU(myID_INDENTINC, AppFrame::OnEdit)
+	// And all our edit-related menu commands.
+	EVT_MENU_RANGE(myID_EDIT_FIRST, myID_EDIT_LAST, AppFrame::OnEdit)
+
+	//menuEdit->Append(myID_INDENTINC, _("&Indent increase\tTab"));
+//menuEdit->Append(myID_INDENTRED, _("I&ndent reduce\tShift+Tab"));
+
+
     // help
     EVT_MENU (wxID_ABOUT,            AppFrame::OnAbout)
 	EVT_MENU(ID_DOWNLOADUPDATE,		AppFrame::OnDownloadUpdate)
@@ -444,15 +448,11 @@ void AppFrame::FileChanged()
 
 void AppFrame::OnFileNew(wxCommandEvent &event )
 {
-	if ( !DoFileSave(true, false) )
+	if (DoFileSave(true, false))
 	{
-		return;
+		m_edit->NewFile((event.GetId() == ID_NEWGCMC) ? FILETYPE_GCMC : FILETYPE_NC);
+		FileChanged();
 	}
-	if (event.GetId() == ID_NEWGCMC)
-		m_edit->NewFile(FILETYPE_GCMC);
-	else
-		m_edit->NewFile(FILETYPE_NC);
-	FileChanged();
 }
 
 // file event handlers
@@ -734,6 +734,9 @@ void AppFrame::CreateMenu ()
     menuEdit->AppendSeparator();
     menuEdit->Append (wxID_SELECTALL, _("&Select all\tCtrl+A"));
     menuEdit->Append (myID_SELECTLINE, _("Select &line\tCtrl+L"));
+	menuEdit->AppendSeparator();
+	menuEdit->Append(myID_INDENTINC, _("&Indent increase\tTab"));
+	menuEdit->Append(myID_INDENTRED, _("I&ndent reduce\tShift+Tab"));
 	menuEdit->AppendSeparator();
 	menuEdit->Append(myID_CHANGECASE, _("Change &case to .."), menuChangeCase);
 	menuEdit->Append(myID_CONVERTEOL, _("Convert line &endings to .."), menuConvertEOL);

@@ -35,8 +35,9 @@ comment("Radius:" + to_string(r));
 comment("Mill dianetr:" + to_string(d));
 comment("Z save:" + to_string(zSave));
 comment("Z max:" + to_string(zFull));
+comment("Step over:" + per_stepover );
 
-Stepover = d * (abs(per_stepover)/100.);
+Stepover = d * (abs(100-per_stepover)/100.);
 
 RampDis = 10;
 rhole = (r - d / 2);

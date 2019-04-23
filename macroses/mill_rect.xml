@@ -1,0 +1,58 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<macroses>
+  <macros>
+    <name>Mill rect serface</name>
+    <desc>
+      Mill rect serface
+    </desc>
+    <image>mill_rect.jpg</image>
+    <gcmc>mill_rect.gcmc</gcmc>
+    <arguments>
+      <argument defvalue ="2" type="scalar" ref="zSave">
+        <name>Save Z:</name>
+      </argument>
+      <argument defvalue ="0" type="scalar" ref="xMin">
+        <name>Specify xMin:</name>
+        <desc>Specify xMin of the rect in mm</desc>
+      </argument>
+      <argument defvalue ="0" type="scalar" ref="yMin">
+        <name>Specify yMin:</name>
+        <desc>Specify yMin of the rect in mm</desc>
+      </argument>
+      <argument defvalue ="200" type="scalar" ref="xD">
+        <name>Width (dX):</name>
+        <desc>Specify width of the rect in mm</desc>
+      </argument>
+      <argument defvalue ="100" type="scalar" ref="yD">
+        <name>Height (dY):</name>
+        <desc>Specify height of the rect in mm</desc>
+      </argument>
+      <argument defvalue ="6" type="scalar" ref="d">
+        <name>Mill diameter</name>
+      </argument>
+      <argument defvalue ="200" type="scalar" ref="rate">
+        <name>Feed rate:</name>
+        <desc>Specify feed rate of cutting</desc>
+      </argument>
+      <argument defvalue ="50" type="scalar" ref="zRate">
+        <name>Z feed rate:</name>
+        <desc>Specify Z feed rate of cutting</desc>
+      </argument>
+      <argument defvalue ="30" type="scalar" ref="per_stepover">
+        <name>Step over(%):</name>
+        <desc>Specify step over</desc>
+      </argument>    
+      <argument defvalue ="1" type="scalar" ref="zDelta">
+        <name>Step Z:</name>
+      </argument>
+      <argument defvalue ="1" type="scalar" ref="zFull">
+        <name>Thikness:</name>
+      </argument>
+      <argument defvalue ="1" type="list" ref="ccw">
+        <name>Direction:</name>
+        <list value ="0" name="Clockwise"/>
+        <list value ="1" name="Counter Clockwise"/>
+      </argument>
+    </arguments>
+  </macros>
+</macroses>

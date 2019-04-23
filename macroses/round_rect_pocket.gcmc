@@ -1,0 +1,136 @@
+// input parameters 
+// rate - feed rate
+// xMin, yMin - start poiunt
+// xD, yD - width and height
+// d  - mill diameter 
+// ccw - clockwise  0 - clockwise, 2- counter clockwise 
+// zSave -  save z
+// zFull - deep
+
+
+//Default Value
+/*
+xMin = 0;
+yMin = 0;
+xD = 100;
+yD = 140;
+d = 6;
+zSave = 1;
+zFull = 6;
+zDelta = 2;
+ccw = 0;
+per_stepover = 30;
+zRate = 50;
+rate = 200;
+radius = 20;
+*/
+function millroundrect(xMin_trc, yMin_trc, xMax_trc, yMax_trc, zCurrent, cur_rad )
+{
+
+    if ( cur_rad  < 0 )  { cur_rad = 0; }  
+    move([xMin_trc,yMin_trc+cur_rad,-]);
+    if ( ccw )
+    {
+        feedrate(rate);
+        if ( cur_rad ) {   arc_ccw ( [xMin_trc + cur_rad ,yMin_trc,-], cur_rad ); }
+        move([xMax_trc-cur_rad, -,-],rate);
+        if ( cur_rad ) {   arc_ccw ( [xMax_trc,yMin_trc+cur_rad,-], cur_rad ); }
+        move([-,yMax_trc-cur_rad,-]);
+        if ( cur_rad ) {   arc_ccw ( [xMax_trc-cur_rad,yMax_trc,-], cur_rad ); }
+        move([xMin_trc+cur_rad,-,-]);
+        if ( cur_rad ) {   arc_ccw ( [xMin_trc,yMax_trc-cur_rad,-], cur_rad ); }
+        move([-,yMin_trc+cur_rad,-]);
+    }
+    else 
+    {
+        move([-,yMax_trc-cur_rad,-],rate);
+        if ( cur_rad ) { arc_cw ( [xMin_trc+cur_rad,yMax_trc,-], cur_rad ); }
+        move([xMax_trc-cur_rad, -,-]);
+        if ( cur_rad ) { arc_cw ( [xMax_trc,yMax_trc-cur_rad,-], cur_rad ); }
+        move([-,yMin_trc+cur_rad,-]);
+        if ( cur_rad ) { arc_cw ( [xMax_trc-cur_rad,yMin_trc,-], cur_rad ); }
+        move([xMin_trc+cur_rad,-,-]);
+        if ( cur_rad ) { arc_cw ( [xMin_trc,yMin_trc+cur_rad,-], cur_rad ); }
+    }
+}
+
+
+
+if( d <= 0 ) { error("Tool diametr can not be zero or negitive"); }
+if( (per_stepover < 0) || (per_stepover >= 95) ) { error("Stepover is wrong"); }
+if( rate <= 0 ) { error("Feed rate can not be zero or negitive"); }
+if( zRate <= 0 ) { error("Plunge feed rate can not be zero or negitive"); }
+if( zDelta == 0 ) { error("Step can not be zero"); }
+if( xD <= 0 ) { error("Width (dX) can not be zero or negitive"); }
+if( yD <= 0 ) { error("Height (dY) diametr can not be zero or negitive"); }
+
+comment("Starting point:" + to_string(xMin) +"," + to_string(yMin));
+comment("Width:" + to_string(xD));
+comment("Height:" + to_string(yD));
+comment("Mill diameter:" + to_string(d));
+comment("Z save:" + to_string(zSave));
+comment("Z max:" + to_string(zFull));
+
+
+Stepover = d * (abs(100-per_stepover)/100.);
+
+rtool = d/2;
+xMax = xMin + xD; 
+yMax = yMin + yD; 
+
+/*
+goto([xMin,yMin,zSave]);
+goto([xMax,yMin,zSave]);
+goto([xMax,yMax,zSave]);
+goto([xMin,yMax,zSave]);
+goto([xMin,yMin,zSave]);
+*/
+xStart = xMin + rtool;
+yStart = yMin + rtool ;
+xEnd = xMax  - rtool;
+yEnd = yMax  - rtool;
+dy = Stepover;
+
+function init_start()
+{
+    xStart = xMin + rtool;
+    yStart = yMin + rtool ;
+    xEnd = xMax  - rtool;
+    yEnd = yMax  - rtool;
+    dy = Stepover;
+}
+
+zCur = 0;
+zFull = -1*zFull;
+
+while(zFull < zCur) 
+{
+    zCur = zCur - zDelta;
+    if ( zCur < zFull)
+    {
+    zCur = zFull;
+    } 
+    
+    init_start();
+    radd = radius;
+    
+    goto([-,-,zSave]);
+    goto([xStart, yStart+radd,-]);
+    move([-,-,zCur ], zRate);   
+    
+    
+    for(; xStart <= xEnd && yStart <= yEnd; )  
+    {
+        millroundrect( xStart, yStart, xEnd, yEnd, zCur, radd);
+        xStart += dy;
+        yStart += dy;
+        xEnd   -= dy;
+        yEnd   -= dy;
+        radd-=dy;            
+    }        
+}
+ 
+ 
+
+
+

@@ -1,12 +1,12 @@
 ﻿<?xml version="1.0" encoding="UTF-8"?>
 <macroses>
   <macros>
-    <name>Cutting circle pocket</name>
+    <name>Mill circular pocket</name>
     <desc>
-      Cut circle pocket by center; and circle raius
+      Mill circular pocket; and circle raius
     </desc>
-    <image>cut_circular_pocket.jpg</image>
-    <gcmc>cut_circular_pocket.gcmc</gcmc>
+    <image>circular_pocket.jpg</image>
+    <gcmc>circular_pocket.gcmc</gcmc>
     <arguments>
       <argument defvalue ="2" type="scalar" ref="zSave">
         <name>Save Z:</name>
