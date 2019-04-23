@@ -543,6 +543,24 @@ wxString Edit::DeterminePrefs (const wxString &filename)
 	return g_LanguagePrefs[0].name; // def return first type
 }
 
+
+wxString Edit::DeterminePrefs(int filetype)
+{
+	// support only GCoDe
+	LanguageInfo const* curInfo;
+
+	
+	// determine language from filepatterns
+	int languageNr;
+	for (languageNr = 0; languageNr < g_LanguagePrefsSize; languageNr++)
+	{
+		curInfo = &g_LanguagePrefs[languageNr];
+		if (curInfo->file_type == filetype)
+			return curInfo->name;
+	}
+	return g_LanguagePrefs[0].name; // def return first type
+}
+
 bool Edit::InitializePrefs (const wxString &name) {
 
     // initialize styles
@@ -676,13 +694,13 @@ bool Edit::InitializePrefs (const wxString &name) {
     return true;
 }
 
-bool Edit::NewFile()
+bool Edit::NewFile (int filetype )
 {
 	SetFilename(wxEmptyString);
 	ClearAll();
 	SetSavePoint();
 	EmptyUndoBuffer();
-	InitializePrefs( g_LanguagePrefs[0].name );
+	InitializePrefs(DeterminePrefs(filetype));
 	return true;
 }
 

@@ -1,0 +1,58 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<macroses>
+  <macros>
+    <name>Cutting circle pocket</name>
+    <desc>
+      Cut circle pocket by center; and circle raius
+    </desc>
+    <image>cut_circular_pocket.jpg</image>
+    <gcmc>cut_circular_pocket.gcmc</gcmc>
+    <arguments>
+      <argument defvalue ="2" type="scalar" ref="zSave">
+        <name>Save Z:</name>
+      </argument>
+      <argument defvalue ="30" type="scalar" ref="xCenter">
+        <name>Specify Xc of the circle:</name>
+        <desc>Specify center of the circle in mm</desc>
+      </argument>
+      <argument defvalue ="50" type="scalar" ref="yCenter">
+        <name>Specify Yc of the circle:</name>
+        <desc>Specify center of the circle in mm</desc>
+      </argument>
+      <argument defvalue ="20" type="scalar" ref="r">
+        <name>Radius</name>
+        <desc>Specify radius of the circle in mm</desc>
+      </argument>
+      <argument defvalue ="6" type="scalar" ref="d">
+        <name>Mill diameter</name>
+      </argument>
+      <argument defvalue ="200" type="scalar" ref="rate">
+        <name>Feed rate:</name>
+        <desc>Specify feed rate of cutting</desc>
+      </argument>
+      <argument defvalue ="50" type="scalar" ref="zRate">
+        <name>Z feed rate:</name>
+        <desc>Specify Z feed rate of cutting</desc>
+      </argument>
+      <argument defvalue ="70" type="scalar" ref="per_stepover">
+        <name>Step over(%):</name>
+        <desc>Specify step over</desc>
+      </argument>
+      <argument defvalue ="10" type="scalar" ref="RampDis">
+        <name>Ramp distance:</name>
+      </argument>
+      
+      <argument defvalue ="1" type="scalar" ref="zDelta">
+        <name>Step Z:</name>
+      </argument>
+      <argument defvalue ="1" type="scalar" ref="zFull">
+        <name>Thikness:</name>
+      </argument>
+      <argument defvalue ="0" type="list" ref="ccw">
+        <name>Direction:</name>
+        <list value ="0" name="Clockwise"/>
+        <list value ="1" name="Counter Clockwise"/>
+      </argument>
+    </arguments>
+  </macros>
+</macroses>

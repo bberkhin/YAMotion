@@ -35,9 +35,9 @@ while(zFull < zCur)
  }
  move([-,-,zCur ], zRate);
  if ( ccw ){
-	circle_ccw( [yCenter,yCenter,-], rate );
+	circle_ccw( [xCenter,yCenter,-], rate );
  }
  else {
-	circle_cw( [yCenter,yCenter,-], rate );
+	circle_cw( [xCenter,yCenter,-], rate );
  }
 }

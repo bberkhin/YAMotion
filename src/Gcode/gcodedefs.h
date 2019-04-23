@@ -417,6 +417,8 @@ namespace Interpreter
 #define G_7     70
 #define G_8     80
 #define G_10   100
+#define G_15   150 //отмена пол€рной системы координат.
+#define G_16   160 // назначение пол€рной системы координат(X радиус, Y угол).
 #define G_17   170
 #define G_17_1 171
 #define G_18   180

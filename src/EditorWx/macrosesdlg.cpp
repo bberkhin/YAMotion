@@ -47,6 +47,8 @@ MacrosesDlg::MacrosesDlg(Macroses *pm,wxWindow *parent)
 	SetSizerAndFit(totalpane);
 	if (ShowModal() == wxID_OK)
 		selection = list->GetSelection();
+	else
+		selection = -1;
 
 }
 

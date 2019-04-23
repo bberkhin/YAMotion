@@ -702,7 +702,7 @@ GModalGroup CmdParser::get_gmodal_group(int num) const
 		return ModalGroup_SPINDLEMODE;  //G96 G97 spindle
 	case G_7: case G_8:
 		return ModalGroup_LATHE_DIAMETER; //G7 or G8
-	default: ////g4, g10, g28, g30, g53, g92 g92.1, g92.2, g92.3 - misc
+	default: ////g4, g10, g28, g30,  g50 g53, g92 g92.1, g92.2, g92.3 - misc
 		return ModalGroup_MODAL_0;
 	}
 }
@@ -723,6 +723,7 @@ bool CmdParser::acsept_gcode(int num) const
 	case G_7:
 	case G_8:
 	case G_10:
+	case G_15:
 	case G_17:
 	case G_17_1:
 	case G_18:

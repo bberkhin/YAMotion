@@ -1,0 +1,81 @@
+// input parameters 
+// rate - feed rate
+// xMin, yMin - start poiunt
+// xD, yD - width and height
+// d  - mill diameter 
+// ccw - clockwise  0 - clockwise, 2- counter clockwise 
+// zSave -  save z
+// zFull - deep
+
+
+// rate - feed rate
+xMin = 10;
+yMin = 20;
+xD = 100;
+yD = 60;
+d  = 6;
+zSave  = 1;
+zFull  =  2;
+ccw = 1;
+per_stepover = 30;
+
+comment("Starting point:" + to_string(xMin) +"," + to_string(yMin));
+comment("Width:" + to_string(xD));
+comment("Height:" + to_string(yD));
+comment("Mill dianetr:" + to_string(d));
+comment("Z save:" + to_string(zSave));
+comment("Z max:" + to_string(zFull));
+
+
+Stepover = d * (abs(1-per_stepover)/100.);
+
+rtool = d/2;
+xMax = xMin + xD; 
+yMax = yMin + yD; 
+xStart = xMin ;
+yStart = yMin + rtool ;
+xEnd = xMax ;
+yEnd = yMax  - rtool;
+dy = Stepover;
+ccw = 1;
+
+if ( ccw == 0 )
+{
+  xStart = xMax;
+  yStart = yMax - rtool;
+  xEnd = xMin;
+  yEnd = yMin + rtool;
+  dy = -d;
+}
+
+
+zCur = 0;
+zFull = -1*zFull;
+while(zFull < zCur) 
+{
+ zCur = zCur - zDelta;
+ if ( zCur < zFull)
+ {
+	zCur = zFull;
+ } 
+ goto([-,-,zSave]);
+ goto([xStart,yStart,-]);
+ move([-,-,zCur ], zRate);  
+
+ for(y = yStart; y <= yEnd; )  
+ {
+   move([xEnd, -,-],rate);
+   if ( y + rtool >= yEnd ) // already mill
+      break;
+   y+=dy;   
+   if ( y > yEnd ) { y = yEnd-rtool; }
+   arc_ccw( [-, y,-], abs(dy) );
+   move([xStart, -,-]);
+   if ( y + rtool >= yEnd ) // already mill
+      break;      
+   y+=dy;
+   if ( y > yEnd ) { y = yEnd-rtool; }
+    arc_cw( [-, y,-], abs(dy) );
+ }
+}
+ 

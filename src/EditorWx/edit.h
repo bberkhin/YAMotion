@@ -107,13 +107,14 @@ public:
 	void OnMouseLeave(wxMouseEvent &event);
 
     //! language/lexer
+	wxString DeterminePrefs(int filetype);
     wxString DeterminePrefs (const wxString &filename);
-    bool InitializePrefs (const wxString &filename);
+    bool InitializePrefs (const wxString &langname);
     //bool UserSettings (const wxString &filename);
 	int GetFileType() {	return ((m_language != 0 ) ? m_language->file_type : FILETYPE_UNKNOW); }
 
     //! load/save file
-	bool NewFile();
+	bool NewFile(int filetype);
     bool LoadFile (const wxString &filename);
     bool SaveFile ();
     bool SaveFile (const wxString &filename);

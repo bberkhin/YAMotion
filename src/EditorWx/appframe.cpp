@@ -185,7 +185,9 @@ wxBEGIN_EVENT_TABLE (AppFrame, wxFrame)
     // common
     EVT_CLOSE (                      AppFrame::OnClose)
     // file
-	EVT_MENU(wxID_NEW, AppFrame::OnFileNew)
+
+	EVT_MENU(wxID_NEW,				 AppFrame::OnFileNew)
+	EVT_MENU(ID_NEWGCMC,			 AppFrame::OnFileNew)
     EVT_MENU (wxID_OPEN,             AppFrame::OnFileOpen)
     EVT_MENU (wxID_SAVE,             AppFrame::OnFileSave)
     EVT_MENU (wxID_SAVEAS,           AppFrame::OnFileSaveAs)
@@ -403,8 +405,14 @@ bool AppFrame::DoFileSave(bool askToSave, bool bSaveAs )
 	wxString fname = m_edit->GetFilename();
 	if (bSaveAs || fname.empty())
 	{
-		wxString filename = wxEmptyString;
-		wxFileDialog dlg(this, _("Save file As"), wxEmptyString, wxEmptyString, _("GCode Files (*.ngc)|*.ngc"), wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
+		wxString filename = _("unnamed");
+		wxString wildCard;
+		if (m_edit->GetFileType() == FILETYPE_GCMC)
+			wildCard = _("GCMC Files (*.gcmc)|*.gcmc");
+		else
+			wildCard = _("GCode Files (*.ngc)|*.ngc");
+
+		wxFileDialog dlg(this, _("Save file As"), wxEmptyString, filename, wildCard, wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
 		if (dlg.ShowModal() != wxID_OK)
 			return false;
 		filename = dlg.GetPath();
@@ -434,13 +442,16 @@ void AppFrame::FileChanged()
 	m_view->clear();
 }
 
-void AppFrame::OnFileNew(wxCommandEvent &WXUNUSED(event))
+void AppFrame::OnFileNew(wxCommandEvent &event )
 {
 	if ( !DoFileSave(true, false) )
 	{
 		return;
 	}
-	m_edit->NewFile();
+	if (event.GetId() == ID_NEWGCMC)
+		m_edit->NewFile(FILETYPE_GCMC);
+	else
+		m_edit->NewFile(FILETYPE_NC);
 	FileChanged();
 }
 
@@ -661,7 +672,11 @@ void AppFrame::CreateMenu ()
 {
     // File menu
     wxMenu *menuFile = new wxMenu;
-	menuFile->Append(wxID_NEW, _("&New ..\tCtrl+O"));
+	wxMenu *menuNewFiles = new wxMenu;
+	menuNewFiles->Append(wxID_NEW, _("&GCode File .."));
+	menuNewFiles->Append(ID_NEWGCMC, _("G&CMC File .."));
+	menuFile->Append(myID_HIGHLIGHTLANG, _("&New"), menuNewFiles);
+
     menuFile->Append (wxID_OPEN, _("&Open ..\tCtrl+O"));
     menuFile->Append (wxID_SAVE, _("&Save\tCtrl+S"));
     menuFile->Append (wxID_SAVEAS, _("Save &as ..\tCtrl+Shift+S"));

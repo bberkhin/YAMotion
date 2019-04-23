@@ -64,7 +64,7 @@ static void ColouriseGcmcDoc(Sci_PositionU startPos, Sci_Position length, int in
 		// Determine if the current state should terminate.
 		if (sc.state == SCE_GCODE_COMMENT) {
 			if (sc.atLineEnd) {
-				sc.SetState(SCE_GCODE_DEFAULT);
+				sc.SetState(SCE_GCMC_DEFAULT);
 			}
 		}
 		else if (sc.state == SCE_GCODE_COMMENT_ML) 
@@ -72,19 +72,19 @@ static void ColouriseGcmcDoc(Sci_PositionU startPos, Sci_Position length, int in
 			if (sc.ch == '*' && sc.chNext == '/') 
 			{
 				sc.Forward();
-				sc.ForwardSetState(SCE_GCODE_DEFAULT);
+				sc.ForwardSetState(SCE_GCMC_DEFAULT);
 			}
 		}
 		else if (sc.state == SCE_GCODE_NUMBER)
 		{
 			if (!IsANumChar(sc.ch))
-				sc.SetState(SCE_GCODE_DEFAULT);
+				sc.SetState(SCE_GCMC_DEFAULT);
 		}
 		//else if (sc.state == SCE_GCODE_VAR)
 		//{
 		//	if ( sc.ch == ']')
 		//	{
-		//		sc.SetState(SCE_GCODE_DEFAULT);
+		//		sc.SetState(SCE_GCMC_DEFAULT);
 		//	}
 		//}
 		else if ((sc.state == SCE_GCODE_IDENTIFIER)  )
@@ -97,14 +97,14 @@ static void ColouriseGcmcDoc(Sci_PositionU startPos, Sci_Position length, int in
 				{
 					sc.ChangeState(SCE_GCODE_WORD1); 				// It's a keyword, change its state
 				}
-				sc.SetState(SCE_GCODE_DEFAULT);
+				sc.SetState(SCE_GCMC_DEFAULT);
 			}
 		}
-		else if ( sc.state != SCE_GCODE_DEFAULT )
-			sc.SetState(SCE_GCODE_DEFAULT);
+		else if ( sc.state != SCE_GCMC_DEFAULT )
+			sc.SetState(SCE_GCMC_DEFAULT);
 		
 		// Determine if a new state should be entered.
-		if (sc.state == SCE_GCODE_DEFAULT  )
+		if (sc.state == SCE_GCMC_DEFAULT  )
 		{
 			if (sc.ch == '/' && sc.chNext == '/') {
 				sc.SetState(SCE_GCODE_COMMENT);

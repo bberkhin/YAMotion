@@ -767,6 +767,10 @@ bool GCodeInterpreter::run_modal_0(CmdParser &parser)
 		break;
 	case G_28:  //run_to_home()
 		break;
+	case G_15:  // cancel polar system
+		break;
+	case G_50: // all k to zero 
+		break;
 	case G_52:
 	case G_92:
 	case G_92_1:
@@ -878,7 +882,7 @@ bool GCodeInterpreter::run_set_coord_sys(const CmdParser &parser)
 	case G_59_2: origin = 8; break;
 	case G_59_3: origin = 9; break;
 		break;
-	default: RET_F_SETSTATE(INTERNAL_ERROR, "run_modal_0 with no GCode");
+	default: RET_F_SETSTATE(INTERNAL_ERROR, "ModalGroup_COORD_SYSTEM with no GCode");
 	}
 	if (runner.coordinate_index == origin) // the same as now
 		return true;

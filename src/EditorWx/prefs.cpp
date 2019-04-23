@@ -38,8 +38,7 @@ const char* GcmcWordlist = "abs acos asin atan atan_xy atan_xz atan_yz ceil comm
 "isundef isvector isvectorlist layer layerstack length literal log10 log2 loge message normalize pause pi plane position pow relocate reverse rotate_xy rotate_xz rotate_yz "
 "round scale sign sin sqrt svg_closepath tail tan to_chr to_deg to_distance to_float to_in to_inch to_int to_mm to_native to_none to_rad to_string to_val typeset undef warning "
 "arc_ccw arc_ccw_r arc_cw arc_cw_r circle_ccw circle_ccw_r circle_cw circle_cw_r coolant drill dwell feedmode feedrate fixpos_restore fixpos_store goto goto_r move move_r pathmode "
-"pause plane spindle spindlespeed toolchange";
-
+"pause plane spindle spindlespeed toolchange if while do else return function";
 
 //----------------------------------------------------------------------------
 //! languages
@@ -98,8 +97,8 @@ const LanguageInfo g_LanguagePrefs[] = {
 	{SCE_GCODE_COORDINATE, NULL},
 	{SCE_GCODE_WORD1, GcmcWordlist },
 	{SCE_GCODE_OPERATORS,NULL},
-	{SCE_GCODE_IDENTIFIER, NULL},
-	{-1, NULL},
+	{SCE_GCODE_IDENTIFIER, NULL},	
+	{SCE_GCMC_DEFAULT, NULL},
 	{-1, NULL},
 	{-1, NULL},
 	{-1, NULL},
@@ -213,8 +212,8 @@ const StyleInfo g_StylePrefs [] = {
    
     // #define SCE_GCODE_WORD1 9 
     {"Keywords",
-     "ORANGE", "WHITE",
-     "", 10, 0, 0},
+	 "RED", "WHITE",
+	 "", 10, mySTC_STYLE_BOLD, 0},
 	 //SCE_GCODE_OPERATORS
 	  {"Keyword2",
 	 "VIOLET RED", "WHITE",
@@ -224,7 +223,10 @@ const StyleInfo g_StylePrefs [] = {
 	 "GREY", "WHITE",
 	 "", 10, 0, 0},
 
-	 
+	 //SCE_GCMC_DEFAULT
+	{"GCMCDEF",
+		"BLACK", "WHITE",
+		"", 10, mySTC_STYLE_BOLD, 0},
 
     };
 
