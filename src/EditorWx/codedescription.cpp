@@ -22,11 +22,24 @@ CodeDescription::CodeDescription()
 	int index = 0;
 	wchar_t *c = 0;
 	wchar_t line[512];
+	int n;
 	while (true)
 	{
 		if( fgetws(line, 512, file) == NULL )
 			break;
 		line[511] = 0;
+		n = wcsnlen(line,512);
+		// remove '\n' && '\r'
+		if (n > 0 && (line[n - 1] == '\n' || line[n - 1] == '\r'))
+		{
+			n--;
+			line[n] = 0; 			
+			if (n > 0 && (line[n - 1] == '\n' || line[n - 1] == '\r'))
+			{
+				line[n - 1] = 0; 
+			}
+		}
+
 		c = wcschr(line, L'=');
 		if (c == NULL)
 			continue;
@@ -155,7 +168,7 @@ std::wstring CodeDescription::get_description(const char *src)
 		if ((gc = parser.getGCode( (GModalGroup)i )) != -1)
 		{
 			out += get_g_description(gc);
-			out += L" ";
+			out += L"\n";
 		}
 	}
 
@@ -174,13 +187,15 @@ std::wstring CodeDescription::get_description(const char *src)
 
 std::wstring CodeDescription::get_g_description(int gc)
 {
-	std::wstring  out;
+	std::wstring  out = L"G";
+	out += std::to_wstring(gc);
+	out += L": ";
+	
 	auto iter = commands.find(gc);
 	if (iter != commands.end())
-		out = iter->second;
+		out += iter->second;
 	else if( !parser.acsept_gcode(gc) )
-		out = L"Unknown G Cod";
-	
+		out += L"Unknown G Cod";
 	return out;
 }
 

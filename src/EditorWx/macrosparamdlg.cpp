@@ -13,11 +13,9 @@ MacrosParamDlg::MacrosParamDlg(MacrosDesc *pm, wxWindow *parent)
 	{
 
 		// sets the application title
-		SetTitle(_("Macros Parameter"));
-		
-		
+		SetTitle(mdesc->name.c_str());
+			
 		wxBoxSizer *inputpane = new wxBoxSizer(wxHORIZONTAL);
-
 		
 		wxStaticBoxSizer *textinfos = new wxStaticBoxSizer(
 			new wxStaticBox(this, wxID_ANY, _("Fill parameters:")),
@@ -120,7 +118,13 @@ int MacrosParamDlg::ShowModal()
 					if (pedit)
 					{
 						wxString label = pedit->GetValue();
-						mdesc->args[i].val = label;
+						if (mdesc->args[i].type == "scalar")
+						{
+							label.Replace(",", ".");
+							mdesc->args[i].val = label;
+						}
+						else
+							mdesc->args[i].val = label;
 					}
 				}
 			}

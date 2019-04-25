@@ -102,8 +102,7 @@ wxBEGIN_EVENT_TABLE(Edit, wxStyledTextCtrl)
 	EVT_STC_DWELLSTART(wxID_ANY, Edit::OnDwellStart)
 	EVT_STC_DWELLEND(wxID_ANY, Edit::OnDwellEnd)
 		
-	//EVT_KILL_FOCUS(Edit::OnKillFocus)
-
+	EVT_KILL_FOCUS(Edit::OnKillFocus)
 	EVT_KEY_DOWN( Edit::OnKeyDown )
 	EVT_LEAVE_WINDOW(Edit::OnMouseLeave)
 
@@ -219,6 +218,14 @@ void Edit::OnMouseLeave(wxMouseEvent &event)
 		CallTipCancel();
 	event.Skip();
 }
+
+void Edit::OnKillFocus(wxFocusEvent& event)
+{
+	//if (CallTipActive())
+		//CallTipCancel();
+	event.Skip();
+}
+
 
 void Edit::OnKeyDown (wxKeyEvent &event)
 {
@@ -513,12 +520,6 @@ void Edit::OnDwellEnd(wxStyledTextEvent &event)
 		CallTipCancel();
 }
 
-
-void Edit::OnKillFocus(wxFocusEvent &event)
-{
-	if (CallTipActive())
-		CallTipCancel();
-}
 
 //----------------------------------------------------------------------------
 // private functions
