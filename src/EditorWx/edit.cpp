@@ -492,6 +492,33 @@ void Edit::OnChanged(wxStyledTextEvent &event)
 	}
 }
 
+static wxString GetWord(const wxString &in, int pos)
+{
+	int start,end;
+	const wchar_t *s = in.wc_str();
+	for (start = pos; start >= 0; start--, s--)
+	{
+		if (::iswspace( *s ) )
+		{
+			start++;
+			break;
+		}
+	}
+	s = in.wc_str();
+	for (end = pos; *s != 0; s++, end++)
+	{
+		if (::iswspace(*s) || *s == '\n' || *s == '\r' )
+		{
+			end--;
+			break;
+		}
+	}
+	if (end > start)
+		return in.SubString(start, end);
+	else
+		return wxEmptyString;
+
+}
 void Edit::OnDwellStart(wxStyledTextEvent &event)
 {
 	if ( !HasFocus() || GetFileType() != FILETYPE_NC )
@@ -500,17 +527,24 @@ void Edit::OnDwellStart(wxStyledTextEvent &event)
 	int pos = event.GetPosition();
 	int x = event.GetX();
 	int y = event.GetX();
+	wxString strWord;
 	int lineN = this->LineFromPosition(pos);
 	wxString str = this->GetLineText(lineN);
 	if (str.empty())
 		return;
+
+	int posOnLine  = pos - PositionFromLine(lineN);
+	if (posOnLine >= 0 && posOnLine < str.length())
+	{
+		wxString strWord = GetWord( str, posOnLine);
+	}
 
 	if ( !code_description )
 	{
 		code_description.reset( new CodeDescription() );
 	}
 
-	wxString strOut = code_description->get_description(str.c_str());
+	wxString strOut = code_description->get_description(str.c_str(), strWord.c_str() );
 	if (strOut.size() > 1 )
 		CallTipShow(pos, strOut);
 }
@@ -618,27 +652,31 @@ bool Edit::InitializePrefs (const wxString &name) {
     // initialize settings
     if (g_CommonPrefs.syntaxEnable) {
         int keywordnr = 0;
-        for (Nr = 0; Nr < STYLE_TYPES_COUNT; Nr++) {
-            if (curInfo->styles[Nr].type == -1) continue;
-            const StyleInfo &curType = g_StylePrefs [curInfo->styles[Nr].type];
+
+        for (Nr = 0; Nr < STYLE_TYPES_COUNT; Nr++) 
+		{
+			int style = curInfo->styles[Nr].type;
+            if (style == -1) continue;
+            const StyleInfo &curType = g_StylePrefs [style];
             wxFont font(wxFontInfo(curType.fontsize)
                             .Family(wxFONTFAMILY_MODERN)
                             .FaceName(curType.fontname));
-            StyleSetFont (Nr, font);
-			StyleSetFontEncoding(Nr, wxFONTENCODING_CP1251);
+            StyleSetFont (style, font);
+			StyleSetFontEncoding(style, wxFONTENCODING_CP1251);
             if (curType.foreground.length()) {
-                StyleSetForeground (Nr, wxColour (curType.foreground));
+                StyleSetForeground (style, wxColour (curType.foreground));
             }
             if (curType.background.length()) {
-                StyleSetBackground (Nr, wxColour (curType.background));
+                StyleSetBackground (style, wxColour (curType.background));
             }
-            StyleSetBold (Nr, (curType.fontstyle & mySTC_STYLE_BOLD) > 0);
-            StyleSetItalic (Nr, (curType.fontstyle & mySTC_STYLE_ITALIC) > 0);
-            StyleSetUnderline (Nr, (curType.fontstyle & mySTC_STYLE_UNDERL) > 0);
-            StyleSetVisible (Nr, (curType.fontstyle & mySTC_STYLE_HIDDEN) == 0);
-            StyleSetCase (Nr, curType.lettercase);
+            StyleSetBold (style, (curType.fontstyle & mySTC_STYLE_BOLD) > 0);
+            StyleSetItalic (style, (curType.fontstyle & mySTC_STYLE_ITALIC) > 0);
+            StyleSetUnderline (style, (curType.fontstyle & mySTC_STYLE_UNDERL) > 0);
+            StyleSetVisible (style, (curType.fontstyle & mySTC_STYLE_HIDDEN) == 0);
+            StyleSetCase (style, curType.lettercase);
             const char *pwords = curInfo->styles[Nr].words;
-            if (pwords) {
+            if (pwords) 
+			{
                 SetKeyWords (keywordnr, pwords);
                 keywordnr += 1;
             }

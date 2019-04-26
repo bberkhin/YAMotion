@@ -10,6 +10,7 @@ class EnvironmentSimple : public IEnvironment
 {
 public:
     EnvironmentSimple();
+	~EnvironmentSimple();
     Coords GetG54G58 ( int index  );
 	void SetG54G58(int index, Coords &pos);
 	void SetVariable(int index, double value);

@@ -6,6 +6,7 @@
 #include "appframe.h"
 #include "configdata.h"
 #include "standartpaths.h"
+#include "environmentsimple.h"
 
 
 
@@ -123,8 +124,9 @@ bool App::OnInit()
 	// GCode & Gcmc lexer
 	LINK_LEXER(lmGcode)
 	LINK_LEXER(lmGcmc)
-	// create application frame
+		// create application frame
 
+	env.reset(new EnvironmentSimple());
 	ConfigData *config = new ConfigData();
 	wxConfigBase::Set(config); //wxConfig
 	wxLanguage m_lang = wxLANGUAGE_UNKNOWN;  // language specified by user

@@ -8,7 +8,7 @@ class CodeDescription
 public:
 	CodeDescription();
 	~CodeDescription();
-	std::wstring get_description(const char *src);
+	std::wstring get_description(const char *src, const char *word);
 private:
 	std::wstring get_g_description(int gc );
 	std::wstring get_m_description(int mc );

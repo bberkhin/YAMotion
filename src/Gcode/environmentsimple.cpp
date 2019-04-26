@@ -8,6 +8,9 @@ EnvironmentSimple::EnvironmentSimple()
 	tools.push_back(t);
 }
 
+EnvironmentSimple::~EnvironmentSimple()
+{
+}
 
 Coords EnvironmentSimple::GetG54G58 ( int origin)
 { //origin [1;9]

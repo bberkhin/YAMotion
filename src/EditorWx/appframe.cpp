@@ -72,10 +72,9 @@ public:
 	{
 
 		m_pHandler = handler;
-		penv = new EnvironmentSimple();
 		pexec = new ExecutorLogWnd(m_pHandler, true);
 		plogger = new LoggerWnd(m_pHandler);
-		ppret = new GCodeInterpreter(penv, pexec, plogger);
+		ppret = new GCodeInterpreter(wxGetApp().GetEnvironment(), pexec, plogger);
 
 	}
 	~IntGCodeThread();
@@ -85,7 +84,6 @@ private:
 protected:
 	virtual wxThread::ExitCode Entry();
 	AppFrame *m_pHandler;
-	EnvironmentSimple *penv;
 	ExecutorLogWnd *pexec;
 	LoggerWnd *plogger;
 	GCodeInterpreter *ppret;
@@ -101,10 +99,9 @@ public:
 	{
 
 		m_pHandler = handler;
-		penv = new EnvironmentSimple();
 		pexec = new ExecutorView(plogger);
 		plogger = new LoggerWnd(m_pHandler);
-		ppret = new GCodeInterpreter(penv, pexec, plogger);
+		ppret = new GCodeInterpreter(wxGetApp().GetEnvironment(), pexec, plogger);
 
 	}
 	~SimulateGCodeThread();
@@ -114,8 +111,7 @@ public:
 
 protected:
 	virtual wxThread::ExitCode Entry();
-	AppFrame *m_pHandler;
-	EnvironmentSimple *penv;
+	AppFrame *m_pHandler;	
 	ExecutorView *pexec;
 	LoggerWnd *plogger;
 	GCodeInterpreter *ppret;
@@ -908,7 +904,6 @@ IntGCodeThread::~IntGCodeThread()
 	wxCriticalSectionLocker enter(m_pHandler->critsect);
 	// the thread is being destroyed; make sure not to leave dangling pointers around
 	m_pHandler->checkThread = NULL;
-	if(penv )delete penv;
 	if(pexec) delete pexec;
 	if(plogger) delete plogger;
 	if(ppret) delete ppret;
@@ -946,7 +941,6 @@ SimulateGCodeThread::~SimulateGCodeThread()
 	m_pHandler->m_view->setBox(getBox());
 
 	m_pHandler->simulateThread = NULL;
-	if (penv)delete penv;
 	if (pexec) delete pexec;
 	if (plogger) delete plogger;
 	if (ppret) delete ppret;

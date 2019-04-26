@@ -26,7 +26,7 @@ using namespace Scintilla;
 
 static bool isALetter(int ch)
 {
-	return (ch >= 'A' && ch <= 'Z') || (ch >= 'a' && ch <= 'z');
+	return (ch >= 'A' && ch <= 'Z') || (ch >= 'a' && ch <= 'z') || (ch =='_');
 }
 
 static inline bool IsANumChar(int ch) {
@@ -45,7 +45,9 @@ static inline bool IsRealVal(int ch)
 static void ColouriseGcmcDoc(Sci_PositionU startPos, Sci_Position length, int initStyle, WordList *keywordLists[],
 	Accessor &styler)
 {
-	WordList &keywords= *keywordLists[0];
+	WordList &keywords1= *keywordLists[0];
+	WordList &keywords2 = *keywordLists[1];
+	
 	CharacterSet operators(CharacterSet::setNone, "*/=+<>");
 	StyleContext sctmp(startPos, length, initStyle, styler);
 
@@ -57,7 +59,7 @@ static void ColouriseGcmcDoc(Sci_PositionU startPos, Sci_Position length, int in
 	//	 buf[i++] = sctmp.ch;
 	//}
 
-	StyleContext sc(startPos, length, initStyle, styler);
+	StyleContext sc(startPos, length, SCE_GCMC_DEFAULT, styler);
 
 	for (; sc.More(); sc.Forward())
 	{
@@ -72,6 +74,13 @@ static void ColouriseGcmcDoc(Sci_PositionU startPos, Sci_Position length, int in
 			if (sc.ch == '*' && sc.chNext == '/') 
 			{
 				sc.Forward();
+				sc.ForwardSetState(SCE_GCMC_DEFAULT);
+			}
+		}
+		else if (sc.state == SCE_GCMC_STRING)
+		{
+			if (sc.ch == '"')
+			{
 				sc.ForwardSetState(SCE_GCMC_DEFAULT);
 			}
 		}
@@ -93,9 +102,13 @@ static void ColouriseGcmcDoc(Sci_PositionU startPos, Sci_Position length, int in
 			{
 				char s[124];
 				sc.GetCurrent(s, sizeof(s));
-				if (keywords.InList(s))
+				if (keywords1.InList(s))
 				{
-					sc.ChangeState(SCE_GCODE_WORD1); 				// It's a keyword, change its state
+					sc.ChangeState(SCE_GCMC_WORD1); 				// It's a keyword, change its state
+				}
+				else if (keywords2.InList(s))
+				{
+					sc.ChangeState(SCE_GCMC_WORD2); 				// It's a keyword, change its state
 				}
 				sc.SetState(SCE_GCMC_DEFAULT);
 			}
@@ -104,7 +117,7 @@ static void ColouriseGcmcDoc(Sci_PositionU startPos, Sci_Position length, int in
 			sc.SetState(SCE_GCMC_DEFAULT);
 		
 		// Determine if a new state should be entered.
-		if (sc.state == SCE_GCMC_DEFAULT  )
+		if (sc.state == SCE_GCMC_DEFAULT  ) 
 		{
 			if (sc.ch == '/' && sc.chNext == '/') {
 				sc.SetState(SCE_GCODE_COMMENT);
@@ -112,6 +125,10 @@ static void ColouriseGcmcDoc(Sci_PositionU startPos, Sci_Position length, int in
 			else if (sc.ch == '/' && sc.chNext == '*') {
 				sc.SetState(SCE_GCODE_COMMENT_ML);
 			} 
+			else if (sc.ch == '"') {
+				sc.SetState(SCE_GCMC_STRING);
+			}
+			
 			else if (IsASCII(sc.ch) &&
 				(IsADigit(sc.ch) || ((sc.ch == '.' || sc.ch == '-') && IsASCII(sc.chNext) && IsADigit(sc.chNext)))
 				) {

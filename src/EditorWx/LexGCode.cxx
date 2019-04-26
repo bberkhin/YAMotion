@@ -59,6 +59,7 @@ static int  get_letter_style(char ch )
         case 'L':
 		case 'H':
 		case 'T':
+		case 'N':
 		  return SCE_GCODE_PARAM;
     }
    return SCE_GCODE_DEFAULT;
@@ -124,7 +125,7 @@ static void ColouriseGCodeDoc(Sci_PositionU startPos, Sci_Position length, int i
 				sc.GetCurrent(s, sizeof(s));
 				if (keywords.InList(s))
 				{
-					sc.ChangeState(SCE_GCODE_WORD1); 				// It's a keyword, change its state
+					sc.ChangeState(SCE_GCODE_WORD); 				// It's a keyword, change its state
 				}
 				sc.SetState(SCE_GCODE_DEFAULT);
 			}

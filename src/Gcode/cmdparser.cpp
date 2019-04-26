@@ -5,6 +5,7 @@
 #include <stdarg.h>
 #include "ienvironment.h"
 #include "gcodeerrors.h"
+#include "environmentsimple.h"
 
 
 namespace Interpreter
@@ -14,6 +15,7 @@ namespace Interpreter
 
 CmdParser::CmdParser(IEnvironment *env_) : env(env_)
 {
+
 }
 
 //====================================================================================================

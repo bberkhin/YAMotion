@@ -37,7 +37,10 @@ bool CmdParser::read_parameter(double *pdbl, bool check_exists)    //!< test for
 		IF_F_RET_F_SETSTATE(((index >= 1) && (index < RS274NGC_MAX_PARAMETERS)), PARAMETER_ERROR, YA_PARAMETER_NUMBER_OUT_OF_RANGE);
 		//IF_F_RET_F_SETSTATE(((index < 5420) || (index <= 5428) && (true)), PARAMETER_ERROR, "Cannot read current position with cutter radius compensation on");
 		
-		*pdbl = env->GetVariable(index);
+		if (env)
+			*pdbl = env->GetVariable(index);
+		else
+			RET_F_SETSTATE(INTERNAL_ERROR, "IEnvironment == 0");
 	}
 	return true;
 }

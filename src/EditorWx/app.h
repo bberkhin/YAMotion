@@ -1,4 +1,6 @@
 #pragma once
+#include "ienvironment.h"
+
 class AppFrame;
 
 //----------------------------------------------------------------------------
@@ -18,7 +20,7 @@ public:
 	virtual int OnExit() wxOVERRIDE;
 	void Restart();
 	bool GetUptadeInfo(wxString &out);
-
+	IEnvironment *GetEnvironment() { return env.get(); }
 private:
 	//! frame window
 	AppFrame* m_frame;
@@ -27,6 +29,8 @@ protected:
 	// Lang support
 	wxLocale m_locale;  // locale we'll be using
 	bool m_restart;
+	// envaroment
+	std::shared_ptr<IEnvironment> env;
 	wxDECLARE_EVENT_TABLE();
 };
 

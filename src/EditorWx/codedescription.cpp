@@ -1,8 +1,10 @@
 #include "wx/wx.h"
+#include "app.h"
 #include <string.h>
 #include <stdint.h>
 #include "codedescription.h"
 #include "standartpaths.h"
+#include "environmentsimple.h"
 
 
 
@@ -10,7 +12,7 @@ using namespace Interpreter;
 
 #pragma warning(disable : 4996)
 
-CodeDescription::CodeDescription()
+CodeDescription::CodeDescription() : parser( wxGetApp().GetEnvironment() )
 {
 	//read description file
 	std::filesystem::path name = StandartPaths::Get()->GetResourcesPath(L"code_defs.ini");
@@ -141,7 +143,7 @@ bool CodeDescription::cpy_close_and_downcase(char *line, const char *src, std::w
 }
 
 
-std::wstring CodeDescription::get_description(const char *src)
+std::wstring CodeDescription::get_description(const char *src, const char *word)
 {
 	
 	std::wstring out;
@@ -149,6 +151,20 @@ std::wstring CodeDescription::get_description(const char *src)
 
 	if (!cpy_close_and_downcase(line, src, out))
 		return out;
+
+	if (word && *word != 0)
+	{
+		switch ( *word )
+		{
+			case L'G':
+			case L'g':
+				break;
+			case L'M':
+			case L'm':
+				break;
+		}
+	}
+
 	
 	if (!parser.parse(line))
 	{
@@ -225,8 +241,8 @@ std::wstring CodeDescription::variable_precision(double val)
 	{
 		truncatedNum = truncatedNum.substr(0, p2 + 1);
 		// Make sure we're not left with just a decimal point at the end
-		size_t decimalPos = truncatedNum.find_last_of('.');
-		if (decimalPos == truncatedNum.length() - 1)
+		wchar_t &lastsym = truncatedNum.back();
+		if (lastsym == '.' || lastsym == ',' )
 		{
 			truncatedNum = truncatedNum.substr(0, truncatedNum.length() - 1);
 		}
