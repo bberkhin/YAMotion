@@ -61,8 +61,11 @@ public:
 	const glm::mat4 &get_projection() {	return viewProjection; }
 private:
 	void reset_matrix(float scale_add_);
+	void update_scale();
 private:
-	float     scale_origin;          //масштаб изображени¤
+	//float     scale_origin;          //масштаб изображени¤
+	glm::vec3  scale_origin;
+	float     k_view;
 	glm::vec3 translate_origin;      //текущий сдвиг
 	float  scale_add;
 	glm::vec3 translate_add;

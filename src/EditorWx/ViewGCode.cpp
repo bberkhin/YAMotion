@@ -179,8 +179,24 @@ void ViewGCode::initializeGL()
 
 void ViewGCode::resizeGL(int nWidth, int nHeight)
 {
-	glViewport(0, 0, nWidth, nHeight);
-	camera.set_viewport(nWidth, nHeight);
+	int realHeight = nHeight;
+	int realWidth = nWidth;
+/*
+	CoordsBox box = camera.get_box();
+	wxASSERT(box.Max.y > box.Min.y);
+	wxASSERT(box.Max.x > box.Min.x);
+	double k = (box.Max.x - box.Min.x) / (box.Max.y - box.Min.y);
+
+
+	realWidth = static_cast<int>(k * realHeight);
+	if (realWidth > nWidth)
+	{
+		realWidth = nWidth;
+		realHeight = static_cast<int>(nWidth / k);
+	}
+*/
+	glViewport(0, 0, realWidth, realHeight);
+	camera.set_viewport(realWidth, realHeight);
 }
 
 void ViewGCode::OnPaint(wxPaintEvent& WXUNUSED(event))
@@ -1183,12 +1199,6 @@ Camera::Camera() :
 	set_box(CoordsBox(Coords(0, 0, 0), Coords(1000, 1000, 300)));
 }
 
-void Camera::set_viewport(int width, int height)
-{
-	width_vp = width;             // viewport 
-	height_vp = height;
-}
-
 void Camera::move_scale_cursor(int x, int y, float delta)
 {
 
@@ -1218,7 +1228,12 @@ void Camera::move_drag_cursor(int deltaX, int deltaY)
 	glm::vec3 worldCoordinates = glm::unProject(windowCoordinates, glm::mat4(1.0f), viewProjection, viewport);
 	glm::vec3 worldCoordinates1 = glm::unProject(windowCoordinates1, glm::mat4(1.0f), viewProjection, viewport);
 
-	translate_add += ((worldCoordinates1 - worldCoordinates) * (scale_origin*scale_add) );
+	//glm::vec3 translate_add1 = scale_origin * scale_add;
+	glm::mat3x3 m(scale_add);
+	m *= scale_origin;
+	
+	translate_add += (m * ((worldCoordinates1 - worldCoordinates)));
+	//translate_add += ((worldCoordinates1 - worldCoordinates) * (scale_origin*scale_add) );
 
 }
 
@@ -1239,10 +1254,10 @@ void Camera::recalc_matrix()
 		return;
 
 	glm::vec3 translate = translate_origin + translate_add;
-	float scale = scale_origin * scale_add;
+	glm::vec3 scale = scale_origin * scale_add;
 
 	float scale_wnd = 2.0f / width_vp; // это ширина бокса вписанного в -1 до 1
-	k_pix_in_mm = scale_wnd / scale;
+	k_pix_in_mm = scale_wnd / scale.x;
 
 
 	//Во время умножения матриц правая матрица умножается на вектор, поэтому вам надо читать умножения справа налево.
@@ -1252,7 +1267,7 @@ void Camera::recalc_matrix()
 
 	glm::mat4 mTrans(1.0f);
 	mTrans = glm::translate(mTrans, translate);
-	mTrans = glm::scale(mTrans, glm::vec3(scale, scale, scale));
+	mTrans = glm::scale(mTrans, scale);
 
 	glm::mat4 mProj = glm::ortho(-1.f, 1.f, -1.f, 1.f, -1000.f, 10000.f);
 
@@ -1356,16 +1371,63 @@ void Camera::increase_scale(float dscl)
 void Camera::set_box(const CoordsBox &bx)
 {
 	box = bx;
+	update_scale();
 	// box must be in [-1;1] range
-	float scalex = 2.0f / (box.Max.x - box.Min.x);
-	float scaley = 2.0f / (box.Max.y - box.Min.y);
-	//float scalez = 2.0f / (box.Max.z - box.Min.z);
-	scale_origin = glm::min(scalex, scaley);//  glm::min(glm::min(scalex, scaley), scalez);
+	float k_view = 1;
+	if ( height_vp != 0 )
+		k_view = float(width_vp) / float(height_vp);
+
+
+	scale_origin.x = ( 2.0f / (box.Max.x - box.Min.x));
+	scale_origin.y = k_view * scale_origin.x;
+	//scale_origin.y = k_view * (2.0f / (box.Max.y - box.Min.y));
+	scale_origin.z = box.Max.z != box.Min.z ? 2.0f / (box.Max.z - box.Min.z) : glm::min(scale_origin.x, scale_origin.y);
 	scale_add = 0.9f;
 	float xcenter = box.Max.x / 2.0f + box.Min.x / 2.0f;
 	float ycenter = box.Max.y / 2.0f + box.Min.y / 2.0f;
 	float zcenter = box.Max.z / 2.0f + box.Min.z / 2.0f;
-	translate_origin = glm::vec3(-xcenter * scale_origin*scale_add, -ycenter * scale_origin*scale_add, -zcenter * scale_origin*scale_add);
-
+	//glm::vec3 center = glm::vec3(box.Max.x / 2.0f + box.Min.x / 2.0f, box.Max.y / 2.0f + box.Min.y / 2.0f, box.Max.z / 2.0f + box.Min.z / 2.0f);
+	translate_origin = glm::vec3(-xcenter * scale_origin.x*scale_add, -ycenter * scale_origin.y*scale_add, -zcenter * scale_origin.z*scale_add);
 	reset_matrix(scale_add);
+}
+
+void Camera::update_scale()
+{
+	// box must be in [-1;1] range
+	float k_view = 1;
+	if (height_vp != 0)
+		k_view = float(width_vp) / float(height_vp);
+
+
+	if (k_view < 1)
+	{
+		scale_origin.x = (2.0f / (box.Max.x - box.Min.x));
+		scale_origin.y = k_view * scale_origin.x;
+	}
+	else
+	{
+		scale_origin.y = (2.0f / (box.Max.y - box.Min.y));
+		scale_origin.x = scale_origin.y / k_view;;
+	}
+	//scale_origin.y = k_view * (2.0f / (box.Max.y - box.Min.y));
+	scale_origin.z = box.Max.z != box.Min.z ? 2.0f / (box.Max.z - box.Min.z) : glm::min(scale_origin.x, scale_origin.y);
+	scale_add = 0.9f;
+	float xcenter = box.Max.x / 2.0f + box.Min.x / 2.0f;
+	float ycenter = box.Max.y / 2.0f + box.Min.y / 2.0f;
+	float zcenter = box.Max.z / 2.0f + box.Min.z / 2.0f;
+	
+	//glm::vec3 center = -1*glm::vec3(box.Max.x / 2.0f + box.Min.x / 2.0f, box.Max.y / 2.0f + box.Min.y / 2.0f, box.Max.z / 2.0f + box.Min.z / 2.0f);
+	//translate_origin = glm::scale()
+	
+	
+	translate_origin = glm::vec3(-xcenter * scale_origin.x*scale_add, -ycenter * scale_origin.y*scale_add, -zcenter * scale_origin.z*scale_add);
+}
+
+
+void Camera::set_viewport(int width, int height)
+{
+	width_vp = width;             // viewport 
+	height_vp = height;
+	update_scale();
+	//k_view = float(width_vp) / float(height_vp);
 }
