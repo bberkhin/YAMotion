@@ -59,7 +59,9 @@ static void ColouriseGcmcDoc(Sci_PositionU startPos, Sci_Position length, int in
 	//	 buf[i++] = sctmp.ch;
 	//}
 
-	StyleContext sc(startPos, length, SCE_GCMC_DEFAULT, styler);
+	int style = startPos == 0 ? SCE_GCMC_DEFAULT : styler.StyleAt(startPos-1);
+
+	StyleContext sc(startPos, length, style/*SCE_GCMC_DEFAULT*/, styler);
 
 	for (; sc.More(); sc.Forward())
 	{

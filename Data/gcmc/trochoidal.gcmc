@@ -35,6 +35,7 @@
  * Trochoidal point calculation.
  * See: https://en.wikipedia.org/wiki/Trochoid
  */
+  
 function trochoid_point(ang, a, b)
 {
 	ang = to_rad(ang);	// Trochoids are defined in radians
@@ -105,11 +106,14 @@ goto(HOME);
 
 path *= 25.0mm;
 
+
 /* Trochoidal high-speed milling of the outline */
+
 feedrate(3000.0mm);	// *Really* high-speed milling
 repeat(count(path); i) {
 	trochoid_move(path[i-2], path[i-1], CUTZ, 5.0mm, 2.0mm);
 }
+
 
 /* Clean-cutting the object */
 feedrate(150.0mm);	// "Finishing the edge" speed

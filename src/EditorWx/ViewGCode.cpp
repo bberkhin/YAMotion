@@ -945,6 +945,7 @@ wxThread::ExitCode SimulateCutting::Entry()
 			glm::vec3 move = k*(second.position - end_point.position);
 			end_point.position = end_point.position + move;
 			end_point.line = second.line;
+			end_point.isFast = second.isFast;
 			currentdistoftick = 0;
 			wxMilliSleep(tickdelay);
 
