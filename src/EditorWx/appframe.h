@@ -38,7 +38,8 @@ public:
 	~AppFrame();
 
 	//! event handlers
-	//! common
+	//! common	
+	void OnTimer(wxTimerEvent &event);
 	void OnClose(wxCloseEvent &event);
 	void OnAbout(wxCommandEvent &event);	
 	void OnDownloadUpdate(wxCommandEvent &event);
@@ -71,6 +72,9 @@ public:
 	void OnUpdateCheck(wxUpdateUIEvent& event);
 	void OnUpdateSimulate(wxUpdateUIEvent& event);
 	void OnUpdateConvertGcmc(wxUpdateUIEvent& event);
+	void OnKillGcmcProcess(wxCommandEvent &event);
+	void OnUpdateKillGcmcProcess(wxUpdateUIEvent& event);
+
 
 	void OnThreadUpdate(wxThreadEvent&);
 	void OnThreadCompletion(wxThreadEvent&);
@@ -97,11 +101,13 @@ private:
 	Edit *m_edit;
 	LogWindow *logwnd;
 	ViewGCode *m_view;
+	wxTimer m_timer;
 
 	IntGCodeThread *checkThread;
 	SimulateGCodeThread *simulateThread;
 	wxCriticalSection critsect;
 	GcmcProcess *gcmcProcess;
+	unsigned int gcmc_running_in_sec;
 
 	void FileOpen(wxString fname);
 	void UpdateTitle();
