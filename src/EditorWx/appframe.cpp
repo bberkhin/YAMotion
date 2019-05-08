@@ -784,7 +784,13 @@ void AppFrame::CreateMenu ()
 	menu3D->Append(myID_SETVIEWFIRST+3,   _("&Right"));
 	menu3D->Append(myID_SETVIEWFIRST+4,   _("&Front"));
 	menu3D->Append(myID_SETVIEWFIRST+5,   _("&Back"));
-	menuView->AppendSeparator();
+	menu3D->AppendSeparator();	
+	menu3D->AppendCheckItem(ID_SHOW2DGRID, _("Show/Hide 2d grid"));
+	menu3D->AppendCheckItem(ID_SHOWBOUNDS, _("Show/Hide bounds"));
+	menu3D->AppendCheckItem(ID_SHOW3DGRID, _("Show/Hide 3d grid"));
+	menu3D->AppendCheckItem(ID_SHOWTOOL, _("Show/Hide tool"));
+	menu3D->AppendCheckItem(ID_SHOWAXIS, _("Show/Hide Axis"));
+	menu3D->AppendSeparator();
 	menu3D->Append(myID_SEMULATE_START, _("&Start Simulate"));
 	menu3D->Append(myID_SEMULATE_PAUSE,_("Sto&p Simulate"));
 	menu3D->Append(myID_SEMULATE_STOP, _("Pause"));

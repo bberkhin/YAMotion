@@ -130,12 +130,14 @@ public:
 	void initializeGL();
 //command
 	void OnSetView(wxCommandEvent &event);
+	void OnSetShow(wxCommandEvent &event);
 	void OnSemulateStart(wxCommandEvent &event);
 	void OnSemulatePause(wxCommandEvent &event);
 	void OnSemulateStop(wxCommandEvent &event);
 	void OnSimulateUpdate(wxThreadEvent&);
 	void OnSimulateCompletion(wxThreadEvent&);
 	void OnSetViewUpdate(wxUpdateUIEvent& event);
+	void OnSetShowUpdate(wxUpdateUIEvent& event);
 	void OnCmdUpdateSimulateStart(wxUpdateUIEvent& event);
 	void OnCmdUpdateSimulateStop(wxUpdateUIEvent& event);
 	void OnCmdUpdateSimulatePause(wxUpdateUIEvent& event);
@@ -143,12 +145,13 @@ public:
 
 
 private:
+	void load_config();
+	void save_config();
 	void resizeGL(int nWidth, int nHeight);
 	void draw_bounds();
 	void draw_3d_grid();
 	void draw_grid();
 	void draw_track();
-	void draw_real_track();
 	void draw_border();
 	void draw_axis();
 	void draw_axis_letters();
@@ -167,7 +170,12 @@ private:
 	std::vector<TrackPointGL> track;
 	std::vector<glm::vec3> realTrack; //пройденна¤ фрезой траектори¤
 
-	bool   m_showGrid;   //показывать ли сетку масштаба
+	bool   show2dGrid;
+	bool   showbounds;
+	bool   show3dGrid;
+	bool   showTool;
+	bool   showAxis;
+
 	float  m_gridStep;   //размер ¤чейки сетки
 	
 	Camera camera;

@@ -9,7 +9,7 @@
 #include <wx/math.h>
 #include "ViewGCode.h"
 #include "defsext.h"     // additional definitions
-
+#include "configdata.h"
 
 #include <glm/gtc/matrix_transform.hpp>
 //#include <glm/gtc/constants.hpp>
@@ -90,11 +90,13 @@ wxBEGIN_EVENT_TABLE(ViewGCode, wxGLCanvas)
 	EVT_CHAR(ViewGCode::OnChar)
 	EVT_MOUSE_EVENTS(ViewGCode::OnMouseEvent)
 	EVT_MENU_RANGE(myID_SETVIEWFIRST, myID_SETVIEWLAST, ViewGCode::OnSetView)
+	EVT_MENU_RANGE(ID_SETSHOWFIRST, ID_SETSHOWLAST, ViewGCode::OnSetShow)
 	EVT_MENU(myID_SEMULATE_START, ViewGCode::OnSemulateStart)
 	EVT_MENU(myID_SEMULATE_PAUSE, ViewGCode::OnSemulatePause)
 	EVT_MENU(myID_SEMULATE_STOP, ViewGCode::OnSemulateStop)
 
 	EVT_UPDATE_UI_RANGE(myID_SETVIEWFIRST, myID_SETVIEWLAST, ViewGCode::OnSetViewUpdate)
+	EVT_UPDATE_UI_RANGE(ID_SETSHOWFIRST, ID_SETSHOWLAST, ViewGCode::OnSetShowUpdate)
 	EVT_UPDATE_UI(myID_SEMULATE_START, ViewGCode::OnCmdUpdateSimulateStart)
 	EVT_UPDATE_UI(myID_SEMULATE_PAUSE, ViewGCode::OnCmdUpdateSimulatePause)
 	EVT_UPDATE_UI(myID_SEMULATE_STOP, ViewGCode::OnCmdUpdateSimulateStop)
@@ -109,8 +111,7 @@ wxBEGIN_EVENT_TABLE(ViewGCode, wxGLCanvas)
 wxEND_EVENT_TABLE()
 
 ViewGCode::ViewGCode(wxWindow *frame, wxWindow *parent,wxWindowID id, int* gl_attrib)
-	: appframe(frame), wxGLCanvas(parent, id, gl_attrib, wxDefaultPosition, wxDefaultSize, wxWANTS_CHARS | wxFULL_REPAINT_ON_RESIZE)
-	
+	: appframe(frame), wxGLCanvas(parent, id, gl_attrib, wxDefaultPosition, wxDefaultSize, wxWANTS_CHARS | wxFULL_REPAINT_ON_RESIZE)	
 {
 	simulateCut = NULL;
 	tickdelay = 50;
@@ -120,19 +121,50 @@ ViewGCode::ViewGCode(wxWindow *frame, wxWindow *parent,wxWindowID id, int* gl_at
 	m_glRC = new wxGLContext(this);	
 
 	m_gridStep = 100;
-	m_showGrid = true;
+	load_config();
 
 	make_tool_simple(tool); //делаем квадратное сверло )
-
 	make_axis(glm::vec4(1, 0, 0, 1), glm::vec3(0, 1, 0), 1.0f, axisX);
 	make_axis(glm::vec4(0, 1, 0, 1), glm::vec3(-1, 0, 0), 1.0f, axisY);
 	make_axis(glm::vec4(0, 0, 1, 1), glm::vec3(0, 0, 1), 1.0f, axisZ);
+	
 	
 }
 
 ViewGCode::~ViewGCode()
 {
 	delete m_glRC;
+	save_config();	
+}
+
+
+void ViewGCode::load_config()
+{
+	ConfigData *config = dynamic_cast<ConfigData *>(wxConfigBase::Get());
+	wxASSERT(config);
+
+	wxString strOldPath = config->GetPath();
+	config->SetPath("/GLView");
+	show2dGrid = config->ReadBool("2dGrid", true);
+	showbounds = config->ReadBool("Bounds", true);
+	show3dGrid = config->ReadBool("3dGrid", true);
+	showTool = config->ReadBool("Tool", true);
+	showAxis = config->ReadBool("Axis", true);
+	config->SetPath(strOldPath);
+}
+
+void ViewGCode::save_config()
+{
+	ConfigData *config = dynamic_cast<ConfigData *>(wxConfigBase::Get());
+	wxASSERT(config);
+	wxString strOldPath = config->GetPath();
+	config->SetPath("/GLView");
+	config->Write("2dGrid", show2dGrid);
+	config->Write("Bounds", showbounds);
+	config->Write("3dGrid", show3dGrid);
+	config->Write("Tool", showTool);
+	config->Write("Axis",showAxis);
+	config->SetPath(strOldPath);
 }
 
 void ViewGCode::initializeGL()
@@ -179,24 +211,8 @@ void ViewGCode::initializeGL()
 
 void ViewGCode::resizeGL(int nWidth, int nHeight)
 {
-	int realHeight = nHeight;
-	int realWidth = nWidth;
-/*
-	CoordsBox box = camera.get_box();
-	wxASSERT(box.Max.y > box.Min.y);
-	wxASSERT(box.Max.x > box.Min.x);
-	double k = (box.Max.x - box.Min.x) / (box.Max.y - box.Min.y);
-
-
-	realWidth = static_cast<int>(k * realHeight);
-	if (realWidth > nWidth)
-	{
-		realWidth = nWidth;
-		realHeight = static_cast<int>(nWidth / k);
-	}
-*/
-	glViewport(0, 0, realWidth, realHeight);
-	camera.set_viewport(realWidth, realHeight);
+	glViewport(0, 0, nWidth, nHeight);
+	camera.set_viewport(nWidth, nHeight);
 }
 
 void ViewGCode::OnPaint(wxPaintEvent& WXUNUSED(event))
@@ -219,21 +235,26 @@ void ViewGCode::OnPaint(wxPaintEvent& WXUNUSED(event))
 	glLoadIdentity();
 
 	glEnable(GL_DEPTH_TEST);
-	//draw_bounds();
 	
-	//draw_3d_grid();
+	if (showbounds)
+		draw_bounds();
+	
+	if (show3dGrid )
+		draw_3d_grid();
 	
 	draw_track();
-//	draw_real_track();
-	//tool.draw();
+	
+	if (showTool)
+		tool.draw();
 
-	draw_axis();
+	if (showAxis)
+		draw_axis();
 
 	glDisable(GL_DEPTH_TEST);
 
 	camera.screen_matrix();
 
-	if (m_showGrid)
+	if (show2dGrid)
 		draw_grid();
 
 	draw_axis_letters();
@@ -421,39 +442,8 @@ void ViewGCode::draw_track()
 		glVertex3f(track[i].position.x, track[i].position.y, track[i].position.z);
 	}
 	glEnd();
-
-	//glBegin(GL_POINTS);
-	//glColor3f(0.7f, 0.2f, 0.9f);
-	//glPointSize(3.0f);
-	//for (size_t i = 0; i < track.size(); ++i)
-	//{
-	//	glVertex3f(track[i].position.x, track[i].position.y, track[i].position.z);
-	//}
-	//glEnd();
 }
 
-//--------------------------------------------------------------------
-void ViewGCode::draw_real_track()
-{
-	glColor3f(0.5f, 0.5f, 0.0f);
-	/*glBegin(GL_LINE_STRIP);
-	for(size_t i = 0; i < realTrack.size(); ++i)
-		glVertex3f(realTrack[i].x, realTrack[i].y, realTrack[i].z);
-	glEnd();
-	*/
-	glEnableClientState(GL_VERTEX_ARRAY);
-	if (realTrack.size() > 0)
-	{
-		glVertexPointer(3, GL_FLOAT, 0, &realTrack[0]);
-		glDrawArrays(GL_LINE_STRIP, 0, realTrack.size());
-
-		glColor3f(0.2f, 0.7f, 0.9f);
-		glPointSize(3.0f);
-		glDrawArrays(GL_POINTS, 0, realTrack.size());
-	}
-	glDisableClientState(GL_VERTEX_ARRAY);
-
-}
 
 //--------------------------------------------------------------------
 //создаёт объект стрлеку
@@ -500,9 +490,6 @@ void ViewGCode::draw_axis()
 	axisX.draw();
 	axisY.draw();
 	axisZ.draw();
-
-
-	
 }
 
 
@@ -882,9 +869,37 @@ void ViewGCode::OnSetView(wxCommandEvent &event)
 	Refresh(false);
 }
 
+
+
 void ViewGCode::OnSetViewUpdate(wxUpdateUIEvent& event)
 {
 	event.Enable(true);
+}
+
+void ViewGCode::OnSetShow(wxCommandEvent &event)
+{
+	switch (event.GetId())
+	{
+	case ID_SHOW2DGRID:	show2dGrid = !show2dGrid; break;
+	case ID_SHOWBOUNDS: showbounds = !showbounds; break;
+	case ID_SHOW3DGRID: show3dGrid = !show3dGrid; break;
+	case ID_SHOWTOOL:	showTool = !showTool ; break;
+	case ID_SHOWAXIS:	showAxis = !showAxis; break;
+	}
+	Refresh(false);
+}
+
+void ViewGCode::OnSetShowUpdate(wxUpdateUIEvent& event)
+{
+	event.Enable(true);
+	switch (event.GetId())
+	{
+	case ID_SHOW2DGRID:	event.Check(show2dGrid ); break;
+	case ID_SHOWBOUNDS: event.Check(showbounds); break;
+	case ID_SHOW3DGRID: event.Check(show3dGrid); break;
+	case ID_SHOWTOOL:	event.Check(showTool); break;
+	case ID_SHOWAXIS:	event.Check(showAxis); break;
+	}
 }
 
 class SimulateThreadEvent : public wxThreadEvent
@@ -1372,27 +1387,14 @@ void Camera::set_box(const CoordsBox &bx)
 {
 	box = bx;
 	update_scale();
-	// box must be in [-1;1] range
-	float k_view = 1;
-	if ( height_vp != 0 )
-		k_view = float(width_vp) / float(height_vp);
-
-
-	scale_origin.x = ( 2.0f / (box.Max.x - box.Min.x));
-	scale_origin.y = k_view * scale_origin.x;
-	//scale_origin.y = k_view * (2.0f / (box.Max.y - box.Min.y));
-	scale_origin.z = box.Max.z != box.Min.z ? 2.0f / (box.Max.z - box.Min.z) : glm::min(scale_origin.x, scale_origin.y);
-	scale_add = 0.9f;
-	float xcenter = box.Max.x / 2.0f + box.Min.x / 2.0f;
-	float ycenter = box.Max.y / 2.0f + box.Min.y / 2.0f;
-	float zcenter = box.Max.z / 2.0f + box.Min.z / 2.0f;
-	//glm::vec3 center = glm::vec3(box.Max.x / 2.0f + box.Min.x / 2.0f, box.Max.y / 2.0f + box.Min.y / 2.0f, box.Max.z / 2.0f + box.Min.z / 2.0f);
-	translate_origin = glm::vec3(-xcenter * scale_origin.x*scale_add, -ycenter * scale_origin.y*scale_add, -zcenter * scale_origin.z*scale_add);
 	reset_matrix(scale_add);
 }
 
 void Camera::update_scale()
 {
+	wxASSERT(box.Max.x != box.Min.x);
+	wxASSERT(box.Max.y != box.Min.y);
+	wxASSERT(box.Max.z != box.Min.z);
 	// box must be in [-1;1] range
 	float k_view = 1;
 	if (height_vp != 0)
@@ -1403,14 +1405,17 @@ void Camera::update_scale()
 	{
 		scale_origin.x = (2.0f / (box.Max.x - box.Min.x));
 		scale_origin.y = k_view * scale_origin.x;
+		scale_origin.z = scale_origin.y;
 	}
 	else
 	{
 		scale_origin.y = (2.0f / (box.Max.y - box.Min.y));
 		scale_origin.x = scale_origin.y / k_view;;
+		scale_origin.z = scale_origin.x;
 	}
-	//scale_origin.y = k_view * (2.0f / (box.Max.y - box.Min.y));
-	scale_origin.z = box.Max.z != box.Min.z ? 2.0f / (box.Max.z - box.Min.z) : glm::min(scale_origin.x, scale_origin.y);
+	//scale_origin.z = box.Max.z != box.Min.z ? 2.0f / (box.Max.z - box.Min.z) : glm::min(scale_origin.x, scale_origin.y);
+
+	//scale_origin.z =  glm::min(scale_origin.x, scale_origin.y);
 	scale_add = 0.9f;
 	float xcenter = box.Max.x / 2.0f + box.Min.x / 2.0f;
 	float ycenter = box.Max.y / 2.0f + box.Min.y / 2.0f;
