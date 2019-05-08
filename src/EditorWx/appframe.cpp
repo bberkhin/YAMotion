@@ -12,6 +12,7 @@
 #include "appdefs.h"       // Prefs
 #include "defsext.h"     // Additional definitions
 #include "edit.h"        // Edit module
+#include "edit.h"        // Edit module
 #include "ViewGCode.h"
 
 #include "about.h"
@@ -180,6 +181,7 @@ bool GcmcProcess::HasInput()
 wxBEGIN_EVENT_TABLE (AppFrame, wxFrame)
     // common
     EVT_CLOSE (                      AppFrame::OnClose)
+	EVT_TIMER( wxID_ANY, AppFrame::OnTimer)
     // file
 
 	EVT_MENU(wxID_NEW,				 AppFrame::OnFileNew)
@@ -223,14 +225,13 @@ wxBEGIN_EVENT_TABLE (AppFrame, wxFrame)
 	EVT_MENU(ID_GCODE_CHECK, AppFrame::OnCheck)
 	EVT_MENU(ID_GCODE_SIMULATE, AppFrame::OnSimulate)
 	EVT_MENU(ID_GCODE_CONVERTGCMC, AppFrame::OnConvertGcmc)
+	EVT_MENU(ID_GCODE_KILLGCMCPROCESS, AppFrame::OnKillGcmcProcess)
 
 	EVT_UPDATE_UI(ID_GCODE_CHECK, AppFrame::OnUpdateCheck)
 	EVT_UPDATE_UI(ID_GCODE_SIMULATE, AppFrame::OnUpdateSimulate)
 	EVT_UPDATE_UI(ID_GCODE_CONVERTGCMC, AppFrame::OnUpdateConvertGcmc)
+	EVT_UPDATE_UI(ID_GCODE_KILLGCMCPROCESS, AppFrame::OnUpdateKillGcmcProcess)
 
-	
-
-	
 	EVT_MENU_RANGE(myID_3D_FIRST, myID_3D_LAST, AppFrame::On3DView)
 	EVT_UPDATE_UI_RANGE(myID_3D_FIRST, myID_3D_LAST, AppFrame::On3DViewUpdate)
 	
@@ -249,13 +250,14 @@ wxEND_EVENT_TABLE ()
 
 
 AppFrame::AppFrame (const wxString &title)
-        : wxFrame ((wxFrame *)NULL, wxID_ANY, title, wxDefaultPosition, wxSize(750,550),
+        : m_timer(this), wxFrame ((wxFrame *)NULL, wxID_ANY, title, wxDefaultPosition, wxSize(750,550),
                     wxDEFAULT_FRAME_STYLE | wxNO_FULL_REPAINT_ON_RESIZE)
 {
     SetIcon(wxICON(sample));
 	checkThread = NULL;
 	simulateThread = NULL;
 	gcmcProcess = NULL;
+	gcmc_running_in_sec = 0;
 	
 	// initialize important variables
     m_edit = NULL;
@@ -324,13 +326,35 @@ AppFrame::AppFrame (const wxString &title)
 
 }
 
-AppFrame::~AppFrame () {
+AppFrame::~AppFrame () 
+{
+
 }
 
 // common event handlers
+void AppFrame::OnTimer(wxTimerEvent &event) 
+{ 
+	static bool needToAsk = true;
+	if (gcmc_running_in_sec == 0)
+		needToAsk == true;
+
+	wxTimer &tm = event.GetTimer();
+	gcmc_running_in_sec++;
+
+	SetTitle(wxString::Format(L"Process gcmc %d sec.", gcmc_running_in_sec));
+	if (gcmcProcess && needToAsk && (gcmc_running_in_sec%60) == 0 )
+	{
+		int rez = wxMessageBox(_("GCMC is running very long time/ Would you like to kill the process?"), wxMessageBoxCaptionStr,
+			wxYES_NO | wxICON_QUESTION);
+		if (rez == wxYES)
+			wxKill(gcmcProcess->GetPid(), wxSIGKILL, NULL, wxKILL_CHILDREN);
+	}	
+}
 void AppFrame::OnClose (wxCloseEvent &event)
 {
-
+	if ( m_timer.IsRunning() )
+		m_timer.Stop();
+		
 	m_view->processClosing();
 	{
 		wxCriticalSectionLocker enter(critsect);
@@ -771,6 +795,8 @@ void AppFrame::CreateMenu ()
 	menuGCode->Append(ID_GCODE_CHECK, _("&Check"));
 	menuGCode->Append(ID_GCODE_SIMULATE, _("&Simulate"));
 	menuGCode->Append(ID_GCODE_CONVERTGCMC, _("&Convert Gcmc"));
+	menuGCode->Append(ID_GCODE_KILLGCMCPROCESS, _("&Kill Gcmc process"));
+	
 	menuGCode->Append(ID_MACROSES, _("Run Macros"));
 	menuGCode->Append(ID_MATHCALC, _("Calculator"));
 	menuGCode->Append(ID_MATHEXPRESSION, _("Calc by Expression"));
@@ -840,13 +866,31 @@ wxToolBar *AppFrame::CreateToolBar()
 
 void AppFrame::FileOpen (wxString fname)
 {
-    wxFileName w(fname); w.Normalize(); fname = w.GetFullPath();
-    m_edit->LoadFile (fname);
-    m_edit->SelectNone();
-	FileChanged();
-	ConfigData *config;
-	if ((config = dynamic_cast<ConfigData *>(wxConfigBase::Get())) != NULL)
-		config->AddFileNameToSaveList(fname);
+    wxFileName w(fname); 
+	w.Normalize(); 
+	fname = w.GetFullPath();
+
+	try
+	{
+		std::uintmax_t fsize = std::filesystem::file_size(fname.wc_str());
+		if (fsize >= MAX_EDITOR_FILE_SIZE)
+		{
+			wxMessageBox(wxString::Format(_("File %s is very lage for the editor"), fname));
+		}
+		else
+		{
+			m_edit->LoadFile(fname);
+			m_edit->SelectNone();
+			FileChanged();
+			ConfigData *config;
+			if ((config = dynamic_cast<ConfigData *>(wxConfigBase::Get())) != NULL)
+				config->AddFileNameToSaveList(fname);
+		}
+	}
+	catch (...)
+	{
+		wxMessageBox(wxString::Format(_("Can not open file %s!"), fname ));
+	}
 }
 
 
@@ -1118,6 +1162,7 @@ void AppFrame::AppendGcmcError(wxString &src)
 
 }
 
+
 int AppFrame::RunGcmc(const wchar_t *src_fname, const  wchar_t *dst_fname, const wchar_t *args, DoAfterConvertGcmc what_to_do)
 {
 
@@ -1178,6 +1223,14 @@ int AppFrame::RunGcmc(const wchar_t *src_fname, const  wchar_t *dst_fname, const
 	}
 	logwnd->Append(MSLInfo, _("Start converting..."));
 	logwnd->Append(MSLInfo, arg.c_str());
+
+	if (m_timer.IsRunning())
+		m_timer.Stop();
+
+	gcmc_running_in_sec = 0;
+	m_timer.Start(1000);
+
+
 	gcmcProcess = new GcmcProcess(this, dst_fname, what_to_do);
 	int code = wxExecute(arg, wxEXEC_ASYNC| wxEXEC_HIDE_CONSOLE | wxEXEC_NODISABLE, gcmcProcess, &env);
 	return code;
@@ -1185,11 +1238,15 @@ int AppFrame::RunGcmc(const wchar_t *src_fname, const  wchar_t *dst_fname, const
 }
 
 
+
+
 void AppFrame::GcmcProcessTerminated(int status, const wchar_t *dst_fname, DoAfterConvertGcmc what_to_do)
 {
 
 	if (gcmcProcess)
 	{
+		gcmc_running_in_sec = 0;
+		m_timer.Stop();
 		wxString inf = wxString::Format(_("Process terminated with exit code %d"), status);
 		logwnd->Append(status == 0 ? MSLInfo : MSLError, inf);
 		if (status == 0)
@@ -1236,6 +1293,16 @@ void AppFrame::OnUpdateConvertGcmc(wxUpdateUIEvent& event)
 	event.Enable(true);
 }
 
+void AppFrame::OnKillGcmcProcess(wxCommandEvent &event)
+{
+	if (gcmcProcess)
+		wxKill(gcmcProcess->GetPid(), wxSIGKILL, NULL, wxKILL_CHILDREN);
+}
+
+void AppFrame::OnUpdateKillGcmcProcess(wxUpdateUIEvent& event)
+{
+	event.Enable(gcmcProcess ? true : false);
+}
 
 
 void AppFrame::DoSimulate(const wchar_t *fname)

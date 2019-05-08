@@ -7,6 +7,9 @@
 // standard IDs
 // ----------------------------------------------------------------------------
 
+
+#define MAX_EDITOR_FILE_SIZE 300000000
+
 enum {
     // menu IDs
     myID_PROPERTIES = wxID_HIGHEST,
@@ -17,6 +20,7 @@ enum {
 	ID_GCODE_CHECK,
 	ID_GCODE_SIMULATE,
 	ID_GCODE_CONVERTGCMC,
+	ID_GCODE_KILLGCMCPROCESS,
 	CHECK_GCODE_UPDATE,
 	CHECK_GCODE_COMPLETE,
 	CHECK_SIMULATE_UPDATE,
@@ -101,6 +105,7 @@ enum {
     myID_PREFS_STYLETYPE,
     myID_PREFS_KEYWORDS,
 };
+
 
 // ----------------------------------------------------------------------------
 // global items
