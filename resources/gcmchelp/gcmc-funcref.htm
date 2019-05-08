@@ -1,0 +1,3292 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title>GCMC- G-Code Meta Compiler</title>
+</head>
+<body bgcolor="#8DEAFF">
+    <h1>gcmc - G-Code Meta Compiler</h1>
+    <p>  <a href="gcmc.htm">Back</a> </p>
+    <h2>Function reference</h2>
+    <table>
+        <tbody>
+            <tr>
+                <td>
+                    <ul>
+                        <li>
+                            <a class="gcmc_idx" href="#vectorfunc">Vector functions</a>
+                            <ul>
+                                <li><a class="gcmc_idx" href="#count">count</a></li>
+                                <li><a class="gcmc_idx" href="#delete">delete</a></li>
+                                <li><a class="gcmc_idx" href="#insert">insert</a></li>
+                                <li><a class="gcmc_idx" href="#length">length</a></li>
+                                <li><a class="gcmc_idx" href="#normalize">normalize</a></li>
+                                <li><a class="gcmc_idx" href="#reverse">reverse</a></li>
+                                <li><a class="gcmc_idx" href="#rotate_xy">rotate_xy</a></li>
+                                <li><a class="gcmc_idx" href="#rotate_xz">rotate_xz</a></li>
+                                <li><a class="gcmc_idx" href="#rotate_yz">rotate_yz</a></li>
+                                <li><a class="gcmc_idx" href="#scale">scale</a></li>
+                                <li><a class="gcmc_idx" href="#position">position</a></li>
+                                <li><a class="gcmc_idx" href="#head">head</a></li>
+                                <li><a class="gcmc_idx" href="#tail">tail</a></li>
+                            </ul>
+                        </li>
+                        <li style="list-style: none">&nbsp;</li>
+                        <li>
+                            <a class="gcmc_idx" href="#specialfunc">Special functions</a>
+                            <ul>
+                                <li><a class="gcmc_idx" href="#relocate">relocate</a></li>
+                                <li><a class="gcmc_idx" href="#typeset">typeset</a></li>
+                            </ul>
+                        </li>
+                    </ul>
+                </td>
+                <td>
+                    <ul>
+                        <li>
+                            <a class="gcmc_idx" href="#mathfunc">Math functions</a>
+                            <ul>
+                                <li><a class="gcmc_idx" href="#abs">abs</a></li>
+                                <li><a class="gcmc_idx" href="#acos">acos</a></li>
+                                <li><a class="gcmc_idx" href="#asin">asin</a></li>
+                                <li><a class="gcmc_idx" href="#atan">atan</a></li>
+                                <li><a class="gcmc_idx" href="#atan_xy">atan_xy</a></li>
+                                <li><a class="gcmc_idx" href="#atan_xz">atan_xz</a></li>
+                                <li><a class="gcmc_idx" href="#atan_yz">atan_yz</a></li>
+                                <li><a class="gcmc_idx" href="#ceil">ceil</a></li>
+                                <li><a class="gcmc_idx" href="#cos">cos</a></li>
+                                <li><a class="gcmc_idx" href="#exp">exp</a></li>
+                                <li><a class="gcmc_idx" href="#floor">floor</a></li>
+                                <li><a class="gcmc_idx" href="#log10">log10</a></li>
+                                <li><a class="gcmc_idx" href="#log2">log2</a></li>
+                                <li><a class="gcmc_idx" href="#loge">loge</a></li>
+                                <li><a class="gcmc_idx" href="#pi">pi</a></li>
+                                <li><a class="gcmc_idx" href="#pow">pow</a></li>
+                                <li><a class="gcmc_idx" href="#round">round</a></li>
+                                <li><a class="gcmc_idx" href="#sign">sign</a></li>
+                                <li><a class="gcmc_idx" href="#sin">sin</a></li>
+                                <li><a class="gcmc_idx" href="#sqrt">sqrt</a></li>
+                                <li><a class="gcmc_idx" href="#tan">tan</a></li>
+                                <li><a class="gcmc_idx" href="#undef">undef</a></li>
+                            </ul>
+                        </li>
+                    </ul>
+                </td>
+                <td>
+                    <ul>
+                        <li>
+                            <a class="gcmc_idx" href="#convfunc">Conversion functions</a>
+                            <ul>
+                                <li><a class="gcmc_idx" href="#to_deg">to_deg</a></li>
+                                <li><a class="gcmc_idx" href="#to_distance">to_distance</a></li>
+                                <li><a class="gcmc_idx" href="#to_rad">to_rad</a></li>
+                                <li><a class="gcmc_idx" href="#to_in">to_in</a></li>
+                                <li><a class="gcmc_idx" href="#to_inch">to_inch</a></li>
+                                <li><a class="gcmc_idx" href="#to_mm">to_mm</a></li>
+                                <li><a class="gcmc_idx" href="#to_native">to_native</a></li>
+                                <li><a class="gcmc_idx" href="#to_none">to_none</a></li>
+                                <li><a class="gcmc_idx" href="#to_float">to_float</a></li>
+                                <li><a class="gcmc_idx" href="#to_int">to_int</a></li>
+                                <li><a class="gcmc_idx" href="#to_string">to_string</a></li>
+                                <li><a class="gcmc_idx" href="#to_chr">to_chr</a></li>
+                                <li><a class="gcmc_idx" href="#to_val">to_val</a></li>
+                            </ul>
+                        </li>
+                        <li style="list-style: none">&nbsp;</li>
+                        <li>
+                            <a class="gcmc_idx" href="#outflowfunc">Output flow functions</a>
+                            <ul>
+                                <li><a class="gcmc_idx" href="#literal">literal</a></li>
+                                <li><a class="gcmc_idx" href="#comment">comment</a></li>
+                                <li><a class="gcmc_idx" href="#error">error</a></li>
+                                <li><a class="gcmc_idx" href="#warning">warning</a></li>
+                                <li><a class="gcmc_idx" href="#message">message</a></li>
+                            </ul>
+                        </li>
+                    </ul>
+                </td>
+                <td>
+                    <ul>
+                        <li>
+                            <a class="gcmc_idx" href="#queryfunc">Query functions</a>
+                            <ul>
+                                <li><a class="gcmc_idx" href="#isfloat">isfloat</a></li>
+                                <li><a class="gcmc_idx" href="#isint">isint</a></li>
+                                <li><a class="gcmc_idx" href="#isscalar">isscalar</a></li>
+                                <li><a class="gcmc_idx" href="#isstring">isstring</a></li>
+                                <li><a class="gcmc_idx" href="#isundef">isundef</a></li>
+                                <li><a class="gcmc_idx" href="#isvector">isvector</a></li>
+                                <li><a class="gcmc_idx" href="#isvectorlist">isvectorlist</a></li>
+                                <li><a class="gcmc_idx" href="#isangle">isangle</a></li>
+                                <li><a class="gcmc_idx" href="#isdistance">isdistance</a></li>
+                                <li><a class="gcmc_idx" href="#isdeg">isdeg</a></li>
+                                <li><a class="gcmc_idx" href="#israd">israd</a></li>
+                                <li><a class="gcmc_idx" href="#ismm">ismm</a></li>
+                                <li><a class="gcmc_idx" href="#ismodemm">ismodemm</a></li>
+                                <li><a class="gcmc_idx" href="#isinch">isinch</a></li>
+                                <li><a class="gcmc_idx" href="#isnone">isnone</a></li>
+                                <li><a class="gcmc_idx" href="#isgcode">isgcode</a></li>
+                                <li><a class="gcmc_idx" href="#isdxf">isdxf</a></li>
+                                <li><a class="gcmc_idx" href="#issvg">issvg</a></li>
+                                <li><a class="gcmc_idx" href="#isdefined">isdefined</a></li>
+                                <li><a class="gcmc_idx" href="#isconst">isconst</a></li>
+                                <li><a class="gcmc_idx" href="#isrelative">isrelative</a></li>
+                            </ul>
+                        </li>
+                    </ul>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <ul>
+                        <li>
+                            <a class="gcmc_idx" href="#movefunc">Movement functions</a>
+                            <ul>
+                                <li><a class="gcmc_idx" href="#arc_ccw">arc_ccw</a></li>
+                                <li><a class="gcmc_idx" href="#arc_ccw_r">arc_ccw_r</a></li>
+                                <li><a class="gcmc_idx" href="#arc_cw">arc_cw</a></li>
+                                <li><a class="gcmc_idx" href="#arc_cw_r">arc_cw_r</a></li>
+                                <li><a class="gcmc_idx" href="#circle_cw">circle_cw</a></li>
+                                <li><a class="gcmc_idx" href="#circle_cw_r">circle_cw_r</a></li>
+                                <li><a class="gcmc_idx" href="#circle_ccw">circle_ccw</a></li>
+                                <li><a class="gcmc_idx" href="#circle_ccw_r">circle_ccw_r</a></li>
+                                <li><a class="gcmc_idx" href="#drill">drill</a></li>
+                                <li><a class="gcmc_idx" href="#goto">goto</a></li>
+                                <li><a class="gcmc_idx" href="#goto_r">goto_r</a></li>
+                                <li><a class="gcmc_idx" href="#layer">layer</a></li>
+                                <li><a class="gcmc_idx" href="#layerstack">layerstack</a></li>
+                                <li><a class="gcmc_idx" href="#move">move</a></li>
+                                <li><a class="gcmc_idx" href="#move_r">move_r</a></li>
+                                <li><a class="gcmc_idx" href="#plane">plane</a></li>
+                            </ul>
+                        </li>
+                    </ul>
+                </td>
+                <td>
+                    <ul>
+                        <li>
+                            <a class="gcmc_idx" href="#gcodefunc">G-code functions</a>
+                            <ul>
+                                <li><a class="gcmc_idx" href="#coolant">coolant</a></li>
+                                <li><a class="gcmc_idx" href="#dwell">dwell</a></li>
+                                <li><a class="gcmc_idx" href="#feedmode">feedmode</a></li>
+                                <li><a class="gcmc_idx" href="#feedrate">feedrate</a></li>
+                                <li><a class="gcmc_idx" href="#pathmode">pathmode</a></li>
+                                <li><a class="gcmc_idx" href="#pause">pause</a></li>
+                                <li><a class="gcmc_idx" href="#fixpos_restore">fixpos_restore</a></li>
+                                <li><a class="gcmc_idx" href="#fixpos_set">fixpos_set</a></li>
+                                <li><a class="gcmc_idx" href="#fixpos_store">fixpos_store</a></li>
+                                <li><a class="gcmc_idx" href="#spindle">spindle</a></li>
+                                <li><a class="gcmc_idx" href="#spindlespeed">spindlespeed</a></li>
+                                <li><a class="gcmc_idx" href="#toolchange">toolchange</a></li>
+                            </ul>
+                        </li>
+                    </ul>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <hr>
+    <h2 id="vectorfunc"><A NAME="vectorfunc">Vector functions</A></h2> 
+    <div class="gcmc_funcblock">
+        <div class="gcmc_function">
+            <span class="gcmc_type">integer</span>
+            <span class="gcmc_func" ID="count">count</span>
+            (
+            <span class="gcmc_type">vector:</span><span class="gcmc_arg">arg</span>
+            )
+        </div>
+        <div class="gcmc_function">
+            <span class="gcmc_type">integer</span>
+            <span class="gcmc_func" id="count_1">count</span>
+            (
+            <span class="gcmc_type">vectorlist:</span><span class="gcmc_arg">arg</span>
+            )
+        </div>
+        <div class="gcmc_function">
+            <span class="gcmc_type">integer</span>
+            <span class="gcmc_func" id="count_2">count</span>
+            (
+            <span class="gcmc_type">string:</span><span class="gcmc_arg">arg</span>
+            )
+        </div>
+        <table class="gcmc_args">
+            <tbody>
+                <tr>
+                    <td class="gcmc_arg">arg</td>
+                    <td class="gcmc_type">vector</td>
+                    <td class="gcmc_unit">&nbsp;</td>
+                    <td>Vector coordinates to count.</td>
+                </tr>
+                <tr>
+                    <td class="gcmc_arg">arg</td>
+                    <td class="gcmc_type">vectorlist</td>
+                    <td class="gcmc_unit">&nbsp;</td>
+                    <td>Vectors to count.</td>
+                </tr>
+                <tr>
+                    <td class="gcmc_arg">arg</td>
+                    <td class="gcmc_type">string</td>
+                    <td class="gcmc_unit">&nbsp;</td>
+                    <td>String characters to count.</td>
+                </tr>
+            </tbody>
+        </table><div class="gcmc_description">
+            Returns number of coordinates or the number of
+            vectors in <span class="gcmc_arg">arg</span> for argument types
+            <span class="gcmc_type">vector</span> and <span class="gcmc_type">vectorlist</span>
+            respectively.<br>
+            Returns the number of bytes occupied by <span class="gcmc_arg">arg</span>
+            if it is of type <span class="gcmc_type">string</span>. No support is available
+            for multi-byte charactersets to count the number of actual characters in the
+            string.
+        </div>
+    </div>
+    <hr class="gcmc_separator"><div class="gcmc_funcblock">
+        <div class="gcmc_function">
+            <span class="gcmc_type">vector</span>
+            <span class="gcmc_func" id="delete">delete</span>
+            (
+            <span class="gcmc_type">vector:</span><span class="gcmc_arg">arg</span>,
+            <span class="gcmc_type">scalar:</span><span class="gcmc_arg">idx</span>
+            )
+        </div>
+        <div class="gcmc_function">
+            <span class="gcmc_type">vector</span>
+            <span class="gcmc_func" id="delete_1">delete</span>
+            (
+            <span class="gcmc_type">vector:</span><span class="gcmc_arg">arg</span>,
+            <span class="gcmc_type">scalar:</span><span class="gcmc_arg">idx</span>,
+            <span class="gcmc_type">scalar:</span><span class="gcmc_arg">cnt</span>
+            )
+        </div>
+        <div class="gcmc_function">
+            <span class="gcmc_type">vectorlist</span>
+            <span class="gcmc_func" id="delete_2">delete</span>
+            (
+            <span class="gcmc_type">vectorlist:</span><span class="gcmc_arg">arg</span>,
+            <span class="gcmc_type">scalar:</span><span class="gcmc_arg">idx</span>
+            )
+        </div>
+        <div class="gcmc_function">
+            <span class="gcmc_type">vectorlist</span>
+            <span class="gcmc_func" id="delete_3">delete</span>
+            (
+            <span class="gcmc_type">vectorlist:</span><span class="gcmc_arg">arg</span>,
+            <span class="gcmc_type">scalar:</span><span class="gcmc_arg">idx</span>,
+            <span class="gcmc_type">scalar:</span><span class="gcmc_arg">cnt</span>
+            )
+        </div>
+        <div class="gcmc_function">
+            <span class="gcmc_type">string</span>
+            <span class="gcmc_func" id="delete_4">delete</span>
+            (
+            <span class="gcmc_type">string:</span><span class="gcmc_arg">arg</span>,
+            <span class="gcmc_type">scalar:</span><span class="gcmc_arg">idx</span>
+            )
+        </div>
+        <div class="gcmc_function">
+            <span class="gcmc_type">string</span>
+            <span class="gcmc_func" id="delete_5">delete</span>
+            (
+            <span class="gcmc_type">string:</span><span class="gcmc_arg">arg</span>,
+            <span class="gcmc_type">scalar:</span><span class="gcmc_arg">idx</span>,
+            <span class="gcmc_type">scalar:</span><span class="gcmc_arg">cnt</span>
+            )
+        </div>
+        <table class="gcmc_args">
+            <tbody>
+                <tr>
+                    <td class="gcmc_arg">arg</td>
+                    <td class="gcmc_type">vector</td>
+                    <td class="gcmc_unit">&nbsp;</td>
+                    <td>Vector coordinates from which to remove coordinates.</td>
+                </tr>
+                <tr>
+                    <td class="gcmc_arg">arg</td>
+                    <td class="gcmc_type">vectorlist</td>
+                    <td class="gcmc_unit">&nbsp;</td>
+                    <td>Vectorlist from which to remove vectors.</td>
+                </tr>
+                <tr>
+                    <td class="gcmc_arg">arg</td>
+                    <td class="gcmc_type">string</td>
+                    <td class="gcmc_unit">&nbsp;</td>
+                    <td>String from which to remove characters.</td>
+                </tr>
+                <tr>
+                    <td class="gcmc_arg">idx</td>
+                    <td class="gcmc_type">scalar</td>
+                    <td class="gcmc_unit">[no unit]</td>
+                    <td>Index which entry to remove; valid range [-count(arg)...count(arg)-1].</td>
+                </tr>
+                <tr>
+                    <td class="gcmc_arg">cnt</td>
+                    <td class="gcmc_type">scalar</td>
+                    <td class="gcmc_unit">[no unit]</td>
+                    <td>Number of entries to remove and must be ≥0 and defaults to 1 is not specified.</td>
+                </tr>
+            </tbody>
+        </table><div class="gcmc_description">
+            Returns <span class="gcmc_arg">arg</span> with
+            the entry <span class="gcmc_arg">idx</span> removed from the vector, vectorlist
+            or string. The second form removes <span class="gcmc_arg">cnt</span> entries.
+            Argument <span class="gcmc_arg">idx</span> may be positive to remove at the
+            position counting from the start, or negative to start counting from the end
+            (with -1 being the last entry of the vector/vectorlist/string). Argument
+            <span class="gcmc_arg">cnt</span> must be larger or equal to zero.
+        </div>
+    </div>
+    <hr class="gcmc_separator"><div class="gcmc_funcblock">
+        <div class="gcmc_function">
+            <span class="gcmc_type">vector</span>
+            <span class="gcmc_func" id="insert">insert</span>
+            (
+            <span class="gcmc_type">vector:</span><span class="gcmc_arg">arg</span>,
+            <span class="gcmc_type">scalar:</span><span class="gcmc_arg">val</span>,
+            <span class="gcmc_type">scalar:</span><span class="gcmc_arg">idx</span>
+            )
+        </div>
+        <div class="gcmc_function">
+            <span class="gcmc_type">vector</span>
+            <span class="gcmc_func" id="insert_1">insert</span>
+            (
+            <span class="gcmc_type">vector:</span><span class="gcmc_arg">arg</span>,
+            <span class="gcmc_type">vector:</span><span class="gcmc_arg">val</span>,
+            <span class="gcmc_type">scalar:</span><span class="gcmc_arg">idx</span>
+            )
+        </div>
+        <div class="gcmc_function">
+            <span class="gcmc_type">vectorlist</span>
+            <span class="gcmc_func" id="insert_2">insert</span>
+            (
+            <span class="gcmc_type">vectorlist:</span><span class="gcmc_arg">arg</span>,
+            <span class="gcmc_type">vector:</span><span class="gcmc_arg">val</span>,
+            <span class="gcmc_type">scalar:</span><span class="gcmc_arg">idx</span>
+            )
+        </div>
+        <div class="gcmc_function">
+            <span class="gcmc_type">vectorlist</span>
+            <span class="gcmc_func" id="insert_3">insert</span>
+            (
+            <span class="gcmc_type">vectorlist:</span><span class="gcmc_arg">arg</span>,
+            <span class="gcmc_type">vectorlist:</span><span class="gcmc_arg">val</span>,
+            <span class="gcmc_type">scalar:</span><span class="gcmc_arg">idx</span>
+            )
+        </div>
+        <div class="gcmc_function">
+            <span class="gcmc_type">string</span>
+            <span class="gcmc_func" id="insert_4">insert</span>
+            (
+            <span class="gcmc_type">string:</span><span class="gcmc_arg">arg</span>,
+            <span class="gcmc_type">string:</span><span class="gcmc_arg">val</span>,
+            <span class="gcmc_type">scalar:</span><span class="gcmc_arg">idx</span>
+            )
+        </div>
+        <table class="gcmc_args">
+            <tbody>
+                <tr>
+                    <td class="gcmc_arg">arg</td>
+                    <td class="gcmc_type">vector</td>
+                    <td class="gcmc_unit">&nbsp;</td>
+                    <td>Vector to insert coordinate(s) into.</td>
+                </tr>
+                <tr>
+                    <td class="gcmc_arg">arg</td>
+                    <td class="gcmc_type">vectorlist</td>
+                    <td class="gcmc_unit">&nbsp;</td>
+                    <td>Vectorlist to insert vector(s) into.</td>
+                </tr>
+                <tr>
+                    <td class="gcmc_arg">arg</td>
+                    <td class="gcmc_type">string</td>
+                    <td class="gcmc_unit">&nbsp;</td>
+                    <td>String to insert character(s) into.</td>
+                </tr>
+                <tr>
+                    <td class="gcmc_arg">val</td>
+                    <td class="gcmc_type">scalar</td>
+                    <td class="gcmc_unit"></td>
+                    <td>Scalar to insert into a vector.</td>
+                </tr>
+                <tr>
+                    <td class="gcmc_arg">val</td>
+                    <td class="gcmc_type">vector</td>
+                    <td class="gcmc_unit"></td>
+                    <td>Vector coordinates to insert into a vector, or vector to insert into a vectorlist.</td>
+                </tr>
+                <tr>
+                    <td class="gcmc_arg">val</td>
+                    <td class="gcmc_type">vectorlist</td>
+                    <td class="gcmc_unit"></td>
+                    <td>Vectors to insert into a vectorlist.</td>
+                </tr>
+                <tr>
+                    <td class="gcmc_arg">val</td>
+                    <td class="gcmc_type">string</td>
+                    <td class="gcmc_unit"></td>
+                    <td>String (characters) to insert into a string.</td>
+                </tr>
+                <tr>
+                    <td class="gcmc_arg">idx</td>
+                    <td class="gcmc_type">scalar</td>
+                    <td class="gcmc_unit">[no unit]</td>
+                    <td>Index at which to insert; valid range [-count(arg)-1...count(arg)].</td>
+                </tr>
+            </tbody>
+        </table><div class="gcmc_description">
+            Returns <span class="gcmc_arg">arg</span> with
+            value <span class="gcmc_arg">val</span> inserted into the
+            vector/vectorlist/string at position <span class="gcmc_arg">idx</span>.
+            Inserting a scalar <span class="gcmc_arg">val</span> into a <span class="gcmc_type">vector</span>
+            or vector <span class="gcmc_arg">val</span> into a <span class="gcmc_type">vectorlist</span>
+            inserts one single entry. Inserting a vector <span class="gcmc_arg">val</span>
+            into a <span class="gcmc_type">vector</span> or vectorlist <span class="gcmc_arg">val</span>
+            into a <span class="gcmc_type">vectorlist</span> inserts all of the contained
+            entries from <span class="gcmc_arg">val</span>.<br>
+            The <span class="gcmc_arg">idx</span> argument specifies the location of
+            insertion with following meaning (with n&nbsp;=&nbsp;<a class="gcmc_func" href="#count">count</a>(arg)):
+            <table class="gcmc_indent"><tbody><tr><td>idx</td><td>=</td><td>-n-1</td><td>prepend</td></tr><tr><td>idx</td><td>≥</td><td>-n</td><td>insert</td></tr><tr><td>idx</td><td>=</td><td>-1</td><td>append</td></tr><tr><td>idx</td><td>=</td><td>0</td><td>prepend</td></tr><tr><td>idx</td><td>≤</td><td>n-1</td><td>insert</td></tr><tr><td>idx</td><td>= </td><td>n</td><td>append</td></tr></tbody></table>
+            Inserting an empty vector into a vector, an empty vectorlist into a vectorlist
+            or an empty string into a string has no effect and the result is equal
+            <span class="gcmc_arg">arg</span>.<br><br>
+            When using huge vectorlists: It should be noted that simple prepending a single
+            vector to a vectorlist or appending a vectorlist to a vectorlist may use a
+            faster alternative formulation. The same is true for strings:
+<pre class="gcmc_indent gcmc_example">veclst = {...many many vectors...};
+
+veclst = <a class="gcmc_func" href="#insert">insert</a>(veclst, vec, -1);		<span class="gcmc_comment">// Slower</span>
+veclst += {vec};				<span class="gcmc_comment">// Fast append a vector</span>
+
+veclst = <a class="gcmc_func" href="#insert">insert</a>(veclst, {vec1, vec2}, -1);	<span class="gcmc_comment">// Slower</span>
+veclst += {vec1, vec2};				<span class="gcmc_comment">// Fast append multiple vectors at once</span>
+
+vectlst = <a class="gcmc_func" href="#insert">insert</a>(veclst, vec, 0);		<span class="gcmc_comment">// Slower</span>
+veclst &gt;&gt;= 1;					<span class="gcmc_comment">// Make room for prepend</span>
+veclst[0] = vec;				<span class="gcmc_comment">// Set prepended value</span>
+
+str = <a class="gcmc_func" href="#insert">insert</a>("string one", "string two", 0);	<span class="gcmc_comment">// Slow prepend</span>
+str = "string two" + "string one";		<span class="gcmc_comment">// Faster</span>
+
+str = <a class="gcmc_func" href="#insert">insert</a>("string one", "string two", -1);	<span class="gcmc_comment">// Slow append</span>
+str = "string one" + "string two";		<span class="gcmc_comment">// Faster</span>
+</pre>
+            The intrinsic forms are faster because it does not require a copy of the veclst
+            or strings to be created. This also goes for prepending a value to a vector.
+            Appending values to vectors does not have a more efficient intrinsic
+            equivalent, which is in contrast to strings, where the reversal of the
+            arguments in intrinsic form is the most simple and efficient way.
+        </div>
+    </div>
+    <hr class="gcmc_separator"><div class="gcmc_funcblock">
+        <div class="gcmc_function">
+            <span class="gcmc_type">float</span>
+            <span class="gcmc_func" id="length">length</span>
+            (
+            <span class="gcmc_type">vector:</span><span class="gcmc_arg">arg</span>
+            )
+        </div>
+        <table class="gcmc_args">
+            <tbody>
+                <tr>
+                    <td class="gcmc_arg">arg</td>
+                    <td class="gcmc_type">vector</td>
+                    <td class="gcmc_unit">[distance]</td>
+                    <td>Vector for length determination.</td>
+                </tr>
+            </tbody>
+        </table><div class="gcmc_description">
+            Returns the length of <span class="gcmc_arg">arg</span> calculated as
+            <a class="gcmc_func" href="#sqrt">sqrt</a>(<span class="gcmc_arg">arg</span>&nbsp;*&nbsp;<span class="gcmc_arg">arg</span>).
+        </div>
+    </div>
+    <hr class="gcmc_separator"><div class="gcmc_funcblock">
+        <div class="gcmc_function">
+            <span class="gcmc_type">vector</span>
+            <span class="gcmc_func" ID="normalize">normalize</span>
+            (
+            <span class="gcmc_type">vector:</span><span class="gcmc_arg">arg</span>
+            )
+        </div>
+        <table class="gcmc_args">
+            <tbody>
+                <tr>
+                    <td class="gcmc_arg">arg</td>
+                    <td class="gcmc_type">vector</td>
+                    <td class="gcmc_unit">[distance]</td>
+                    <td>Vector for normalization.</td>
+                </tr>
+            </tbody>
+        </table><div class="gcmc_description">
+            Returns the scaled version of <span class="gcmc_arg">arg</span> such that
+            <a class="gcmc_func" href="#length">length</a>(<a class="gcmc_func" href="#normalize">normalize</a>(<span class="gcmc_arg">arg</span>))
+            equals 1.0. The resulting normalized vector has no units associated.
+        </div>
+    </div>
+    <hr class="gcmc_separator"><div class="gcmc_funcblock">
+        <div class="gcmc_function">
+            <span class="gcmc_type">vector</span>
+            <span class="gcmc_func" id="reverse">reverse</span>
+            (
+            <span class="gcmc_type">vector:</span><span class="gcmc_arg">arg</span>
+            )
+        </div>
+        <div class="gcmc_function">
+            <span class="gcmc_type">vectorlist</span>
+            <span class="gcmc_func" id="reverse_1">reverse</span>
+            (
+            <span class="gcmc_type">vectorlist:</span><span class="gcmc_arg">arg</span>
+            )
+        </div>
+        <div class="gcmc_function">
+            <span class="gcmc_type">string</span>
+            <span class="gcmc_func" id="reverse_2">reverse</span>
+            (
+            <span class="gcmc_type">string:</span><span class="gcmc_arg">arg</span>
+            )
+        </div>
+        <table class="gcmc_args">
+            <tbody>
+                <tr>
+                    <td class="gcmc_arg">arg</td>
+                    <td class="gcmc_type">vector</td>
+                    <td class="gcmc_unit"></td>
+                    <td>Vector to reverse coordinates.</td>
+                </tr>
+                <tr>
+                    <td class="gcmc_arg">arg</td>
+                    <td class="gcmc_type">vectorlist</td>
+                    <td class="gcmc_unit"></td>
+                    <td>Vectorlist to reverse vectors.</td>
+                </tr>
+                <tr>
+                    <td class="gcmc_arg">arg</td>
+                    <td class="gcmc_type">string</td>
+                    <td class="gcmc_unit"></td>
+                    <td>String to reverse characters.</td>
+                </tr>
+            </tbody>
+        </table><div class="gcmc_description">
+            Returns the reversed version of
+            <span class="gcmc_arg">arg</span> such that all coordinates of a vector,
+            vectors of a vectorlist or characters of a string are reversed. I.e. the first
+            becomes the last, etc..
+        </div>
+    </div>
+    <hr class="gcmc_separator"><div class="gcmc_funcblock">
+        <div class="gcmc_function">
+            <span class="gcmc_type">vector</span>
+            <span class="gcmc_func" id="position">position</span>
+            (
+            )
+        </div>
+        <div class="gcmc_function">
+            <span class="gcmc_type">vector</span>
+            <span class="gcmc_func" id="position_1">position</span>
+            (
+            <span class="gcmc_type">scalar:</span><span class="gcmc_arg">naxes</span>
+            )
+        </div>
+        <table class="gcmc_args">
+            <tbody>
+                <tr>
+                    <td class="gcmc_arg">naxes</td>
+                    <td class="gcmc_type">scalar</td>
+                    <td class="gcmc_unit"></td>
+                    <td>Maximum number of axis to return. Must be ≥ 1 and less or equal the number of active axes (6 or 9).</td>
+                </tr>
+            </tbody>
+        </table><div class="gcmc_description">
+            Returns the current absolute position as a
+            vector. The default number of coordinates returned is 3 (XYZ). The maximum
+            number of coordinates returned is 6 or 9, depending whether 9-axis mode is
+            enabled on the command-line. The optional argument
+            <span class="gcmc_arg">naxes</span> limits the number of axis returned.
+        </div>
+    </div>
+    <hr class="gcmc_separator"><div class="gcmc_funcblock">
+        <div class="gcmc_function">
+            <span class="gcmc_type">vector</span>
+            <span class="gcmc_func" id="rotate_xy">rotate_xy</span>
+            (
+            <span class="gcmc_type">vector:</span><span class="gcmc_arg">arg</span>,
+            <span class="gcmc_type">scalar:</span><span class="gcmc_arg">angle</span>
+            )
+        </div>
+        <div class="gcmc_function">
+            <span class="gcmc_type">vector</span>
+            <span class="gcmc_func" id="rotate_xz">rotate_xz</span>
+            (
+            <span class="gcmc_type">vector:</span><span class="gcmc_arg">arg</span>,
+            <span class="gcmc_type">scalar:</span><span class="gcmc_arg">angle</span>
+            )
+        </div>
+        <div class="gcmc_function">
+            <span class="gcmc_type">vector</span>
+            <span class="gcmc_func" id="rotate_yz">rotate_yz</span>
+            (
+            <span class="gcmc_type">vector:</span><span class="gcmc_arg">arg</span>,
+            <span class="gcmc_type">scalar:</span><span class="gcmc_arg">angle</span>
+            )
+        </div>
+        <div class="gcmc_function">
+            <span class="gcmc_type">vectorlist</span>
+            <span class="gcmc_func" id="rotate_xy_1">rotate_xy</span>
+            (
+            <span class="gcmc_type">vectorlist:</span><span class="gcmc_arg">arg</span>,
+            <span class="gcmc_type">scalar:</span><span class="gcmc_arg">angle</span>
+            )
+        </div>
+        <div class="gcmc_function">
+            <span class="gcmc_type">vectorlist</span>
+            <span class="gcmc_func" id="rotate_xz_1">rotate_xz</span>
+            (
+            <span class="gcmc_type">vectorlist:</span><span class="gcmc_arg">arg</span>,
+            <span class="gcmc_type">scalar:</span><span class="gcmc_arg">angle</span>
+            )
+        </div>
+        <div class="gcmc_function">
+            <span class="gcmc_type">vectorlist</span>
+            <span class="gcmc_func" id="rotate_yz_1">rotate_yz</span>
+            (
+            <span class="gcmc_type">vectorlist:</span><span class="gcmc_arg">arg</span>,
+            <span class="gcmc_type">scalar:</span><span class="gcmc_arg">angle</span>
+            )
+        </div>
+        <table class="gcmc_args">
+            <tbody>
+                <tr>
+                    <td class="gcmc_arg">arg</td>
+                    <td class="gcmc_type">vector</td>
+                    <td class="gcmc_unit">[distance]</td>
+                    <td>Vector to rotate.</td>
+                </tr>
+                <tr>
+                    <td class="gcmc_arg">arg</td>
+                    <td class="gcmc_type">vectorlist</td>
+                    <td class="gcmc_unit">[distance]</td>
+                    <td>Vectors to rotate.</td>
+                </tr>
+                <tr>
+                    <td class="gcmc_arg">angle</td>
+                    <td class="gcmc_type">scalar</td>
+                    <td class="gcmc_unit">[angular]</td>
+                    <td>Angle of rotation.</td>
+                </tr>
+            </tbody>
+        </table><div class="gcmc_description">
+            Returns <span class="gcmc_arg">arg</span> rotated by <span class="gcmc_arg">angle</span>.
+            The plane of rotation is XY, XZ or YZ for respective functions. If <span class="gcmc_arg">arg</span>
+            is of type <span class="gcmc_type">vectorlist</span>, then each containing vector is
+            rotated and a vectorlist is returned.
+        </div>
+    </div>
+    <hr class="gcmc_separator"><div class="gcmc_funcblock">
+        <div class="gcmc_function">
+            <span class="gcmc_type">vector</span>
+            <span class="gcmc_func" id="scale">scale</span>
+            (
+            <span class="gcmc_type">vector:</span><span class="gcmc_arg">arg</span>,
+            <span class="gcmc_type">vector:</span><span class="gcmc_arg">mult</span>
+            )
+        </div>
+        <div class="gcmc_function">
+            <span class="gcmc_type">vectorlist</span>
+            <span class="gcmc_func" id="scale_1">scale</span>
+            (
+            <span class="gcmc_type">vectorlist:</span><span class="gcmc_arg">arg</span>,
+            <span class="gcmc_type">vector:</span><span class="gcmc_arg">mult</span>
+            )
+        </div>
+        <table class="gcmc_args">
+            <tbody>
+                <tr>
+                    <td class="gcmc_arg">arg</td>
+                    <td class="gcmc_type">vector</td>
+                    <td class="gcmc_unit">&nbsp;</td>
+                    <td>Vector to scale.</td>
+                </tr>
+                <tr>
+                    <td class="gcmc_arg">arg</td>
+                    <td class="gcmc_type">vectorlist</td>
+                    <td class="gcmc_unit">&nbsp;</td>
+                    <td>Vectors to scale.</td>
+                </tr>
+                <tr>
+                    <td class="gcmc_arg">mult</td>
+                    <td class="gcmc_type">vector</td>
+                    <td class="gcmc_unit">&nbsp;</td>
+                    <td>Multiplication factors.</td>
+                </tr>
+            </tbody>
+        </table><div class="gcmc_description">
+            Multiply <span class="gcmc_arg">arg</span> with coefficients from
+            <span class="gcmc_arg">mult</span>. Where <span class="gcmc_arg">mult</span> can be seen
+            as the primary diagonal of a multiplication matrix. If the first argument is of type
+            <span class="gcmc_type">vectorlist</span>, then each containing vector of <span class="gcmc_arg">arg</span>
+            is iterated and scaled separately.
+        </div>
+    </div>
+    <hr class="gcmc_separator"><div class="gcmc_funcblock">
+        <div class="gcmc_function">
+            <span class="gcmc_type">vector</span>
+            <span class="gcmc_func" id="head">head</span>
+            (
+            <span class="gcmc_type">vector:</span><span class="gcmc_arg">arg</span>,
+            <span class="gcmc_type">scalar:</span><span class="gcmc_arg">nr</span>
+            )
+        </div>
+        <div class="gcmc_function">
+            <span class="gcmc_type">vectorlist</span>
+            <span class="gcmc_func" id="head_1">head</span>
+            (
+            <span class="gcmc_type">vectorlist:</span><span class="gcmc_arg">arg</span>,
+            <span class="gcmc_type">scalar:</span><span class="gcmc_arg">nr</span>
+            )
+        </div>
+        <div class="gcmc_function">
+            <span class="gcmc_type">string</span>
+            <span class="gcmc_func" id="head_2">head</span>
+            (
+            <span class="gcmc_type">string:</span><span class="gcmc_arg">arg</span>,
+            <span class="gcmc_type">scalar:</span><span class="gcmc_arg">nr</span>
+            )
+        </div>
+        <table class="gcmc_args">
+            <tbody>
+                <tr>
+                    <td class="gcmc_arg">arg</td>
+                    <td class="gcmc_type">vector</td>
+                    <td class="gcmc_unit">&nbsp;</td>
+                    <td>Vector to take coordinates from.</td>
+                </tr>
+                <tr>
+                    <td class="gcmc_arg">arg</td>
+                    <td class="gcmc_type">vectorlist</td>
+                    <td class="gcmc_unit">&nbsp;</td>
+                    <td>Vectorlist to take vectors from.</td>
+                </tr>
+                <tr>
+                    <td class="gcmc_arg">arg</td>
+                    <td class="gcmc_type">string</td>
+                    <td class="gcmc_unit">&nbsp;</td>
+                    <td>String to take characters from.</td>
+                </tr>
+                <tr>
+                    <td class="gcmc_arg">nr</td>
+                    <td class="gcmc_type">scalar</td>
+                    <td class="gcmc_unit">[no&nbsp;unit]</td>
+                    <td>Number of elements to take if positive and number of elements to leave when negative.</td>
+                </tr>
+            </tbody>
+        </table><div class="gcmc_description">
+            Returns the first <span class="gcmc_arg">nr</span>
+            number of entries from <span class="gcmc_arg">arg</span> as a vector,
+            vectorlist or string.  If <span class="gcmc_arg">arg</span> is a <span class="gcmc_type">vector</span>
+            and has fewer than <span class="gcmc_arg">nr</span> entries, then the result is
+            padded with <span class="gcmc_type">undef</span> until the result has <span class="gcmc_arg">nr</span>
+            entries.<br>
+            If <span class="gcmc_arg">arg</span> is a <span class="gcmc_type">vectorlist</span>
+            or <span class="gcmc_type">string</span> and has fewer than <span class="gcmc_arg">nr</span>
+            entries, then only the available entries are returned.<br>
+            If <span class="gcmc_arg">nr</span> is negative then a
+            <span class="gcmc_type">vector</span>/<span class="gcmc_type">vectorlist</span>/<span class="gcmc_type">string</span>
+            is returned with |<span class="gcmc_arg">nr</span>| fewer entries than
+            <a href="#count"><span class="gcmc_func">count</span></a>(<span class="gcmc_arg">arg</span>).
+        </div>
+    </div>
+    <hr class="gcmc_separator"><div class="gcmc_funcblock">
+        <div class="gcmc_function">
+            <span class="gcmc_type">vector</span>
+            <span class="gcmc_func" id="tail">tail</span>
+            (
+            <span class="gcmc_type">vector:</span><span class="gcmc_arg">arg</span>,
+            <span class="gcmc_type">scalar:</span><span class="gcmc_arg">nr</span>
+            )
+        </div>
+        <div class="gcmc_function">
+            <span class="gcmc_type">vectorlist</span>
+            <span class="gcmc_func" id="tail_1">tail</span>
+            (
+            <span class="gcmc_type">vectorlist:</span><span class="gcmc_arg">arg</span>,
+            <span class="gcmc_type">scalar:</span><span class="gcmc_arg">nr</span>
+            )
+        </div>
+        <div class="gcmc_function">
+            <span class="gcmc_type">string</span>
+            <span class="gcmc_func" id="tail_2">tail</span>
+            (
+            <span class="gcmc_type">string:</span><span class="gcmc_arg">arg</span>,
+            <span class="gcmc_type">scalar:</span><span class="gcmc_arg">nr</span>
+            )
+        </div>
+        <table class="gcmc_args">
+            <tbody>
+                <tr>
+                    <td class="gcmc_arg">arg</td>
+                    <td class="gcmc_type">vector</td>
+                    <td class="gcmc_unit">&nbsp;</td>
+                    <td>Vector to take coordinates from.</td>
+                </tr>
+                <tr>
+                    <td class="gcmc_arg">arg</td>
+                    <td class="gcmc_type">vectorlist</td>
+                    <td class="gcmc_unit">&nbsp;</td>
+                    <td>Vectorlist to take vectors from.</td>
+                </tr>
+                <tr>
+                    <td class="gcmc_arg">arg</td>
+                    <td class="gcmc_type">string</td>
+                    <td class="gcmc_unit">&nbsp;</td>
+                    <td>String to take characters from.</td>
+                </tr>
+                <tr>
+                    <td class="gcmc_arg">nr</td>
+                    <td class="gcmc_type">scalar</td>
+                    <td class="gcmc_unit">[no&nbsp;unit]</td>
+                    <td>Number of elements to take if positive and number of elements to leave when negative.</td>
+                </tr>
+            </tbody>
+        </table><div class="gcmc_description">
+            Returns the last <span class="gcmc_arg">nr</span>
+            number of entries from <span class="gcmc_arg">arg</span> as a vector,
+            vectorlist or string.  If <span class="gcmc_arg">arg</span> is a <span class="gcmc_type">vector</span>
+            and has fewer than <span class="gcmc_arg">nr</span> entries, then the result is
+            prepended with <span class="gcmc_type">undef</span> until the result has <span class="gcmc_arg">nr</span>
+            entries.<br>
+            If <span class="gcmc_arg">arg</span> is a <span class="gcmc_type">vectorlist</span>
+            or <span class="gcmc_type">string</span> and has fewer than <span class="gcmc_arg">nr</span>
+            entries, then only the available entries are returned.<br>
+            If <span class="gcmc_arg">nr</span> is negative then a
+            <span class="gcmc_type">vector</span>/<span class="gcmc_type">vectorlist</span>/<span class="gcmc_type">string</span>
+            is returned with |<span class="gcmc_arg">nr</span>| fewer entries than
+            <a href="#count"><span class="gcmc_func">count</span></a>(<span class="gcmc_arg">arg</span>).
+        </div>
+    </div>
+
+    <hr><h2 id="specialfunc">Special functions</h2>
+    <div class="gcmc_funcblock">
+        <div class="gcmc_function">
+            <span class="gcmc_type">undef</span>
+            <span class="gcmc_func" id="relocate">relocate</span>
+            (
+            )
+        </div>
+        <div class="gcmc_function">
+            <span class="gcmc_type">undef</span>
+            <span class="gcmc_func" id="relocate">relocate</span>
+            (
+            <span class="gcmc_type">vector:</span><span class="gcmc_arg">offs</span>
+            )
+        </div>
+        <table class="gcmc_args">
+            <tbody>
+                <tr>
+                    <td class="gcmc_arg">arg</td>
+                    <td class="gcmc_type">vector</td>
+                    <td class="gcmc_unit">&nbsp;</td>
+                    <td>Vector coordinates defining the current relative offset.</td>
+                </tr>
+            </tbody>
+        </table><div class="gcmc_description">
+            Sets a relative offset for any axis on all
+            subsequent output of any path. The relative offset is applied to the
+            coordinates just before they are output. The relative offset is independent of
+            the offset set on the command-line. A program may set both, either or neither
+            relative or global offsets for any coordinate. The generated output uses the
+            sum of the global offset (command-line values) and the currently active
+            relative offset, as set by the <span class="gcmc_arg">offs</span> argument. Any
+            coordinate not specified in the <span class="gcmc_arg">offs</span> argument is
+            set to zero (0.0). Not specifying an argument to the
+            <span class="gcmc_func">relocate</span>() function zeros the relative offset
+            for all axes.<br><br>
+            The <span class="gcmc_func">relocate</span>() function is especially useful
+            when several identical parts must be cut on one piece, but at different
+            locations. The generating code can be simplified by producing the same path
+            with different relative offsets, set before the call to generate the pattern.
+            Note: proper parametrization of the generating code is better (creating a
+            function with a specific offset argument). The
+            <span class="gcmc_func">relocate</span>() function is an alternative to achieve
+            a non-parametrized result quickly.
+        </div>
+    </div>
+    <hr class="gcmc_separator"><div class="gcmc_funcblock">
+        <div class="gcmc_function">
+            <span class="gcmc_type">vectorlist</span>
+            <span class="gcmc_func" id="typeset">typeset</span>
+            (
+            <span class="gcmc_type">string:</span><span class="gcmc_arg">text</span>,
+            <span class="gcmc_type">integer:</span><span class="gcmc_arg">fontid</span>
+            )
+        </div>
+        <table class="gcmc_args">
+            <tbody>
+                <tr>
+                    <td class="gcmc_arg">text</td>
+                    <td class="gcmc_type">string</td>
+                    <td class="gcmc_unit">&nbsp;</td>
+                    <td>The text to typeset in UTF-8 format.</td>
+                </tr>
+                <tr>
+                    <td class="gcmc_arg">fontid</td>
+                    <td class="gcmc_type">integer</td>
+                    <td class="gcmc_unit">[no&nbsp;unit]</td>
+                    <td>Reference ID of the font to use (see table below).</td>
+                </tr>
+            </tbody>
+        </table><div class="gcmc_description">
+            Returns a vectorlist with all strokes to write out
+            <span class="gcmc_arg">text</span> shaped using the font-face as defined by the
+            <span class="gcmc_arg">fontid</span> argument. The vectorlist includes pen-up
+            and pen-down vectors so movement can be separated into engraving and
+            non-engraving.<br><br>
+            The <span class="gcmc_arg">fontid</span> should be one of the following:
+            <table><tbody><tr><td>&nbsp;</td><td>Font-ID</td><td>Description</td></tr><tr><td>•</td><td><a href="http://www.vagrearg.org/content/font_hsans_1.svg">FONT_HSANS_1</a></td><td>Sans-serif single-stroke font</td></tr><tr><td>•</td><td><a href="http://www.vagrearg.org/content/font_hsans_1_rs.svg">FONT_HSANS_1_RS</a></td><td>Sans-serif single-stroke font with reduced strokes and pen-up/down</td></tr><tr><td>•</td><td><a href="http://www.vagrearg.org/content/font_hsans_2.svg">FONT_HSANS_2</a></td><td>Sans-serif double-stroke font</td></tr><tr><td>•</td><td><a href="http://www.vagrearg.org/content/font_hscript_1.svg">FONT_HSCRIPT_1</a></td><td>Script single-stroke font (handwriting)</td></tr><tr><td>•</td><td><a href="http://www.vagrearg.org/content/font_hscript_2.svg">FONT_HSCRIPT_2</a></td><td>Script double-stroke font (semi-bold handwriting)</td></tr><tr><td>•</td><td><a href="http://www.vagrearg.org/content/font_htimes.svg">FONT_HTIMES</a></td><td>Serif font</td></tr><tr><td>•</td><td><a href="http://www.vagrearg.org/content/font_htimes_bold.svg">FONT_HTIMES_BOLD</a></td><td>Serif boldface font</td></tr><tr><td>•</td><td><a href="http://www.vagrearg.org/content/font_htimes_italic.svg">FONT_HTIMES_ITALIC</a></td><td>Serif italic font</td></tr><tr><td>•</td><td><a href="http://www.vagrearg.org/content/font_htimes_italic_bold.svg">FONT_HTIMES_ITALIC_BOLD</a></td><td>Serif italic boldface font</td></tr></tbody></table>
+            The fonts are derived from the Hershey fonts and linked to a corresponding
+            visualisation in SVG format for all glyphs in the font-faces.<br><br>
+            The returned vectorlist is constructed with two inital vectors. The first
+            vector is always a pen-up movement specified as [-,&nbsp;-,&nbsp;1.0]. The
+            second vector is always a movement to the XY origin [0.0,&nbsp;0.0,&nbsp;-].
+            The last two vectors in the vectorlist is the are always a pen-up movement
+            followed by a XY movement to the end-position of the typeset string. The
+            end-position is such that it can be used as an offset for subsequent
+            strings. The setting can be illustrated as:
+<pre class="gcmc_indent gcmc_example">veclist[0]   = [-, -, 1.0];		<span class="gcmc_comment">/* Pen-up */</span>
+veclist[1]   = [0.0, 0.0, -];		<span class="gcmc_comment">/* Left-bottom corner of text */</span>
+<span class="gcmc_comment">/* Strokes of the glyphs follow */</span>
+veclist[2]   = [x, y, -];		<span class="gcmc_comment">/* Entry point for first stroke */</span>
+veclist[3]   = [-, -, 0.0];		<span class="gcmc_comment">/* Pen-down */</span>
+... lots of entries up to n-2 ...
+veclist[n-1] = [-, -, 1.0];		<span class="gcmc_comment">/* Pen-up */</span>
+veclist[n]   = [end_x_pos, 0.0, -];	<span class="gcmc_comment">/* Final position would be start of next glyph */</span>
+</pre>
+            A pen-down movement is defined as vector [-,&nbsp;-,&nbsp;0.0]. This implies
+            that the engraving plane is defined at Z-level 0.0 (down).<br><br>
+            The font-height is by definition 1.0. All glyphs are scaled such that the upper
+            case character 'X' has the exact height of 1.0. No units are associated with
+            any value in the vectors. The caller may use the
+            <a class="gcmc_func" href="#scale">scale</a>() function to scale the font to
+            real-world sizes, as well as scaling the engraving plane to any level.
+            Additionally, vector-additions may be used to relocate the typeset text to any
+            position in space.<br><br>
+            See also the library function <a class="gcmc_func" href="gcmc-library.htm#engrave">engrave</a>()
+            for engraving the returned vectorlist and the examples in the
+            distribution for outputting the vectorlist. You can alternatively use the
+            path with <a class="gcmc_func" href="#move">move</a>() and
+            <a class="gcmc_func" href="#goto">goto</a>() calls manually (see
+            <a class="gcmc_func" href="gcmc-library.htm#engrave">engrave</a>()
+            source in the distribution for details).
+        </div>
+    </div>
+
+    <hr><h2 id="mathfunc">Math functions</h2>
+    <div class="gcmc_funcblock">
+        <div class="gcmc_function">
+            <span class="gcmc_type">scalar</span>
+            <span class="gcmc_func" id="abs">abs</span>
+            (
+            <span class="gcmc_type">scalar:</span><span class="gcmc_arg">val</span>
+            )
+        </div>
+        <table class="gcmc_args">
+            <tbody>
+                <tr>
+                    <td class="gcmc_arg">val</td>
+                    <td class="gcmc_type">scalar</td>
+                    <td class="gcmc_unit">&nbsp;</td>
+                    <td>Any number.</td>
+                </tr>
+            </tbody>
+        </table><div class="gcmc_description">Return the absolute value of <span class="gcmc_arg">val</span>. Units are preserved.</div>
+    </div>
+    <hr class="gcmc_separator"><div class="gcmc_funcblock">
+        <div class="gcmc_function">
+            <span class="gcmc_type">float</span>
+            <span class="gcmc_func" id="acos">acos</span>
+            (
+            <span class="gcmc_type">scalar:</span><span class="gcmc_arg">val</span>
+            )
+        </div>
+        <table class="gcmc_args">
+            <tbody>
+                <tr>
+                    <td class="gcmc_arg">val</td>
+                    <td class="gcmc_type">scalar</td>
+                    <td class="gcmc_unit">[no&nbsp;unit]</td>
+                    <td>A number from -1.0 to 1.0.</td>
+                </tr>
+            </tbody>
+        </table><div class="gcmc_description">Return the arc-cosine of <span class="gcmc_arg">val</span> in radians.</div>
+    </div>
+    <hr class="gcmc_separator"><div class="gcmc_funcblock">
+        <div class="gcmc_function">
+            <span class="gcmc_type">float</span>
+            <span class="gcmc_func" id="asin">asin</span>
+            (
+            <span class="gcmc_type">scalar:</span><span class="gcmc_arg">val</span>
+            )
+        </div>
+        <table class="gcmc_args">
+            <tbody>
+                <tr>
+                    <td class="gcmc_arg">val</td>
+                    <td class="gcmc_type">scalar</td>
+                    <td class="gcmc_unit">[no&nbsp;unit]</td>
+                    <td>A number from -1.0 to 1.0.</td>
+                </tr>
+            </tbody>
+        </table><div class="gcmc_description">Return the arc-sine of <span class="gcmc_arg">val</span> in radians.</div>
+    </div>
+    <hr class="gcmc_separator"><div class="gcmc_funcblock">
+        <div class="gcmc_function">
+            <span class="gcmc_type">float</span>
+            <span class="gcmc_func" id="atan">atan</span>
+            (
+            <span class="gcmc_type">scalar:</span><span class="gcmc_arg">y</span>,
+            <span class="gcmc_type">scalar:</span><span class="gcmc_arg">x</span>
+            )
+        </div>
+        <table class="gcmc_args">
+            <tbody>
+                <tr>
+                    <td class="gcmc_arg">y</td>
+                    <td class="gcmc_type">scalar</td>
+                    <td class="gcmc_unit">[distance]</td>
+                    <td>Any number.</td>
+                </tr>
+                <tr>
+                    <td class="gcmc_arg">x</td>
+                    <td class="gcmc_type">scalar</td>
+                    <td class="gcmc_unit">[distance]</td>
+                    <td>Any number.</td>
+                </tr>
+            </tbody>
+        </table><div class="gcmc_description">Return the arc-tangent of <span class="gcmc_arg">y</span>/<span class="gcmc_arg">x</span> in radians.</div>
+    </div>
+    <hr class="gcmc_separator"><div class="gcmc_funcblock">
+        <div class="gcmc_function">
+            <span class="gcmc_type">float</span>
+            <span class="gcmc_func" id="atan_xy">atan_xy</span>
+            (
+            <span class="gcmc_type">vector:</span><span class="gcmc_arg">v</span>
+            )
+        </div>
+        <table class="gcmc_args">
+            <tbody>
+                <tr>
+                    <td class="gcmc_arg">v</td>
+                    <td class="gcmc_type">vector</td>
+                    <td class="gcmc_unit">[distance]</td>
+                    <td>Any vector with both X and Y coordinates.</td>
+                </tr>
+            </tbody>
+        </table><div class="gcmc_description">Return the arc-tangent of <span class="gcmc_arg">v.y</span>/<span class="gcmc_arg">v.x</span> in radians.</div>
+    </div>
+    <hr class="gcmc_separator"><div class="gcmc_funcblock">
+        <div class="gcmc_function">
+            <span class="gcmc_type">float</span>
+            <span class="gcmc_func" id="atan_xz">atan_xz</span>
+            (
+            <span class="gcmc_type">vector:</span><span class="gcmc_arg">v</span>
+            )
+        </div>
+        <table class="gcmc_args">
+            <tbody>
+                <tr>
+                    <td class="gcmc_arg">v</td>
+                    <td class="gcmc_type">vector</td>
+                    <td class="gcmc_unit">[distance]</td>
+                    <td>Any vector with both X and Z coordinates.</td>
+                </tr>
+            </tbody>
+        </table><div class="gcmc_description">Return the arc-tangent of <span class="gcmc_arg">v.z</span>/<span class="gcmc_arg">v.x</span> in radians.</div>
+    </div>
+    <hr class="gcmc_separator"><div class="gcmc_funcblock">
+        <div class="gcmc_function">
+            <span class="gcmc_type">float</span>
+            <span class="gcmc_func" id="atan_yz">atan_yz</span>
+            (
+            <span class="gcmc_type">vector:</span><span class="gcmc_arg">v</span>
+            )
+        </div>
+        <table class="gcmc_args">
+            <tbody>
+                <tr>
+                    <td class="gcmc_arg">v</td>
+                    <td class="gcmc_type">vector</td>
+                    <td class="gcmc_unit">[distance]</td>
+                    <td>Any vector with both Y and Z coordinates.</td>
+                </tr>
+            </tbody>
+        </table><div class="gcmc_description">Return the arc-tangent of <span class="gcmc_arg">v.z</span>/<span class="gcmc_arg">v.y</span> in radians.</div>
+    </div>
+    <hr class="gcmc_separator"><div class="gcmc_funcblock">
+        <div class="gcmc_function">
+            <span class="gcmc_type">float</span>
+            <span class="gcmc_func" id="ceil">ceil</span>
+            (
+            <span class="gcmc_type">scalar:</span><span class="gcmc_arg">val</span>
+            )
+        </div>
+        <table class="gcmc_args">
+            <tbody>
+                <tr>
+                    <td class="gcmc_arg">val</td>
+                    <td class="gcmc_type">scalar</td>
+                    <td class="gcmc_unit">&nbsp;</td>
+                    <td>Any number.</td>
+                </tr>
+            </tbody>
+        </table><div class="gcmc_description">
+            Return the smallest integral number not smaller than <span class="gcmc_arg">val</span>.
+            Units are preserved. Examples:<br><a class="gcmc_func" href="#ceil">ceil</a>(0.5) → 1.0<br><a class="gcmc_func" href="#ceil">ceil</a>(-0.5) → 0.0<br>
+        </div>
+    </div>
+    <hr class="gcmc_separator"><div class="gcmc_funcblock">
+        <div class="gcmc_function">
+            <span class="gcmc_type">float</span>
+            <span class="gcmc_func" id="cos">cos</span>
+            (
+            <span class="gcmc_type">scalar:</span><span class="gcmc_arg">angle</span>
+            )
+        </div>
+        <table class="gcmc_args">
+            <tbody>
+                <tr>
+                    <td class="gcmc_arg">angle</td>
+                    <td class="gcmc_type">scalar</td>
+                    <td class="gcmc_unit">[angular]</td>
+                    <td>Any number.</td>
+                </tr>
+            </tbody>
+        </table><div class="gcmc_description">
+            Return the cosine of <span class="gcmc_arg">angle</span>.
+            The returned value has no units associated.
+        </div>
+    </div>
+    <hr class="gcmc_separator"><div class="gcmc_funcblock">
+        <div class="gcmc_function">
+            <span class="gcmc_type">float</span>
+            <span class="gcmc_func" id="exp">exp</span>
+            (
+            <span class="gcmc_type">scalar:</span><span class="gcmc_arg">val</span>
+            )
+        </div>
+        <table class="gcmc_args">
+            <tbody>
+                <tr>
+                    <td class="gcmc_arg">val</td>
+                    <td class="gcmc_type">scalar</td>
+                    <td class="gcmc_unit">&nbsp;</td>
+                    <td>Any number.</td>
+                </tr>
+            </tbody>
+        </table><div class="gcmc_description">
+            Return the exponentiation of <span class="gcmc_arg">val</span> with base e.
+            The returned value has no units associated.
+        </div>
+    </div>
+    <hr class="gcmc_separator"><div class="gcmc_funcblock">
+        <div class="gcmc_function">
+            <span class="gcmc_type">float</span>
+            <span class="gcmc_func" id="floor">floor</span>
+            (
+            <span class="gcmc_type">scalar:</span><span class="gcmc_arg">val</span>
+            )
+        </div>
+        <table class="gcmc_args">
+            <tbody>
+                <tr>
+                    <td class="gcmc_arg">val</td>
+                    <td class="gcmc_type">scalar</td>
+                    <td class="gcmc_unit">&nbsp;</td>
+                    <td>Any number.</td>
+                </tr>
+            </tbody>
+        </table><div class="gcmc_description">
+            Return the largest integral number not greater than <span class="gcmc_arg">val</span>.
+            Units are preserved. Examples:<br><a class="gcmc_func" href="#floor">floor</a>(0.5) → 0.0<br><a class="gcmc_func" href="#floor">floor</a>(-0.5) → -1.0<br>
+        </div>
+    </div>
+    <hr class="gcmc_separator"><div class="gcmc_funcblock">
+        <div class="gcmc_function">
+            <span class="gcmc_type">float</span>
+            <span class="gcmc_func" id="log10">log10</span>
+            (
+            <span class="gcmc_type">scalar:</span><span class="gcmc_arg">val</span>
+            )
+        </div>
+        <div class="gcmc_function">
+            <span class="gcmc_type">float</span>
+            <span class="gcmc_func" id="log2">log2</span>
+            (
+            <span class="gcmc_type">scalar:</span><span class="gcmc_arg">val</span>
+            )
+        </div>
+        <div class="gcmc_function">
+            <span class="gcmc_type">float</span>
+            <span class="gcmc_func" id="loge">loge</span>
+            (
+            <span class="gcmc_type">scalar:</span><span class="gcmc_arg">val</span>
+            )
+        </div>
+        <table class="gcmc_args">
+            <tbody>
+                <tr>
+                    <td class="gcmc_arg">val</td>
+                    <td class="gcmc_type">scalar</td>
+                    <td class="gcmc_unit">&nbsp;</td>
+                    <td>Any number greater than zero.</td>
+                </tr>
+            </tbody>
+        </table><div class="gcmc_description">
+            Return the logarithm of <span class="gcmc_arg">val</span> with base 10, 2 and e respectively.
+            The returned value has no units associated.
+        </div>
+    </div>
+    <hr class="gcmc_separator"><div class="gcmc_funcblock">
+        <div class="gcmc_function">
+            <span class="gcmc_type">float</span>
+            <span class="gcmc_func" id="pi">pi</span>
+            (
+            )
+        </div>
+        <div class="gcmc_description">Returns pi (3.141529.....).</div>
+    </div>
+    <hr class="gcmc_separator"><div class="gcmc_funcblock">
+        <div class="gcmc_function">
+            <span class="gcmc_type">float</span>
+            <span class="gcmc_func" id="pow">pow</span>
+            (
+            <span class="gcmc_type">scalar:</span><span class="gcmc_arg">x</span>,
+            <span class="gcmc_type">scalar:</span><span class="gcmc_arg">y</span>
+            )
+        </div>
+        <table class="gcmc_args">
+            <tbody>
+                <tr>
+                    <td class="gcmc_arg">x</td>
+                    <td class="gcmc_type">scalar</td>
+                    <td class="gcmc_unit">&nbsp;</td>
+                    <td>Any number.</td>
+                </tr>
+                <tr>
+                    <td class="gcmc_arg">y</td>
+                    <td class="gcmc_type">scalar</td>
+                    <td class="gcmc_unit">[no&nbsp;unit]</td>
+                    <td>Any number.</td>
+                </tr>
+            </tbody>
+        </table><div class="gcmc_description">
+            Return the <span class="gcmc_arg">x</span> raised to the power <span class="gcmc_arg">y</span>.
+            The returned value has no units associated.
+        </div>
+    </div>
+    <hr class="gcmc_separator"><div class="gcmc_funcblock">
+        <div class="gcmc_function">
+            <span class="gcmc_type">float</span>
+            <span class="gcmc_func" id="round">round</span>
+            (
+            <span class="gcmc_type">scalar:</span><span class="gcmc_arg">val</span>
+            )
+        </div>
+        <table class="gcmc_args">
+            <tbody>
+                <tr>
+                    <td class="gcmc_arg">val</td>
+                    <td class="gcmc_type">scalar</td>
+                    <td class="gcmc_unit">&nbsp;</td>
+                    <td>Any number.</td>
+                </tr>
+            </tbody>
+        </table><div class="gcmc_description">
+            Return <span class="gcmc_arg">val</span> rounded with half-way cases rounded away from zero.
+            Units are preserved. Examples:<br><a class="gcmc_func" href="#round">round</a>(0.7) → 1.0<br><a class="gcmc_func" href="#round">round</a>(0.5) → 1.0<br><a class="gcmc_func" href="#round">round</a>(0.4) → 0.0<br><a class="gcmc_func" href="#round">round</a>(-0.4) → 0.0<br><a class="gcmc_func" href="#round">round</a>(-0.5) → -1.0<br><a class="gcmc_func" href="#round">round</a>(-0.7) → -1.0<br>
+        </div>
+    </div>
+    <hr class="gcmc_separator"><div class="gcmc_funcblock">
+        <div class="gcmc_function">
+            <span class="gcmc_type">float</span>
+            <span class="gcmc_func" id="sign">sign</span>
+            (
+            <span class="gcmc_type">scalar:</span><span class="gcmc_arg">val</span>
+            )
+        </div>
+        <table class="gcmc_args">
+            <tbody>
+                <tr>
+                    <td class="gcmc_arg">val</td>
+                    <td class="gcmc_type">scalar</td>
+                    <td class="gcmc_unit"></td>
+                    <td>Any number.</td>
+                </tr>
+            </tbody>
+        </table><div class="gcmc_description">
+            Returns +1.0 if <span class="gcmc_arg">val</span>
+            is greater or equal 0.0 and -1.0 if <span class="gcmc_arg">val</span> is
+            negative. The returned value has no units associated.
+        </div>
+    </div>
+    <hr class="gcmc_separator"><div class="gcmc_funcblock">
+        <div class="gcmc_function">
+            <span class="gcmc_type">float</span>
+            <span class="gcmc_func" id="sin">sin</span>
+            (
+            <span class="gcmc_type">scalar:</span><span class="gcmc_arg">angle</span>
+            )
+        </div>
+        <table class="gcmc_args">
+            <tbody>
+                <tr>
+                    <td class="gcmc_arg">angle</td>
+                    <td class="gcmc_type">scalar</td>
+                    <td class="gcmc_unit">[angular]</td>
+                    <td>Any number.</td>
+                </tr>
+            </tbody>
+        </table><div class="gcmc_description">
+            Return the sine of <span class="gcmc_arg">angle</span>.
+            The returned value has no units associated.
+        </div>
+    </div>
+    <hr class="gcmc_separator"><div class="gcmc_funcblock">
+        <div class="gcmc_function">
+            <span class="gcmc_type">float</span>
+            <span class="gcmc_func" id="sqrt">sqrt</span>
+            (
+            <span class="gcmc_type">scalar:</span><span class="gcmc_arg">val</span>
+            )
+        </div>
+        <table class="gcmc_args">
+            <tbody>
+                <tr>
+                    <td class="gcmc_arg">val</td>
+                    <td class="gcmc_type">scalar</td>
+                    <td class="gcmc_unit">&nbsp;</td>
+                    <td>Any number greater or equal zero.</td>
+                </tr>
+            </tbody>
+        </table><div class="gcmc_description">
+            Return the square root of <span class="gcmc_arg">val</span>.
+            The returned value has no units associated.
+        </div>
+    </div>
+    <hr class="gcmc_separator"><div class="gcmc_funcblock">
+        <div class="gcmc_function">
+            <span class="gcmc_type">float</span>
+            <span class="gcmc_func" id="tan">tan</span>
+            (
+            <span class="gcmc_type">scalar:</span><span class="gcmc_arg">angle</span>
+            )
+        </div>
+        <table class="gcmc_args">
+            <tbody>
+                <tr>
+                    <td class="gcmc_arg">angle</td>
+                    <td class="gcmc_type">scalar</td>
+                    <td class="gcmc_unit">[angular]</td>
+                    <td>Any number.</td>
+                </tr>
+            </tbody>
+        </table><div class="gcmc_description">
+            Return the tangent of <span class="gcmc_arg">angle</span>.
+            The returned value has no units associated.
+        </div>
+    </div>
+    <hr class="gcmc_separator"><div class="gcmc_funcblock">
+        <div class="gcmc_function">
+            <span class="gcmc_type">undef</span>
+            <span class="gcmc_func" id="undef">undef</span>
+            (
+            )
+        </div>
+        <div class="gcmc_description">
+            Return an <span class="gcmc_type">undef</span>
+            value. An <span class="gcmc_type">undef</span> value may also be written as
+            [-][0] (see also <a href="gcmc-syntax.htm#syntax_op_undef">Undef handling</a>),
+            but it is more readable to write it as a function.
+        </div>
+    </div>
+
+    <hr><h2 id="convfunc">Conversion functions</h2>
+    <div class="gcmc_funcblock">
+        <div class="gcmc_function">
+            <span class="gcmc_type">scalar</span>
+            <span class="gcmc_func" id="to_deg">to_deg</span>
+            (
+            <span class="gcmc_type">scalar:</span><span class="gcmc_arg">arg</span>
+            )
+        </div>
+        <div class="gcmc_function">
+            <span class="gcmc_type">vector</span>
+            <span class="gcmc_func" id="to_deg_1">to_deg</span>
+            (
+            <span class="gcmc_type">vector:</span><span class="gcmc_arg">arg</span>
+            )
+        </div>
+        <div class="gcmc_function">
+            <span class="gcmc_type">vectorlist</span>
+            <span class="gcmc_func" id="to_deg_2">to_deg</span>
+            (
+            <span class="gcmc_type">vectorlist:</span><span class="gcmc_arg">arg</span>
+            )
+        </div>
+        <table class="gcmc_args">
+            <tbody>
+                <tr>
+                    <td class="gcmc_arg">arg</td>
+                    <td class="gcmc_type">scalar</td>
+                    <td class="gcmc_unit">[angular]</td>
+                    <td>Any number.</td>
+                </tr>
+                <tr>
+                    <td class="gcmc_arg">arg</td>
+                    <td class="gcmc_type">vector</td>
+                    <td class="gcmc_unit">[angular]</td>
+                    <td>&nbsp;</td>
+                </tr>
+                <tr>
+                    <td class="gcmc_arg">arg</td>
+                    <td class="gcmc_type">vectorlist</td>
+                    <td class="gcmc_unit">[angular]</td>
+                    <td>&nbsp;</td>
+                </tr>
+            </tbody>
+        </table><div class="gcmc_description">
+            Returns <span class="gcmc_arg">arg</span> / <a class="gcmc_func" href="#pi">pi</a>() * 180.0 (deg)
+            if <span class="gcmc_arg">arg</span> has unit radians, returns
+            <span class="gcmc_arg">arg</span> otherwise. Vectors and vectorlists are iterated
+            over all scalars contained in them and return vector or vectorlist.
+            Conversions:
+            <table><tbody><tr><td>1</td><td>→ 1deg</td></tr><tr><td>1mm</td><td>→ Warning, 1deg</td></tr><tr><td>1in</td><td>→ Warning, 1deg</td></tr><tr><td>1deg</td><td>→ 1deg</td></tr><tr><td>1rad</td><td>→ 57.29577951deg</td></tr><tr><td>undef</td><td>→ undef</td></tr></tbody></table>
+        </div>
+    </div>
+    <hr class="gcmc_separator"><div class="gcmc_funcblock">
+        <div class="gcmc_function">
+            <span class="gcmc_type">scalar</span>
+            <span class="gcmc_func" id="to_distance">to_distance</span>
+            (
+            <span class="gcmc_type">scalar:</span><span class="gcmc_arg">arg</span>
+            )
+        </div>
+        <div class="gcmc_function">
+            <span class="gcmc_type">vector</span>
+            <span class="gcmc_func" id="to_distance_1">to_distance</span>
+            (
+            <span class="gcmc_type">vector:</span><span class="gcmc_arg">arg</span>
+            )
+        </div>
+        <div class="gcmc_function">
+            <span class="gcmc_type">vectorlist</span>
+            <span class="gcmc_func" id="to_distance_2">to_distance</span>
+            (
+            <span class="gcmc_type">vectorlist:</span><span class="gcmc_arg">arg</span>
+            )
+        </div>
+        <table class="gcmc_args">
+            <tbody>
+                <tr>
+                    <td class="gcmc_arg">arg</td>
+                    <td class="gcmc_type">scalar</td>
+                    <td class="gcmc_unit">&nbsp;</td>
+                    <td>Any number.</td>
+                </tr>
+                <tr>
+                    <td class="gcmc_arg">arg</td>
+                    <td class="gcmc_type">vector</td>
+                    <td class="gcmc_unit">&nbsp;</td>
+                    <td>&nbsp;</td>
+                </tr>
+                <tr>
+                    <td class="gcmc_arg">arg</td>
+                    <td class="gcmc_type">vectorlist</td>
+                    <td class="gcmc_unit">&nbsp;</td>
+                    <td>&nbsp;</td>
+                </tr>
+            </tbody>
+        </table><div class="gcmc_description">
+            Returns <span class="gcmc_arg">arg</span>
+            converting any value without distance units to have distance units. The units
+            depend on the command-line setting whether metric or imperial is used according
+            to following rules:<br>
+            If gcmc is run in metric mode (default):
+            <table><tbody><tr><td>1</td><td>→ 1mm</td></tr><tr><td>1mm</td><td>→ 1mm</td></tr><tr><td>1in</td><td>→ 1in</td></tr><tr><td>1deg</td><td>→ Warning, 1mm</td></tr><tr><td>1rad</td><td>→ Warning, 1mm</td></tr><tr><td>undef</td><td>→ undef</td></tr></tbody></table>
+            If gcmc is run in imperial mode (-i/--imperial option set on command-line):
+            <table><tbody><tr><td>1</td><td>→ 1in</td></tr><tr><td>1mm</td><td>→ 1mm</td></tr><tr><td>1in</td><td>→ 1in</td></tr><tr><td>1deg</td><td>→ Warning, 1in</td></tr><tr><td>1rad</td><td>→ Warning, 1in</td></tr><tr><td>undef</td><td>→ undef</td></tr></tbody></table>
+            Vectors and vectorlists are iterated over all scalars contained in them and
+            return vector or vectorlist.
+        </div>
+    </div>
+    <hr class="gcmc_separator"><div class="gcmc_funcblock">
+        <div class="gcmc_function">
+            <span class="gcmc_type">scalar</span>
+            <span class="gcmc_func" id="to_rad">to_rad</span>
+            (
+            <span class="gcmc_type">scalar:</span><span class="gcmc_arg">arg</span>
+            )
+        </div>
+        <div class="gcmc_function">
+            <span class="gcmc_type">vector</span>
+            <span class="gcmc_func" id="to_rad_1">to_rad</span>
+            (
+            <span class="gcmc_type">vector:</span><span class="gcmc_arg">arg</span>
+            )
+        </div>
+        <div class="gcmc_function">
+            <span class="gcmc_type">vectorlist</span>
+            <span class="gcmc_func" id="to_rad_2">to_rad</span>
+            (
+            <span class="gcmc_type">vectorlist:</span><span class="gcmc_arg">arg</span>
+            )
+        </div>
+        <table class="gcmc_args">
+            <tbody>
+                <tr>
+                    <td class="gcmc_arg">arg</td>
+                    <td class="gcmc_type">scalar</td>
+                    <td class="gcmc_unit">[angular]</td>
+                    <td>Any number.</td>
+                </tr>
+                <tr>
+                    <td class="gcmc_arg">arg</td>
+                    <td class="gcmc_type">vector</td>
+                    <td class="gcmc_unit">[angular]</td>
+                    <td>&nbsp;</td>
+                </tr>
+                <tr>
+                    <td class="gcmc_arg">arg</td>
+                    <td class="gcmc_type">vectorlist</td>
+                    <td class="gcmc_unit">[angular]</td>
+                    <td>&nbsp;</td>
+                </tr>
+            </tbody>
+        </table><div class="gcmc_description">
+            Returns <span class="gcmc_arg">arg</span> * <a class="gcmc_func" href="#pi">pi</a>() / 180.0 (rad)
+            if <span class="gcmc_arg">arg</span> has unit degrees, returns
+            <span class="gcmc_arg">arg</span> otherwise. Vectors and vectorlists are iterated
+            over all scalars contained in them and return vector or vectorlist.
+            Conversions:
+            <table><tbody><tr><td>1</td><td>→ 1rad</td></tr><tr><td>1mm</td><td>→ Warning, 1rad</td></tr><tr><td>1in</td><td>→ Warning, 1rad</td></tr><tr><td>1deg</td><td>→ 0.01745329rad</td></tr><tr><td>1rad</td><td>→ 1rad</td></tr><tr><td>undef</td><td>→ undef</td></tr></tbody></table>
+        </div>
+    </div>
+    <hr class="gcmc_separator"><div class="gcmc_funcblock">
+        <div class="gcmc_function">
+            <span class="gcmc_type">scalar</span>
+            <span class="gcmc_func" id="to_in">to_in</span>
+            (
+            <span class="gcmc_type">scalar:</span><span class="gcmc_arg">arg</span>
+            )
+        </div>
+        <div class="gcmc_function">
+            <span class="gcmc_type">vector</span>
+            <span class="gcmc_func" id="to_in_1">to_in</span>
+            (
+            <span class="gcmc_type">vector:</span><span class="gcmc_arg">arg</span>
+            )
+        </div>
+        <div class="gcmc_function">
+            <span class="gcmc_type">vectorlist</span>
+            <span class="gcmc_func" id="to_in_2">to_in</span>
+            (
+            <span class="gcmc_type">vectorlist:</span><span class="gcmc_arg">arg</span>
+            )
+        </div>
+        <div class="gcmc_function">
+            <span class="gcmc_type">scalar</span>
+            <span class="gcmc_func" id="to_inch">to_inch</span>
+            (
+            <span class="gcmc_type">scalar:</span><span class="gcmc_arg">arg</span>
+            )
+        </div>
+        <div class="gcmc_function">
+            <span class="gcmc_type">vector</span>
+            <span class="gcmc_func" id="to_inch_1">to_inch</span>
+            (
+            <span class="gcmc_type">vector:</span><span class="gcmc_arg">arg</span>
+            )
+        </div>
+        <div class="gcmc_function">
+            <span class="gcmc_type">vectorlist</span>
+            <span class="gcmc_func" id="to_inch_2">to_inch</span>
+            (
+            <span class="gcmc_type">vectorlist:</span><span class="gcmc_arg">arg</span>
+            )
+        </div>
+        <table class="gcmc_args">
+            <tbody>
+                <tr>
+                    <td class="gcmc_arg">arg</td>
+                    <td class="gcmc_type">scalar</td>
+                    <td class="gcmc_unit">[distance]</td>
+                    <td>Any number.</td>
+                </tr>
+                <tr>
+                    <td class="gcmc_arg">arg</td>
+                    <td class="gcmc_type">vector</td>
+                    <td class="gcmc_unit">[distance]</td>
+                    <td>&nbsp;</td>
+                </tr>
+                <tr>
+                    <td class="gcmc_arg">arg</td>
+                    <td class="gcmc_type">vectorlist</td>
+                    <td class="gcmc_unit">[distance]</td>
+                    <td>&nbsp;</td>
+                </tr>
+            </tbody>
+        </table><div class="gcmc_description">
+            Returns <span class="gcmc_arg">arg</span> coverted to inch.
+            If <span class="gcmc_arg">arg</span> has no units or already is in inch, then no
+            conversion is performed. Vectors and vectorlists are iterated over all scalars
+            contained in them and return vector or vectorlist. Conversions:
+            <table><tbody><tr><td>1</td><td>→ 1in</td></tr><tr><td>1mm</td><td>→ 0.03937008in</td></tr><tr><td>1in</td><td>→ 1in</td></tr><tr><td>1deg</td><td>→ Warning, 1in</td></tr><tr><td>1rad</td><td>→ Warning, 1in</td></tr><tr><td>undef</td><td>→ undef</td></tr></tbody></table>
+            Function <span class="gcmc_func">to_in</span>() is an alias for <span class="gcmc_func">to_inch</span>().
+        </div>
+    </div>
+    <hr class="gcmc_separator"><div class="gcmc_funcblock">
+        <div class="gcmc_function">
+            <span class="gcmc_type">scalar</span>
+            <span class="gcmc_func" id="to_mm">to_mm</span>
+            (
+            <span class="gcmc_type">scalar:</span><span class="gcmc_arg">arg</span>
+            )
+        </div>
+        <div class="gcmc_function">
+            <span class="gcmc_type">vector</span>
+            <span class="gcmc_func" id="to_mm_1">to_mm</span>
+            (
+            <span class="gcmc_type">vector:</span><span class="gcmc_arg">arg</span>
+            )
+        </div>
+        <div class="gcmc_function">
+            <span class="gcmc_type">vectorlist</span>
+            <span class="gcmc_func" id="to_mm_2">to_mm</span>
+            (
+            <span class="gcmc_type">vectorlist:</span><span class="gcmc_arg">arg</span>
+            )
+        </div>
+        <table class="gcmc_args">
+            <tbody>
+                <tr>
+                    <td class="gcmc_arg">arg</td>
+                    <td class="gcmc_type">scalar</td>
+                    <td class="gcmc_unit">[distance]</td>
+                    <td>Any number.</td>
+                </tr>
+                <tr>
+                    <td class="gcmc_arg">arg</td>
+                    <td class="gcmc_type">vector</td>
+                    <td class="gcmc_unit">[distance]</td>
+                    <td>&nbsp;</td>
+                </tr>
+                <tr>
+                    <td class="gcmc_arg">arg</td>
+                    <td class="gcmc_type">vectorlist</td>
+                    <td class="gcmc_unit">[distance]</td>
+                    <td>&nbsp;</td>
+                </tr>
+            </tbody>
+        </table><div class="gcmc_description">
+            Returns <span class="gcmc_arg">arg</span> coverted to mm.
+            If <span class="gcmc_arg">arg</span> has no units or already is in mm, then no
+            conversion is performed. Vectors and vectorlists are iterated over all scalars
+            contained in them and return vector or vectorlist. Conversions:
+            <table><tbody><tr><td>1</td><td>→ 1mm</td></tr><tr><td>1mm</td><td>→ 1mm</td></tr><tr><td>1in</td><td>→ 25.4mm</td></tr><tr><td>1deg</td><td>→ Warning, 1mm</td></tr><tr><td>1rad</td><td>→ Warning, 1mm</td></tr><tr><td>undef</td><td>→ undef</td></tr></tbody></table>
+        </div>
+    </div>
+    <hr class="gcmc_separator"><div class="gcmc_funcblock">
+        <div class="gcmc_function">
+            <span class="gcmc_type">scalar</span>
+            <span class="gcmc_func" id="to_native">to_native</span>
+            (
+            <span class="gcmc_type">scalar:</span><span class="gcmc_arg">arg</span>
+            )
+        </div>
+        <div class="gcmc_function">
+            <span class="gcmc_type">vector</span>
+            <span class="gcmc_func" id="to_native_1">to_native</span>
+            (
+            <span class="gcmc_type">vector:</span><span class="gcmc_arg">arg</span>
+            )
+        </div>
+        <div class="gcmc_function">
+            <span class="gcmc_type">vectorlist</span>
+            <span class="gcmc_func" id="to_native_2">to_native</span>
+            (
+            <span class="gcmc_type">vectorlist:</span><span class="gcmc_arg">arg</span>
+            )
+        </div>
+        <table class="gcmc_args">
+            <tbody>
+                <tr>
+                    <td class="gcmc_arg">arg</td>
+                    <td class="gcmc_type">scalar</td>
+                    <td class="gcmc_unit">&nbsp;</td>
+                    <td>Any number.</td>
+                </tr>
+                <tr>
+                    <td class="gcmc_arg">arg</td>
+                    <td class="gcmc_type">vector</td>
+                    <td class="gcmc_unit">&nbsp;</td>
+                    <td>&nbsp;</td>
+                </tr>
+                <tr>
+                    <td class="gcmc_arg">arg</td>
+                    <td class="gcmc_type">vectorlist</td>
+                    <td class="gcmc_unit">&nbsp;</td>
+                    <td>&nbsp;</td>
+                </tr>
+            </tbody>
+        </table><div class="gcmc_description">
+            Returns <span class="gcmc_arg">arg</span> converting any value to gcode native representation according to following rules:<br>
+            If gcmc is run in metric mode (default):
+            <table><tbody><tr><td>1</td><td>→ 1</td></tr><tr><td>1mm</td><td>→ 1mm</td></tr><tr><td>1in</td><td>→ 25.4mm</td></tr><tr><td>1deg</td><td>→ 1deg</td></tr><tr><td>1rad</td><td>→ 57.2957795131deg</td></tr><tr><td>undef</td><td>→ undef</td></tr></tbody></table>
+            If gcmc is run in imperial mode (-i/--imperial option set on command-line):
+            <table><tbody><tr><td>1</td><td>→ 1</td></tr><tr><td>1mm</td><td>→ 0.0393700787402in</td></tr><tr><td>1in</td><td>→ 1in</td></tr><tr><td>1deg</td><td>→ 1deg</td></tr><tr><td>1rad</td><td>→ 57.2957795131deg</td></tr><tr><td>undef</td><td>→ undef</td></tr></tbody></table>
+            Vectors and vectorlists are iterated over all scalars contained in them and
+            return vector or vectorlist.
+        </div>
+    </div>
+    <hr class="gcmc_separator"><div class="gcmc_funcblock">
+        <div class="gcmc_function">
+            <span class="gcmc_type">scalar</span>
+            <span class="gcmc_func" id="to_none">to_none</span>
+            (
+            <span class="gcmc_type">scalar:</span><span class="gcmc_arg">arg</span>
+            )
+        </div>
+        <div class="gcmc_function">
+            <span class="gcmc_type">vector</span>
+            <span class="gcmc_func" id="to_none_1">to_none</span>
+            (
+            <span class="gcmc_type">vector:</span><span class="gcmc_arg">arg</span>
+            )
+        </div>
+        <div class="gcmc_function">
+            <span class="gcmc_type">vectorlist</span>
+            <span class="gcmc_func" id="to_none_2">to_none</span>
+            (
+            <span class="gcmc_type">vectorlist:</span><span class="gcmc_arg">arg</span>
+            )
+        </div>
+        <table class="gcmc_args">
+            <tbody>
+                <tr>
+                    <td class="gcmc_arg">arg</td>
+                    <td class="gcmc_type">scalar</td>
+                    <td class="gcmc_unit">&nbsp;</td>
+                    <td>Any number.</td>
+                </tr>
+                <tr>
+                    <td class="gcmc_arg">arg</td>
+                    <td class="gcmc_type">vector</td>
+                    <td class="gcmc_unit">&nbsp;</td>
+                    <td>&nbsp;</td>
+                </tr>
+                <tr>
+                    <td class="gcmc_arg">arg</td>
+                    <td class="gcmc_type">vectorlist</td>
+                    <td class="gcmc_unit">&nbsp;</td>
+                    <td>&nbsp;</td>
+                </tr>
+            </tbody>
+        </table><div class="gcmc_description">
+            Returns <span class="gcmc_arg">arg</span> stripping any
+            associated units. Vectors and vectorlists are iterated over all scalars
+            contained in them and return vector or vectorlist. Conversions:
+            <table><tbody><tr><td>1</td><td>→ 1</td></tr><tr><td>1mm</td><td>→ 1</td></tr><tr><td>1in</td><td>→ 1</td></tr><tr><td>1deg</td><td>→ 1</td></tr><tr><td>1rad</td><td>→ 1</td></tr><tr><td>undef</td><td>→ undef</td></tr></tbody></table>
+        </div>
+    </div>
+    <hr class="gcmc_separator"><div class="gcmc_funcblock">
+        <div class="gcmc_function">
+            <span class="gcmc_type">string</span>
+            <span class="gcmc_func" id="to_string">to_string</span>
+            (
+            <span class="gcmc_arg">arg</span>,
+            <span class="gcmc_arg">...</span>
+            )
+        </div>
+        <table class="gcmc_args">
+            <tbody>
+                <tr>
+                    <td class="gcmc_arg">arg</td>
+                    <td class="gcmc_type">any type</td>
+                    <td class="gcmc_unit">&nbsp;</td>
+                    <td>Any value.</td>
+                </tr>
+            </tbody>
+        </table><div class="gcmc_description">
+            Returns <span class="gcmc_arg">arg</span> and any
+            additional arguments converted and concatenated to a string. Scalar values,
+            including those within <span class="gcmc_type">vector</span>s and
+            <span class="gcmc_type">vectorlist</span>s, have their units appended in
+            the string. Floating point values are printed with the number of decimals as
+            indicated on the command-line.
+        </div>
+    </div>
+    <hr class="gcmc_separator"><div class="gcmc_funcblock">
+        <div class="gcmc_function">
+            <span class="gcmc_type">string</span>
+            <span class="gcmc_func" id="to_chr">to_chr</span>
+            (
+            <span class="gcmc_type">integer:</span><span class="gcmc_arg">arg</span>
+            )
+        </div>
+        <table class="gcmc_args">
+            <tbody>
+                <tr>
+                    <td class="gcmc_arg">arg</td>
+                    <td class="gcmc_type">integer</td>
+                    <td class="gcmc_unit">none</td>
+                    <td>Value to convert to Unicode</td>
+                </tr>
+            </tbody>
+        </table><div class="gcmc_description">
+            Returns <span class="gcmc_arg">arg</span>
+            converted to a string with one Unicode character with the value of
+            <span class="gcmc_arg">arg</span>. The argument must be integer and have no
+            units attached or a warning wil be emitted. An additional warning is emitted in
+            pedantic mode if <span class="gcmc_arg">arg</span> is zero.
+        </div>
+    </div>
+    <hr class="gcmc_separator"><div class="gcmc_funcblock">
+        <div class="gcmc_function">
+            <span class="gcmc_type">integer</span>
+            <span class="gcmc_func" id="to_val">to_val</span>
+            (
+            <span class="gcmc_type">string:</span><span class="gcmc_arg">arg</span>
+            )
+        </div>
+        <table class="gcmc_args">
+            <tbody>
+                <tr>
+                    <td class="gcmc_arg">arg</td>
+                    <td class="gcmc_type">string</td>
+                    <td class="gcmc_unit">&nbsp;</td>
+                    <td>String (character) to convert to Unicode value</td>
+                </tr>
+            </tbody>
+        </table><div class="gcmc_description">
+            Returns the first Unicode character of
+            <span class="gcmc_arg">arg</span> converted to an integer value without units.
+            Any additional characters in the argument are ignored. Zero is returned if the
+            string is empty.
+        </div>
+    </div>
+    <hr class="gcmc_separator"><div class="gcmc_funcblock">
+        <div class="gcmc_function">
+            <span class="gcmc_type">float</span>
+            <span class="gcmc_func" id="to_float">to_float</span>
+            (
+            <span class="gcmc_type">scalar:</span><span class="gcmc_arg">arg</span>
+            )
+        </div>
+        <div class="gcmc_function">
+            <span class="gcmc_type">vector</span>
+            <span class="gcmc_func" id="to_float_1">to_float</span>
+            (
+            <span class="gcmc_type">vector:</span><span class="gcmc_arg">arg</span>
+            )
+        </div>
+        <div class="gcmc_function">
+            <span class="gcmc_type">vectorlist</span>
+            <span class="gcmc_func" id="to_float_2">to_float</span>
+            (
+            <span class="gcmc_type">vectorlist:</span><span class="gcmc_arg">arg</span>
+            )
+        </div>
+        <div class="gcmc_function">
+            <span class="gcmc_type">float</span>
+            <span class="gcmc_func" id="to_float_3">to_float</span>
+            (
+            <span class="gcmc_type">string:</span><span class="gcmc_arg">arg</span>
+            )
+        </div>
+        <table class="gcmc_args">
+            <tbody>
+                <tr>
+                    <td class="gcmc_arg">arg</td>
+                    <td class="gcmc_type">scalar</td>
+                    <td class="gcmc_unit">&nbsp;</td>
+                    <td>Any number.</td>
+                </tr>
+                <tr>
+                    <td class="gcmc_arg">arg</td>
+                    <td class="gcmc_type">vector</td>
+                    <td class="gcmc_unit">&nbsp;</td>
+                    <td>&nbsp;</td>
+                </tr>
+                <tr>
+                    <td class="gcmc_arg">arg</td>
+                    <td class="gcmc_type">vectorlist</td>
+                    <td class="gcmc_unit">&nbsp;</td>
+                    <td>&nbsp;</td>
+                </tr>
+                <tr>
+                    <td class="gcmc_arg">arg</td>
+                    <td class="gcmc_type">string</td>
+                    <td class="gcmc_unit">&nbsp;</td>
+                    <td>&nbsp;</td>
+                </tr>
+            </tbody>
+        </table><div class="gcmc_description">
+            Convert <span class="gcmc_arg">arg</span> to floating
+            point. Vectors and vectorlists are iterated over all scalars contained in them
+            and return vector or vectorlist. Undef is returned as undef and units are
+            preserved.<br><br>
+            Strings are converted into floating point numbers with optional units (mm, in,
+            mil, rad, deg). A string that cannot be converted returns 0.0 and emits a
+            warning. Both conversions to NaN (not a number) and Inf (infinity) result in a
+            warning. The special string "&lt;undef&gt;" will result in an undef value.
+        </div>
+    </div>
+    <hr class="gcmc_separator"><div class="gcmc_funcblock">
+        <div class="gcmc_function">
+            <span class="gcmc_type">integer</span>
+            <span class="gcmc_func" id="to_int">to_int</span>
+            (
+            <span class="gcmc_type">scalar:</span><span class="gcmc_arg">arg</span>
+            )
+        </div>
+        <div class="gcmc_function">
+            <span class="gcmc_type">vector</span>
+            <span class="gcmc_func" id="to_int_1">to_int</span>
+            (
+            <span class="gcmc_type">vector:</span><span class="gcmc_arg">arg</span>
+            )
+        </div>
+        <div class="gcmc_function">
+            <span class="gcmc_type">vectorlist</span>
+            <span class="gcmc_func" id="to_int_2">to_int</span>
+            (
+            <span class="gcmc_type">vectorlist:</span><span class="gcmc_arg">arg</span>
+            )
+        </div>
+        <div class="gcmc_function">
+            <span class="gcmc_type">integer</span>
+            <span class="gcmc_func" id="to_int_3">to_int</span>
+            (
+            <span class="gcmc_type">string:</span><span class="gcmc_arg">arg</span>
+            )
+        </div>
+        <div class="gcmc_function">
+            <span class="gcmc_type">integer</span>
+            <span class="gcmc_func" id="to_int_4">to_int</span>
+            (
+            <span class="gcmc_type">string:</span><span class="gcmc_arg">arg</span>,
+            <span class="gcmc_type">integer:</span><span class="gcmc_arg">base</span>
+            )
+        </div>
+        <table class="gcmc_args">
+            <tbody>
+                <tr>
+                    <td class="gcmc_arg">arg</td>
+                    <td class="gcmc_type">scalar</td>
+                    <td class="gcmc_unit">&nbsp;</td>
+                    <td>Any number.</td>
+                </tr>
+                <tr>
+                    <td class="gcmc_arg">arg</td>
+                    <td class="gcmc_type">vector</td>
+                    <td class="gcmc_unit">&nbsp;</td>
+                    <td>&nbsp;</td>
+                </tr>
+                <tr>
+                    <td class="gcmc_arg">arg</td>
+                    <td class="gcmc_type">vectorlist</td>
+                    <td class="gcmc_unit">&nbsp;</td>
+                    <td>&nbsp;</td>
+                </tr>
+                <tr>
+                    <td class="gcmc_arg">arg</td>
+                    <td class="gcmc_type">string</td>
+                    <td class="gcmc_unit">&nbsp;</td>
+                    <td>&nbsp;</td>
+                </tr>
+                <tr>
+                    <td class="gcmc_arg">base</td>
+                    <td class="gcmc_type">integer</td>
+                    <td class="gcmc_unit">none</td>
+                    <td>Conversion base must be zero or [2..36]</td>
+                </tr>
+            </tbody>
+        </table><div class="gcmc_description">
+            Convert <span class="gcmc_arg">arg</span> to
+            integer. Floating point numbers are converted by truncation. However, values
+            are subject to EPSILON calculation. Any floating point value within EPSILON of
+            an integer value will be rounded to that value. Examples:
+            <table><tbody><tr><td>1.5</td><td>→</td><td>1</td></tr><tr><td>-1.5</td><td>→</td><td>-1</td></tr><tr><td>0.999999999999999</td><td>→</td><td>1</td></tr></tbody></table>
+            Vectors and vectorlists are iterated over all scalars contained in them
+            and return vector or vectorlist. Undef is returned as undef and units are
+            preserved.<br><br>
+            String are converted to integer with optional units (mm, in, mil, rad, deg). A
+            string that cannot be converted returns 0 and emits a warning. The integer
+            number may be of octal, decimal or hexadecimal base using usual patterns.<br>
+            Integer numbers for base zero can be described by the following regex:
+            <table><tbody><tr><td>Octal</td><td>[+-]?0[0-7]*(mm|in|mil|rad|deg)?</td></tr><tr><td>Decimal</td><td>[+-]1[0-9]*(mm|in|mil|rad|deg)?</td></tr><tr><td>Hexadecimal</td><td>[+-]?0[xX][0-9a-fA-F]*(mm|in|mil|rad|deg)?</td></tr><tr><td>undef</td><td>&lt;undef&gt;</td></tr></tbody></table>
+            The optional <span class="gcmc_arg">base</span> argument may be used to specify
+            a specific conversion base for the number. This may or may not play nice with
+            attached units. The same problem exists for hexadecimal conversions and deg
+            units.<br><br><u>Note 1</u>: The variable base means that values with a leading zero are
+            <i>interpreted as octal numbers</i>.<br><u>Note 2</u>: Using 'mil' as unit may lead to loss of digits because the value
+            is automatically converted to inch and <i>remains</i> integer. A warning is
+            emitted if this happens. If you want the specific conversion, then you should use
+            <a class="gcmc_func" href="#to_int">to_int</a>(<a class="gcmc_func" href="#to_float">to_float</a>(milvalue))
+            instead, which will perform the same function without the warning.
+        </div>
+    </div>
+    <hr><h2 id="outflowfunc">Output flow functions</h2>
+    <div class="gcmc_funcblock">
+        <div class="gcmc_function">
+            <span class="gcmc_type">undef</span>
+            <span class="gcmc_func" id="literal">literal</span>
+            (
+            <span class="gcmc_arg">...</span>
+            )
+        </div>
+        <table class="gcmc_args">
+            <tbody>
+                <tr>
+                    <td class="gcmc_arg">...</td>
+                    <td class="gcmc_type">&nbsp;</td>
+                    <td class="gcmc_unit">&nbsp;</td>
+                    <td>Any type of argument</td>
+                </tr>
+            </tbody>
+        </table><div class="gcmc_description">
+            Outputs all arguments as text into the output.
+            Note that the <a href="#literal" class="gcmc_func">literal</a>() function does
+            not terminate the line with a newline and you must provide the newline as a
+            string argument if the line must be terminated. The SVG and DXF backends ignore
+            this function.<br><br>
+            Do <u>not</u> use the <a href="#literal" class="gcmc_func">literal</a>()
+            function lightly. It is extremely powerful but also very dangerous. It will
+            make your source a lot more unreadable and may introduce side-effects that you
+            did not intend.<br><br>
+            If you simply want to embed a comment or a G-code debug statement, you should
+            be using the <a href="#comment" class="gcmc_func">comment</a>() function
+            instead because it is much safer to use.
+        </div>
+    </div>
+    <hr class="gcmc_separator"><div class="gcmc_funcblock">
+        <div class="gcmc_function">
+            <span class="gcmc_type">undef</span>
+            <span class="gcmc_func" id="comment">comment</span>
+            (
+            <span class="gcmc_arg">...</span>
+            )
+        </div>
+        <table class="gcmc_args">
+            <tbody>
+                <tr>
+                    <td class="gcmc_arg">...</td>
+                    <td class="gcmc_type">&nbsp;</td>
+                    <td class="gcmc_unit">&nbsp;</td>
+                    <td>Any type of argument</td>
+                </tr>
+            </tbody>
+        </table><div class="gcmc_description">
+            Outputs all arguments as a G-code comment into
+            the output. The <a href="#comment" class="gcmc_func">comment</a>() function
+            will prepend a '(' and append a ')' including newline automatically.
+        </div>
+    </div>
+    <hr class="gcmc_separator"><div class="gcmc_funcblock">
+        <div class="gcmc_function">
+            <span class="gcmc_type">undef</span>
+            <span class="gcmc_func" id="message">message</span>
+            (
+            <span class="gcmc_arg">...</span>
+            )
+        </div>
+        <div class="gcmc_function">
+            <span class="gcmc_type">undef</span>
+            <span class="gcmc_func" id="warning">warning</span>
+            (
+            <span class="gcmc_arg">...</span>
+            )
+        </div>
+        <div class="gcmc_function">
+            <span class="gcmc_type">undef</span>
+            <span class="gcmc_func" id="error">error</span>
+            (
+            <span class="gcmc_arg">...</span>
+            )
+        </div>
+        <table class="gcmc_args">
+            <tbody>
+                <tr>
+                    <td class="gcmc_arg">...</td>
+                    <td class="gcmc_type">&nbsp;</td>
+                    <td class="gcmc_unit">&nbsp;</td>
+                    <td>Any type of argument</td>
+                </tr>
+            </tbody>
+        </table><div class="gcmc_description">
+            Outputs all arguments as text to the console. Origin
+            file and line number is prepended and a newline is appended if none in the last
+            argument. The gcmc executable will return non-zero if error() is
+            executed.
+        </div>
+    </div>
+
+    <hr><h2 id="queryfunc">Query functions</h2>
+    <div class="gcmc_funcblock">
+        <div class="gcmc_function">
+            <span class="gcmc_type">integer</span>
+            <span class="gcmc_func" id="isfloat">isfloat</span>
+            (
+            <span class="gcmc_arg">arg</span>
+            )
+        </div>
+        <div class="gcmc_function">
+            <span class="gcmc_type">integer</span>
+            <span class="gcmc_func" id="isint">isint</span>
+            (
+            <span class="gcmc_arg">arg</span>
+            )
+        </div>
+        <div class="gcmc_function">
+            <span class="gcmc_type">integer</span>
+            <span class="gcmc_func" id="isscalar">isscalar</span>
+            (
+            <span class="gcmc_arg">arg</span>
+            )
+        </div>
+        <div class="gcmc_function">
+            <span class="gcmc_type">integer</span>
+            <span class="gcmc_func" id="isstring">isstring</span>
+            (
+            <span class="gcmc_arg">arg</span>
+            )
+        </div>
+        <div class="gcmc_function">
+            <span class="gcmc_type">integer</span>
+            <span class="gcmc_func" id="isundef">isundef</span>
+            (
+            <span class="gcmc_arg">arg</span>
+            )
+        </div>
+        <div class="gcmc_function">
+            <span class="gcmc_type">integer</span>
+            <span class="gcmc_func" id="isvector">isvector</span>
+            (
+            <span class="gcmc_arg">arg</span>
+            )
+        </div>
+        <div class="gcmc_function">
+            <span class="gcmc_type">integer</span>
+            <span class="gcmc_func" id="isvectorlist">isvectorlist</span>
+            (
+            <span class="gcmc_arg">arg</span>
+            )
+        </div>
+        <div class="gcmc_description">
+            These functions return an integer (boolean) which is
+            true (1) if <span class="gcmc_arg">arg</span> is of tested type and false (0)
+            otherwise.<br>
+            Function <a class="gcmc_func" href="#isscalar">isscalar</a>(<span class="gcmc_arg">arg</span>) equals
+            "<a class="gcmc_func" href="#isint">isint</a>(<span class="gcmc_arg">arg</span>) || <a class="gcmc_func" href="#isfloat">isfloat</a>(<span class="gcmc_arg">arg</span>)".
+        </div>
+    </div>
+    <hr class="gcmc_separator"><div class="gcmc_funcblock">
+        <div class="gcmc_function">
+            <span class="gcmc_type">integer</span>
+            <span class="gcmc_func" id="isangle">isangle</span>
+            (
+            <span class="gcmc_type">scalar:</span><span class="gcmc_arg">arg</span>
+            )
+        </div>
+        <div class="gcmc_function">
+            <span class="gcmc_type">integer</span>
+            <span class="gcmc_func" id="isdistance">isdistance</span>
+            (
+            <span class="gcmc_type">scalar:</span><span class="gcmc_arg">arg</span>
+            )
+        </div>
+        <div class="gcmc_function">
+            <span class="gcmc_type">integer</span>
+            <span class="gcmc_func" id="isdeg">isdeg</span>
+            (
+            <span class="gcmc_type">scalar:</span><span class="gcmc_arg">arg</span>
+            )
+        </div>
+        <div class="gcmc_function">
+            <span class="gcmc_type">integer</span>
+            <span class="gcmc_func" id="israd">israd</span>
+            (
+            <span class="gcmc_type">scalar:</span><span class="gcmc_arg">arg</span>
+            )
+        </div>
+        <div class="gcmc_function">
+            <span class="gcmc_type">integer</span>
+            <span class="gcmc_func" id="ismm">ismm</span>
+            (
+            <span class="gcmc_type">scalar:</span><span class="gcmc_arg">arg</span>
+            )
+        </div>
+        <div class="gcmc_function">
+            <span class="gcmc_type">integer</span>
+            <span class="gcmc_func" id="isinch">isinch</span>
+            (
+            <span class="gcmc_type">scalar:</span><span class="gcmc_arg">arg</span>
+            )
+        </div>
+        <div class="gcmc_function">
+            <span class="gcmc_type">integer</span>
+            <span class="gcmc_func" id="isnone">isnone</span>
+            (
+            <span class="gcmc_type">scalar:</span><span class="gcmc_arg">arg</span>
+            )
+        </div>
+        <div class="gcmc_description">
+            These functions return an integer (boolean) which is
+            true (1) if <span class="gcmc_arg">arg</span> has the tested units and false (0)
+            otherwise.<br>
+            Function <a class="gcmc_func" href="#isangle">isangle</a>(<span class="gcmc_arg">arg</span>) equals
+            "<a class="gcmc_func" href="#israd">israd</a>(<span class="gcmc_arg">arg</span>) || <a class="gcmc_func" href="#isdeg">isdeg</a>(<span class="gcmc_arg">arg</span>)".<br>
+            Function <a class="gcmc_func" href="#isdistance">isdistance</a>(<span class="gcmc_arg">arg</span>) equals
+            "<a class="gcmc_func" href="#ismm">ismm</a>(<span class="gcmc_arg">arg</span>) || <a class="gcmc_func" href="#isinch">isinch</a>(<span class="gcmc_arg">arg</span>)".
+        </div>
+    </div>
+    <hr class="gcmc_separator"><div class="gcmc_funcblock">
+        <div class="gcmc_function">
+            <span class="gcmc_type">integer</span>
+            <span class="gcmc_func" id="isgcode">isgcode</span>
+            (
+            )
+        </div>
+        <div class="gcmc_function">
+            <span class="gcmc_type">integer</span>
+            <span class="gcmc_func" id="isdxf">isdxf</span>
+            (
+            )
+        </div>
+        <div class="gcmc_function">
+            <span class="gcmc_type">integer</span>
+            <span class="gcmc_func" id="issvg">issvg</span>
+            (
+            )
+        </div>
+        <div class="gcmc_description">
+            These function return an integer (boolean) which is
+            true (1) is the current output format is set as queried and false (0)
+            otherwise.
+        </div>
+    </div>
+    <hr class="gcmc_separator"><div class="gcmc_funcblock">
+        <div class="gcmc_function">
+            <span class="gcmc_type">integer</span>
+            <span class="gcmc_func" id="isdefined">isdefined</span>
+            (
+            <span class="gcmc_type">string:</span><span class="gcmc_arg">var</span>
+            )
+        </div>
+        <div class="gcmc_description">
+            Returns an integer (boolean) which is true (1) if a
+            variable with name <span class="gcmc_arg">var</span> is currently defined in either
+            local or global scope and false (0) otherwise.
+        </div>
+    </div>
+    <hr class="gcmc_separator"><div class="gcmc_funcblock">
+        <div class="gcmc_function">
+            <span class="gcmc_type">integer|undef</span>
+            <span class="gcmc_func" id="isconst">isconst</span>
+            (
+            <span class="gcmc_type">string:</span><span class="gcmc_arg">var</span>
+            )
+        </div>
+        <div class="gcmc_description">
+            Returns an integer (boolean) which is true (1) if
+            a variable with name <span class="gcmc_arg">var</span> is constant and false
+            (0) otherwise. The return value is <span class="gcmc_type">undef</span> if the
+            variable is not defined in local or global scope.
+        </div>
+    </div>
+    <hr class="gcmc_separator"><div class="gcmc_funcblock">
+        <div class="gcmc_function">
+            <span class="gcmc_type">integer</span>
+            <span class="gcmc_func" id="ismodemm">ismodemm</span>
+            (
+            )
+        </div>
+        <div class="gcmc_description">
+            Returns an integer (boolean) which is true (1) if
+            gcmc is run in millimeter mode and false (0) if run in inch mode (option
+            -i/--imperial).
+        </div>
+    </div>
+    <hr class="gcmc_separator"><div class="gcmc_funcblock">
+        <div class="gcmc_function">
+            <span class="gcmc_type">integer</span>
+            <span class="gcmc_func" id="isrelative">isrelative</span>
+            (
+            )
+        </div>
+        <div class="gcmc_description">
+            Returns an integer (boolean) which is true (1) if the
+            output is set to relative mode (-r option) and false (0) otherwise.
+        </div>
+    </div>
+
+    <hr><h2 id="movefunc">Movement functions</h2>
+    <div class="gcmc_funcblock">
+        <div class="gcmc_function">
+            <span class="gcmc_type">vector</span>
+            <span class="gcmc_func" id="arc_ccw">arc_ccw</span>
+            (
+            <span class="gcmc_type">vector:</span><span class="gcmc_arg">endpoint</span>,
+            <span class="gcmc_type">scalar:</span><span class="gcmc_arg">radius</span>
+            )
+        </div>
+        <div class="gcmc_function">
+            <span class="gcmc_type">vector</span>
+            <span class="gcmc_func" id="arc_ccw_1">arc_ccw</span>
+            (
+            <span class="gcmc_type">vector:</span><span class="gcmc_arg">endpoint</span>,
+            <span class="gcmc_type">scalar:</span><span class="gcmc_arg">radius</span>,
+            <span class="gcmc_type">scalar:</span><span class="gcmc_arg">turns</span>
+            )
+        </div>
+        <div class="gcmc_function">
+            <span class="gcmc_type">vector</span>
+            <span class="gcmc_func" id="arc_ccw_r">arc_ccw_r</span>
+            (
+            <span class="gcmc_type">vector:</span><span class="gcmc_arg">endpoint</span>,
+            <span class="gcmc_type">scalar:</span><span class="gcmc_arg">radius</span>
+            )
+        </div>
+        <div class="gcmc_function">
+            <span class="gcmc_type">vector</span>
+            <span class="gcmc_func" id="arc_ccw_r_1">arc_ccw_r</span>
+            (
+            <span class="gcmc_type">vector:</span><span class="gcmc_arg">endpoint</span>,
+            <span class="gcmc_type">scalar:</span><span class="gcmc_arg">radius</span>,
+            <span class="gcmc_type">scalar:</span><span class="gcmc_arg">turns</span>
+            )
+        </div>
+        <div class="gcmc_function">
+            <span class="gcmc_type">vector</span>
+            <span class="gcmc_func" id="arc_cw">arc_cw</span>
+            (
+            <span class="gcmc_type">vector:</span><span class="gcmc_arg">endpoint</span>,
+            <span class="gcmc_type">scalar:</span><span class="gcmc_arg">radius</span>
+            )
+        </div>
+        <div class="gcmc_function">
+            <span class="gcmc_type">vector</span>
+            <span class="gcmc_func" id="arc_cw_1">arc_cw</span>
+            (
+            <span class="gcmc_type">vector:</span><span class="gcmc_arg">endpoint</span>,
+            <span class="gcmc_type">scalar:</span><span class="gcmc_arg">radius</span>,
+            <span class="gcmc_type">scalar:</span><span class="gcmc_arg">turns</span>
+            )
+        </div>
+        <div class="gcmc_function">
+            <span class="gcmc_type">vector</span>
+            <span class="gcmc_func" id="arc_cw_r">arc_cw_r</span>
+            (
+            <span class="gcmc_type">vector:</span><span class="gcmc_arg">endpoint</span>,
+            <span class="gcmc_type">scalar:</span><span class="gcmc_arg">radius</span>
+            )
+        </div>
+        <div class="gcmc_function">
+            <span class="gcmc_type">vector</span>
+            <span class="gcmc_func" id="arc_cw_r_1">arc_cw_r</span>
+            (
+            <span class="gcmc_type">vector:</span><span class="gcmc_arg">endpoint</span>,
+            <span class="gcmc_type">scalar:</span><span class="gcmc_arg">radius</span>,
+            <span class="gcmc_type">scalar:</span><span class="gcmc_arg">turns</span>
+            )
+        </div>
+        <div class="gcmc_args">
+            <table>
+                <tbody>
+                    <tr>
+                        <td class="gcmc_arg">endpoint</td>
+                        <td class="gcmc_type">vector</td>
+                        <td class="gcmc_unit">[distance]</td>
+                        <td>Endpoint coordinate of the arc.</td>
+                    </tr>
+                    <tr>
+                        <td class="gcmc_arg">radius</td>
+                        <td class="gcmc_type">scalar</td>
+                        <td class="gcmc_unit">[angular]</td>
+                        <td>Radius of the arc. Radius must not be zero.</td>
+                    </tr>
+                    <tr>
+                        <td class="gcmc_arg">turns</td>
+                        <td class="gcmc_type">scalar</td>
+                        <td class="gcmc_unit">[no&nbsp;units]</td>
+                        <td>Number of turns to perform. Turns should be integer and must be larger than zero.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="gcmc_description">
+            Perform a counter clockwise (ccw) or clockwise (cw)
+            arc from the current position to <span class="gcmc_arg">endpoint</span> with radius
+            <span class="gcmc_arg">radius</span>. The arc will be shortest angular movement with
+            positive radius and largest angular movement with negative radius. Optional
+            <span class="gcmc_arg">turns</span> sets the number of turns to perform. Functions
+            <a class="gcmc_func" href="#arc_ccw_r">arc_ccw_r</a>() and <a class="gcmc_func" href="#arc_ccw_r">arc_cw_r</a>()
+            use relative addressing. The argument endpoint returned.
+        </div>
+    </div>
+    <hr class="gcmc_separator"><div class="gcmc_funcblock">
+        <div class="gcmc_function">
+            <span class="gcmc_type">undef</span>
+            <span class="gcmc_func" id="circle_ccw">circle_ccw</span>
+            (
+            <span class="gcmc_type">vector:</span><span class="gcmc_arg">centerpoint</span>
+            )
+        </div>
+        <div class="gcmc_function">
+            <span class="gcmc_type">undef</span>
+            <span class="gcmc_func" id="circle_ccw_1">circle_ccw</span>
+            (
+            <span class="gcmc_type">vector:</span><span class="gcmc_arg">centerpoint</span>,
+            <span class="gcmc_type">scalar:</span><span class="gcmc_arg">turns</span>
+            )
+        </div>
+        <div class="gcmc_function">
+            <span class="gcmc_type">undef</span>
+            <span class="gcmc_func" id="circle_ccw_2">circle_ccw</span>
+            (
+            <span class="gcmc_type">scalar:</span><span class="gcmc_arg">radius</span>,
+            <span class="gcmc_type">scalar:</span><span class="gcmc_arg">angle</span>
+            )
+        </div>
+        <div class="gcmc_function">
+            <span class="gcmc_type">undef</span>
+            <span class="gcmc_func" id="circle_ccw_r">circle_ccw_r</span>
+            (
+            <span class="gcmc_type">vector:</span><span class="gcmc_arg">centerpoint</span>
+            )
+        </div>
+        <div class="gcmc_function">
+            <span class="gcmc_type">undef</span>
+            <span class="gcmc_func" id="circle_ccw_r_1">circle_ccw_r</span>
+            (
+            <span class="gcmc_type">vector:</span><span class="gcmc_arg">centerpoint</span>,
+            <span class="gcmc_type">scalar:</span><span class="gcmc_arg">turns</span>
+            )
+        </div>
+        <div class="gcmc_function">
+            <span class="gcmc_type">undef</span>
+            <span class="gcmc_func" id="circle_cw">circle_cw</span>
+            (
+            <span class="gcmc_type">vector:</span><span class="gcmc_arg">centerpoint</span>
+            )
+        </div>
+        <div class="gcmc_function">
+            <span class="gcmc_type">undef</span>
+            <span class="gcmc_func" id="circle_cw_1">circle_cw</span>
+            (
+            <span class="gcmc_type">vector:</span><span class="gcmc_arg">centerpoint</span>,
+            <span class="gcmc_type">scalar:</span><span class="gcmc_arg">turns</span>
+            )
+        </div>
+        <div class="gcmc_function">
+            <span class="gcmc_type">undef</span>
+            <span class="gcmc_func" id="circle_cw_2">circle_cw</span>
+            (
+            <span class="gcmc_type">scalar:</span><span class="gcmc_arg">radius</span>,
+            <span class="gcmc_type">scalar:</span><span class="gcmc_arg">angle</span>,
+            <span class="gcmc_type">scalar:</span><span class="gcmc_arg">turns</span>
+            )
+        </div>
+        <div class="gcmc_function">
+            <span class="gcmc_type">undef</span>
+            <span class="gcmc_func" id="circle_cw_r">circle_cw_r</span>
+            (
+            <span class="gcmc_type">vector:</span><span class="gcmc_arg">centerpoint</span>
+            )
+        </div>
+        <div class="gcmc_function">
+            <span class="gcmc_type">undef</span>
+            <span class="gcmc_func" id="circle_cw_r_1">circle_cw_r</span>
+            (
+            <span class="gcmc_type">vector:</span><span class="gcmc_arg">centerpoint</span>,
+            <span class="gcmc_type">scalar:</span><span class="gcmc_arg">turns</span>
+            )
+        </div>
+        <table class="gcmc_args">
+            <tbody>
+                <tr>
+                    <td class="gcmc_arg">centerpoint</td>
+                    <td class="gcmc_type">vector</td>
+                    <td class="gcmc_unit">[distance]</td>
+                    <td>Coordinate of the center of the circle.</td>
+                </tr>
+                <tr>
+                    <td class="gcmc_arg">radius</td>
+                    <td class="gcmc_type">scalar</td>
+                    <td class="gcmc_unit">[distance]</td>
+                    <td>Radius of the circle.</td>
+                </tr>
+                <tr>
+                    <td class="gcmc_arg">angle</td>
+                    <td class="gcmc_type">scalar</td>
+                    <td class="gcmc_unit">[angular]</td>
+                    <td>Angle of the vector from the current point to the center of the circle.</td>
+                </tr>
+                <tr>
+                    <td class="gcmc_arg">turns</td>
+                    <td class="gcmc_type">scalar</td>
+                    <td class="gcmc_unit">[no&nbsp;units]</td>
+                    <td>Number of turns to perform. Turns should be integer and must be larger than zero.</td>
+                </tr>
+            </tbody>
+        </table><div class="gcmc_description">
+            Perform a clockwise (cw) or counter clockwise (ccw)
+            circle with radius <a class="gcmc_func" href="#length">length</a>(<span class="gcmc_arg">centerpoint</span>)
+            for the <a class="gcmc_func" href="#circle_cw_r">circle_cw_r</a> and <a class="gcmc_func" href="#circle_ccw_r">circle_ccw_r</a>
+            functions and radius <a class="gcmc_func" href="#length">length</a>(<span class="gcmc_arg">centerpoint</span>-<a class="gcmc_func" href="#position">position</a>())
+            for the <a class="gcmc_func" href="#circle_cw">circle_cw</a> and <a class="gcmc_func" href="#circle_ccw">circle_ccw</a>
+            functions and where <span class="gcmc_arg">centerpoint</span> is the center point or
+            the circle.  Optional <span class="gcmc_arg">turns</span> sets the number of turns
+            to perform. The specified <span class="gcmc_arg">centerpoint</span> is a relative
+            position for the <a class="gcmc_func" href="#circle_cw_r">circle_cw_r</a> and <a class="gcmc_func" href="#circle_ccw_r">circle_ccw_r</a>
+            functions and an absolute coordinate for <a class="gcmc_func" href="#circle_cw">circle_cw</a>
+            and <a class="gcmc_func" href="#circle_ccw">circle_ccw</a>. The non-active plane coordinate
+            may be used to create a helical movement.<br><br>
+            The scalar form performs a clockwise (cw) or counter clockwise (ccw)
+            circle with radius <span class="gcmc_arg">radius</span>. The center point is located
+            at a vector calculated from the current position of length <span class="gcmc_arg">radius</span>
+            and angled at <span class="gcmc_arg">angle</span>.  Optional <span class="gcmc_arg">turns</span>
+            sets the number of turns to perform. The circle is always performed within the
+            active plane.
+        </div>
+    </div>
+    <hr class="gcmc_separator"><div class="gcmc_funcblock">
+        <div class="gcmc_function">
+            <span class="gcmc_type">undef</span>
+            <span class="gcmc_func" id="drill">drill</span>
+            (
+            <span class="gcmc_type">vector:</span><span class="gcmc_arg">drillpoint</span>,
+            <span class="gcmc_type">scalar:</span><span class="gcmc_arg">retract</span>,
+            <span class="gcmc_type">scalar:</span><span class="gcmc_arg">increment</span>
+            )
+        </div>
+        <div class="gcmc_function">
+            <span class="gcmc_type">undef</span>
+            <span class="gcmc_func" id="drill_1">drill</span>
+            (
+            <span class="gcmc_type">vector:</span><span class="gcmc_arg">drillpoint</span>,
+            <span class="gcmc_type">scalar:</span><span class="gcmc_arg">retract</span>,
+            <span class="gcmc_type">scalar:</span><span class="gcmc_arg">increment</span>,
+            <span class="gcmc_type">scalar:</span><span class="gcmc_arg">repeat</span>
+            )
+        </div>
+        <table class="gcmc_args">
+            <tbody>
+                <tr>
+                    <td class="gcmc_arg">drillpoint</td>
+                    <td class="gcmc_type">vector</td>
+                    <td class="gcmc_unit">[distance]</td>
+                    <td>Endpoint of the drill-hole.</td>
+                </tr>
+                <tr>
+                    <td class="gcmc_arg">retract</td>
+                    <td class="gcmc_type">scalar</td>
+                    <td class="gcmc_unit">[distance]</td>
+                    <td>Endpoint of the Z-axis after drilling.</td>
+                </tr>
+                <tr>
+                    <td class="gcmc_arg">increment</td>
+                    <td class="gcmc_type">scalar</td>
+                    <td class="gcmc_unit">[distance]</td>
+                    <td>Increments of the Z-axis before retracting temporarily.</td>
+                </tr>
+                <tr>
+                    <td class="gcmc_arg">repeat</td>
+                    <td class="gcmc_type">scalar</td>
+                    <td class="gcmc_unit">[no&nbsp;units]</td>
+                    <td>Number of repeats of the drill-cycle. Repeats must be larger the zero.</td>
+                </tr>
+            </tbody>
+        </table><div class="gcmc_description">
+            Perform a drill-cycle to <span class="gcmc_arg">drillpoint</span>
+            with <span class="gcmc_arg">retract</span> denoting the retract (Z) position after the cycle,
+            <span class="gcmc_arg">increment</span> the Z-axis increments and optional
+            <span class="gcmc_arg">repeat</span> repeats.
+        </div>
+    </div>
+    <hr class="gcmc_separator"><div class="gcmc_funcblock">
+        <div class="gcmc_function">
+            <span class="gcmc_type">vector</span>
+            <span class="gcmc_func" id="goto">goto</span>
+            (
+            <span class="gcmc_type">vector:</span><span class="gcmc_arg">endpoint</span>
+            )
+        </div>
+        <div class="gcmc_function">
+            <span class="gcmc_type">vector</span>
+            <span class="gcmc_func" id="goto_1">goto</span>
+            (
+            <span class="gcmc_type">vectorlist:</span><span class="gcmc_arg">points</span>
+            )
+        </div>
+        <div class="gcmc_function">
+            <span class="gcmc_type">vector</span>
+            <span class="gcmc_func" id="goto_r">goto_r</span>
+            (
+            <span class="gcmc_type">vector:</span><span class="gcmc_arg">endpoint</span>
+            )
+        </div>
+        <div class="gcmc_function">
+            <span class="gcmc_type">vector</span>
+            <span class="gcmc_func" id="goto_r_1">goto_r</span>
+            (
+            <span class="gcmc_type">vectorlist:</span><span class="gcmc_arg">points</span>
+            )
+        </div>
+        <table class="gcmc_args">
+            <tbody>
+                <tr>
+                    <td class="gcmc_arg">endpoint</td>
+                    <td class="gcmc_type">vector</td>
+                    <td class="gcmc_unit">[distance/anglular]</td>
+                    <td>Endpoint of the rapid</td>
+                </tr>
+                <tr>
+                    <td class="gcmc_arg">points</td>
+                    <td class="gcmc_type">vectorlist</td>
+                    <td class="gcmc_unit">[distance/anglular]</td>
+                    <td>Points to visit using rapids</td>
+                </tr>
+            </tbody>
+        </table><div class="gcmc_description">
+            Rapid move (G0) to position <span class="gcmc_arg">endpoint</span>,
+            or all position in vectorlist <span class="gcmc_arg">points</span>.
+            The <span class="gcmc_arg">endpoint</span>/<span class="gcmc_arg">points</span>
+            position is an absolute position for <a class="gcmc_func" href="#goto">goto</a>()
+            and a relative position for <a class="gcmc_func" href="#goto_r">goto_r</a>().<br>
+            The <span class="gcmc_arg">endpoint</span> vector and each vector in vectorlist
+            <span class="gcmc_arg">points</span> may consist of up to nine coordinates and
+            are interpreted for axis XYZABCUVW respectively. Coordinates for axes XYZ and
+            UVW are interpreted with distance units and axes ABC are interpreted with
+            angular units. The absolute position before the movement is returned.
+        </div>
+    </div>
+    <hr class="gcmc_separator"><div class="gcmc_funcblock">
+        <div class="gcmc_function">
+            <span class="gcmc_type">undef</span>
+            <span class="gcmc_func" id="layer">layer</span>
+            (
+            <span class="gcmc_type">integer:</span><span class="gcmc_arg">id</span>
+            )
+        </div>
+        <div class="gcmc_function">
+            <span class="gcmc_type">undef</span>
+            <span class="gcmc_func" id="layer_1">layer</span>
+            (
+            <span class="gcmc_type">string:</span><span class="gcmc_arg">name</span>
+            )
+        </div>
+        <table class="gcmc_args">
+            <tbody>
+                <tr>
+                    <td class="gcmc_arg">id</td>
+                    <td class="gcmc_type">integer</td>
+                    <td class="gcmc_unit">[none]</td>
+                    <td>One-based index in the layer stack</td>
+                </tr>
+                <tr>
+                    <td class="gcmc_arg">name</td>
+                    <td class="gcmc_type">string</td>
+                    <td class="gcmc_unit"></td>
+                    <td>Name of the layer to activate</td>
+                </tr>
+            </tbody>
+        </table><div class="gcmc_description">
+            Set the active layer on which to output feed moves
+            from the <a class="gcmc_func" href="#move">move</a>(),
+            <a class="gcmc_func" href="#move_r">move_r</a>(),
+            <a class="gcmc_func" href="#arc_cw">arc_*</a>(),
+            <a class="gcmc_func" href="#circle_cw">circle_*</a>() and all other feed-move
+            producing functions.<br><br>
+            The <span class="gcmc_arg">id</span> argument is an index in the set of layers
+            defined by the <a class="gcmc_func" href="#layerstack">layerstack</a>() call.
+            The index is one-based. Alternatively, the active layer can be set by
+            specifying the name of the layer using the <span class="gcmc_arg">name</span>
+            argument. The <span class="gcmc_arg">name</span> must have the same spelling as
+            used in the  <a class="gcmc_func" href="#layerstack">layerstack</a>() call or a
+            warning will be issued.<br><br>
+            Layers are transparent to the G-Code backend and are simply ignored. All rapid
+            and feed movement is output regardless of the active layer. Currently, only SVG
+            and DXF backends make use of the layer settings.<br><br><div class="gcmc_indent">
+                <b>Note</b>: Layer names are limited to characters
+                [a-zA-Z0-9_]. Any other characters result in an error.
+            </div>
+            <br>
+            Example:
+<pre class="gcmc_example">square = {[-1,-1], [-1,1], [1,1], [1,-1]};
+
+<span class="gcmc_comment">/* Declare and set the order of the layers */</span>
+<a class="gcmc_func" href="#layerstack">layerstack</a>("layer1", "layer2", "layer3");
+
+<a class="gcmc_func" href="#layer">layer</a>(2);		<span class="gcmc_comment">/* Set the active layer */</span>
+<a class="gcmc_func" href="#goto">goto</a>(square[-1] * 20.0mm);
+<a class="gcmc_func" href="#move">move</a>(square * 20.0mm);
+
+<a class="gcmc_func" href="#layer">layer</a>(3);
+<a class="gcmc_func" href="#goto">goto</a>(square[-1] * 30.0mm);
+<a class="gcmc_func" href="#move">move</a>(square * 30.0mm);
+
+<a class="gcmc_func" href="#layer">layer</a>("layer1");	<span class="gcmc_comment">/* Can also be set by name */</span>
+<a class="gcmc_func" href="#goto">goto</a>(square[-1] * 10.0mm);
+<a class="gcmc_func" href="#move">move</a>(square * 10.0mm);
+</pre>
+        </div>
+    </div>
+    <hr class="gcmc_separator"><div class="gcmc_funcblock">
+        <div class="gcmc_function">
+            <span class="gcmc_type">undef</span>
+            <span class="gcmc_func" id="layerstack">layerstack</span>
+            (
+            <span class="gcmc_type">string:</span><span class="gcmc_arg">name1</span>&nbsp;[,
+            <span class="gcmc_type">string:</span><span class="gcmc_arg">name2</span>&nbsp;[,&nbsp;...]&nbsp;]
+            )
+        </div>
+        <table class="gcmc_args">
+            <tbody>
+                <tr>
+                    <td class="gcmc_arg">name*</td>
+                    <td class="gcmc_type">string</td>
+                    <td class="gcmc_unit"></td>
+                    <td>Name of the layers</td>
+                </tr>
+            </tbody>
+        </table><div class="gcmc_description">
+            Declare the stack of layers to be used in DXF and SVG output. Each
+            <span class="gcmc_arg">name</span> argument is entered in the stack in the
+            order in which they are specified. The output routine will output the layers in
+            that order.<br><br>
+            The <a class="gcmc_func" href="#layerstack">layerstack</a>() function
+            automatically activates the first layer in the argument list after the call. A
+            call to <a class="gcmc_func" href="#layer">layer</a>() must be used to change
+            the active layer.<br><br><div class="gcmc_indent">
+                <b>Note</b>: Layer names are limited to characters
+                [a-zA-Z0-9_]. Any other characters result in an error.
+            </div>
+        </div>
+    </div>
+    <hr class="gcmc_separator"><div class="gcmc_funcblock">
+        <div class="gcmc_function">
+            <span class="gcmc_type">vector</span>
+            <span class="gcmc_func" id="move">move</span>
+            (
+            <span class="gcmc_type">vector:</span><span class="gcmc_arg">endpoint</span>
+            )
+        </div>
+        <div class="gcmc_function">
+            <span class="gcmc_type">vector</span>
+            <span class="gcmc_func" id="move_1">move</span>
+            (
+            <span class="gcmc_type">vector:</span><span class="gcmc_arg">endpoint</span>,
+            <span class="gcmc_type">scalar:</span><span class="gcmc_arg">rate</span>
+            )
+        </div>
+        <div class="gcmc_function">
+            <span class="gcmc_type">vector</span>
+            <span class="gcmc_func" id="move_2">move</span>
+            (
+            <span class="gcmc_type">vectorlist:</span><span class="gcmc_arg">points</span>
+            )
+        </div>
+        <div class="gcmc_function">
+            <span class="gcmc_type">vector</span>
+            <span class="gcmc_func" id="move_3">move</span>
+            (
+            <span class="gcmc_type">vectorlist:</span><span class="gcmc_arg">points</span>,
+            <span class="gcmc_type">scalar:</span><span class="gcmc_arg">rate</span>
+            )
+        </div>
+        <div class="gcmc_function">
+            <span class="gcmc_type">vector</span>
+            <span class="gcmc_func" id="move_r">move_r</span>
+            (
+            <span class="gcmc_type">vector:</span><span class="gcmc_arg">endpoint</span>
+            )
+        </div>
+        <div class="gcmc_function">
+            <span class="gcmc_type">vector</span>
+            <span class="gcmc_func" id="move_r_1">move_r</span>
+            (
+            <span class="gcmc_type">vector:</span><span class="gcmc_arg">endpoint</span>,
+            <span class="gcmc_type">scalar:</span><span class="gcmc_arg">rate</span>
+            )
+        </div>
+        <div class="gcmc_function">
+            <span class="gcmc_type">vector</span>
+            <span class="gcmc_func" id="move_r_2">move_r</span>
+            (
+            <span class="gcmc_type">vectorlist:</span><span class="gcmc_arg">points</span>
+            )
+        </div>
+        <div class="gcmc_function">
+            <span class="gcmc_type">vector</span>
+            <span class="gcmc_func" id="move_r_3">move_r</span>
+            (
+            <span class="gcmc_type">vectorlist:</span><span class="gcmc_arg">points</span>,
+            <span class="gcmc_type">scalar:</span><span class="gcmc_arg">rate</span>
+            )
+        </div>
+        <table class="gcmc_args">
+            <tbody>
+                <tr>
+                    <td class="gcmc_arg">endpoint</td>
+                    <td class="gcmc_type">vector</td>
+                    <td class="gcmc_unit">[distance/angular]</td>
+                    <td>Endpoint of the feed move</td>
+                </tr>
+                <tr>
+                    <td class="gcmc_arg">points</td>
+                    <td class="gcmc_type">vectorlist</td>
+                    <td class="gcmc_unit">[distance/angular]</td>
+                    <td>A list of points to visit</td>
+                </tr>
+                <tr>
+                    <td class="gcmc_arg">rate</td>
+                    <td class="gcmc_type">scalar</td>
+                    <td class="gcmc_unit">[distance]</td>
+                    <td>Maximum feed rate override; must be larger than zero.</td>
+                </tr>
+            </tbody>
+        </table><div class="gcmc_description">
+            Feed move (G1) to position <span class="gcmc_arg">endpoint</span>,
+            or all position in vectorlist <span class="gcmc_arg">points</span>.
+            The <span class="gcmc_arg">endpoint</span>/<span class="gcmc_arg">points</span> position is an absolute position for
+            <a class="gcmc_func" href="#move">move</a>() and a relative position for <a class="gcmc_func" href="#move_r">move_r</a>().
+            The optional <span class="gcmc_arg">rate</span> argument sets the feed override
+            (F-parameter) for this move and is interpreted in the context of the
+            <a class="gcmc_func" href="#feedmode">feedmode</a>() setting.<br>
+            The <span class="gcmc_arg">endpoint</span> vector and each vector in vectorlist
+            <span class="gcmc_arg">points</span> may consist of up to nine coordinates and
+            are interpreted for axis XYZABCUVW respectively. Coordinates for axes XYZ and
+            UVW are interpreted with distance units and axes ABC are interpreted with
+            angular units. The absolute position before the movement is returned.
+        </div>
+    </div>
+    <hr class="gcmc_separator"><div class="gcmc_funcblock">
+        <div class="gcmc_function">
+            <span class="gcmc_type">integer</span>
+            <span class="gcmc_func" id="plane">plane</span>
+            (
+            <span class="gcmc_type">scalar:</span><span class="gcmc_arg">mode</span>
+            )
+        </div>
+        <div class="gcmc_function">
+            <span class="gcmc_type">integer</span>
+            <span class="gcmc_func" id="plane_1">plane</span>
+            (
+            <span class="gcmc_type">string:</span><span class="gcmc_arg">mode</span>
+            )
+        </div>
+        <table class="gcmc_args">
+            <tbody>
+                <tr>
+                    <td class="gcmc_arg">mode</td>
+                    <td class="gcmc_type">scalar</td>
+                    <td class="gcmc_unit">[no&nbsp;units]</td>
+                    <td>Active cutting plane (see below).</td>
+                </tr>
+                <tr>
+                    <td class="gcmc_arg">mode</td>
+                    <td class="gcmc_type">string</td>
+                    <td class="gcmc_unit">&nbsp;</td>
+                    <td>Active cutting plane (see below). Mode is case-insensitive.</td>
+                </tr>
+            </tbody>
+        </table><div class="gcmc_description">
+            Set the current operational plane to <span class="gcmc_arg">mode</span> or
+            return the current active plane. Argument <span class="gcmc_arg">mode</span>
+            may be one of the following:
+            <table><tbody><tr><td>&nbsp;</td><td>scalar</td><td>(value)</td><td>string</td><td>Description</td></tr><tr><td>•</td><td>PLANE_QUERY</td><td>(undef)</td><td></td><td>return current plane as integer</td></tr><tr><td>•</td><td>PLANE_XY</td><td>(0)</td><td>"XY"</td><td>set XY plane and return previous value (G17, default set in prologue)</td></tr><tr><td>•</td><td>PLANE_XZ</td><td>(1)</td><td>"XZ"</td><td>set XZ plane and return previous value (G18)</td></tr><tr><td>•</td><td>PLANE_YZ</td><td>(2)</td><td>"YZ"</td><td>set YZ plane and return previous value (G19)</td></tr></tbody></table>
+            The previously active plane is returned if the plane is set. The current plane
+            of operation is returned as an integer if <span class="gcmc_arg">mode</span> is
+            <span class="gcmc_type">undef</span>.
+        </div>
+    </div>
+
+    <hr><h2 id="gcodefunc">G-code functions</h2>
+    <div class="gcmc_funcblock">
+        <div class="gcmc_function">
+            <span class="gcmc_type">undef</span>
+            <span class="gcmc_func" id="coolant">coolant</span>
+            (
+            <span class="gcmc_type">scalar:</span><span class="gcmc_arg">state</span>
+            )
+        </div>
+        <div class="gcmc_function">
+            <span class="gcmc_type">undef</span>
+            <span class="gcmc_func" id="coolant_1">coolant</span>
+            (
+            <span class="gcmc_type">string:</span><span class="gcmc_arg">state</span>
+            )
+        </div>
+        <table class="gcmc_args">
+            <tbody>
+                <tr>
+                    <td class="gcmc_arg">state</td>
+                    <td class="gcmc_type">scalar</td>
+                    <td class="gcmc_unit">[no&nbsp;units]</td>
+                    <td>Coolant state (see below).</td>
+                </tr>
+                <tr>
+                    <td class="gcmc_arg">state</td>
+                    <td class="gcmc_type">string</td>
+                    <td class="gcmc_unit">&nbsp;</td>
+                    <td>Coolant state (see below). State is case-insensitive.</td>
+                </tr>
+            </tbody>
+        </table><div class="gcmc_description">
+            Enable/disable coolant (M7, M8, M9). Argument
+            <span class="gcmc_arg">state</span> must be one of:
+            <table><tbody><tr><td>&nbsp;</td><td>scalar</td><td>(value)</td><td>string</td><td>Description</td></tr><tr><td>•</td><td>COOLANT_OFF</td><td>(0)</td><td>"off"</td><td>coolant off</td></tr><tr><td>•</td><td>COOLANT_MIST</td><td>(1)</td><td>"mist"</td><td>coolant mist</td></tr><tr><td>•</td><td>COOLANT_FLOOD</td><td>(2)</td><td>"flood"</td><td>coolant flood</td></tr><tr><td>•</td><td>COOLANT_ALL</td><td>(3)</td><td>"mist+flood"</td><td>coolant mist+flood</td></tr></tbody></table>
+        </div>
+    </div>
+    <hr class="gcmc_separator"><div class="gcmc_funcblock">
+        <div class="gcmc_function">
+            <span class="gcmc_type">undef</span>
+            <span class="gcmc_func" id="dwell">dwell</span>
+            (
+            <span class="gcmc_type">scalar:</span><span class="gcmc_arg">time</span>
+            )
+        </div>
+        <table class="gcmc_args">
+            <tbody>
+                <tr>
+                    <td class="gcmc_arg">time</td>
+                    <td class="gcmc_type">scalar</td>
+                    <td class="gcmc_unit">[no&nbsp;units]</td>
+                    <td>Time to stay at the current position. Time must be larger or equal zero.</td>
+                </tr>
+            </tbody>
+        </table><div class="gcmc_description">Pause (G4) for <span class="gcmc_arg">time</span> seconds.</div>
+    </div>
+    <hr class="gcmc_separator"><div class="gcmc_funcblock">
+        <div class="gcmc_function">
+            <span class="gcmc_type">undef</span>
+            <span class="gcmc_func" id="feedmode">feedmode</span>
+            (
+            <span class="gcmc_type">scalar:</span><span class="gcmc_arg">mode</span>
+            )
+        </div>
+        <div class="gcmc_function">
+            <span class="gcmc_type">undef</span>
+            <span class="gcmc_func" id="feedmode_1">feedmode</span>
+            (
+            <span class="gcmc_type">string:</span><span class="gcmc_arg">mode</span>
+            )
+        </div>
+        <table class="gcmc_args">
+            <tbody>
+                <tr>
+                    <td class="gcmc_arg">mode</td>
+                    <td class="gcmc_type">scalar</td>
+                    <td class="gcmc_unit">[no&nbsp;units]</td>
+                    <td>Feed mode (see below).</td>
+                </tr>
+                <tr>
+                    <td class="gcmc_arg">mode</td>
+                    <td class="gcmc_type">string</td>
+                    <td class="gcmc_unit">&nbsp;</td>
+                    <td>Feed mode (see below). Mode is case-insensitive.</td>
+                </tr>
+            </tbody>
+        </table><div class="gcmc_description">
+            Feed rate mode setting to one of the following:
+            <table><tbody><tr><td>&nbsp;</td><td>scalar</td><td>(value)</td><td>string</td><td>Description</td></tr><tr><td>•</td><td>FEEDMODE_INVERSE</td><td>(0)</td><td>"inverse"</td><td>Inverse Time Mode (G93)</td></tr><tr><td>•</td><td>FEEDMODE_UPM</td><td>(1)</td><td>"upm"</td><td>Units Per Minute (G94) (default)</td></tr><tr><td>•</td><td>FEEDMODE_UPR</td><td>(2)</td><td>"upr"</td><td>Units Per Revolution (G95)</td></tr></tbody></table>
+            The time based units interpretation depend on the command-line setting whether
+            metric (mm/s) or imperial (in/s).
+        </div>
+    </div>
+    <hr class="gcmc_separator"><div class="gcmc_funcblock">
+        <div class="gcmc_function">
+            <span class="gcmc_type">undef</span>
+            <span class="gcmc_func" id="feedrate">feedrate</span>
+            (
+            <span class="gcmc_type">scalar:</span><span class="gcmc_arg">rate</span>
+            )
+        </div>
+        <table class="gcmc_args">
+            <tbody>
+                <tr>
+                    <td class="gcmc_arg">rate</td>
+                    <td class="gcmc_type">scalar</td>
+                    <td class="gcmc_unit">[distance]</td>
+                    <td>Feed rate; must be larger than zero.</td>
+                </tr>
+            </tbody>
+        </table><div class="gcmc_description">
+            Set feedrate (F) to <span class="gcmc_arg">rate</span>. The
+            rate is interpreted following the setting of the <a class="gcmc_func" href="#feedmode">feedmode</a>() function.
+        </div>
+    </div>
+    <hr class="gcmc_separator"><div class="gcmc_funcblock">
+        <div class="gcmc_function">
+            <span class="gcmc_type">undef</span>
+            <span class="gcmc_func" id="fixpos_restore">fixpos_restore</span>
+            (
+            <span class="gcmc_type">scalar:</span><span class="gcmc_arg">g28g30</span>
+            )
+        </div>
+        <div class="gcmc_function">
+            <span class="gcmc_type">undef</span>
+            <span class="gcmc_func" id="fixpos_restore_1">fixpos_restore</span>
+            (
+            <span class="gcmc_type">scalar:</span><span class="gcmc_arg">g28g30</span>,
+            <span class="gcmc_type">vector:</span><span class="gcmc_arg">rapid</span>
+            )
+        </div>
+        <table class="gcmc_args">
+            <tbody>
+                <tr>
+                    <td class="gcmc_arg">g28g30</td>
+                    <td class="gcmc_type">scalar</td>
+                    <td class="gcmc_unit">[none]</td>
+                    <td>Boolean to indicate which position storage to retrieve</td>
+                </tr>
+                <tr>
+                    <td class="gcmc_arg">rapid</td>
+                    <td class="gcmc_type">vector</td>
+                    <td class="gcmc_unit"></td>
+                    <td>Rapid before restoring predefined position</td>
+                </tr>
+            </tbody>
+        </table><div class="gcmc_description">
+            Emit a G28 or G30 gcode (goto predefined position).
+            If <span class="gcmc_arg">g28g30</span> evaluates to false then G28 is used,
+            otherwise G30. The argument <span class="gcmc_arg">rapid</span> defines a
+            rapid move in absolute coordinates to perform before the rapid move to the
+            indicated stored position is performed.<br>
+            A warning is emitted if the position was never stored using
+            <a href="#fixpos_store" class="gcmc_func">fixpos_store</a> or set using
+            <a href="#fixpos_set" class="gcmc_func">fixpos_set</a> before restored and
+            gcmc's internally tracked position is set to
+            [0,&nbsp;0,&nbsp;0,&nbsp;0,&nbsp;0,&nbsp;0,&nbsp;0,&nbsp;0,&nbsp;0].
+        </div>
+    </div>
+    <hr class="gcmc_separator"><div class="gcmc_funcblock">
+        <div class="gcmc_function">
+            <span class="gcmc_type">undef</span>
+            <span class="gcmc_func" id="fixpos_set">fixpos_set</span>
+            (
+            <span class="gcmc_type">scalar:</span><span class="gcmc_arg">g28g30</span>,
+            <span class="gcmc_type">vector:</span><span class="gcmc_arg">pos</span>
+            )
+        </div>
+        <table class="gcmc_args">
+            <tbody>
+                <tr>
+                    <td class="gcmc_arg">g28g30</td>
+                    <td class="gcmc_type">scalar</td>
+                    <td class="gcmc_unit">[none]</td>
+                    <td>Boolean to indicate which position storage to retrieve</td>
+                </tr>
+                <tr>
+                    <td class="gcmc_arg">pos</td>
+                    <td class="gcmc_type">vector</td>
+                    <td class="gcmc_unit"></td>
+                    <td>Absolute position to set at stored entry</td>
+                </tr>
+            </tbody>
+        </table><div class="gcmc_description">
+            Set the position <span class="gcmc_arg">pos</span> for use in use in G28 and G30. If
+            <span class="gcmc_arg">g28g30</span> evaluates to false then G28's position is
+            set, otherwise G30's position is set.<br>
+            This function is an administrative function to allow
+            <a href="#fixpos_restore" class="gcmc_func">fixpos_restore</a>() to be called
+            without emitting a warning. The G28/G30 positions are often machine dependent
+            variables and gcmc has no means of knowing them unless set explicitly.
+        </div>
+    </div>
+    <hr class="gcmc_separator"><div class="gcmc_funcblock">
+        <div class="gcmc_function">
+            <span class="gcmc_type">undef</span>
+            <span class="gcmc_func" id="fixpos_store">fixpos_store</span>
+            (
+            <span class="gcmc_type">scalar:</span><span class="gcmc_arg">g28g30</span>
+            )
+        </div>
+        <table class="gcmc_args">
+            <tbody>
+                <tr>
+                    <td class="gcmc_arg">g28g30</td>
+                    <td class="gcmc_type">scalar</td>
+                    <td class="gcmc_unit">[none]</td>
+                    <td>Boolean to indicate which position storage to retrieve</td>
+                </tr>
+            </tbody>
+        </table><div class="gcmc_description">
+            Emit a G28.1 or G30.1 gcode (store current absolute position).
+            If <span class="gcmc_arg">g28g30</span> evaluates to false then G28.1 is used,
+            otherwise G30.1.
+        </div>
+    </div>
+    <hr class="gcmc_separator"><div class="gcmc_funcblock">
+        <div class="gcmc_function">
+            <span class="gcmc_type">undef</span>
+            <span class="gcmc_func" id="pathmode">pathmode</span>
+            (
+            <span class="gcmc_type">scalar:</span><span class="gcmc_arg">exact</span>
+            )
+        </div>
+        <div class="gcmc_function">
+            <span class="gcmc_type">undef</span>
+            <span class="gcmc_func" id="pathmode_1">pathmode</span>
+            (
+            <span class="gcmc_type">scalar:</span><span class="gcmc_arg">pathtol</span>,
+            <span class="gcmc_type">scalar:</span><span class="gcmc_arg">colintol</span>
+            )
+        </div>
+        <table class="gcmc_args">
+            <tbody>
+                <tr>
+                    <td class="gcmc_arg">exact</td>
+                    <td class="gcmc_type">scalar</td>
+                    <td class="gcmc_unit">[none]</td>
+                    <td>Boolean to indicate pathmode exact (true) or blend (false)</td>
+                </tr>
+                <tr>
+                    <td class="gcmc_arg">pathtol</td>
+                    <td class="gcmc_type">scalar</td>
+                    <td class="gcmc_unit">[distance]</td>
+                    <td>Maximum path tolerance for any given path. Must be ≥0.0</td>
+                </tr>
+                <tr>
+                    <td class="gcmc_arg">colintol</td>
+                    <td class="gcmc_type">scalar</td>
+                    <td class="gcmc_unit">[distance]</td>
+                    <td>Co-linearity tolerance to join paths. Must be ≥0.0</td>
+                </tr>
+            </tbody>
+        </table><div class="gcmc_description">
+            The single argument form emits a G61 (exact
+            path mode) gcode when <span class="gcmc_arg">exact</span> is true and a G64
+            gcode (best possible speed) when <span class="gcmc_arg">exact</span> is
+            false.<br><br>
+            The dual argument form emits a G64 with path tolerance (P-parameter) set
+            to <span class="gcmc_arg">pathtol</span> and the co-linearity tolerance
+            (Q-parameter) to <span class="gcmc_arg">colintol</span>. If you only intent to
+            use/set the path tolerance, then you should set <span class="gcmc_arg">colintol</span>
+            to &lt;undef&gt; to suppress the Q-parameter or set both <span class="gcmc_arg">pathtol</span>
+            and <span class="gcmc_arg">colintol</span> to the same value.
+        </div>
+    </div>
+    <hr class="gcmc_separator"><div class="gcmc_funcblock">
+        <div class="gcmc_function">
+            <span class="gcmc_type">undef</span>
+            <span class="gcmc_func" id="pause">pause</span>
+            (
+            )
+        </div>
+        <div class="gcmc_function">
+            <span class="gcmc_type">undef</span>
+            <span class="gcmc_func" id="pause_1">pause</span>
+            (
+            <span class="gcmc_type">scalar:</span><span class="gcmc_arg">optionalstop</span>
+            )
+        </div>
+        <table class="gcmc_args">
+            <tbody>
+                <tr>
+                    <td class="gcmc_arg">optionalstop</td>
+                    <td class="gcmc_type">scalar</td>
+                    <td class="gcmc_unit">[none]</td>
+                    <td>Boolean to indicate optional/forced program pause</td>
+                </tr>
+            </tbody>
+        </table><div class="gcmc_description">
+            Emit an M0 gcode (forced pause) if
+            <span class="gcmc_arg">optionalstop</span> evaluates to false or is not
+            specified. Otherwise, emit an M1 gcode (optional pause) if
+            <span class="gcmc_arg">optionalstop</span> evaluates to true.
+        </div>
+    </div>
+    <hr class="gcmc_separator"><div class="gcmc_funcblock">
+        <div class="gcmc_function">
+            <span class="gcmc_type">undef</span>
+            <span class="gcmc_func" id="spindle">spindle</span>
+            (
+            <span class="gcmc_type">scalar:</span><span class="gcmc_arg">speed</span>
+            )
+        </div>
+        <table class="gcmc_args">
+            <tbody>
+                <tr>
+                    <td class="gcmc_arg">speed</td>
+                    <td class="gcmc_type">scalar</td>
+                    <td class="gcmc_unit">[no&nbsp;units]</td>
+                    <td>Spindle speed (see below).</td>
+                </tr>
+            </tbody>
+        </table><div class="gcmc_description">
+            Enable/disable spindle turning and set the spindle's speed, where <span class="gcmc_arg">speed</span> should be:
+            <table><tbody><tr><td>&nbsp;</td><td>scalar</td><td>Description</td></tr><tr><td>•</td><td>&lt;0</td><td>spindle counter clockwise (M4)</td></tr><tr><td>•</td><td>0</td><td>spindle off (M5)</td></tr><tr><td>•</td><td>&gt;0</td><td>spindle clockwise (M3)</td></tr></tbody></table>
+            The spindle speed is set with an S command to <a class="gcmc_func" href="#abs">abs</a>(<span class="gcmc_arg">speed</span>)
+            before the spindle is enabled.
+        </div>
+    </div>
+    <hr class="gcmc_separator"><div class="gcmc_funcblock">
+        <div class="gcmc_function">
+            <span class="gcmc_type">undef</span>
+            <span class="gcmc_func" id="spindlespeed">spindlespeed</span>
+            (
+            <span class="gcmc_type">scalar:</span><span class="gcmc_arg">speed</span>
+            )
+        </div>
+        <table class="gcmc_args">
+            <tbody>
+                <tr>
+                    <td class="gcmc_arg">speed</td>
+                    <td class="gcmc_type">scalar</td>
+                    <td class="gcmc_unit">[no&nbsp;units]</td>
+                    <td>Spindle speed. Speed must be larger or equal zero.</td>
+                </tr>
+            </tbody>
+        </table><div class="gcmc_description">Set the spindle's speed (S) to <span class="gcmc_arg">speed</span>.</div>
+    </div>
+    <hr class="gcmc_separator"><div class="gcmc_funcblock">
+        <div class="gcmc_function">
+            <span class="gcmc_type">undef</span>
+            <span class="gcmc_func" id="toolchange">toolchange</span>
+            (
+            <span class="gcmc_type">scalar:</span><span class="gcmc_arg">toolnr</span>
+            )
+        </div>
+        <div class="gcmc_function">
+            <span class="gcmc_type">undef</span>
+            <span class="gcmc_func" id="toolchange_1">toolchange</span>
+            (
+            <span class="gcmc_type">scalar:</span><span class="gcmc_arg">toolnr</span>,
+            <span class="gcmc_type">scalar:</span><span class="gcmc_arg">setoffs</span>
+            )
+        </div>
+        <table class="gcmc_args">
+            <tbody>
+                <tr>
+                    <td class="gcmc_arg">toolnr</td>
+                    <td class="gcmc_type">scalar</td>
+                    <td class="gcmc_unit">[no&nbsp;units]</td>
+                    <td>Tool number to change to. Toolnr should be integer and must be larger or equal zero.</td>
+                </tr>
+                <tr>
+                    <td class="gcmc_arg">setoffs</td>
+                    <td class="gcmc_type">scalar</td>
+                    <td class="gcmc_unit">[boolean]</td>
+                    <td>Set tool offset.</td>
+                </tr>
+            </tbody>
+        </table><div class="gcmc_description">
+            Change tool (T) to <span class="gcmc_arg">toolnr</span>.
+            An M6 code is also emitted to perform the actual tool change.
+            If <span class="gcmc_arg">setoffs</span> evaluates to true, then a G43 code is
+            also emitted to set the tool's offset.
+        </div>
+    </div>
+
+</body>
+</html>

@@ -5,7 +5,7 @@
 </head>
 <body bgcolor="#8DEAFF">
     <h1>gcmc - G-Code Meta Compiler</h1>
-    <p>  <a href="gcmc.htm">Назад</a> </p>
+    <p>  <a href="gcmc.htm">Back</a> </p>
     <h2>Introduction</h2>
     <ul>
         <li><a href="#intro_preface">Preface</a></li>
@@ -39,11 +39,11 @@
         To get started with gcmc, you need to get a feeling for the basic outline of the language. Question: How to move your machine from
         one place to another?
         Answer:
-<pre class="gcmc_indent gcmc_example"><a class="gcmc_func" href="gcmc-funcref#move">move</a>([1, 2, 3]);
+<pre class="gcmc_indent gcmc_example"><a class="gcmc_func" href="gcmc-funcref.htm#move">move</a>([1, 2, 3]);
 </pre>
         The above example performs a move at the current feed-rate to coordinates X=1, Y=2 and Z=3. If you instead want to perform a rapid
         move, then you write:
-<pre class="gcmc_indent gcmc_example"><a class="gcmc_func" href="gcmc-funcref#goto">goto</a>([0, 0, 10]);
+<pre class="gcmc_indent gcmc_example"><a class="gcmc_func" href="gcmc-funcref.htm#goto">goto</a>([0, 0, 10]);
 </pre>
         Which moves the machine to coordinates X=0, Y=0, Z=10 as a rapid move.<br><br>
         Both examples use a <span class="gcmc_type">vector</span> to describe the position to which the machine should move. A
@@ -52,41 +52,15 @@
         Vectors may contain undefined coordinates, which instruct the move() and goto() functions to prevent the corresponding axes to move
         at all. For example, you may wish to move only the Z-axis to ensure the machine to go to a safe height before any other movement is
         performed.  This can be accomplished using:
-<pre class="gcmc_indent gcmc_example"><a class="gcmc_func" href="gcmc-funcref#goto">goto</a>([-, -, 10]);	<span class="gcmc_comment">/* Move the Z-axis */</span>
-<a class="gcmc_func" href="gcmc-funcref#goto">goto</a>([0, 0]);		<span class="gcmc_comment">/* Move XY-axes */</span>
+<pre class="gcmc_indent gcmc_example"><a class="gcmc_func" href="gcmc-funcref.htm#goto">goto</a>([-, -, 10]);	<span class="gcmc_comment">/* Move the Z-axis */</span>
+<a class="gcmc_func" href="gcmc-funcref.htm#goto">goto</a>([0, 0]);		<span class="gcmc_comment">/* Move XY-axes */</span>
 </pre>
         A vector coordinate entered as '-' is an undefined entry. A vector's coordinates are interpreted by many functions as
         [X,&nbsp;Y,&nbsp;Z,&nbsp;A,&nbsp;B,&nbsp;C,&nbsp;U,&nbsp;V,&nbsp;W] and any coordinate not specified omits that axis in the movement
         output. Vector coordinates omitted at the end of a vector are implied to be undefined. I.e. [1,&nbsp;2] is interpreted as
         [1,&nbsp;2,&nbsp;-,&nbsp;-,&nbsp;-,&nbsp;-,&nbsp;-,&nbsp;-,&nbsp;-] when movement is concerned.<br><br>
         Comments in the gcmc source are entered with // or /*...*/, for comments to end-of-line and block-comments respectively.<br><br>
-        You can test all examples and see the output when you input them into gcmc. A simple way is to save the example to a file and run
-        gcmc. Under the assumption that you save the example code as "example.gcmc" you can type:
-<pre class="gcmc_indent gcmc_example">$ gcmc -q example.gcmc
-</pre>
-        The '-q' option suppresses any other automatically generated code (prologue/epilogue) to set the CNC machine in a default state. The
-        example output will be written to standard output (the console/terminal). The output can be saved to a file using the '-o ofile.ngc'
-        option, which write the output to a file called "ofile.ngc".<br><br>
-        Above examples result in following G-code snippets:
-<pre class="gcmc_indent gcmc_example">$ gcmc -q example.gcmc
-G1 X1.00000000 Y2.00000000 Z3.00000000
-</pre>
-<pre class="gcmc_indent gcmc_example">$ gcmc -q example.gcmc
-G0 X0.00000000 Y0.00000000 Z10.00000000
-</pre>
-<pre class="gcmc_indent gcmc_example">$ gcmc -q example.gcmc
-G0 Z10.00000000
-G0 X0.00000000 Y0.00000000
-</pre>
-        <br>
-        You would want gcmc to produce a full fledged output file for normal operation. You can specify an output file with the '-o' option
-        like:
-<pre class="gcmc_indent gcmc_example">$ gcmc -o example.ngc example.gcmc
-</pre>
-        Above example generates a file called "example.ngc" containing all gcode for the CNC machine. You can find all command-line options
-        in the gcmc manual page or you may use the '-h' option for a brief listing of all options. The manual page is part of the
-        distribution and also available online.
-    </div>
+
     <h3 id="intro_usevar">Using a variable</h3>
     <div class="gcmc_indent">
         Simple movement with goto() and move() become quite involved very fast. You
@@ -96,8 +70,8 @@ G0 X0.00000000 Y0.00000000
         above could look like:
 <pre class="gcmc_indent gcmc_example">SafeZ   = [-, -, 10];
 HomePos = [0, 0];
-<a class="gcmc_func" href="gcmc-funcref#goto">goto</a>(SafeZ);	<span class="gcmc_comment">/* Retract Z */</span>
-<a class="gcmc_func" href="gcmc-funcref#goto">goto</a>(HomePos);	<span class="gcmc_comment">/* Back to home-base */</span>
+<a class="gcmc_func" href="gcmc-funcref.htm#goto">goto</a>(SafeZ);	<span class="gcmc_comment">/* Retract Z */</span>
+<a class="gcmc_func" href="gcmc-funcref.htm#goto">goto</a>(HomePos);	<span class="gcmc_comment">/* Back to home-base */</span>
 </pre>
         Variable can be used in calculations and simple vector math may create customized paths is simple ways. One way to create a path is
         to use a <span class="gcmc_type">vectorlist</span> type. A vector-list is a comma separated collection of vectors enclosed in curly
@@ -106,14 +80,14 @@ HomePos = [0, 0];
 CutZ    = [-, -, -1];
 HomePos = [0, 0];
 Square  = { [0, 0], [1, 0], [1, 1], [0, 1] };
-<a class="gcmc_func" href="gcmc-funcref#goto">goto</a>(Square[3]);	<span class="gcmc_comment">/* To last point */</span>
-<a class="gcmc_func" href="gcmc-funcref#move">move</a>(CutZ);		<span class="gcmc_comment">/* Goto cutting depth */</span>
-<a class="gcmc_func" href="gcmc-funcref#move">move</a>(Square[0]);	<span class="gcmc_comment">/* Cut the square */</span>
-<a class="gcmc_func" href="gcmc-funcref#move">move</a>(Square[1]);
-<a class="gcmc_func" href="gcmc-funcref#move">move</a>(Square[2]);
-<a class="gcmc_func" href="gcmc-funcref#move">move</a>(Square[3]);
-<a class="gcmc_func" href="gcmc-funcref#goto">goto</a>(SafeZ);		<span class="gcmc_comment">/* Retract */</span>
-<a class="gcmc_func" href="gcmc-funcref#goto">goto</a>(HomePos);		<span class="gcmc_comment">/* Back to home-base */</span>
+<a class="gcmc_func" href="gcmc-funcref.htm#goto">goto</a>(Square[3]);	<span class="gcmc_comment">/* To last point */</span>
+<a class="gcmc_func" href="gcmc-funcref.htm#move">move</a>(CutZ);		<span class="gcmc_comment">/* Goto cutting depth */</span>
+<a class="gcmc_func" href="gcmc-funcref.htm#move">move</a>(Square[0]);	<span class="gcmc_comment">/* Cut the square */</span>
+<a class="gcmc_func" href="gcmc-funcref.htm#move">move</a>(Square[1]);
+<a class="gcmc_func" href="gcmc-funcref.htm#move">move</a>(Square[2]);
+<a class="gcmc_func" href="gcmc-funcref.htm#move">move</a>(Square[3]);
+<a class="gcmc_func" href="gcmc-funcref.htm#goto">goto</a>(SafeZ);		<span class="gcmc_comment">/* Retract */</span>
+<a class="gcmc_func" href="gcmc-funcref.htm#goto">goto</a>(HomePos);		<span class="gcmc_comment">/* Back to home-base */</span>
 </pre>
         Each element in a vector-list can be addressed using an index starting from zero. However, there is no reason to iterate through all
         entries manually as it can be performed automatically using a foreach construct. Secondly, the square can be scaled and moved to any
@@ -124,14 +98,14 @@ HomePos = [0, 0];
 Square  = { [0, 0], [1, 0], [1, 1], [0, 1] };
 Offset  = [-2, 5];
 Square  = Square * 10 + Offset;	<span class="gcmc_comment">/* Scale and move the square */</span>
-<a class="gcmc_func" href="gcmc-funcref#feedrate">feedrate</a>(100);		<span class="gcmc_comment">/* Set feed so it can be visualized by LinuxCNC */</span>
-<a class="gcmc_func" href="gcmc-funcref#goto">goto</a>(Square[-1]);		<span class="gcmc_comment">/* To last point */</span>
-<a class="gcmc_func" href="gcmc-funcref#move">move</a>(CutZ);			<span class="gcmc_comment">/* Goto cutting depth */</span>
-<a class="gcmc_func" href="gcmc-syntax#syntax_foreach">foreach</a>(Square; v) {
-        <a class="gcmc_func" href="gcmc-funcref#move">move</a>(v);		<span class="gcmc_comment">/* Cut the square */</span>
+<a class="gcmc_func" href="gcmc-funcref.htm#feedrate">feedrate</a>(100);		<span class="gcmc_comment">/* Set feed so it can be visualized by LinuxCNC */</span>
+<a class="gcmc_func" href="gcmc-funcref.htm#goto">goto</a>(Square[-1]);		<span class="gcmc_comment">/* To last point */</span>
+<a class="gcmc_func" href="gcmc-funcref.htm#move">move</a>(CutZ);			<span class="gcmc_comment">/* Goto cutting depth */</span>
+<a class="gcmc_func" href="gcmc-syntax.htm#syntax_foreach">foreach</a>(Square; v) {
+        <a class="gcmc_func" href="gcmc-funcref.htm#move">move</a>(v);		<span class="gcmc_comment">/* Cut the square */</span>
 }
-<a class="gcmc_func" href="gcmc-funcref#goto">goto</a>(SafeZ);			<span class="gcmc_comment">/* Retract */</span>
-<a class="gcmc_func" href="gcmc-funcref#goto">goto</a>(HomePos);			<span class="gcmc_comment">/* Back to home-base */</span>
+<a class="gcmc_func" href="gcmc-funcref.htm#goto">goto</a>(SafeZ);			<span class="gcmc_comment">/* Retract */</span>
+<a class="gcmc_func" href="gcmc-funcref.htm#goto">goto</a>(HomePos);			<span class="gcmc_comment">/* Back to home-base */</span>
 </pre>
         Above example scales the square by a factor 10 and moves all point of the square -2 in X and +5 in Y, resulting in
         {[-2,&nbsp;5],&nbsp;[8,&nbsp;5],&nbsp;[8,&nbsp;15],&nbsp;[-2,&nbsp;15]}.<br><br>
@@ -182,7 +156,7 @@ divf = i1 / fl;		<span class="gcmc_comment">/* divf becomes float 2.5 */</span>
         Numbers with units associated are converted to the unit on the left-hand-side of the calculation. Unit conversion always implies
         conversion to floating point. If either of the numbers has no units associated, then the one with units will be used and conversion
         to floating point will occur only if any is floating point to start with. A more detailed description is available at the
-        <a href="gcmc-syntax#syntax_units">unit syntax description</a> with all combinations specified.<br><br>
+        <a href="gcmc-syntax.htm#syntax_units">unit syntax description</a> with all combinations specified.<br><br>
         Revisiting the example from above with proper units attached may look like:
 <pre class="gcmc_indent gcmc_example">SafeZ   = [-, -, 10.0mm];
 CutZ    = [-, -, -1.0mm];
@@ -190,18 +164,18 @@ HomePos = [0.0mm, 0.0mm];
 Square  = { [0, 0], [1, 0], [1, 1], [0, 1] };
 Offset  = [-2.0mm, 5.0mm];
 Square  = Square * 10.0in + Offset;	<span class="gcmc_comment">/* Scale and move the square */</span>
-<a class="gcmc_func" href="gcmc-funcref#feedrate">feedrate</a>(100mm);		<span class="gcmc_comment">/* Set feed so it can be visualized by LinuxCNC */</span>
-<a class="gcmc_func" href="gcmc-funcref#goto">goto</a>(Square[-1]);		<span class="gcmc_comment">/* To last point */</span>
-<a class="gcmc_func" href="gcmc-funcref#move">move</a>(CutZ);			<span class="gcmc_comment">/* Goto cutting depth */</span>
-<a class="gcmc_func" href="gcmc-syntax#syntax_foreach">foreach</a>(Square; v) {
-        <a class="gcmc_func" href="gcmc-funcref#move">move</a>(v);		<span class="gcmc_comment">/* Cut the square */</span>
+<a class="gcmc_func" href="gcmc-funcref.htm#feedrate">feedrate</a>(100mm);		<span class="gcmc_comment">/* Set feed so it can be visualized by LinuxCNC */</span>
+<a class="gcmc_func" href="gcmc-funcref.htm#goto">goto</a>(Square[-1]);		<span class="gcmc_comment">/* To last point */</span>
+<a class="gcmc_func" href="gcmc-funcref.htm#move">move</a>(CutZ);			<span class="gcmc_comment">/* Goto cutting depth */</span>
+<a class="gcmc_func" href="gcmc-syntax.htm#syntax_foreach">foreach</a>(Square; v) {
+        <a class="gcmc_func" href="gcmc-funcref.htm#move">move</a>(v);		<span class="gcmc_comment">/* Cut the square */</span>
 }
-<a class="gcmc_func" href="gcmc-funcref#goto">goto</a>(SafeZ);			<span class="gcmc_comment">/* Retract */</span>
-<a class="gcmc_func" href="gcmc-funcref#goto">goto</a>(HomePos);			<span class="gcmc_comment">/* Back to home-base */</span>
+<a class="gcmc_func" href="gcmc-funcref.htm#goto">goto</a>(SafeZ);			<span class="gcmc_comment">/* Retract */</span>
+<a class="gcmc_func" href="gcmc-funcref.htm#goto">goto</a>(HomePos);			<span class="gcmc_comment">/* Back to home-base */</span>
 </pre>
         Please note that the definition of the square has no units attached. The square is an abstract form which receives the actual size
-        and position by 10 inch scaling and metric offsetting. Compiling the example with gcmc gives following results:
-<pre class="gcmc_indent gcmc_example">$ gcmc -q example.gcmc
+        and position by 10 inch scaling and metric offsetting. Compiling the example gives following results:
+<pre class="gcmc_indent gcmc_example">
 F100.00000000
 G0 X-2.00000000 Y259.00000000
 G1 Z-1.00000000
@@ -212,25 +186,6 @@ G1 X-2.00000000 Y259.00000000
 G0 Z10.00000000
 G0 X0.00000000 Y0.00000000
 
-$ gcmc -q -i example.gcmc
-F3.93700787
-G0 X-0.07874016 Y10.19685039
-G1 Z-0.03937008
-G1 X-0.07874016 Y0.19685039
-G1 X9.92125984 Y0.19685039
-G1 X9.92125984 Y10.19685039
-G1 X-0.07874016 Y10.19685039
-G0 Z0.39370079
-G0 X0.00000000 Y0.00000000
-</pre>
-        The first compilation uses metric mode, whereas the second compilation uses imperial mode ('-i' option). The difference is the
-        absolute values of the coordinates, which are converted to the units which the target uses. Gcmc wil normally insert the appropriate
-        G21/G20 instruction in the prologue (if the '-q' option is omitted) to tell the G-code interpreter that the following coordinates
-        are in millimeters or inches respectively.<br><br>
-        Both versions, metric and imperial, have the same absolute sizes and will be cut at the same physical speed because units were
-        consistently used. All the numbers were converted automatically to yield the same physical result. Portable gcmc programs should
-        always make use of units in a consistent manner to ensure correct output when either metric or imperial is used.
-    </div>    
     <h3 id="intro_userfunc">User functions</h3>
     <div class="gcmc_indent">
         Repeating patterns often occur when machining a particular part. It is often desirable to describe the repeating patterns as a
@@ -240,57 +195,57 @@ CutZ    = [-, -, -1.0mm];
 HomePos = [0.0mm, 0.0mm];
 Square  = { [0, 0], [1, 0], [1, 1], [0, 1] };
 
-<a class="gcmc_func" href="gcmc-syntax#syntax_functions">function</a> cut_the_path(path, offset)
+<a class="gcmc_func" href="gcmc-syntax.htm#syntax_functions">function</a> cut_the_path(path, offset)
 {
 	path += offset;		<span class="gcmc_comment">/* Move the path to the actual position */</span>
-        <a class="gcmc_func" href="gcmc-funcref#goto">goto</a>(path[-1]);	<span class="gcmc_comment">/* To last point */</span>
-        <a class="gcmc_func" href="gcmc-funcref#move">move</a>(CutZ);		<span class="gcmc_comment">/* Goto cutting depth */</span>
-        <a class="gcmc_func" href="gcmc-syntax#syntax_foreach">foreach</a>(path; v) {
-        <a class="gcmc_func" href="gcmc-funcref#move">move</a>(v);	<span class="gcmc_comment">/* Cut the path */</span>
+        <a class="gcmc_func" href="gcmc-funcref.htm#goto">goto</a>(path[-1]);	<span class="gcmc_comment">/* To last point */</span>
+        <a class="gcmc_func" href="gcmc-funcref.htm#move">move</a>(CutZ);		<span class="gcmc_comment">/* Goto cutting depth */</span>
+        <a class="gcmc_func" href="gcmc-syntax.htm#syntax_foreach">foreach</a>(path; v) {
+        <a class="gcmc_func" href="gcmc-funcref.htm#move">move</a>(v);	<span class="gcmc_comment">/* Cut the path */</span>
 	}
-        <a class="gcmc_func" href="gcmc-funcref#goto">goto</a>(SafeZ);		<span class="gcmc_comment">/* Retract */</span>
+        <a class="gcmc_func" href="gcmc-funcref.htm#goto">goto</a>(SafeZ);		<span class="gcmc_comment">/* Retract */</span>
 }
 
-<a class="gcmc_func" href="gcmc-funcref#feedrate">feedrate</a>(100mm);				<span class="gcmc_comment">/* Set feed so it can be visualized by LinuxCNC */</span>
-<a class="gcmc_func" href="gcmc-funcref#goto">goto</a>(SafeZ);					<span class="gcmc_comment">/* Initial to safe Z retraction point*/</span>
+<a class="gcmc_func" href="gcmc-funcref.htm#feedrate">feedrate</a>(100mm);				<span class="gcmc_comment">/* Set feed so it can be visualized by LinuxCNC */</span>
+<a class="gcmc_func" href="gcmc-funcref.htm#goto">goto</a>(SafeZ);					<span class="gcmc_comment">/* Initial to safe Z retraction point*/</span>
 cut_the_path(Square * 1in, [10.0mm, 5.0mm]);	<span class="gcmc_comment">/* First square */</span>
 cut_the_path(Square * 2in, [15.0mm, 15.0mm]);	<span class="gcmc_comment">/* Second square */</span>
 cut_the_path(Square * 3in, [20.0mm, 25.0mm]);	<span class="gcmc_comment">/* Third square */</span>
 cut_the_path(Square * 4in, [25.0mm, 35.0mm]);	<span class="gcmc_comment">/* Fourth square */</span>
 cut_the_path(Square * 5in, [30.0mm, 45.0mm]);	<span class="gcmc_comment">/* Fifth square */</span>
-<a class="gcmc_func" href="gcmc-funcref#goto">goto</a>(HomePos);					<span class="gcmc_comment">/* Back to home-base */</span>
+<a class="gcmc_func" href="gcmc-funcref.htm#goto">goto</a>(HomePos);					<span class="gcmc_comment">/* Back to home-base */</span>
 </pre>
         Functions can take as many parameters as required and are most often passed as values (see
-        <a href="gcmc-syntax#syntax_functions">functions syntax reference</a> for more details). Above example can be further
-        abstracted by using the <a href="gcmc-syntax#syntax_repeat">repeat</a> construct. The path is cut five times with regular
+        <a href="gcmc-syntax.htm#syntax_functions">functions syntax reference</a> for more details). Above example can be further
+        abstracted by using the <a href="gcmc-syntax.htm#syntax_repeat">repeat</a> construct. The path is cut five times with regular
         intervals, which can be expressed in a mathematical way:
 <pre class="gcmc_indent gcmc_example">SafeZ   = [-, -, 10.0mm];
 CutZ    = [-, -, -1.0mm];
 HomePos = [0.0mm, 0.0mm];
 Square  = { [0, 0], [1, 0], [1, 1], [0, 1] };
 
-<a class="gcmc_func" href="gcmc-syntax#syntax_functions">function</a> cut_the_path(path, offset)
+<a class="gcmc_func" href="gcmc-syntax.htm#syntax_functions">function</a> cut_the_path(path, offset)
 {
 	path += offset;		<span class="gcmc_comment">/* Move the path to the actual position */</span>
-        <a class="gcmc_func" href="gcmc-funcref#goto">goto</a>(path[-1]);	<span class="gcmc_comment">/* To last point */</span>
-        <a class="gcmc_func" href="gcmc-funcref#move">move</a>(CutZ);		<span class="gcmc_comment">/* Goto cutting depth */</span>
-        <a class="gcmc_func" href="gcmc-syntax#syntax_foreach">foreach</a>(path; v) {
-        <a class="gcmc_func" href="gcmc-funcref#move">move</a>(v);	<span class="gcmc_comment">/* Cut the path */</span>
+        <a class="gcmc_func" href="gcmc-funcref.htm#goto">goto</a>(path[-1]);	<span class="gcmc_comment">/* To last point */</span>
+        <a class="gcmc_func" href="gcmc-funcref.htm#move">move</a>(CutZ);		<span class="gcmc_comment">/* Goto cutting depth */</span>
+        <a class="gcmc_func" href="gcmc-syntax.htm#syntax_foreach">foreach</a>(path; v) {
+        <a class="gcmc_func" href="gcmc-funcref.htm#move">move</a>(v);	<span class="gcmc_comment">/* Cut the path */</span>
 	}
-        <a class="gcmc_func" href="gcmc-funcref#goto">goto</a>(SafeZ);		<span class="gcmc_comment">/* Retract */</span>
+        <a class="gcmc_func" href="gcmc-funcref.htm#goto">goto</a>(SafeZ);		<span class="gcmc_comment">/* Retract */</span>
 }
 
-<a class="gcmc_func" href="gcmc-funcref#feedrate">feedrate</a>(100mm);		<span class="gcmc_comment">/* Set feed so it can be visualized by LinuxCNC */</span>
-<a class="gcmc_func" href="gcmc-funcref#goto">goto</a>(SafeZ);			<span class="gcmc_comment">/* Initial to safe Z retraction point*/</span>
-<a class="gcmc_func" href="gcmc-syntax#syntax_repeat">repeat</a>(5; i) {
+<a class="gcmc_func" href="gcmc-funcref.htm#feedrate">feedrate</a>(100mm);		<span class="gcmc_comment">/* Set feed so it can be visualized by LinuxCNC */</span>
+<a class="gcmc_func" href="gcmc-funcref.htm#goto">goto</a>(SafeZ);			<span class="gcmc_comment">/* Initial to safe Z retraction point*/</span>
+<a class="gcmc_func" href="gcmc-syntax.htm#syntax_repeat">repeat</a>(5; i) {
 	cut_the_path(Square * (1.0in + i), [10.0mm, 5.0mm] + [5.0mm, 10.0mm] * i);
 }
-<a class="gcmc_func" href="gcmc-funcref#goto">goto</a>(HomePos);			<span class="gcmc_comment">/* Back to home-base */</span>
+<a class="gcmc_func" href="gcmc-funcref.htm#goto">goto</a>(HomePos);			<span class="gcmc_comment">/* Back to home-base */</span>
 </pre>
-        The <a href="gcmc-syntax#syntax_repeat">repeat</a> construct sets the variable 'i' to the sequence 1, 2, 3, 4, 5 and is used to
+        The <a href="gcmc-syntax.htm#syntax_repeat">repeat</a> construct sets the variable 'i' to the sequence 1, 2, 3, 4, 5 and is used to
         calculate the scaling factor by addition and the offset by scaled addition. It should be noted that the scaling "1.0in + i" adds
         inches and a number without units. Gcmc handles such case by defaulting the units to the side with units associated (see
-        <a href="gcmc-syntax#syntax_units">unit description</a> for rules).
+        <a href="gcmc-syntax.htm#syntax_units">unit description</a> for rules).
     </div>
     <h3 id="intro_realprog">A real program - Making gears</h3>
     <div class="gcmc_indent">
@@ -475,11 +430,11 @@ Square  = { [0, 0], [1, 0], [1, 1], [0, 1] };
                 </tbody>
             </table><br>
             All other parameters can be calculated from the above input arguments. The output is a vectorlist containing all points to describe
-            the gear in a 2D path.<br><pre class="gcmc_indent gcmc_example"><a class="gcmc_func" href="gcmc-syntax#syntax_functions">function</a> gear_P(nteeth, pressure_angle, diametral_pitch)
+            the gear in a 2D path.<br><pre class="gcmc_indent gcmc_example"><a class="gcmc_func" href="gcmc-syntax.htm#syntax_functions">function</a> gear_P(nteeth, pressure_angle, diametral_pitch)
 {
-            <a class="gcmc_func" href="gcmc-syntax#syntax_functions">local</a> gear = {};
+            <a class="gcmc_func" href="gcmc-syntax.htm#syntax_functions">local</a> gear = {};
 	...
-            <a class="gcmc_func" href="gcmc-syntax#syntax_functions">return</a> gear;
+            <a class="gcmc_func" href="gcmc-syntax.htm#syntax_functions">return</a> gear;
 }
 </pre>
             There are two new concepts in above function outline. Firstly, the keyword <i>local</i> is used to signal gcmc that the named
@@ -487,16 +442,16 @@ Square  = { [0, 0], [1, 0], [1, 1], [0, 1] };
             to the caller. The variable "gear" will be containing a list of vectors which are returned to the caller of the function.<br><br>
             The first part of the function consists of calculating the necessary parameters to define the gear from the input arguments. The
             calculations are as given in above table. The work diameter is given by the working depth, which is twice the addendum.
-<pre class="gcmc_indent gcmc_example"><a class="gcmc_func" href="gcmc-syntax#syntax_functions">function</a> gear_P(nteeth, pressure_angle, diametral_pitch)
+<pre class="gcmc_indent gcmc_example"><a class="gcmc_func" href="gcmc-syntax.htm#syntax_functions">function</a> gear_P(nteeth, pressure_angle, diametral_pitch)
 {
-            <a class="gcmc_func" href="gcmc-syntax#syntax_functions">local</a> pitch_diameter = nteeth / diametral_pitch;
-            <a class="gcmc_func" href="gcmc-syntax#syntax_functions">local</a> base_diameter = pitch_diameter * cos(pressure_angle);
-            <a class="gcmc_func" href="gcmc-syntax#syntax_functions">local</a> addendum = 1.0/diametral_pitch;
-            <a class="gcmc_func" href="gcmc-syntax#syntax_functions">local</a> ht = 2.157 / diametral_pitch;
-            <a class="gcmc_func" href="gcmc-syntax#syntax_functions">local</a> dedendum = ht - addendum;
-            <a class="gcmc_func" href="gcmc-syntax#syntax_functions">local</a> outside_diameter = pitch_diameter + 2.0*addendum;
-            <a class="gcmc_func" href="gcmc-syntax#syntax_functions">local</a> root_diameter = base_diameter - 2.0*dedendum;
-            <a class="gcmc_func" href="gcmc-syntax#syntax_functions">local</a> work_diameter = outside_diameter - 4.0*addendum;
+            <a class="gcmc_func" href="gcmc-syntax.htm#syntax_functions">local</a> pitch_diameter = nteeth / diametral_pitch;
+            <a class="gcmc_func" href="gcmc-syntax.htm#syntax_functions">local</a> base_diameter = pitch_diameter * cos(pressure_angle);
+            <a class="gcmc_func" href="gcmc-syntax.htm#syntax_functions">local</a> addendum = 1.0/diametral_pitch;
+            <a class="gcmc_func" href="gcmc-syntax.htm#syntax_functions">local</a> ht = 2.157 / diametral_pitch;
+            <a class="gcmc_func" href="gcmc-syntax.htm#syntax_functions">local</a> dedendum = ht - addendum;
+            <a class="gcmc_func" href="gcmc-syntax.htm#syntax_functions">local</a> outside_diameter = pitch_diameter + 2.0*addendum;
+            <a class="gcmc_func" href="gcmc-syntax.htm#syntax_functions">local</a> root_diameter = base_diameter - 2.0*dedendum;
+            <a class="gcmc_func" href="gcmc-syntax.htm#syntax_functions">local</a> work_diameter = outside_diameter - 4.0*addendum;
 	...
 }
 </pre>
@@ -511,7 +466,7 @@ Square  = { [0, 0], [1, 0], [1, 1], [0, 1] };
             Instead of doing extensive math here, it is enough to <i>estimate</i> the radius of the fillet arc. It turns out that the radius may
             be approximated by 1/8 of the distance from base to root circles. This measure will create an arc that does not drop onto the root
             circle exactly. The local variable "filletrad" is set to the appropriate value. Making an exact calculation is left to the
-            reader.<br><pre class="gcmc_indent gcmc_example"><a class="gcmc_func" href="gcmc-syntax#syntax_functions">local</a> filletrad = (base_diameter - root_diameter)/8.0;
+            reader.<br><pre class="gcmc_indent gcmc_example"><a class="gcmc_func" href="gcmc-syntax.htm#syntax_functions">local</a> filletrad = (base_diameter - root_diameter)/8.0;
 </pre>
             <br>
             The fillet arc has an angled connection to the straight line at the work circle. That angle is set at 240 degrees (seen CW). The
@@ -519,14 +474,14 @@ Square  = { [0, 0], [1, 0], [1, 1], [0, 1] };
             circle.<br><br>
             The vector [-filletrad, 0.0mm] points left and must be rotated 60 degrees CCW to have the same direction as the bisecting line that
             is sought after. Rotating a vector is performed by:
-<pre class="gcmc_indent gcmc_example"><a class="gcmc_func" href="gcmc-funcref#rotate_xy">rotate_xy</a>([-filletrad, 0.0mm], 60.0deg);
+<pre class="gcmc_indent gcmc_example"><a class="gcmc_func" href="gcmc-funcref.htm#rotate_xy">rotate_xy</a>([-filletrad, 0.0mm], 60.0deg);
 </pre>
             The built-in function rotate_xy() rotates any vector or vectorlist by the angle given. It should be noted that
             rotate_xy([filletrad,&nbsp;0.0mm],&nbsp;240.0deg) would have performed the same function as the minus sign on the X-coordinate
             equals 180 degree rotation for a vector with zero Y-coordinate.<br><br>
             The center of the fillet arc can now be calculated by adding the distance from the origin to the work circle. The result is a point
             denoting the center of the fillet arc:
-<pre class="gcmc_indent gcmc_example"><a class="gcmc_func" href="gcmc-syntax#syntax_functions">local</a> center = <a class="gcmc_func" href="gcmc-funcref#rotate_xy">rotate_xy</a>([-filletrad, 0.0mm], 60.0deg) + [work_diameter/2.0, 0];
+<pre class="gcmc_indent gcmc_example"><a class="gcmc_func" href="gcmc-syntax.htm#syntax_functions">local</a> center = <a class="gcmc_func" href="gcmc-funcref.htm#rotate_xy">rotate_xy</a>([-filletrad, 0.0mm], 60.0deg) + [work_diameter/2.0, 0];
 </pre>
             <br>
             The fillet arc could be created with an arc command, but that would not be useful. There is no method to embed non-linear segments
@@ -535,14 +490,14 @@ Square  = { [0, 0], [1, 0], [1, 1], [0, 1] };
             intervals from start to end. Each calculated point is then added to the result.<br><br>
             It is known that the arc starts at 180 degrees, the vertical tangent, and ends at 60 degrees (i.e. covers 120 degree span). Also,
             the center point and radius are known. A simple loop can be constructed to calculate points on the arc in following way:
-<pre class="gcmc_indent gcmc_example"><a class="gcmc_func" href="gcmc-syntax#syntax_functions">local</a> i;
-<a class="gcmc_func" href="gcmc-syntax#syntax_functions">local</a> tooth = {};
-<a class="gcmc_func" href="gcmc-syntax#syntax_for">for</a>(i = 180.0deg; i &gt; 60.0deg; i -= __ang_step*2.5) {
-	tooth += { [<a class="gcmc_func" href="gcmc-funcref#cos">cos</a>(i), <a class="gcmc_func" href="gcmc-funcref#sin">sin</a>(i)] * filletrad + center };
+<pre class="gcmc_indent gcmc_example"><a class="gcmc_func" href="gcmc-syntax.htm#syntax_functions">local</a> i;
+<a class="gcmc_func" href="gcmc-syntax.htm#syntax_functions">local</a> tooth = {};
+<a class="gcmc_func" href="gcmc-syntax.htm#syntax_for">for</a>(i = 180.0deg; i &gt; 60.0deg; i -= __ang_step*2.5) {
+	tooth += { [<a class="gcmc_func" href="gcmc-funcref.htm#cos">cos</a>(i), <a class="gcmc_func" href="gcmc-funcref.htm#sin">sin</a>(i)] * filletrad + center };
 }
-<a class="gcmc_func" href="gcmc-syntax#syntax_if">if</a>(i != 60.0deg) {
+<a class="gcmc_func" href="gcmc-syntax.htm#syntax_if">if</a>(i != 60.0deg) {
             <span class="gcmc_comment">// Add the last point if we did not reach the working depth</span>
-	tooth += { [<a class="gcmc_func" href="gcmc-funcref#cos">cos</a>(60.0deg), <a class="gcmc_func" href="gcmc-funcref#sin">sin</a>(60.0deg)] * filletrad + center };
+	tooth += { [<a class="gcmc_func" href="gcmc-funcref.htm#cos">cos</a>(60.0deg), <a class="gcmc_func" href="gcmc-funcref.htm#sin">sin</a>(60.0deg)] * filletrad + center };
 }
 </pre>
             The first part loops the variable "i" from 180 degrees down to 60 degrees in discrete steps using a for() construct. The decrement
@@ -557,24 +512,24 @@ Square  = { [0, 0], [1, 0], [1, 1], [0, 1] };
             vector list (using '{' ... '}') in order to concatenate vector-lists easily with the '+=' operator.<br><br>
             The end result of the fillet arc calculation as part of the function:
 <pre class="gcmc_indent gcmc_example">	...
-            <a class="gcmc_func" href="gcmc-syntax#syntax_functions">local</a> i;
-            <a class="gcmc_func" href="gcmc-syntax#syntax_functions">local</a> tooth = {};
+            <a class="gcmc_func" href="gcmc-syntax.htm#syntax_functions">local</a> i;
+            <a class="gcmc_func" href="gcmc-syntax.htm#syntax_functions">local</a> tooth = {};
 
             <span class="gcmc_comment">// Fillet radius is approx. Will not reach root exactly, but close enough</span>
             <span class="gcmc_comment">// Otherwise need to calculate intersection with root-circle</span>
-            <a class="gcmc_func" href="gcmc-syntax#syntax_functions">local</a> filletrad = (base_diameter - root_diameter)/8.0;
+            <a class="gcmc_func" href="gcmc-syntax.htm#syntax_functions">local</a> filletrad = (base_diameter - root_diameter)/8.0;
 
             <span class="gcmc_comment">// Center of the fillet arc, involute makes a ~240deg angle with fillet arc</span>
             <span class="gcmc_comment">// The fillet arc runs from the root to the working depth of the gear</span>
-            <a class="gcmc_func" href="gcmc-syntax#syntax_functions">local</a> center = <a class="gcmc_func" href="gcmc-funcref#rotate_xy">rotate_xy</a>([-filletrad, 0.0mm], 60.0deg) + [work_diameter/2.0, 0];
+            <a class="gcmc_func" href="gcmc-syntax.htm#syntax_functions">local</a> center = <a class="gcmc_func" href="gcmc-funcref.htm#rotate_xy">rotate_xy</a>([-filletrad, 0.0mm], 60.0deg) + [work_diameter/2.0, 0];
 
             <span class="gcmc_comment">// Trace the fillet arc from ~root-circle to working depth at involute arc starting Y-level</span>
-            <a class="gcmc_func" href="gcmc-syntax#syntax_for">for</a>(i = 180.0deg; i &gt; 60.0deg; i -= __ang_step*2.5) {
-		tooth += { [<a class="gcmc_func" href="gcmc-funcref#cos">cos</a>(i), <a class="gcmc_func" href="gcmc-funcref#sin">sin</a>(i)] * filletrad + center };
+            <a class="gcmc_func" href="gcmc-syntax.htm#syntax_for">for</a>(i = 180.0deg; i &gt; 60.0deg; i -= __ang_step*2.5) {
+		tooth += { [<a class="gcmc_func" href="gcmc-funcref.htm#cos">cos</a>(i), <a class="gcmc_func" href="gcmc-funcref.htm#sin">sin</a>(i)] * filletrad + center };
 	}
-            <a class="gcmc_func" href="gcmc-syntax#syntax_if">if</a>(i != 60.0deg) {
+            <a class="gcmc_func" href="gcmc-syntax.htm#syntax_if">if</a>(i != 60.0deg) {
             <span class="gcmc_comment">// Add the last point if we did not reach the working depth</span>
-		tooth += { [<a class="gcmc_func" href="gcmc-funcref#cos">cos</a>(60.0deg), <a class="gcmc_func" href="gcmc-funcref#sin">sin</a>(60.0deg)] * filletrad + center };
+		tooth += { [<a class="gcmc_func" href="gcmc-funcref.htm#cos">cos</a>(60.0deg), <a class="gcmc_func" href="gcmc-funcref.htm#sin">sin</a>(60.0deg)] * filletrad + center };
 	}
 	...
 </pre>
@@ -592,9 +547,9 @@ Square  = { [0, 0], [1, 0], [1, 1], [0, 1] };
             reach the outer circle.<br><br>
             The involute arc's intersection with the outer circle, in radians, is defined by sqrt((O/B)^2-1), with O outer radius and B base
             radius of appropriate circles. In gcmc terms:
-<pre class="gcmc_indent gcmc_example"><a class="gcmc_func" href="gcmc-syntax#syntax_functions">function</a> involute_angle(radius, outrad)
+<pre class="gcmc_indent gcmc_example"><a class="gcmc_func" href="gcmc-syntax.htm#syntax_functions">function</a> involute_angle(radius, outrad)
 {
-            <a class="gcmc_func" href="gcmc-syntax#syntax_functions">return</a> <a class="gcmc_func" href="gcmc-funcref#to_rad">to_rad</a>(<a class="gcmc_func" href="gcmc-funcref#sqrt">sqrt</a>(<a class="gcmc_func" href="gcmc-funcref#pow">pow</a>(outrad/radius, 2.0) - 1));
+            <a class="gcmc_func" href="gcmc-syntax.htm#syntax_functions">return</a> <a class="gcmc_func" href="gcmc-funcref.htm#to_rad">to_rad</a>(<a class="gcmc_func" href="gcmc-funcref.htm#sqrt">sqrt</a>(<a class="gcmc_func" href="gcmc-funcref.htm#pow">pow</a>(outrad/radius, 2.0) - 1));
 }
 </pre>
             The extra to_rad() function is to return a value with radians as units. The sqrt() returns a dimension-less value, but the formula
@@ -605,10 +560,10 @@ Square  = { [0, 0], [1, 0], [1, 1], [0, 1] };
             The to_none() function is used to strip the units within the basic curve calculation. The involute curve describing vector should be
             dimensionless so it may be scaled to distance units. The conversion to distance units is implied by the multiplication of the
             "radius" argument, which will be the contributor to the units of the return value.
-<pre class="gcmc_indent gcmc_example"><a class="gcmc_func" href="gcmc-syntax#syntax_functions">function</a> involute_point(angle, radius)
+<pre class="gcmc_indent gcmc_example"><a class="gcmc_func" href="gcmc-syntax.htm#syntax_functions">function</a> involute_point(angle, radius)
 {
-	angle = <a class="gcmc_func" href="gcmc-funcref#to_rad">to_rad</a>(angle);	<span class="gcmc_comment">/* Multiplication must be in radians */</span>
-            <a class="gcmc_func" href="gcmc-syntax#syntax_functions">return</a> radius * [<a class="gcmc_func" href="gcmc-funcref#cos">cos</a>(angle) + <a class="gcmc_func" href="gcmc-funcref#to_none">to_none</a>(angle) * <a class="gcmc_func" href="gcmc-funcref#sin">sin</a>(angle), <a class="gcmc_func" href="gcmc-funcref#sin">sin</a>(angle) - <a class="gcmc_func" href="gcmc-funcref#to_none">to_none</a>(angle) * <a class="gcmc_func" href="gcmc-funcref#cos">cos</a>(angle)];
+	angle = <a class="gcmc_func" href="gcmc-funcref.htm#to_rad">to_rad</a>(angle);	<span class="gcmc_comment">/* Multiplication must be in radians */</span>
+            <a class="gcmc_func" href="gcmc-syntax.htm#syntax_functions">return</a> radius * [<a class="gcmc_func" href="gcmc-funcref.htm#cos">cos</a>(angle) + <a class="gcmc_func" href="gcmc-funcref.htm#to_none">to_none</a>(angle) * <a class="gcmc_func" href="gcmc-funcref.htm#sin">sin</a>(angle), <a class="gcmc_func" href="gcmc-funcref.htm#sin">sin</a>(angle) - <a class="gcmc_func" href="gcmc-funcref.htm#to_none">to_none</a>(angle) * <a class="gcmc_func" href="gcmc-funcref.htm#cos">cos</a>(angle)];
 }
 </pre>
             The involute arc is calculated by repeatedly calling the involute_point() function from angles 0 degrees to the maximum angle as
@@ -616,13 +571,13 @@ Square  = { [0, 0], [1, 0], [1, 1], [0, 1] };
             like the fillet arc above.
 <pre class="gcmc_indent gcmc_example">	...
             <span class="gcmc_comment">// Calculate the maximum involute angle to intersect at the outside radius</span>
-            <a class="gcmc_func" href="gcmc-syntax#syntax_functions">local</a> max_a = involute_angle(base_diameter/2.0, outside_diameter/2.0);
+            <a class="gcmc_func" href="gcmc-syntax.htm#syntax_functions">local</a> max_a = involute_angle(base_diameter/2.0, outside_diameter/2.0);
 
             <span class="gcmc_comment">// Trace the involute arc from the base up to outside radius</span>
-            <a class="gcmc_func" href="gcmc-syntax#syntax_for">for</a>(i = 0.0deg; i &lt; max_a; i += __ang_step) {
+            <a class="gcmc_func" href="gcmc-syntax.htm#syntax_for">for</a>(i = 0.0deg; i &lt; max_a; i += __ang_step) {
 		tooth += { involute_point(i, base_diameter/2.0)};
 	}
-            <a class="gcmc_func" href="gcmc-syntax#syntax_if">if</a>(i != max_a) {
+            <a class="gcmc_func" href="gcmc-syntax.htm#syntax_if">if</a>(i != max_a) {
             <span class="gcmc_comment">// Add the last point if we did not reach the outside radius</span>
 		tooth += { involute_point(max_a, base_diameter/2.0)};
 	}
@@ -641,7 +596,7 @@ Square  = { [0, 0], [1, 0], [1, 1], [0, 1] };
             in two half-tooth-pitch sizes of two side each.
 <pre class="gcmc_indent gcmc_example">	...
             <span class="gcmc_comment">// We now have one side of the tooth. Rotate to be at tooth-symmetry on X-axis</span>
-	tooth = <a class="gcmc_func" href="gcmc-funcref#rotate_xy">rotate_xy</a>(tooth, -90.0deg / nteeth);
+	tooth = <a class="gcmc_func" href="gcmc-funcref.htm#rotate_xy">rotate_xy</a>(tooth, -90.0deg / nteeth);
 	...
 </pre>
             The above snippet will rotate the tooth-side CW by the correct angle.<br><br>
@@ -651,7 +606,7 @@ Square  = { [0, 0], [1, 0], [1, 1], [0, 1] };
 <pre class="gcmc_indent gcmc_example">	...
             <span class="gcmc_comment">// Add the same curve mirrored to make the other side of the tooth</span>
             <span class="gcmc_comment">// Coordinates reverse to have them all in one direction only</span>
-	tooth += <a class="gcmc_func" href="gcmc-funcref#reverse">reverse</a>(<a class="gcmc_func" href="gcmc-funcref#scale">scale</a>(tooth, [1, -1]));
+	tooth += <a class="gcmc_func" href="gcmc-funcref.htm#reverse">reverse</a>(<a class="gcmc_func" href="gcmc-funcref.htm#scale">scale</a>(tooth, [1, -1]));
 	...
 </pre>
             The scale() function scales each vector of "tooth" to produce a mirror-over-X copy and the reverse() functions reverses all points
@@ -661,48 +616,49 @@ Square  = { [0, 0], [1, 0], [1, 1], [0, 1] };
             The result is accumulated in the gear variable and returned from the function.
 <pre class="gcmc_indent gcmc_example">	...
             <span class="gcmc_comment">// Create all teeth of the gear by adding each tooth at correct angle</span>
-            <a class="gcmc_func" href="gcmc-syntax#syntax_functions">local</a> gear = {};
-            <a class="gcmc_func" href="gcmc-syntax#syntax_repeat">repeat</a>(nteeth; i) {
-		gear += <a class="gcmc_func" href="gcmc-funcref#rotate_xy">rotate_xy</a>(tooth, 360.0deg * i / nteeth);
+            <a class="gcmc_func" href="gcmc-syntax.htm#syntax_functions">local</a> gear = {};
+            <a class="gcmc_func" href="gcmc-syntax.htm#syntax_repeat">repeat</a>(nteeth; i) {
+		gear += <a class="gcmc_func" href="gcmc-funcref.htm#rotate_xy">rotate_xy</a>(tooth, 360.0deg * i / nteeth);
 	}
-            <a class="gcmc_func" href="gcmc-syntax#syntax_functions">return</a> gear;
+            <a class="gcmc_func" href="gcmc-syntax.htm#syntax_functions">return</a> gear;
 </pre>
         </div>
         <h4>Finishing touches to make it work</h4>
         <div class="gcmc_indent">
             The function gear_P() has now been fully developed and it returns a vector-list with all points of the outline. The outline needs to
             be output using a simple trace() routine that will do just that. A second small function hole() is created to make the center-hole
-            of the gear. Finally calling it all with some parameters will give a nice set of gears.
+            of the gear. Finally calling it all with some parameters will give a nice set of gears.<br>
 <pre class="gcmc_indent gcmc_example"><span class="gcmc_comment">/* Trace a path at given offset */</span>
-<a class="gcmc_func" href="gcmc-syntax#syntax_functions">function</a> trace(path, offset)
+<a class="gcmc_func" href="gcmc-syntax.htm#syntax_functions">function</a> trace(path, offset)
 {
-            <a class="gcmc_func" href="gcmc-funcref#goto">goto</a>(path[-1] + offset);
-            <a class="gcmc_func" href="gcmc-syntax#syntax_foreach">foreach</a>(path; v) {
-            <a class="gcmc_func" href="gcmc-funcref#move">move</a>(v + offset);
+            <a class="gcmc_func" href="gcmc-funcref.htm#goto">goto</a>(path[-1] + offset);
+            <a class="gcmc_func" href="gcmc-syntax.htm#syntax_foreach">foreach</a>(path; v) {
+            <a class="gcmc_func" href="gcmc-funcref.htm#move">move</a>(v + offset);
 	}
 }
 
 <span class="gcmc_comment">/* Make a hole at center point with given radius */</span>
-<a class="gcmc_func" href="gcmc-syntax#syntax_functions">function</a> hole(point, radius)
+<a class="gcmc_func" href="gcmc-syntax.htm#syntax_functions">function</a> hole(point, radius)
 {
-            <a class="gcmc_func" href="gcmc-funcref#goto">goto</a>(point - [radius]);
-            <a class="gcmc_func" href="gcmc-funcref#circle_cw_r">circle_cw_r</a>([radius, 0]);
+            <a class="gcmc_func" href="gcmc-funcref.htm#goto">goto</a>(point - [radius]);
+            <a class="gcmc_func" href="gcmc-funcref.htm#circle_cw_r">circle_cw_r</a>([radius, 0]);
 }
 
+<br>
 <span class="gcmc_comment">/* -------------------- Main Program -------------------- */</span>
+<br>
+HD = 6.0mm;	<span class="gcmc_comment">// Gear center-hole diameter</span><br>
+N = 9;		<span class="gcmc_comment">// Number of teeth</span><br>
+PA = 20.0deg;	<span class="gcmc_comment">// Pressure angle</span><br>
+D = 100.0mm;	<span class="gcmc_comment">// Pitch diameter</span><br>
+P = N/D;	<span class="gcmc_comment">// Diametral pitch</span><br>
+                                                                <br>
+<span class="gcmc_comment">// First gear</span><br>
+hole([D/2.0, 0.0mm], HD/2.0);<br>
+trace(gear_P(N, PA, P), [D/2.0, 0.0mm]);<br>
 
-HD = 6.0mm;	<span class="gcmc_comment">// Gear center-hole diameter</span>
-N = 9;		<span class="gcmc_comment">// Number of teeth</span>
-PA = 20.0deg;	<span class="gcmc_comment">// Pressure angle</span>
-D = 100.0mm;	<span class="gcmc_comment">// Pitch diameter</span>
-P = N/D;	<span class="gcmc_comment">// Diametral pitch</span>
-
-<span class="gcmc_comment">// First gear</span>
-hole([D/2.0, 0.0mm], HD/2.0);
-trace(gear_P(N, PA, P), [D/2.0, 0.0mm]);
-
-<span class="gcmc_comment">// Second gear</span>
-hole([-D/2.0, 0.0mm], HD/2.0);
-trace(gear_P(N, PA, P), [-D/2, 0.0mm]);
+<span class="gcmc_comment">// Second gear</span><br>
+hole([-D/2.0, 0.0mm], HD/2.0);<br>
+trace(gear_P(N, PA, P), [-D/2, 0.0mm]);<br>
 </body>
 </html>
