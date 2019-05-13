@@ -219,6 +219,7 @@ wxBEGIN_EVENT_TABLE (AppFrame, wxFrame)
     // help
     EVT_MENU (wxID_ABOUT,            AppFrame::OnAbout)
 	EVT_MENU(ID_DOWNLOADUPDATE,		AppFrame::OnDownloadUpdate)
+	EVT_MENU(ID_SHOWWLCOME, AppFrame::OnShowWelcome)
 
   //  EVT_CONTEXT_MENU(                AppFrame::OnContextMenu)
 //GCode
@@ -321,9 +322,8 @@ AppFrame::AppFrame (const wxString &title)
 	wxLog::SetActiveTarget(m_LogWin);
 #endif
 	
-	WelcomeWnd *welcome = new WelcomeWnd(this);
-	welcome->ShowWelcome(true);
-
+	ShowWelcome();
+	
 }
 
 AppFrame::~AppFrame () 
@@ -331,12 +331,18 @@ AppFrame::~AppFrame ()
 
 }
 
+void AppFrame::ShowWelcome()
+{
+	WelcomeWnd *welcome = new WelcomeWnd(this);
+	welcome->ShowWelcome(true);
+}
+
 // common event handlers
 void AppFrame::OnTimer(wxTimerEvent &event) 
 { 
 	static bool needToAsk = true;
 	if (gcmc_running_in_sec == 0)
-		needToAsk == true;
+		needToAsk = true;
 
 	wxTimer &tm = event.GetTimer();
 	gcmc_running_in_sec++;
@@ -405,6 +411,11 @@ void AppFrame::OnAbout (wxCommandEvent &WXUNUSED(event)) {
     AppAbout dlg(this);
 }
 
+void AppFrame::OnShowWelcome(wxCommandEvent &WXUNUSED(event))
+{
+	ShowWelcome();
+}
+
 void AppFrame::OnExit (wxCommandEvent &WXUNUSED(event)) {
     Close (true);
 }
@@ -429,7 +440,7 @@ bool AppFrame::DoFileSave(bool askToSave, bool bSaveAs )
 	wxString fname = m_edit->GetFilename();
 	if (bSaveAs || fname.empty())
 	{
-		wxString filename = _("unnamed");
+		wxString filename = fname.empty() ? _("unnamed") : fname;
 		wxString wildCard;
 		if (m_edit->GetFileType() == FILETYPE_GCMC)
 			wildCard = _("GCMC Files (*.gcmc)|*.gcmc");
@@ -823,8 +834,9 @@ void AppFrame::CreateMenu ()
 		 
      // Help menu
     wxMenu *menuHelp = new wxMenu;
-	menuHelp->Append(ID_DOWNLOADUPDATE, _("&About ..\tCtrl+D"));
+	menuHelp->Append(ID_DOWNLOADUPDATE, _("&Download ..\tCtrl+D"));
     menuHelp->Append (wxID_ABOUT, _("&About ..\tCtrl+D"));
+	menuHelp->Append(ID_SHOWWLCOME, _("Show Welcome Screen"));
 
     // construct menu
     m_menuBar->Append (menuFile, _("&File"));

@@ -1,0 +1,53 @@
+/*
+ * G-code meta compiler
+ *
+ * Copyright (C) 2014  B. Stultiens
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+ * Hole milling example
+ * --------------------
+ * Mill a hole in continuous curvature movements. Not a single straight line is
+ * required to mill an arbitrary large hole from any size milling bit.
+ * Continuous curvature milling reduces the stress on the mill, bit and object
+ * by preventing any jerking.
+ *
+ * A hole is milled at a given center and depth with a target radius. The
+ * milling-bit radius and the cutting step define how many turning cycles are
+ * required to finish the hole. The mill is retracted with a helical move back
+ * to the center and starting Z-position.
+ *
+ * @@@--svg-toolwidth 6.0 --svg-opacity 0.2@@@
+ */
+
+include("cc_hole.inc.gcmc");
+
+feedrate(600mm);
+
+/* -------------------- Main Program -------------------- */
+
+HOME = [0.0mm, 0.0mm, 10.0mm];
+goto(HOME);
+if(!issvg()) {
+	move(HOME);	// To visualize subsequent rapids in LinuxCNC
+}
+
+//          Center         R_hole  R_tool  Step  Cutting-Z
+cc_hole([ 10.0mm, 25.0mm],  4.0mm, 3.0mm, 1.1mm, -1.0mm);
+cc_hole([ 25.0mm, 25.0mm],  7.0mm, 3.0mm, 0.6mm, -1.0mm);
+cc_hole([ 55.0mm, 25.0mm], 17.0mm, 3.0mm, 3.0mm, -1.0mm);
+cc_hole([100.0mm, 25.0mm], 26.0mm, 3.0mm, 5.0mm, -1.0mm);
+
+goto(HOME);

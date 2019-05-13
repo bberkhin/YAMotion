@@ -42,6 +42,7 @@ public:
 	void OnTimer(wxTimerEvent &event);
 	void OnClose(wxCloseEvent &event);
 	void OnAbout(wxCommandEvent &event);	
+	void OnShowWelcome(wxCommandEvent &event);
 	void OnDownloadUpdate(wxCommandEvent &event);
 	void OnExit(wxCommandEvent &event);
 	void OnTimerEvent(wxTimerEvent &event);
@@ -95,6 +96,7 @@ private:
 	void AppendGcmcError(wxString &src);
 	void GcmcProcessTerminated(int status, const wchar_t *dst_fname, DoAfterConvertGcmc what_to_do);
 	void DoMathCalc(DoMathBase &mth);
+	void ShowWelcome();
 	
 private:
 	// edit object

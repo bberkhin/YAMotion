@@ -1,0 +1,32 @@
+﻿<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>GCode Help</title>
+</head>
+<body bgcolor="#8DEAFF">
+    <p>  <a href="./gcode.htm">Back</a> </p>
+    <h1 class="post-title entry-title">G1 or G01</h1>
+
+    <p>Linear move at a specified feed rate.&nbsp; It can cut in a single axis, or using multiple axes.</p>
+    <p>It is a modal command, so any coordinates that follow it will be treated as liner move destinations or distances (see G90/G91) until another command cancels it (such as a <a href="http://www.manufacturinget.org/2011/12/cnc-g-code-g0-or-g00/">G00</a> or G02).</p>
+    <p>
+        G1 is usually used to cut a straight line.&nbsp;
+        Be sure you know about speeds, feeds and depth of cut before you select the cutting parameters.
+    </p>
+    <p>The argument F sets the feedrate.&nbsp; The meaning is determined by the following commands (usually set in the header of the program).</p>
+    <ul>
+        <li>G93 – Time to complete the motion (Inverse time mode)</li>
+        <li>G94 – Inches or mm per minute (IPM) (See G20/G21)&nbsp; &lt;– The “usual” setting</li>
+        <li>G95 -Inches or mm per spindle revolution (IPR)</li>
+    </ul>
+    <p>If “F” is not present in the code block and has not been set by another feed command earlier in the program, most machines will throw an error.&nbsp; Also, for all arguments, including the F value, use a decimal point.</p>
+    <p>Once a G01 is started all programmed axes will move and reach the destination at the same time.</p>
+    <h2>Example:</h2>
+    <p>Assume G90, G20 and G94 have been set and the machine is currently at X0.0 Y0.0 Z0.0. For the following code:</p>
+    <p style="padding-left: 30px;">G01 X3.0 Y1.0 F8.0;</p>
+    <p>The toolpath will look like this:</p>
+    <p><a href="G01.png"><img class="alignnone size-large wp-image-2831" title="G01" src="G01.png" alt="" width="600" height="223"></a></p>
+    <p>The cutting tool will move at 8 inches per minute.</p>
+    <p>&nbsp;</p>
+</body>
+</html>
