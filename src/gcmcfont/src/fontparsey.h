@@ -30,8 +30,8 @@
    This special exception was added by the Free Software Foundation in
    version 2.2 of Bison.  */
 
-#ifndef YY_YY_GRAMMARY_TAB_H_INCLUDED
-# define YY_YY_GRAMMARY_TAB_H_INCLUDED
+#ifndef YY_YY_FONTPARSEY_H_INCLUDED
+# define YY_YY_FONTPARSEY_H_INCLUDED
 /* Enabling traces.  */
 #ifndef YYDEBUG
 # define YYDEBUG 0
@@ -46,60 +46,11 @@ extern int yydebug;
    /* Put the tokens into the symbol table, so that GDB and other debuggers
       know about them.  */
    enum yytokentype {
-     FUNCTION = 258,
-     FOR = 259,
-     FOREACH = 260,
-     DO = 261,
-     WHILE = 262,
-     IF = 263,
-     ELIF = 264,
-     ELSE = 265,
-     BREAK = 266,
-     CONTINUE = 267,
-     RETURN = 268,
-     INCLUDE = 269,
-     LOCAL = 270,
-     REPEAT = 271,
-     CONST = 272,
-     TOPEN = 273,
-     TCLOSE = 274,
-     MM = 275,
-     MIL = 276,
-     IN = 277,
-     DEG = 278,
-     RAD = 279,
-     IDENT = 280,
-     STRING = 281,
-     NUMBER = 282,
-     FLOAT = 283,
-     BXORASSIGN = 284,
-     BANDASSIGN = 285,
-     BORASSIGN = 286,
-     SUBORASSIGN = 287,
-     ADDORASSIGN = 288,
-     SHRASSIGN = 289,
-     SHLASSIGN = 290,
-     MODASSIGN = 291,
-     DIVASSIGN = 292,
-     MULASSIGN = 293,
-     ADDASSIGN = 294,
-     SUBASSIGN = 295,
-     LOR = 296,
-     LAND = 297,
-     NE = 298,
-     EQ = 299,
-     GE = 300,
-     LE = 301,
-     GT = 302,
-     LT = 303,
-     SHR = 304,
-     SHL = 305,
-     SUBOR = 306,
-     ADDOR = 307,
-     DEC = 308,
-     INC = 309,
-     UPM = 310,
-     UID = 311
+     tGLYPH = 258,
+     tLEFT = 259,
+     tRIGHT = 260,
+     tSTROKE = 261,
+     tNUMBER = 262
    };
 #endif
 
@@ -108,16 +59,16 @@ extern int yydebug;
 typedef union YYSTYPE
 {
 /* Line 2058 of yacc.c  */
-#line 76 "grammary.y"
+#line 53 "fontparsey.y"
 
-	wchar_t		*str;
-	double		d;
 	int		i;
-	node_t		*node;
+	glyph_t		*g;
+	coord_t		c;
+	stroke_t	*s;
 
 
 /* Line 2058 of yacc.c  */
-#line 121 "grammary.tab.h"
+#line 72 "fontparsey.h"
 } YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
@@ -140,4 +91,4 @@ int yyparse ();
 #endif
 #endif /* ! YYPARSE_PARAM */
 
-#endif /* !YY_YY_GRAMMARY_TAB_H_INCLUDED  */
+#endif /* !YY_YY_FONTPARSEY_H_INCLUDED  */
