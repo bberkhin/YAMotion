@@ -336,7 +336,7 @@ void AppFrame::OnTimer(wxTimerEvent &event)
 { 
 	static bool needToAsk = true;
 	if (gcmc_running_in_sec == 0)
-		needToAsk == true;
+		needToAsk = true;
 
 	wxTimer &tm = event.GetTimer();
 	gcmc_running_in_sec++;
