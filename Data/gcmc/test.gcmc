@@ -1,6 +1,1 @@
-
-center=[100mm,100in,100];
-center2=[100in,100,100];
-comment(center);
-newvec = center+center2;
-comment(newvec);
+﻿Ф

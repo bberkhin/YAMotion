@@ -47,7 +47,7 @@ function shear_x(vl)
 /* - - - - - - - - - - - - - - - - - - - */
 feedrate(400.0mm);
 
-text = "œË‚ÂÚ World! All your Glyphs are belong to us.";
+text = "–ü—Ä–∏–≤–µ—Ç –ú–∏—Ä! All your Glyphs are belong to us.";
 sf = 2.5mm;	/* Scaling factor */
 
 /*
@@ -74,7 +74,7 @@ vl += [0.0mm, 18.0 * sf];
 /* Engrave it (output move/goto) with pen-up at 1.0mm and pen-down at 0.0mm */
 //engrave(vl, 1.0mm, 0.0mm);
 
-//engrave(scale(typeset(text, FONT_HTIMES			), [sf, sf])  + [0.0mm,  6.0 * sf], 1.0mm, 0.0mm);
+engrave(scale(typeset(text, FONT_HTIMES			), [sf, sf])  + [0.0mm,  6.0 * sf], 1.0mm, 0.0mm);
 
 /* As one-liners... */
 /*

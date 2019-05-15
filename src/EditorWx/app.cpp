@@ -114,6 +114,8 @@ bool App::OnInit()
 	if (!wxApp::OnInit())
 		return false;
 
+	wxConvCurrent = &wxConvUTF8;
+
 	wxInitAllImageHandlers();
 	// set application and vendor name
 	SetAppName(APP_NAME);

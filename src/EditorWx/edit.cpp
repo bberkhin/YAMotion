@@ -534,7 +534,7 @@ void Edit::OnDwellStart(wxStyledTextEvent &event)
 		return;
 
 	int posOnLine  = pos - PositionFromLine(lineN);
-	if (posOnLine >= 0 && posOnLine < str.length())
+	if (posOnLine >= 0 && posOnLine < static_cast<int>(str.length()))
 	{
 		wxString strWord = GetWord( str, posOnLine);
 	}
@@ -867,8 +867,82 @@ bool Edit::DoLoadFile(const wxString& filename, int WXUNUSED(fileType))
 
 	if (file.IsOpened())
 	{
+		wxFileOffset len = file.Length();
+		wxCHECK_MSG(len >= 0, false, wxT("invalid length"));
+		size_t length = wx_truncate_cast(size_t, len );
+		wxCHECK_MSG((wxFileOffset)length == len, false, wxT("huge file not supported"));
+		clearerr(file.fp());
+		wxCharBuffer buf(length);
+
+		// note that real length may be less than file length for text files with DOS EOLs
+		// ('\r's get dropped by CRT when reading which means that we have
+		// realLen = fileLen - numOfLinesInTheFile)
+		length = fread(buf.data(), 1, length, file.fp());
+		if (file.Error())
+		{
+			wxLogSysError(_("Read error on file '%s'"), filename.c_str());
+			return false;
+		}
+		buf.data()[length] = 0;
+		wxBOM bomType = wxConvAuto::DetectBOM(buf.data(), length);
+		int offset = 0;
+		wxMBConv *conv = wxConvCurrent;
+		bool delConv = false;
+		switch (bomType)
+		{
+
+			case wxBOM_UTF32BE:
+				conv = new wxMBConvUTF32BE;
+				delConv = true;				
+				offset = 4;
+				break;
+			case wxBOM_UTF32LE:
+				conv = new wxMBConvUTF32LE;
+				delConv = true;
+				offset = 4;
+				break;
+
+			case wxBOM_UTF16BE:
+				conv = new wxMBConvUTF16BE;
+				delConv = true;
+				offset = 2;
+				break;
+			case wxBOM_UTF16LE:
+				conv = new wxMBConvUTF16LE;
+				delConv = true;
+				offset = 2;
+				break;
+			case wxBOM_UTF8:
+				offset = 3;
+				conv = &wxConvUTF8;
+				break;
+		}
+
+		wxString text(buf.data()+ offset, *conv);
+		if (delConv)
+			delete conv;
+		const wxString::size_type posLF = text.find('\n');
+		if (posLF != wxString::npos)
+		{
+			// Set EOL mode to ensure that the new lines inserted into the
+			// text use the same EOLs as the existing ones.
+			if (posLF > 0 && text[posLF - 1] == '\r')
+				SetEOLMode(wxSTC_EOL_CRLF);
+			else
+				SetEOLMode(wxSTC_EOL_LF);
+		}
+		//else: Use the default EOL for the current platform.
+
+		SetValue(text);
+		EmptyUndoBuffer();
+		SetSavePoint();
+
+		return true;
+
+		/*
 		wxString text;
 		if (file.ReadAll(&text, *wxConvCurrent))
+		//if (file.ReadAll(&text, wxConvUTF8))
 		{
 			// Detect the EOL: we use just the first line because there is not
 			// much we can do if the file uses inconsistent EOLs anyhow, we'd
@@ -895,6 +969,7 @@ bool Edit::DoLoadFile(const wxString& filename, int WXUNUSED(fileType))
 
 			return true;
 		}
+		*/
 	}
 #endif // !wxUSE_FFILE && !wxUSE_FILE
 

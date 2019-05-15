@@ -53,7 +53,7 @@
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
-    <Import Project="..\..\..\..\..\..\win_flex_bison\custom_build_rules\win_flex_bison_custom_build.props" />
+    <Import Project="C:\win_flex_bison\custom_build_rules\win_flex_bison_custom_build.props" />
   </ImportGroup>
   <ImportGroup Label="Shared">
   </ImportGroup>
@@ -156,13 +156,13 @@
     </Bison>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\src\fontparsel.c" />
-    <ClCompile Include="..\src\fontparsey.c" />
-    <ClCompile Include="..\src\gcmcfont.c" />
-    <ClCompile Include="..\src\utils.c" />
+    <ClCompile Include="fontparsel.c" />
+    <ClCompile Include="fontparsey.c" />
+    <ClCompile Include="gcmcfont.c" />
+    <ClCompile Include="utils.c" />
   </ItemGroup>
   <ItemGroup>
-    <Flex Include="..\src\fontparsel.l">
+    <Flex Include="fontparsel.l">
       <FileType>Document</FileType>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</ExcludedFromBuild>
       <OutputFile Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(Filename).c</OutputFile>
@@ -171,7 +171,7 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
     </Flex>
-    <Bison Include="..\src\fontparsey.y">
+    <Bison Include="fontparsey.y">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</ExcludedFromBuild>
       <FileType>Document</FileType>
       <OutputFile Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(Filename).c</OutputFile>
@@ -182,14 +182,14 @@
     </Bison>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\src\config.h" />
-    <ClInclude Include="..\src\fontparsey.h" />
-    <ClInclude Include="..\src\gcmcfont.h" />
-    <ClInclude Include="..\src\glyphdata.h" />
-    <ClInclude Include="..\src\utils.h" />
+    <ClInclude Include="config.h" />
+    <ClInclude Include="fontparsey.h" />
+    <ClInclude Include="gcmcfont.h" />
+    <ClInclude Include="glyphdata.h" />
+    <ClInclude Include="utils.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
-    <Import Project="..\..\..\..\..\..\win_flex_bison\custom_build_rules\win_flex_bison_custom_build.targets" />
+    <Import Project="C:\win_flex_bison\custom_build_rules\win_flex_bison_custom_build.targets" />
   </ImportGroup>
 </Project>

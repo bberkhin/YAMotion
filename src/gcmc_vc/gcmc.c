@@ -474,6 +474,26 @@ static int get_offset(double *offs, const char *str, char ch, unit_et *unit)
 	return 1;
 }
 
+void skeep_UTF8BOM()
+{
+	char c;
+	if ((c = getc(yyin)) != '\xEF')
+	{
+		fseek(yyin, 0, SEEK_SET);
+		return;
+	}
+	if ((c = getc(yyin)) != '\xBB')
+	{
+		fseek(yyin, 0, SEEK_SET);
+		return;
+	}
+	if ((c = getc(yyin)) != '\xBF')
+	{
+		fseek(yyin, 0, SEEK_SET);
+		return;
+	}
+}
+
 int main(int argc, char *argv[])
 {
 	int i;
@@ -733,11 +753,15 @@ int main(int argc, char *argv[])
 		filename = strdup("--stdin--");
 	}
 	else {
-		if (NULL == (yyin = fopen(argv[optind], "r"))) {
+		
+		if (NULL == (yyin = fopen(argv[optind], "r"))) 
+		{
 			perror(argv[optind]);
 			exit(1);
 		}
 		filename = strdup(argv[optind]);
+		//skeep UTF-8 BOM
+		skeep_UTF8BOM();
 	}
 
 	if (!ofn) {

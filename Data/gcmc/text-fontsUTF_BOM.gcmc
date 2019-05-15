@@ -1,37 +1,7 @@
-/*
- * G-code meta compiler
- *
- * Copyright (C) 2015  B. Stultiens
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- *
- *---------------------------------------------------------------------
- * Example of vector fonts
- *---------------------------------------------------------------------
- *
- *   @@@--svg-toolwidth=0.1 --svg-opacity=1.0 --svg-no-movelayer@@@
- */
-
 include("engrave.inc.gcmc");	/* Engraving helper function */
 
-/*
- * Shear the coordinate system in X
- *
- * An italic font is foremost a sheared version of the regular font. This is
- * not really true for all glyphs, but it is close enough for the most simple
- * sans-serif fonts. Real italics means a separate font definition.
- */
+text = "ÐŸÑ€Ð¸Ð²ÐµÑ‚! All your Glyphs are belong to us.";
+
 function shear_x(vl)
 {
 	local l = {};
@@ -47,7 +17,7 @@ function shear_x(vl)
 /* - - - - - - - - - - - - - - - - - - - */
 feedrate(400.0mm);
 
-text = "Ïðèâåò World! All your Glyphs are belong to us.";
+
 sf = 2.5mm;	/* Scaling factor */
 
 /*
@@ -74,7 +44,7 @@ vl += [0.0mm, 18.0 * sf];
 /* Engrave it (output move/goto) with pen-up at 1.0mm and pen-down at 0.0mm */
 //engrave(vl, 1.0mm, 0.0mm);
 
-//engrave(scale(typeset(text, FONT_HTIMES			), [sf, sf])  + [0.0mm,  6.0 * sf], 1.0mm, 0.0mm);
+engrave(scale(typeset(text, FONT_HTIMES			), [sf, sf])  + [0.0mm,  6.0 * sf], 1.0mm, 0.0mm);
 
 /* As one-liners... */
 /*

@@ -7,7 +7,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "EditorWx", "EditorWx\Editor
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "gcmc_vc", "gcmc_vc\gcmc_vc.vcxproj", "{C0295E58-FB1E-4D13-93AA-86B47636D28E}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "gcmcfont_vc", "gcmcfont\gcmcfont_vc\gcmcfont_vc.vcxproj", "{9C66F4FB-CF24-4EB1-B44B-4EE2E68314C2}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "gcmcfont_vc", "gcmcfont\gcmcfont_vc.vcxproj", "{9C66F4FB-CF24-4EB1-B44B-4EE2E68314C2}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
