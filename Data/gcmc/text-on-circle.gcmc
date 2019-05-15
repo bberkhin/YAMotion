@@ -73,7 +73,7 @@ engrave(rotlst, 1.0mm, 0.0mm);
 /* Inset text too, with accents */
 sf = 8.0mm;	/* Scaling factor a bit less than above */
 
-vl  = typeset("Blá Blå Blà Blæ Blø", FONT_HSANS_1);
+vl  = typeset("Hello World", FONT_HSANS_1);
 
 /* Scale to real world coordinates */
 vl = scale(vl, [sf / pi(), sf]);

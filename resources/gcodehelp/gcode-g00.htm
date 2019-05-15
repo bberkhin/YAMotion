@@ -1,0 +1,26 @@
+﻿<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>GCode Help</title>
+</head>
+<body bgcolor="#8DEAFF">
+    <p>  <a href="./gcode.htm">Back</a> </p>
+    <h1 style="text-align:center">G0 code</h1>
+
+    <p>Rapid move to a point. (Not necessarily in a straight line!)</p>
+    <p>G0 (G zero) tells the machine to move as quickly as possible to a given point (absolute or relative, depending on the setting of G90 or 91). This command is <strong>modal</strong>, so any coordinates that follow will be rapid as well (until a Group 01 code is called).&nbsp; As with all G codes, it specifies only the destination point.&nbsp; HINT: It is usually a good idea to pull the Z up to a safe distance before executing a G0, since the path is not a straight line.&nbsp; Also, never rapid to or from a position too close to the workpiece.&nbsp; Leave some room for lead-ins and lead-outs.&nbsp; Be aware of the decimal point!</p>
+    <p>
+        Takes the arguments (X, Y, Z, A, B).<br>
+        Each of these is optional, A and B are for rotary axes.&nbsp; Notice there is no argument for feed rate, it is the machine max.
+    </p>
+    <h2>Example:</h2>
+    <p>Assume the machine is currently at X0.0 Y0.0 and G90 is enabled. for the following code:</p>
+    <p style="padding-left: 30px;">G0 X3.0 Y1.0 ;</p>
+    <p>The toolpath will look like this:</p>
+    <p><a href="G00.png"><img class="alignnone size-large wp-image-2816" title="G00" src="G00.png" alt="" width="600" height="231"></a></p>
+    <p>Don’t make the mistake of thinking the path looks like the one shown below in red! This is a crash waiting to happen.</p>
+    <p><a href="Not-G00.png"><img class="alignnone size-large wp-image-2817" title="Not G00" src="Not-G00.png" alt="" width="600" height="227"></a></p>
+    <p>The above example assumes milling, for turning, the only difference is the interpretation of the coordinate system.</p>
+    
+</body>
+</html>

@@ -1,6 +1,6 @@
-#line 1 "grammarl.flex.cpp"
+#line 1 "fontparsel.c"
 
-#line 3 "grammarl.flex.cpp"
+#line 3 "fontparsel.c"
 
 #define  YY_INT_ALIGNED short int
 
@@ -355,8 +355,8 @@ static void yynoreturn yy_fatal_error ( const char* msg  );
 	(yy_hold_char) = *yy_cp; \
 	*yy_cp = '\0'; \
 	(yy_c_buf_p) = yy_cp;
-#define YY_NUM_RULES 87
-#define YY_END_OF_BUFFER 88
+#define YY_NUM_RULES 15
+#define YY_END_OF_BUFFER 16
 /* This struct is not used in this scanner,
    but its presence is necessary. */
 struct yy_trans_info
@@ -364,45 +364,30 @@ struct yy_trans_info
 	flex_int32_t yy_verify;
 	flex_int32_t yy_nxt;
 	};
-static const flex_int16_t yy_accept[179] =
+static const flex_int16_t yy_accept[41] =
     {   0,
-       84,   84,    0,    0,    0,    0,   88,   86,   84,   85,
-       83,    8,   83,   83,   83,   83,   83,   83,   83,   83,
-       29,   29,   79,   83,   80,   54,   83,   54,   54,   54,
-       54,   54,   54,   54,   54,   54,   54,   81,   83,   82,
-        2,    4,    6,   26,   28,   10,   86,   84,   62,   71,
-       60,   75,   69,   56,   65,   55,   58,   67,   57,   32,
-        1,    7,   70,   32,   29,   33,   31,   77,   63,   61,
-       64,   78,   54,   76,   54,   54,   54,   37,   54,   54,
-       54,   44,   45,   54,   54,   49,   54,   54,   54,   74,
-       59,    2,    3,    3,    5,   26,    9,   24,   15,   24,
-
-       23,   11,   14,   16,   17,   18,   19,   20,   21,   22,
-       24,   66,   68,    7,   32,   33,   32,   31,   30,   72,
-       73,   54,   54,   38,   54,   54,   42,   54,   54,   54,
-       48,   50,   54,   54,   54,   27,   15,   25,   11,   14,
-       13,   54,   54,   54,   39,   40,   54,   54,   54,   54,
-       54,   54,   54,   11,   12,   34,   36,   54,   54,   54,
-       54,   47,   54,   54,   53,   54,   54,   54,   54,   51,
-       52,   54,   41,   54,   46,   35,   43,    0
+        0,    0,   16,   14,    2,   13,    1,   12,   11,   10,
+       10,    7,    7,    7,    7,    7,    2,    1,   10,   10,
+        9,    7,    7,    7,    7,    7,    8,    7,    7,    7,
+        7,    7,    4,    7,    7,    3,    5,    7,    6,    0
     } ;
 
 static const YY_CHAR yy_ec[256] =
     {   0,
         1,    1,    1,    1,    1,    1,    1,    1,    2,    3,
-        1,    2,    4,    1,    1,    1,    1,    1,    1,    1,
+        1,    2,    2,    1,    1,    1,    1,    1,    1,    1,
         1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
-        1,    2,    5,    6,    1,    1,    7,    8,    1,    9,
-        9,   10,   11,    9,   12,   13,   14,   15,   16,   16,
-       16,   16,   16,   16,   16,   17,   17,    9,    9,   18,
-       19,   20,    9,    1,   21,   21,   21,   21,   22,   21,
-       23,   23,   23,   23,   23,   23,   23,   23,   23,   23,
-       23,   23,   23,   23,   23,   23,   23,   23,   23,   23,
-        9,   24,    9,   25,   23,    1,   26,   27,   28,   29,
+        1,    2,    1,    1,    4,    1,    1,    1,    1,    5,
+        5,    1,    6,    5,    6,    1,    1,    7,    8,    8,
+        8,    8,    8,    8,    8,    8,    8,    1,    1,    1,
+        1,    1,    1,    1,    9,    9,    9,    9,    9,    9,
+       10,   10,   10,   10,   10,   10,   10,   10,   10,   10,
+       10,   10,   10,   10,   10,   10,   10,   11,   10,   10,
+        5,    1,    5,    1,   10,    1,    9,    9,    9,    9,
 
-       30,   31,   32,   33,   34,   23,   35,   36,   37,   38,
-       39,   40,   23,   41,   42,   43,   44,   45,   46,   47,
-       23,   23,   48,   49,   50,    9,    1,    1,    1,    1,
+       12,   13,   14,   15,   16,   10,   17,   18,   10,   10,
+       19,   20,   10,   21,   22,   23,   10,   10,   10,   11,
+       24,   10,    5,    1,    5,    1,    1,    1,    1,    1,
         1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
         1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
         1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
@@ -419,149 +404,55 @@ static const YY_CHAR yy_ec[256] =
         1,    1,    1,    1,    1
     } ;
 
-static const YY_CHAR yy_meta[51] =
+static const YY_CHAR yy_meta[25] =
     {   0,
-        1,    1,    2,    1,    1,    3,    1,    1,    1,    4,
-        1,    1,    1,    1,    5,    5,    5,    1,    1,    1,
-        5,    5,    6,    3,    1,    5,    5,    5,    5,    5,
-        5,    6,    6,    6,    6,    6,    6,    6,    6,    6,
-        6,    6,    6,    6,    6,    6,    6,    1,    1,    1
+        1,    1,    2,    1,    1,    1,    3,    3,    3,    4,
+        4,    3,    3,    4,    4,    4,    4,    4,    4,    4,
+        4,    4,    4,    4
     } ;
 
-static const flex_int16_t yy_base[191] =
+static const flex_int16_t yy_base[44] =
     {   0,
-        0,    0,   48,   49,   50,   51,  313,  314,   58,  314,
-      293,  314,  292,   47,  314,  291,   50,   51,   56,   66,
-       66,   76,   46,  290,   48,    0,  289,  266,  267,   47,
-      269,   51,   56,  265,   67,   77,  270,  314,   59,  314,
-        0,  314,   95,    0,  314,  108,  111,  114,  314,  314,
-      314,  314,  314,  314,  314,  283,  314,  314,  282,  114,
-      314,    0,  314,  117,  144,  108,  160,  281,  314,  314,
-      314,  280,    0,  314,  268,  259,  264,    0,  101,  254,
-      256,    0,  265,  264,  255,    0,  261,  105,  255,  314,
-      314,    0,  314,  136,  314,    0,  149,  314,  160,  285,
-
-      314,  152,  155,  314,  314,  314,  314,  314,  314,  314,
-        0,  314,  314,    0,  163,  179,  182,  185,    0,  314,
-      314,  261,   79,    0,  255,  255,  254,  255,  246,  255,
-        0,    0,  250,  235,  242,  314,  161,  314,  188,  193,
-        0,  242,  233,  241,    0,    0,  248,  230,  228,  235,
-      244,  224,  229,  202,  314,    0,    0,  210,  219,  207,
-      208,    0,  192,  154,    0,  140,  150,  134,  111,    0,
-        0,  110,    0,   73,    0,    0,    0,  314,  219,  225,
-      227,  233,  239,  245,  251,  257,  263,   97,   92,   79
+        0,    0,   61,   62,   58,   62,    0,   62,   18,   20,
+       22,    0,   41,   46,   41,   33,   53,    0,   25,   27,
+        0,    0,   30,   40,   38,   30,    0,   30,   26,   33,
+       28,   31,    0,   22,   27,    0,    0,   31,    0,   62,
+       36,   38,   35
     } ;
 
-static const flex_int16_t yy_def[191] =
+static const flex_int16_t yy_def[44] =
     {   0,
-      178,    1,  179,  179,  180,  180,  178,  178,  178,  178,
-      178,  178,  178,  178,  178,  178,  178,  178,  178,  178,
-      178,  178,  178,  178,  178,  181,  178,  181,  181,  181,
-      181,  181,  181,  181,  181,  181,  181,  178,  178,  178,
-      182,  178,  183,  184,  178,  178,  185,  178,  178,  178,
-      178,  178,  178,  178,  178,  178,  178,  178,  178,  178,
-      178,  186,  178,  178,  178,  178,  187,  178,  178,  178,
-      178,  178,  181,  178,  181,  181,  181,  181,  181,  181,
-      181,  181,  181,  181,  181,  181,  181,  181,  181,  178,
-      178,  182,  178,  183,  178,  184,  178,  178,  178,  178,
-
-      178,  178,  178,  178,  178,  178,  178,  178,  178,  178,
-      188,  178,  178,  186,  178,  178,  178,  187,  189,  178,
-      178,  181,  181,  181,  181,  181,  181,  181,  181,  181,
-      181,  181,  181,  181,  181,  178,  178,  178,  178,  178,
-      190,  181,  181,  181,  181,  181,  181,  181,  181,  181,
-      181,  181,  181,  178,  178,  181,  181,  181,  181,  181,
-      181,  181,  181,  181,  181,  181,  181,  181,  181,  181,
-      181,  181,  181,  181,  181,  181,  181,    0,  178,  178,
-      178,  178,  178,  178,  178,  178,  178,  178,  178,  178
+       40,    1,   40,   40,   40,   40,   41,   40,   40,   40,
+       40,   42,   42,   42,   42,   42,   40,   41,   40,   40,
+       43,   42,   42,   42,   42,   42,   43,   42,   42,   42,
+       42,   42,   42,   42,   42,   42,   42,   42,   42,    0,
+       40,   40,   40
     } ;
 
-static const flex_int16_t yy_nxt[365] =
+static const flex_int16_t yy_nxt[87] =
     {   0,
-        8,    9,   10,    9,   11,   12,   13,   14,   15,   16,
-       17,   18,   19,   20,   21,   22,   22,   23,   24,   25,
-       26,   26,   26,    8,   27,   26,   28,   29,   30,   31,
-       32,   26,   26,   33,   26,   34,   35,   26,   26,   26,
-       36,   26,   26,   26,   26,   37,   26,   38,   39,   40,
-       42,   42,   45,   45,   51,   46,   46,   43,   43,   48,
-       54,   48,   57,   68,   69,   52,   71,   72,   55,   58,
-       60,   60,   60,   47,   47,   61,   77,   90,   64,   62,
-       65,   65,   65,  155,   63,   78,   82,   66,   64,   80,
-       65,   65,   65,   83,   81,   66,  119,   66,   56,   59,
-
-       85,  141,   87,   86,   94,   66,   88,   91,   95,   97,
-      177,   97,   67,   99,  100,   48,  101,   48,  116,  116,
-      143,  144,  117,  117,  117,  102,  102,  103,   60,   60,
-       60,  115,  115,  115,  125,   66,  104,  105,   66,  176,
-      175,  106,  126,   66,  133,   94,   66,  134,  107,   95,
-       97,  108,   97,  109,  136,  110,   64,  111,   65,   65,
-       65,  137,  137,  137,  137,   66,  139,  139,  140,  140,
-      140,  140,  174,   66,  119,  119,  119,  115,  115,  115,
-      119,  119,  173,  172,   66,  119,  119,  119,  119,  119,
-      119,  171,   66,  117,  117,  117,  117,  117,  117,  178,
-
-      178,  178,  154,  154,  140,  178,  178,  140,  140,  140,
-      178,  178,  178,  178,  178,  178,  140,  140,  140,   41,
-       41,   41,   41,   41,   41,   44,   44,   44,   44,   44,
-       44,   73,   73,   92,  170,   92,  169,   92,   92,   93,
-      168,   93,   93,   93,   93,   96,  167,  166,   96,   96,
-       96,   98,   98,   98,   98,   98,   98,  114,  165,  114,
-      114,  114,  114,  118,  164,  118,  118,  118,  118,  163,
-      162,  161,  160,  159,  158,  157,  156,  153,  152,  151,
-      150,  149,  148,  147,  146,  145,  142,  138,  135,  132,
-      131,  130,  129,  128,  127,  124,  123,  122,  121,  120,
-
-      113,  112,   89,   84,   79,   76,   75,   74,   70,   53,
-       50,   49,  178,    7,  178,  178,  178,  178,  178,  178,
-      178,  178,  178,  178,  178,  178,  178,  178,  178,  178,
-      178,  178,  178,  178,  178,  178,  178,  178,  178,  178,
-      178,  178,  178,  178,  178,  178,  178,  178,  178,  178,
-      178,  178,  178,  178,  178,  178,  178,  178,  178,  178,
-      178,  178,  178,  178
+        4,    5,    6,    7,    8,    9,   10,   11,   12,   12,
+       12,   12,   12,   13,   12,   12,   12,   14,   12,   12,
+       15,   16,   12,   12,   19,   20,   20,   20,   20,   20,
+       21,   20,   20,   20,   20,   21,   18,   27,   18,   18,
+       22,   22,   39,   38,   37,   36,   35,   34,   33,   32,
+       31,   30,   29,   28,   17,   26,   25,   24,   23,   17,
+       40,    3,   40,   40,   40,   40,   40,   40,   40,   40,
+       40,   40,   40,   40,   40,   40,   40,   40,   40,   40,
+       40,   40,   40,   40,   40,   40
     } ;
 
-static const flex_int16_t yy_chk[365] =
+static const flex_int16_t yy_chk[87] =
     {   0,
         1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
         1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
-        1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
-        1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
-        1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
-        3,    4,    5,    6,   14,    5,    6,    3,    4,    9,
-       17,    9,   18,   23,   23,   14,   25,   25,   17,   18,
-       19,   19,   19,    5,    6,   20,   30,   39,   21,   20,
-       21,   21,   21,  190,   20,   30,   33,   21,   22,   32,
-       22,   22,   22,   33,   32,   21,  189,   22,   17,   18,
-
-       35,  188,   36,   35,   43,   22,   36,   39,   43,   46,
-      174,   46,   21,   47,   47,   48,   47,   48,   66,   66,
-      123,  123,   66,   66,   66,   47,   47,   47,   60,   60,
-       60,   64,   64,   64,   79,   60,   47,   47,   64,  172,
-      169,   47,   79,   60,   88,   94,   64,   88,   47,   94,
-       97,   47,   97,   47,   97,   47,   65,   47,   65,   65,
-       65,   99,  137,   99,  137,   65,  102,  102,  102,  103,
-      103,  103,  168,   65,   67,   67,   67,  115,  115,  115,
-       67,   67,  167,  166,  115,   67,   67,   67,   67,   67,
-       67,  164,  115,  116,  116,  116,  117,  117,  117,  118,
-
-      118,  118,  139,  139,  139,  118,  118,  140,  140,  140,
-      118,  118,  118,  118,  118,  118,  154,  154,  154,  179,
-      179,  179,  179,  179,  179,  180,  180,  180,  180,  180,
-      180,  181,  181,  182,  163,  182,  161,  182,  182,  183,
-      160,  183,  183,  183,  183,  184,  159,  158,  184,  184,
-      184,  185,  185,  185,  185,  185,  185,  186,  153,  186,
-      186,  186,  186,  187,  152,  187,  187,  187,  187,  151,
-      150,  149,  148,  147,  144,  143,  142,  135,  134,  133,
-      130,  129,  128,  127,  126,  125,  122,  100,   89,   87,
-       85,   84,   83,   81,   80,   77,   76,   75,   72,   68,
-
-       59,   56,   37,   34,   31,   29,   28,   27,   24,   16,
-       13,   11,    7,  178,  178,  178,  178,  178,  178,  178,
-      178,  178,  178,  178,  178,  178,  178,  178,  178,  178,
-      178,  178,  178,  178,  178,  178,  178,  178,  178,  178,
-      178,  178,  178,  178,  178,  178,  178,  178,  178,  178,
-      178,  178,  178,  178,  178,  178,  178,  178,  178,  178,
-      178,  178,  178,  178
+        1,    1,    1,    1,    9,    9,   10,   10,   11,   11,
+       10,   19,   19,   20,   20,   19,   41,   43,   41,   41,
+       42,   42,   38,   35,   34,   32,   31,   30,   29,   28,
+       26,   25,   24,   23,   17,   16,   15,   14,   13,    5,
+        3,   40,   40,   40,   40,   40,   40,   40,   40,   40,
+       40,   40,   40,   40,   40,   40,   40,   40,   40,   40,
+       40,   40,   40,   40,   40,   40
     } ;
 
 static yy_state_type yy_last_accepting_state;
@@ -578,11 +469,11 @@ int yy_flex_debug = 0;
 #define YY_MORE_ADJ 0
 #define YY_RESTORE_YY_MORE_OFFSET
 char *yytext;
-#line 1 "grammarl.l"
+#line 1 "fontparsel.l"
 /*
- * G-code meta compiler
+ * G-code meta compiler - Font conversion
  *
- * Copyright (C) 2013  B. Stultiens
+ * Copyright (C) 2015  B. Stultiens
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -598,11 +489,7 @@ char *yytext;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #define YY_NO_INPUT 1
-/* Exclusive comment eating */
-
-/* Exclusive string collection */
-
-#line 29 "grammarl.l"
+#line 23 "fontparsel.l"
 #include "config.h"
 
 #ifdef HAVE_UNISTD_H
@@ -610,19 +497,19 @@ char *yytext;
 #else
 #define YY_NO_UNISTD_H
 #endif
-#define YYDEBUG 1
 #include <ctype.h>
 #include <assert.h>
 
-#include "grammartypes.h"
-#include "grammary.h"
 #include "utils.h"
+#include "glyphdata.h"
+#include "fontparsey.h"
+#include "gcmcfont.h"
  
 /* This is here to cast the result to ssize_t so that the "< 0" comparison works */
 /* The rest is a copy of the generated scanner code */
 #define YY_INPUT(buf,result,max_size) \
 	errno = 0; \
-	while((int)(result = read( fileno(yyin), (char *) buf, max_size )) < 0) { \
+	while((size_t)(result = read( fileno(yyin), (char *) buf, max_size )) < 0) { \
 		if(errno != EINTR) { \
 			YY_FATAL_ERROR("input in flex scanner failed"); \
 			break; \
@@ -637,37 +524,16 @@ int prevlinenr = 1;
 int prevcharnr = 1;
 const char *filename;
 
-typedef struct __incstack_t {
-	YY_BUFFER_STATE	bufferstate;	/* Previous flex context */
-	FILE		*fp;		/* Previous input file */
-	int		linenr;		/* Position of the include() statement */
-	int		charnr;
-	int		prevlinenr;
-	int		prevcharnr;
-	const char	*filename;	/* Name of file we were handling */
-} incstack_t;
-
-static incstack_t	*incstack;
-static int		nincstack;
-static int		naincstack;
-
-static void str_init(void);
-static void str_addc(char c);
-static wchar_t *str_get(void);
-static wchar_t *utf8_to_ucs32(const char *s, int len);
-
 /* Always update the current character position within a line */
 #define YY_USER_ACTION	do { prevlinenr = linenr; prevcharnr = charnr; charnr += yyleng; } while(0);
 
 #pragma warning(disable:4996)
 
-#line 664 "grammarl.flex.cpp"
+#line 532 "fontparsel.c"
 /* Some shortcut definitions */
-#line 666 "grammarl.flex.cpp"
+#line 534 "fontparsel.c"
 
 #define INITIAL 0
-#define comment 1
-#define string 2
 
 /*windows compatibility case*/
 #include <io.h>
@@ -742,14 +608,6 @@ static int input ( void );
 
 #endif
 
-        static int yy_start_stack_ptr = 0;
-        static int yy_start_stack_depth = 0;
-        static int *yy_start_stack = NULL;
-    
-    static void yy_push_state ( int _new_state );
-    
-    static void yy_pop_state ( void );
-    
 /* Amount of stuff to slurp up with each read. */
 #ifndef YY_READ_BUF_SIZE
 #ifdef __ia64__
@@ -885,10 +743,9 @@ YY_DECL
 		}
 
 	{
-#line 95 "grammarl.l"
+#line 69 "fontparsel.l"
 
-
-#line 891 "grammarl.flex.cpp"
+#line 748 "fontparsel.c"
 
 	while ( /*CONSTCOND*/1 )		/* loops until end-of-file is reached */
 		{
@@ -915,13 +772,13 @@ yy_match:
 			while ( yy_chk[yy_base[yy_current_state] + yy_c] != yy_current_state )
 				{
 				yy_current_state = (int) yy_def[yy_current_state];
-				if ( yy_current_state >= 179 )
+				if ( yy_current_state >= 41 )
 					yy_c = yy_meta[yy_c];
 				}
 			yy_current_state = yy_nxt[yy_base[yy_current_state] + yy_c];
 			++yy_cp;
 			}
-		while ( yy_current_state != 178 );
+		while ( yy_current_state != 40 );
 		yy_cp = (yy_last_accepting_cpos);
 		yy_current_state = (yy_last_accepting_state);
 
@@ -943,518 +800,86 @@ do_action:	/* This label is used only to access EOF actions. */
 
 case 1:
 YY_RULE_SETUP
-#line 97 "grammarl.l"
-yy_push_state(comment); /* Skip block comments */
+#line 70 "fontparsel.l"
+;	/* Skip comments */
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 98 "grammarl.l"
-; /* Skip junk */
+#line 71 "fontparsel.l"
+;	/* Skip whitespace */
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 99 "grammarl.l"
-; /* Skip * */
+#line 72 "fontparsel.l"
+return tGLYPH;
 	YY_BREAK
 case 4:
-/* rule 4 can match eol */
 YY_RULE_SETUP
-#line 100 "grammarl.l"
-linenr++; charnr = 1;
+#line 73 "fontparsel.l"
+return tLEFT;
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 101 "grammarl.l"
-yy_pop_state();
+#line 74 "fontparsel.l"
+return tRIGHT;
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 102 "grammarl.l"
-; /* Skip * */
+#line 75 "fontparsel.l"
+return tSTROKE;
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 104 "grammarl.l"
-; /* Skip line comments */
+#line 76 "fontparsel.l"
+{ yyerror("Unrecognized word '%s'", yytext); }
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 106 "grammarl.l"
-yy_push_state(string); str_init();
+#line 77 "fontparsel.l"
+{ yylval.i = strtol(yytext, NULL, 16); return tNUMBER; }
 	YY_BREAK
 case 9:
-#line 108 "grammarl.l"
+YY_RULE_SETUP
+#line 78 "fontparsel.l"
+{ yyerror("Invalid hexadecimal value"); }
+	YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 108 "grammarl.l"
-{
-				yy_pop_state();
-				yylval.str = str_get();
-				return STRING;
-			}
+#line 79 "fontparsel.l"
+{ yylval.i = strtol(yytext, NULL, 10); return tNUMBER; }
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 113 "grammarl.l"
-{ /* octal escape sequence */
-				int result;
-				result = strtol(yytext+1, 0, 8);
-				if(result > 0xff)
-					yyerror("Character constant out of range");
-				if(!result)
-					yyerror("Embedded '\\0' character not allowed");
-				str_addc((char)result);
-			}
+#line 80 "fontparsel.l"
+{ yyerror("Invalid number"); }
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 122 "grammarl.l"
-{ /* hex escape sequence */
-				int result;
-				result = strtol(yytext+2, 0, 16);
-				if(!result)
-					yyerror("Embedded '\\0' character not allowed");
-				str_addc((char)result);
-			}
+#line 81 "fontparsel.l"
+return *yytext;
 	YY_BREAK
 case 13:
+/* rule 13 can match eol */
 YY_RULE_SETUP
-#line 129 "grammarl.l"
-{  yyerror("Invalid hex escape sequence '%s'", yytext); }
+#line 82 "fontparsel.l"
+linenr++; charnr = 1;
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
-#line 131 "grammarl.l"
-yyerror("Bad escape sequence");
-	YY_BREAK
-case 15:
-/* rule 15 can match eol */
-YY_RULE_SETUP
-#line 132 "grammarl.l"
-linenr++; charnr = 1; /* backslash at EOL continues string after leading whitespace on next line */
-	YY_BREAK
-case 16:
-YY_RULE_SETUP
-#line 133 "grammarl.l"
-str_addc('\a');
-	YY_BREAK
-case 17:
-YY_RULE_SETUP
-#line 134 "grammarl.l"
-str_addc('\b');
-	YY_BREAK
-case 18:
-YY_RULE_SETUP
-#line 135 "grammarl.l"
-str_addc('\f');
-	YY_BREAK
-case 19:
-YY_RULE_SETUP
-#line 136 "grammarl.l"
-str_addc('\n');
-	YY_BREAK
-case 20:
-YY_RULE_SETUP
-#line 137 "grammarl.l"
-str_addc('\r');
-	YY_BREAK
-case 21:
-YY_RULE_SETUP
-#line 138 "grammarl.l"
-str_addc('\t');
-	YY_BREAK
-case 22:
-YY_RULE_SETUP
-#line 139 "grammarl.l"
-str_addc('\v');
-	YY_BREAK
-case 23:
-YY_RULE_SETUP
-#line 140 "grammarl.l"
-str_addc('"');
-	YY_BREAK
-case 24:
-YY_RULE_SETUP
-#line 141 "grammarl.l"
-str_addc(yytext[1]);
-	YY_BREAK
-case 25:
-/* rule 25 can match eol */
-YY_RULE_SETUP
-#line 142 "grammarl.l"
-str_addc(yytext[2]); linenr++; charnr = 1;
-	YY_BREAK
-case 26:
-YY_RULE_SETUP
-#line 143 "grammarl.l"
-{
-				char *yptr = yytext;
-				while(*yptr)
-					str_addc(*yptr++);
-			}
-	YY_BREAK
-case 27:
-YY_RULE_SETUP
-#line 148 "grammarl.l"
-;		/* "bla" "bla" -> "blabla" */
-	YY_BREAK
-case 28:
-/* rule 28 can match eol */
-YY_RULE_SETUP
-#line 149 "grammarl.l"
-yyerror("Unterminated string");
-	YY_BREAK
-case 29:
-YY_RULE_SETUP
-#line 151 "grammarl.l"
-{
-			yylval.i = strtol(yytext, NULL, 10);
-			return NUMBER;
-		}
-	YY_BREAK
-case 30:
-YY_RULE_SETUP
-#line 155 "grammarl.l"
-{
-			yylval.i = strtol(yytext, NULL, 16);
-			return NUMBER;
-		}
-	YY_BREAK
-case 31:
-YY_RULE_SETUP
-#line 159 "grammarl.l"
-yyerror("Bad hexadecimal number '%s'", yytext);
-	YY_BREAK
-case 32:
-YY_RULE_SETUP
-#line 161 "grammarl.l"
-{
-			yylval.d = strtod(yytext, NULL);
-			return FLOAT;
-		}
-	YY_BREAK
-case 33:
-YY_RULE_SETUP
-#line 165 "grammarl.l"
-{
-			yyerror("Bad floating point number '%s', missing exponent magnitude", yytext);
-		}
-	YY_BREAK
-case 34:
-YY_RULE_SETUP
-#line 169 "grammarl.l"
-return BREAK;
-	YY_BREAK
-case 35:
-YY_RULE_SETUP
-#line 170 "grammarl.l"
-return CONTINUE;
-	YY_BREAK
-case 36:
-YY_RULE_SETUP
-#line 171 "grammarl.l"
-return CONST;
-	YY_BREAK
-case 37:
-YY_RULE_SETUP
-#line 172 "grammarl.l"
-return DO;
-	YY_BREAK
-case 38:
-YY_RULE_SETUP
-#line 173 "grammarl.l"
-return DEG;
-	YY_BREAK
-case 39:
-YY_RULE_SETUP
-#line 174 "grammarl.l"
-return ELIF;
-	YY_BREAK
-case 40:
-YY_RULE_SETUP
-#line 175 "grammarl.l"
-return ELSE;
-	YY_BREAK
-case 41:
-YY_RULE_SETUP
-#line 176 "grammarl.l"
-return FOREACH;
-	YY_BREAK
-case 42:
-YY_RULE_SETUP
-#line 177 "grammarl.l"
-return FOR;
-	YY_BREAK
-case 43:
-YY_RULE_SETUP
-#line 178 "grammarl.l"
-return FUNCTION;
-	YY_BREAK
-case 44:
-YY_RULE_SETUP
-#line 179 "grammarl.l"
-return IF;
-	YY_BREAK
-case 45:
-YY_RULE_SETUP
-#line 180 "grammarl.l"
-return IN;
-	YY_BREAK
-case 46:
-YY_RULE_SETUP
-#line 181 "grammarl.l"
-return INCLUDE;
-	YY_BREAK
-case 47:
-YY_RULE_SETUP
-#line 182 "grammarl.l"
-return LOCAL;
-	YY_BREAK
-case 48:
-YY_RULE_SETUP
-#line 183 "grammarl.l"
-return MIL;
-	YY_BREAK
-case 49:
-YY_RULE_SETUP
-#line 184 "grammarl.l"
-return MM;
-	YY_BREAK
-case 50:
-YY_RULE_SETUP
-#line 185 "grammarl.l"
-return RAD;
-	YY_BREAK
-case 51:
-YY_RULE_SETUP
-#line 186 "grammarl.l"
-return REPEAT;
-	YY_BREAK
-case 52:
-YY_RULE_SETUP
-#line 187 "grammarl.l"
-return RETURN;
-	YY_BREAK
-case 53:
-YY_RULE_SETUP
-#line 188 "grammarl.l"
-return WHILE;
-	YY_BREAK
-case 54:
-YY_RULE_SETUP
-#line 190 "grammarl.l"
-{
-			yylval.str = utf8_to_ucs32(yytext, yyleng);
-			return IDENT;
-		}
-	YY_BREAK
-case 55:
-YY_RULE_SETUP
-#line 195 "grammarl.l"
-return ADDOR;
-	YY_BREAK
-case 56:
-YY_RULE_SETUP
-#line 196 "grammarl.l"
-return INC;
-	YY_BREAK
-case 57:
-YY_RULE_SETUP
-#line 197 "grammarl.l"
-return SUBOR;
-	YY_BREAK
-case 58:
-YY_RULE_SETUP
-#line 198 "grammarl.l"
-return DEC;
-	YY_BREAK
-case 59:
-YY_RULE_SETUP
-#line 199 "grammarl.l"
-return LOR;
-	YY_BREAK
-case 60:
-YY_RULE_SETUP
-#line 200 "grammarl.l"
-return LAND;
-	YY_BREAK
-case 61:
-YY_RULE_SETUP
-#line 201 "grammarl.l"
-return EQ;
-	YY_BREAK
-case 62:
-YY_RULE_SETUP
-#line 202 "grammarl.l"
-return NE;
-	YY_BREAK
-case 63:
-YY_RULE_SETUP
-#line 203 "grammarl.l"
-return LE;
-	YY_BREAK
-case 64:
-YY_RULE_SETUP
-#line 204 "grammarl.l"
-return GE;
-	YY_BREAK
-case 65:
-YY_RULE_SETUP
-#line 205 "grammarl.l"
-return ADDASSIGN;
-	YY_BREAK
-case 66:
-YY_RULE_SETUP
-#line 206 "grammarl.l"
-return ADDORASSIGN;
-	YY_BREAK
-case 67:
-YY_RULE_SETUP
-#line 207 "grammarl.l"
-return SUBASSIGN;
-	YY_BREAK
-case 68:
-YY_RULE_SETUP
-#line 208 "grammarl.l"
-return SUBORASSIGN;
-	YY_BREAK
-case 69:
-YY_RULE_SETUP
-#line 209 "grammarl.l"
-return MULASSIGN;
-	YY_BREAK
-case 70:
-YY_RULE_SETUP
-#line 210 "grammarl.l"
-return DIVASSIGN;
-	YY_BREAK
-case 71:
-YY_RULE_SETUP
-#line 211 "grammarl.l"
-return MODASSIGN;
-	YY_BREAK
-case 72:
-YY_RULE_SETUP
-#line 212 "grammarl.l"
-return SHLASSIGN;
-	YY_BREAK
-case 73:
-YY_RULE_SETUP
-#line 213 "grammarl.l"
-return SHRASSIGN;
-	YY_BREAK
-case 74:
-YY_RULE_SETUP
-#line 214 "grammarl.l"
-return BORASSIGN;
-	YY_BREAK
-case 75:
-YY_RULE_SETUP
-#line 215 "grammarl.l"
-return BANDASSIGN;
-	YY_BREAK
-case 76:
-YY_RULE_SETUP
-#line 216 "grammarl.l"
-return BXORASSIGN;
-	YY_BREAK
-case 77:
-YY_RULE_SETUP
-#line 217 "grammarl.l"
-return SHL;
-	YY_BREAK
-case 78:
-YY_RULE_SETUP
-#line 218 "grammarl.l"
-return SHR;
-	YY_BREAK
-case 79:
-YY_RULE_SETUP
-#line 219 "grammarl.l"
-return LT;
-	YY_BREAK
-case 80:
-YY_RULE_SETUP
-#line 220 "grammarl.l"
-return GT;
-	YY_BREAK
-case 81:
-YY_RULE_SETUP
-#line 221 "grammarl.l"
-return TOPEN;
-	YY_BREAK
-case 82:
-YY_RULE_SETUP
-#line 222 "grammarl.l"
-return TCLOSE;
-	YY_BREAK
-case 83:
-YY_RULE_SETUP
-#line 224 "grammarl.l"
-return *yytext;
-	YY_BREAK
-case 84:
-YY_RULE_SETUP
-#line 226 "grammarl.l"
-; /* Skip whitespace */
-	YY_BREAK
-case 85:
-/* rule 85 can match eol */
-YY_RULE_SETUP
-#line 228 "grammarl.l"
-linenr++; charnr = 1;
-	YY_BREAK
-case 86:
-/* rule 86 can match eol */
-YY_RULE_SETUP
-#line 229 "grammarl.l"
+#line 83 "fontparsel.l"
 {
 				/* Catch all rule to find any unmatched text */
-				if(*yytext == '\n') {
-					linenr++;
-					charnr = 1;
-				}
-				yyerror("Illegal character in text '%c' (0x%02x)", isprint((unsigned char)*yytext) ? *yytext : '.', *yytext);
-				/*yyfatal("internal: Unmatched text '%c' (0x%02x) YY_START=%d", isprint((unsigned char)*yytext) ? *yytext : '.', *yytext, YY_START);*/
+				yyerror("internal: Unmatched text '%c' (0x%02x)", isprint((unsigned char)*yytext) ? *yytext : '.', *yytext);
 			}
 	YY_BREAK
-case YY_STATE_EOF(INITIAL):
-case YY_STATE_EOF(comment):
-case YY_STATE_EOF(string):
-#line 238 "grammarl.l"
-{
-				/* Pop the include stack */
-				YY_BUFFER_STATE bs = YY_CURRENT_BUFFER;
-
-				if(YY_START != INITIAL)
-					yyfatal("Unexpected EOF");
-
-				if(nincstack) {
-					/* Freeing the filename invalidates the node_t structure reference! */
-					/*free((void *)filename);*/
-					nincstack--;
-					if(yyin)
-						fclose(yyin);
-					yy_switch_to_buffer(incstack[nincstack].bufferstate);
-					linenr = incstack[nincstack].linenr;
-					charnr = incstack[nincstack].charnr;
-					prevlinenr = incstack[nincstack].prevlinenr;
-					prevcharnr = incstack[nincstack].prevcharnr;
-					filename = incstack[nincstack].filename;
-					yy_delete_buffer(bs);
-				} else {
-					fclose(yyin);
-					yylex_destroy();
-					yyterminate();
-				}
-			}
-	YY_BREAK
-case 87:
+case 15:
 YY_RULE_SETUP
-#line 264 "grammarl.l"
+#line 87 "fontparsel.l"
 ECHO;
 	YY_BREAK
-#line 1457 "grammarl.flex.cpp"
+#line 880 "fontparsel.c"
+case YY_STATE_EOF(INITIAL):
+	yyterminate();
 
 	case YY_END_OF_BUFFER:
 		{
@@ -1750,7 +1175,7 @@ static int yy_get_next_buffer (void)
 		while ( yy_chk[yy_base[yy_current_state] + yy_c] != yy_current_state )
 			{
 			yy_current_state = (int) yy_def[yy_current_state];
-			if ( yy_current_state >= 179 )
+			if ( yy_current_state >= 41 )
 				yy_c = yy_meta[yy_c];
 			}
 		yy_current_state = yy_nxt[yy_base[yy_current_state] + yy_c];
@@ -1778,11 +1203,11 @@ static int yy_get_next_buffer (void)
 	while ( yy_chk[yy_base[yy_current_state] + yy_c] != yy_current_state )
 		{
 		yy_current_state = (int) yy_def[yy_current_state];
-		if ( yy_current_state >= 179 )
+		if ( yy_current_state >= 41 )
 			yy_c = yy_meta[yy_c];
 		}
 	yy_current_state = yy_nxt[yy_base[yy_current_state] + yy_c];
-	yy_is_jam = (yy_current_state == 178);
+	yy_is_jam = (yy_current_state == 40);
 
 		return yy_is_jam ? 0 : yy_current_state;
 }
@@ -2214,39 +1639,6 @@ YY_BUFFER_STATE yy_scan_bytes  (const char * yybytes, int  _yybytes_len )
 	return b;
 }
 
-    static void yy_push_state (int  _new_state )
-{
-    	if ( (yy_start_stack_ptr) >= (yy_start_stack_depth) )
-		{
-		yy_size_t new_size;
-
-		(yy_start_stack_depth) += YY_START_STACK_INCR;
-		new_size = (yy_size_t) (yy_start_stack_depth) * sizeof( int );
-
-		if ( ! (yy_start_stack) )
-			(yy_start_stack) = (int *) yyalloc( new_size  );
-
-		else
-			(yy_start_stack) = (int *) yyrealloc(
-					(void *) (yy_start_stack), new_size  );
-
-		if ( ! (yy_start_stack) )
-			YY_FATAL_ERROR( "out of memory expanding start-condition stack" );
-		}
-
-	(yy_start_stack)[(yy_start_stack_ptr)++] = YY_START;
-
-	BEGIN(_new_state);
-}
-
-    static void yy_pop_state  (void)
-{
-    	if ( --(yy_start_stack_ptr) < 0 )
-		YY_FATAL_ERROR( "start-condition stack underflow" );
-
-	BEGIN((yy_start_stack)[(yy_start_stack_ptr)]);
-}
-
 #ifndef YY_EXIT_FAILURE
 #define YY_EXIT_FAILURE 2
 #endif
@@ -2367,10 +1759,6 @@ static int yy_init_globals (void)
     (yy_init) = 0;
     (yy_start) = 0;
 
-    (yy_start_stack_ptr) = 0;
-    (yy_start_stack_depth) = 0;
-    (yy_start_stack) =  NULL;
-
 /* Defined in main.c */
 #ifdef YY_STDINIT
     yyin = stdin;
@@ -2400,10 +1788,6 @@ int yylex_destroy  (void)
 	/* Destroy the stack itself. */
 	yyfree((yy_buffer_stack) );
 	(yy_buffer_stack) = NULL;
-
-    /* Destroy the start condition stack. */
-        yyfree( (yy_start_stack)  );
-        (yy_start_stack) = NULL;
 
     /* Reset the globals. This is important in a non-reentrant scanner so the next time
      * yylex() is called, initialization will occur. */
@@ -2462,295 +1846,7 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 264 "grammarl.l"
+#line 87 "fontparsel.l"
 
 
-static char *str;
-static int nstr;
-static int nastr;
-
-static void str_init(void)
-{
-	if(!str) {
-		nastr = 32;
-		str = (char *)calloc(nastr, sizeof(*str));
-	}
-	nstr = 0;
-}
-
-static void str_addc(char c)
-{
-	if(nstr >= nastr) {
-		str = (char *)realloc(str, 2*nastr*sizeof(*str));
-		assert(str != NULL);
-		nastr *= 2;
-	}
-	str[nstr] = c;
-	nstr++;
-}
-
-static wchar_t *str_get(void)
-{
-	wchar_t *s;
-	assert(str != NULL);
-	s = utf8_to_ucs32(str, nstr);
-	nstr = 0;
-	return s;
-}
-
-/*
- * UTF-8 to UCS-32 conversion
- *
- * It includes 1, 2, 3, 4, 5 and 6 byte sequences. The 5 and 6 byte sequences
- * are deprecated by RFC 3629, but they are possible encodings for specials if
- * we ever wanted to (we are not doing the internet here).
- */
-static wchar_t *utf8_to_ucs32(const char *s, int len)
-{
-	int ns = len;
-	int nucs = 0;
-	int naucs = 0;
-	wchar_t *ucs = NULL;
-
-	assert(s != NULL);
-
-	while(len > 0) {
-		unsigned int val = 0;
-
-		if((*s & 0xff) <= 0x7f) {
-			/* 1-byte sequence */
-			val = *s & 0x7f;
-			len--;
-			s++;
-		} else if((*s & 0xfe) == 0xfc) {
-			/* 6-byte sequence */
-			if(len < 6) {
-				yyerror("Invalid 6-byte UTF-8 sequence at %d/%d, missing bytes", ns-len, nucs);
-				goto errout;
-			}
-			if((s[1] & 0xc0) != 0x80) {
-				yyerror("Invalid 6-byte UTF-8 sequence at %d/%d, invalid second byte", ns-len, nucs);
-				goto errout;
-			}
-			if((s[2] & 0xc0) != 0x80) {
-				yyerror("Invalid 6-byte UTF-8 sequence at %d/%d, invalid third byte", ns-len, nucs);
-				goto errout;
-			}
-			if((s[3] & 0xc0) != 0x80) {
-				yyerror("Invalid 6-byte UTF-8 sequence at %d/%d, invalid fourth byte", ns-len, nucs);
-				goto errout;
-			}
-			if((s[4] & 0xc0) != 0x80) {
-				yyerror("Invalid 6-byte UTF-8 sequence at %d/%d, invalid fifth byte", ns-len, nucs);
-				goto errout;
-			}
-			if((s[5] & 0xc0) != 0x80) {
-				yyerror("Invalid 6-byte UTF-8 sequence at %d/%d, invalid sixth byte", ns-len, nucs);
-				goto errout;
-			}
-			val = ((s[0] & 0x01) << 30) | ((s[1] & 0x3f) << 24) | ((s[2] & 0x3f) << 18) | ((s[3] & 0x3f) << 12) | ((s[4] & 0x3f) << 6) | (s[5] & 0x3f);
-			if(val < 0x4000000)
-				rtwarning(NULL, "Degenerate 6-byte UTF-8 encoding at %d/%d", ns-len, nucs);
-			len -= 6;
-			s += 6;
-		} else if((*s & 0xfc) == 0xf8) {
-			/* 5-byte sequence */
-			if(len < 5) {
-				yyerror("Invalid 5-byte UTF-8 sequence at %d/%d, missing bytes", ns-len, nucs);
-				goto errout;
-			}
-			if((s[1] & 0xc0) != 0x80) {
-				yyerror("Invalid 5-byte UTF-8 sequence at %d/%d, invalid second byte", ns-len, nucs);
-				goto errout;
-			}
-			if((s[2] & 0xc0) != 0x80) {
-				yyerror("Invalid 5-byte UTF-8 sequence at %d/%d, invalid third byte", ns-len, nucs);
-				goto errout;
-			}
-			if((s[3] & 0xc0) != 0x80) {
-				yyerror("Invalid 5-byte UTF-8 sequence at %d/%d, invalid fourth byte", ns-len, nucs);
-				goto errout;
-			}
-			if((s[4] & 0xc0) != 0x80) {
-				yyerror("Invalid 5-byte UTF-8 sequence at %d/%d, invalid fifth byte", ns-len, nucs);
-				goto errout;
-			}
-			val = ((s[0] & 0x03) << 24) | ((s[1] & 0x3f) << 18) | ((s[2] & 0x3f) << 12) | ((s[3] & 0x3f) << 6) | (s[4] & 0x3f);
-			if(val < 0x200000)
-				rtwarning(NULL, "Degenerate 5-byte UTF-8 encoding at %d/%d", ns-len, nucs);
-			len -= 5;
-			s += 5;
-		} else if((*s & 0xf8) == 0xf0) {
-			/* 4-byte sequence */
-			if(len < 4) {
-				yyerror("Invalid 4-byte UTF-8 sequence at %d/%d, missing bytes", ns-len, nucs);
-				goto errout;
-			}
-			if((s[1] & 0xc0) != 0x80) {
-				yyerror("Invalid 4-byte UTF-8 sequence at %d/%d, invalid second byte", ns-len, nucs);
-				goto errout;
-			}
-			if((s[2] & 0xc0) != 0x80) {
-				yyerror("Invalid 4-byte UTF-8 sequence at %d/%d, invalid third byte", ns-len, nucs);
-				goto errout;
-			}
-			if((s[3] & 0xc0) != 0x80) {
-				yyerror("Invalid 4-byte UTF-8 sequence at %d/%d, invalid fourth byte", ns-len, nucs);
-				goto errout;
-			}
-			val = ((s[0] & 0x07) << 18) | ((s[1] & 0x3f) << 12) | ((s[2] & 0x3f) << 6) | (s[3] & 0x3f);
-			if(val < 0x10000)
-				rtwarning(NULL, "Degenerate 4-byte UTF-8 encoding at %d/%d", ns-len, nucs);
-			len -= 4;
-			s += 4;
-		} else if((*s & 0xf0) == 0xe0) {
-			/* 3-byte sequence */
-			if(len < 3) {
-				yyerror("Invalid 3-byte UTF-8 sequence at %d/%d, missing bytes", ns-len, nucs);
-				goto errout;
-			}
-			if((s[1] & 0xc0) != 0x80) {
-				yyerror("Invalid 3-byte UTF-8 sequence at %d/%d, invalid second byte", ns-len, nucs);
-				goto errout;
-			}
-			if((s[2] & 0xc0) != 0x80) {
-				yyerror("Invalid 3-byte UTF-8 sequence at %d/%d, invalid third byte", ns-len, nucs);
-				goto errout;
-			}
-			val = ((s[0] & 0x0f) << 12) | ((s[1] & 0x3f) << 6) | (s[2] & 0x3f);
-			if(val < 0x800)
-				rtwarning(NULL, "Degenerate 3-byte UTF-8 encoding at %d/%d", ns-len, nucs);
-			len -= 3;
-			s += 3;
-		} else if((*s & 0xe0) == 0xc0) {
-			/* 2-byte sequence */
-			if(len < 2) {
-				yyerror("Invalid 2-byte UTF-8 sequence at %d/%d, missing bytes", ns-len, nucs);
-				goto errout;
-			}
-			if((s[1] & 0xc0) != 0x80) {
-				yyerror("Invalid 2-byte UTF-8 sequence at %d/%d, invalid second byte", ns-len, nucs);
-				goto errout;
-			}
-			val = ((s[0] & 0x1f) << 6) | (s[1] & 0x3f);
-			if(val < 0x80)
-				rtwarning(NULL, "Degenerate 2-byte UTF-8 encoding at %d/%d", ns-len, nucs);
-			len -= 2;
-			s += 2;
-		} else {
-			yyerror("Invalid UTF-8 character at %d/%d, out-of-sequence byte", ns-len, nucs);
-			goto errout;
-		}
-
-		if(val) {
-			if(sizeof(wchar_t) < sizeof(val) && val > 0xffff) {
-				rtwarning(NULL, "wchar_t too small to hold character U+%08x, replacing with '?'", val);
-				val = L'?';
-			}
-			testalloc((void **)&ucs, nucs, &naucs, sizeof(ucs[0]));
-			ucs[nucs++] = (wchar_t)val;
-		} else
-			rtwarning(NULL, "Skipping embedded UTF-8 NUL embedding %d/%d", ns-len, nucs);
-	}
-
-errout:
-	testalloc((void **)&ucs, nucs, &naucs, sizeof(ucs[0]));
-	ucs[nucs] = 0;	/* Implicit zero terminate */
-
-	return ucs;
-}
-
-void define_setup(char *buf, int bufsize, const char *name)
-{
-	if(!buf || !bufsize)
-		return;
-
-	testalloc((void **)&incstack, nincstack, &naincstack, sizeof(incstack[0]));
-	/* Push the current state onto the include stack */
-	/* We have to create the initial buffer because it does not exist yet. */
-	if(!(incstack[nincstack].bufferstate = YY_CURRENT_BUFFER))
-		incstack[nincstack].bufferstate = yy_create_buffer(yyin, YY_BUF_SIZE);
-	incstack[nincstack].fp = yyin;
-	incstack[nincstack].linenr = linenr;
-	incstack[nincstack].charnr = charnr;
-	incstack[nincstack].prevlinenr = prevlinenr;
-	incstack[nincstack].prevcharnr = prevcharnr;
-	incstack[nincstack].filename = filename;
-	nincstack++;
-
-	yyin = NULL;
-	linenr = 0;
-	charnr = 0;
-	prevlinenr = 0;
-	prevcharnr = 0;
-	filename = _strdup(name);
-	yy_scan_bytes(buf, bufsize);
-}
-
-void handle_include(const wchar_t *wfname)
-{
-	int i;
-	char *fname = _strdup(ucs32_to_utf8(wfname, -1));
-
-	testalloc((void **)&incstack, nincstack, &naincstack, sizeof(incstack[0]));
-	/* Push the current state onto the include stack */
-	incstack[nincstack].bufferstate = YY_CURRENT_BUFFER;
-	incstack[nincstack].fp = yyin;
-	incstack[nincstack].linenr = linenr;
-	incstack[nincstack].charnr = charnr;
-	incstack[nincstack].prevlinenr = prevlinenr;
-	incstack[nincstack].prevcharnr = prevcharnr;
-	incstack[nincstack].filename = filename;
-	nincstack++;
-
-	if(0 != access(fname, 0)) {
-		for(i = 0; 1; i++) {
-			char *p;
-			const char *ip = includepath_get(i);
-			if(!ip) {
-				yyerror("Include file '%s' cannot be found", fname);
-				nincstack--;
-				free(fname);
-				return;
-			}
-			p = (char *)malloc(strlen(ip) + strlen(fname) + 2);
-			assert(p != NULL);
-			strcpy(p, ip);
-			strcat(p, "/");
-			strcat(p, fname);
-			if(0 == access(p, 0)) {
-				filename = p;
-				break;
-			}
-			free(p);
-		}
-	} else {
-		filename = strdup(fname);
-	}
-
-	free(fname);
-
-	yyin = fopen(filename, "r");
-	if(!yyin) {
-		yyerror("Include file '%s' cannot be opened", filename);
-		nincstack--;
-		return;
-	}
-
-	linenr = 1;
-	charnr = 1;
-	prevlinenr = 1;
-	prevcharnr = 1;
-	yy_switch_to_buffer(yy_create_buffer(yyin, YY_BUF_SIZE));
-}
-
-void lexer_cleanup(void)
-{
-	if(str)
-		free(str);
-	if(incstack)
-		free(incstack);
-	incstack = 0;
-	nincstack = naincstack = 0;
-}
 

@@ -66,7 +66,7 @@ void Macroses::init()
 		std::filesystem::path dirpath = StandartPaths::Get()->GetMacrosPath();
 		scan_xml_files(dirpath, namesList);
 		std::filesystem::path dirpathLan = StandartPaths::Get()->GetMacrosPath(0, true);
-		if (dirpathLan != dirpath)
+		if ((dirpathLan != dirpath) && std::filesystem::exists(dirpathLan) )
 		{
 			scan_xml_files(dirpathLan, namesList); // rewrite def xml by language specific xml
 		}

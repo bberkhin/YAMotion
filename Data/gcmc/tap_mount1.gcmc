@@ -4,35 +4,20 @@ include("cc_hole.inc.gcmc");
 feedrate(200mm);
 
 path = {
-	[ 0, 20], [ 0, 120], [ 100,  120],
-	[100, 0], [40,  0], [40, 20], 
-
-};
+	[ 0, 20], [ 0, 100],[ 60, 120], [ 100,  120],
+	[100, 0], [40,  0], [40, 20] };
 
 holes = { [ 80, 20], [ 80, 100] };
 
-/*
- * Simple tracer to show the outline
- */
-function trace(path, offset)
-{
-	path = tail(path, -1) + head(path, 1);
-	goto(path[-1] + offset);
-	foreach(path; v) {
-		goto(v + offset);
-		//dwell(0);
-	}
-}
 
 function clone_semmetrical(x, path )
 {
-    outpath = path;
     n = count( path );
     for( i = 0; i < n; ++i )
     {
-        outpath[i][0] = x + (x - path[i][0]);     
+        path[i][0] = x + (x - path[i][0]);     
     }
-    return  reverse( outpath );
+    return  reverse( path );
 }
 
 
@@ -51,7 +36,7 @@ function CutCountour(path)
     /*
      * Choose your test trace by uncommenting the line(s) you want to see
      */
-     goto([-,-,SAFEZ]);
+    goto([-,-,SAFEZ]);
     CURZ = 0;
     do{
       CURZ -= STEPZ;  

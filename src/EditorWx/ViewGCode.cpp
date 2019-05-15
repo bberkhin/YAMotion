@@ -134,7 +134,7 @@ ViewGCode::ViewGCode(wxWindow *frame, wxWindow *parent,wxWindowID id, int* gl_at
 ViewGCode::~ViewGCode()
 {
 	delete m_glRC;
-	save_config();	
+	//save_config();
 }
 
 
@@ -1005,6 +1005,9 @@ void ViewGCode::setSimulationSpeed(double mm_per_sec)
 
 void ViewGCode::processClosing()
 {
+
+	save_config();
+
 	{
 		wxCriticalSectionLocker enter(critsect);
 		if (simulateCut)         // does the thread still exist?

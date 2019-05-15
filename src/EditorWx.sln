@@ -7,6 +7,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "EditorWx", "EditorWx\Editor
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "gcmc_vc", "gcmc_vc\gcmc_vc.vcxproj", "{C0295E58-FB1E-4D13-93AA-86B47636D28E}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "gcmcfont_vc", "gcmcfont\gcmcfont_vc\gcmcfont_vc.vcxproj", "{9C66F4FB-CF24-4EB1-B44B-4EE2E68314C2}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -51,6 +53,22 @@ Global
 		{C0295E58-FB1E-4D13-93AA-86B47636D28E}.Release|x64.Build.0 = Release|x64
 		{C0295E58-FB1E-4D13-93AA-86B47636D28E}.Release|x86.ActiveCfg = Release|Win32
 		{C0295E58-FB1E-4D13-93AA-86B47636D28E}.Release|x86.Build.0 = Release|Win32
+		{9C66F4FB-CF24-4EB1-B44B-4EE2E68314C2}.Debug|x64.ActiveCfg = Debug|x64
+		{9C66F4FB-CF24-4EB1-B44B-4EE2E68314C2}.Debug|x64.Build.0 = Debug|x64
+		{9C66F4FB-CF24-4EB1-B44B-4EE2E68314C2}.Debug|x86.ActiveCfg = Debug|Win32
+		{9C66F4FB-CF24-4EB1-B44B-4EE2E68314C2}.Debug|x86.Build.0 = Debug|Win32
+		{9C66F4FB-CF24-4EB1-B44B-4EE2E68314C2}.DLL Debug|x64.ActiveCfg = Debug|x64
+		{9C66F4FB-CF24-4EB1-B44B-4EE2E68314C2}.DLL Debug|x64.Build.0 = Debug|x64
+		{9C66F4FB-CF24-4EB1-B44B-4EE2E68314C2}.DLL Debug|x86.ActiveCfg = Debug|Win32
+		{9C66F4FB-CF24-4EB1-B44B-4EE2E68314C2}.DLL Debug|x86.Build.0 = Debug|Win32
+		{9C66F4FB-CF24-4EB1-B44B-4EE2E68314C2}.DLL Release|x64.ActiveCfg = Release|x64
+		{9C66F4FB-CF24-4EB1-B44B-4EE2E68314C2}.DLL Release|x64.Build.0 = Release|x64
+		{9C66F4FB-CF24-4EB1-B44B-4EE2E68314C2}.DLL Release|x86.ActiveCfg = Release|Win32
+		{9C66F4FB-CF24-4EB1-B44B-4EE2E68314C2}.DLL Release|x86.Build.0 = Release|Win32
+		{9C66F4FB-CF24-4EB1-B44B-4EE2E68314C2}.Release|x64.ActiveCfg = Release|x64
+		{9C66F4FB-CF24-4EB1-B44B-4EE2E68314C2}.Release|x64.Build.0 = Release|x64
+		{9C66F4FB-CF24-4EB1-B44B-4EE2E68314C2}.Release|x86.ActiveCfg = Release|Win32
+		{9C66F4FB-CF24-4EB1-B44B-4EE2E68314C2}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
