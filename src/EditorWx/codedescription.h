@@ -2,13 +2,23 @@
 #include  <string>
 #include  <map>
 #include "cmdparser.h"
+#include "prefs.h"
 
-class CodeDescription
+class ICodeDescription
 {
 public:
-	CodeDescription();
-	~CodeDescription();
+	virtual ~ICodeDescription() { }
+	virtual std::wstring get_description(const char *src, const char *word) = 0;
+	virtual int file_type() = 0;
+};
+
+class GCodeDescription : public ICodeDescription
+{
+public:
+	GCodeDescription();
+	~GCodeDescription();
 	std::wstring get_description(const char *src, const char *word);
+	virtual int file_type() { return FILETYPE_NC; }
 private:
 	std::wstring get_g_description(int gc );
 	std::wstring get_m_description(int mc );
@@ -22,3 +32,13 @@ private:
 
 };
 
+class GcmcCodeDescription : public ICodeDescription
+{
+public:
+	GcmcCodeDescription();
+	~GcmcCodeDescription();
+	std::wstring get_description(const char *src, const char *word);
+	virtual int file_type() { return FILETYPE_GCMC; }
+private:
+	std::map<std::wstring, std::wstring> commands;
+};

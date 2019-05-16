@@ -1,6 +1,6 @@
 include("engrave.inc.gcmc");	/* Engraving helper function */
 
-text = "Привет! All your Glyphs are belong to us.";
+text = "Ф All your Glyphs are belong to us.";
 
 function shear_x(vl)
 {
@@ -31,7 +31,7 @@ sf = 2.5mm;	/* Scaling factor */
  */
 
 /* Typeset the text */
-vl = typeset(text, FONT_HSANS_1);
+vl = typeset(text, FONT_HTIMES);
 
 /* Scale XY to real world coordinates */
 /* Do not touch the Z-coordinate, the engrave() function needs the original */

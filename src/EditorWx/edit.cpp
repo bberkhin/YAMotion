@@ -495,19 +495,21 @@ void Edit::OnChanged(wxStyledTextEvent &event)
 static wxString GetWord(const wxString &in, int pos)
 {
 	int start,end;
-	const wchar_t *s = in.wc_str();
+	const wchar_t *s = in.wc_str() + pos;
 	for (start = pos; start >= 0; start--, s--)
 	{
-		if (::iswspace( *s ) )
+		if ( !(::iswalpha(*s) || ::iswdigit(*s)) )
 		{
 			start++;
 			break;
 		}
 	}
-	s = in.wc_str();
+	if (start < 0) 
+		start = 0;
+	s = in.wc_str() + pos;
 	for (end = pos; *s != 0; s++, end++)
 	{
-		if (::iswspace(*s) || *s == '\n' || *s == '\r' )
+		if (!(::iswalpha(*s) || ::iswdigit(*s)))
 		{
 			end--;
 			break;
@@ -521,12 +523,10 @@ static wxString GetWord(const wxString &in, int pos)
 }
 void Edit::OnDwellStart(wxStyledTextEvent &event)
 {
-	if ( !HasFocus() || GetFileType() != FILETYPE_NC )
+	if ( !HasFocus() )
 		return;
 
 	int pos = event.GetPosition();
-	int x = event.GetX();
-	int y = event.GetX();
 	wxString strWord;
 	int lineN = this->LineFromPosition(pos);
 	wxString str = this->GetLineText(lineN);
@@ -536,12 +536,15 @@ void Edit::OnDwellStart(wxStyledTextEvent &event)
 	int posOnLine  = pos - PositionFromLine(lineN);
 	if (posOnLine >= 0 && posOnLine < static_cast<int>(str.length()))
 	{
-		wxString strWord = GetWord( str, posOnLine);
+		strWord = GetWord( str, posOnLine);
 	}
 
-	if ( !code_description )
+	if ( !code_description || code_description->file_type() != GetFileType() )
 	{
-		code_description.reset( new CodeDescription() );
+		if (GetFileType() == FILETYPE_GCMC )
+			code_description.reset(new GcmcCodeDescription());
+		else
+			code_description.reset(new GCodeDescription());
 	}
 
 	wxString strOut = code_description->get_description(str.c_str(), strWord.c_str() );

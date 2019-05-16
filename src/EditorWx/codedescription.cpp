@@ -12,7 +12,7 @@ using namespace Interpreter;
 
 #pragma warning(disable : 4996)
 
-CodeDescription::CodeDescription() : parser( wxGetApp().GetEnvironment() )
+GCodeDescription::GCodeDescription() : parser( wxGetApp().GetEnvironment() )
 {
 	//read description file
 	std::filesystem::path name = StandartPaths::Get()->GetResourcesPath(L"code_defs.ini");
@@ -68,11 +68,11 @@ CodeDescription::CodeDescription() : parser( wxGetApp().GetEnvironment() )
 }
 
 
-CodeDescription::~CodeDescription()
+GCodeDescription::~GCodeDescription()
 {
 }
 
-bool CodeDescription::cpy_close_and_downcase(char *line, const char *src, std::wstring &error)  
+bool GCodeDescription::cpy_close_and_downcase(char *line, const char *src, std::wstring &error)  
 {
 	int m;
 	int n;
@@ -143,7 +143,7 @@ bool CodeDescription::cpy_close_and_downcase(char *line, const char *src, std::w
 }
 
 
-std::wstring CodeDescription::get_description(const char *src, const char *word)
+std::wstring GCodeDescription::get_description(const char *src, const char *word)
 {
 	
 	std::wstring out;
@@ -231,7 +231,7 @@ std::wstring CodeDescription::get_description(const char *src, const char *word)
 
 }
 
-std::wstring CodeDescription::variable_precision(double val)
+std::wstring GCodeDescription::variable_precision(double val)
 {
 	std::wstring truncatedNum = std::to_wstring(val);
 
@@ -250,7 +250,7 @@ std::wstring CodeDescription::variable_precision(double val)
 	return truncatedNum;
 }
 
-std::wstring CodeDescription::format(const std::wstring &src)
+std::wstring GCodeDescription::format(const std::wstring &src)
 {
 	std::wstring out;
 	size_t start_pos = 0;
@@ -320,7 +320,7 @@ std::wstring CodeDescription::format(const std::wstring &src)
 	return out;
 }
 
-std::wstring CodeDescription::get_g_description(int gc)
+std::wstring GCodeDescription::get_g_description(int gc)
 {
 	std::wstring  out(L"G");
 	out += std::to_wstring(gc/10);
@@ -334,7 +334,7 @@ std::wstring CodeDescription::get_g_description(int gc)
 	return out;
 }
 
-std::wstring CodeDescription::get_m_description(int mc )
+std::wstring GCodeDescription::get_m_description(int mc )
 {
 	std::wstring out(L"M");
 	out += std::to_wstring(mc);
@@ -345,11 +345,70 @@ std::wstring CodeDescription::get_m_description(int mc )
 	return out;
 }
 
-std::wstring CodeDescription::get_p_description(int cmd)
+std::wstring GCodeDescription::get_p_description(int cmd)
 {
 	std::wstring out;
 	auto iter = commands.find(cmd);
 	if (iter != commands.end())
 		out += format(iter->second);
 	return out;
+}
+
+/////////////////////////////////////////////////////////////////////////////////
+GcmcCodeDescription::GcmcCodeDescription()
+{
+	//read description file
+	std::filesystem::path name = StandartPaths::Get()->GetResourcesPath(L"gcmc_code_defs.ini");
+	FILE *file = _wfopen(name.c_str(), L"r,ccs=UTF-8");
+	if (file == NULL)
+		return;
+
+	wchar_t *c = 0;
+	wchar_t line[512];
+	int n;
+	while (true)
+	{
+		if (fgetws(line, 512, file) == NULL)
+			break;
+		line[511] = 0;
+		n = wcsnlen(line, 512);
+		// remove '\n' && '\r'
+		if (n > 0 && (line[n - 1] == '\n' || line[n - 1] == '\r'))
+		{
+			n--;
+			line[n] = 0;
+			if (n > 0 && (line[n - 1] == '\n' || line[n - 1] == '\r'))
+			{
+				line[n - 1] = 0;
+			}
+		}
+
+		c = wcschr(line, L'=');
+		if (c == NULL)
+			continue;
+		*c = 0;
+		// change '|' to '\n' 
+		for (wchar_t *s = c + 1; *s != 0; s++)
+		{
+			if (*s == '|') *s = '\n';
+		}
+		commands[line] = c + 1;
+	}
+	fclose(file);
+}
+
+GcmcCodeDescription::~GcmcCodeDescription()
+{
+
+}
+
+std::wstring GcmcCodeDescription::get_description(const char *src, const char *word)
+{
+	
+	std::wstring key;
+	std::string keych(word);
+	
+	key.assign( keych.begin(), keych.end() ); // this converter is OK for keys
+	auto it = commands.find(key);
+	return it == commands.end() ? std::wstring() : it->second;
 }

@@ -27,7 +27,7 @@
 // declarations
 //============================================================================
 
-class CodeDescription;
+class ICodeDescription;
 //----------------------------------------------------------------------------
 //! Edit
 class Edit: public wxStyledTextCtrl {
@@ -140,7 +140,7 @@ private:
     int m_FoldingID;
     int m_FoldingMargin;
     int m_DividerID;
-	std::shared_ptr<CodeDescription> code_description;
+	std::shared_ptr<ICodeDescription> code_description;
 	//find
 	wxFindReplaceDialog *dlg_find;
 	wxFindReplaceData find_data;
