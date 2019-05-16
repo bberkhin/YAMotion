@@ -8,7 +8,7 @@
 #include "standartpaths.h"
 #include "environmentsimple.h"
 
-/// NEST BRUNCH
+/// RUNCH
 
 #include "..\..\src\stc\scintilla\include\ILexer.h"
 #include "..\..\src\stc\scintilla\include\Scintilla.h"
