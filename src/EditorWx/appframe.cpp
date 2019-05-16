@@ -5,6 +5,7 @@
 #include <wx/thread.h>
 #include "wx/process.h"
 #include "wx/txtstrm.h"
+#include "wx/artprov.h"
 
 
 //! application headers
@@ -254,15 +255,22 @@ AppFrame::AppFrame (const wxString &title)
         : m_timer(this), wxFrame ((wxFrame *)NULL, wxID_ANY, title, wxDefaultPosition, wxSize(750,550),
                     wxDEFAULT_FRAME_STYLE | wxNO_FULL_REPAINT_ON_RESIZE)
 {
+	// tell wxAuiManager to manage this frame
+	m_mgr.SetManagedWindow(this);
+
+	m_notebook_style = wxAUI_NB_DEFAULT_STYLE | wxAUI_NB_TAB_EXTERNAL_MOVE | wxNO_BORDER;
+	m_notebook_theme = 0;
+
+
     SetIcon(wxICON(sample));
+
 	checkThread = NULL;
 	simulateThread = NULL;
 	gcmcProcess = NULL;
 	gcmc_running_in_sec = 0;
 	
 	// initialize important variables
-    m_edit = NULL;
-	
+
     // set icon and background
     SetTitle (APP_NAME);
     SetBackgroundColour ("WHITE");
@@ -273,63 +281,95 @@ AppFrame::AppFrame (const wxString &title)
 		config->ReadFileNames();
 
     // create menu
-    m_menuBar = new wxMenuBar;
-    CreateMenu ();
+	wxMenuBar *m_menuBar = CreateMenu();
+	SetMenuBar(m_menuBar);
+   
+	m_notebook = CreateNotebook();
+	m_mgr.AddPane(m_notebook, wxAuiPaneInfo().Name("notebook_content").
+		CenterPane().PaneBorder(false));
 
-  	wxBoxSizer* sizer = new wxBoxSizer(wxVERTICAL);
-	SetSizer(sizer);
-	wxToolBar *toolBar= CreateToolBar();
-	sizer->Add(toolBar, 0, wxEXPAND);
-	toolBar->Realize();
-
-	wxSplitterWindow* splitter = new wxSplitterWindow(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxSP_LIVE_UPDATE);
-	sizer->Add(splitter, 1, wxEXPAND);
-	splitter->SetSashGravity(1.0);
-
-	wxSplitterWindow* splitterV = new wxSplitterWindow(splitter, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxSP_LIVE_UPDATE);
-	splitterV->SetSashGravity(1.0);
+	m_mgr.AddPane(CreateGLView(), wxAuiPaneInfo().
+		Name("ViewGCode").Caption("3D View").
+		Right().Layer(1).Position(1).
+		CloseButton(true).MaximizeButton(true));
 
 
-	// open first page
-	m_edit = new Edit(splitterV, wxID_ANY);
+	logwnd = new LogWindow(this, this, wxID_ANY);
+	int iconSize = m_mgr.GetArtProvider()->GetMetric(wxAUI_DOCKART_CAPTION_SIZE);
+	// Make it even to use 16 pixel icons with default 17 caption height.
+	iconSize &= ~1;
 
-	//int gl_attrib[20] =	{ WX_GL_RGBA, WX_GL_MIN_RED, 1, WX_GL_MIN_GREEN, 1,
-		//				WX_GL_MIN_BLUE, 1, WX_GL_DEPTH_SIZE, 1, WX_GL_DOUBLEBUFFER, GL_NONE };
-
-	m_view = new ViewGCode(this, splitterV, wxID_ANY/*, gl_attrib*/ );
+	m_mgr.AddPane(logwnd, wxAuiPaneInfo().
+		Name("logwnd").Caption(_("Output")).
+		Bottom().Layer(1).Position(1).
+		Icon(wxArtProvider::GetBitmap(wxART_WARNING,
+			wxART_OTHER,
+			wxSize(iconSize, iconSize))));
 	
-	logwnd = new LogWindow(splitter, this, wxID_ANY);
-	
-	splitter->SplitHorizontally(splitterV, logwnd,  -100);
-	splitterV->SplitVertically(m_edit, m_view, -300 );
-
-	Layout();
-	splitter->UpdateSize();
-	splitterV->UpdateSize();
-
-	m_edit->SetFocus();
-	m_view->initializeGL();
-	m_view->setSimulationSpeed(20);
-	//m_view->SetFocus();
+	// add the toolbars to the manager
+	wxAuiToolBar *toolBar = CreateToolBar();
+	m_mgr.AddPane(toolBar, wxAuiPaneInfo().
+		Name("tb").Caption("Standart commands").
+		ToolbarPane().Top().Row(1));
 
 
-	
-
+	m_mgr.Update();
 
 #ifdef DOWX_LOGGING
 		//Open a log window, don't show it though
 	wxLogWindow *m_LogWin = new wxLogWindow(this, "YAMotion Gcode Editor", true, false);
 	wxLog::SetActiveTarget(m_LogWin);
 #endif
-	
-	ShowWelcome();
-	
+	//ShowWelcome();
 }
 
 AppFrame::~AppFrame () 
 {
 
 }
+
+
+wxAuiNotebook* AppFrame::CreateNotebook()
+{
+	// create the notebook off-window to avoid flicker
+	wxSize client_size = GetClientSize();
+
+	wxAuiNotebook* ctrl = new wxAuiNotebook(this, wxID_ANY,
+		wxPoint(client_size.x, client_size.y),
+		FromDIP(wxSize(330, 200)),
+		m_notebook_style);
+	ctrl->Freeze();
+
+
+	ctrl->AddPage(new WelcomeWnd(this), _("Welcome"), true );
+	ctrl->SetPageToolTip(0, _("Welcome screen"));
+
+	ctrl->AddPage(new Edit(ctrl, wxID_ANY), "wxTextCtrl 1", false );
+	ctrl->SetPageToolTip(ctrl->GetPageCount()- 1, _("New File"));
+
+	ctrl->Thaw();
+	return ctrl;
+}
+
+Edit *AppFrame::GetActiveFile()
+{
+	wxWindow *wnd = m_notebook->GetCurrentPage();
+	return dynamic_cast<Edit *>(wnd);
+}
+
+
+ViewGCode* AppFrame::CreateGLView()
+{
+	m_view = new ViewGCode(this, this, wxID_ANY);
+
+	/*	wxTreeCtrl* tree = new wxTreeCtrl(this, wxID_ANY,
+			wxPoint(0, 0),
+			FromDIP(wxSize(160, 250)),
+			wxTR_DEFAULT_STYLE | wxNO_BORDER);
+			*/
+	return m_view;
+}
+
 
 void AppFrame::ShowWelcome()
 {
@@ -387,13 +427,6 @@ void AppFrame::OnClose (wxCloseEvent &event)
 
    
 	DoFileSave( true, false );
- //   if (m_edit && m_edit->Modified()) 
-	//{
- //       if (event.CanVeto()) event.Veto (true);
- //       return;
- //   }
-
-
 	ConfigData *config;
 	if ((config = dynamic_cast<ConfigData *>(wxConfigBase::Get())) != NULL)
 		config->WriteFileNames();
@@ -422,8 +455,11 @@ void AppFrame::OnExit (wxCommandEvent &WXUNUSED(event)) {
 
 bool AppFrame::DoFileSave(bool askToSave, bool bSaveAs )
 {
-	if (!m_edit) return false;
-	if ( !m_edit->Modified() && !bSaveAs )
+	Edit *pedit = GetActiveFile();
+
+	if (!pedit) return false;
+
+	if ( !pedit->Modified() && !bSaveAs )
 		return true;
 
 	// Ask need to save
@@ -437,12 +473,12 @@ bool AppFrame::DoFileSave(bool askToSave, bool bSaveAs )
 			return true;
 	}
 	// Need save
-	wxString fname = m_edit->GetFilename();
+	wxString fname = pedit->GetFilename();
 	if (bSaveAs || fname.empty())
 	{
 		wxString filename = fname.empty() ? _("unnamed") : fname;
 		wxString wildCard;
-		if (m_edit->GetFileType() == FILETYPE_GCMC)
+		if (pedit->GetFileType() == FILETYPE_GCMC)
 			wildCard = _("GCMC Files (*.gcmc)|*.gcmc");
 		else
 			wildCard = _("GCode Files (*.ngc)|*.ngc");
@@ -451,15 +487,15 @@ bool AppFrame::DoFileSave(bool askToSave, bool bSaveAs )
 		if (dlg.ShowModal() != wxID_OK)
 			return false;
 		filename = dlg.GetPath();
-		m_edit->SaveFile(filename);
+		pedit->SaveFile(filename);
 		ConfigData *config;
 		if ((config = dynamic_cast<ConfigData *>(wxConfigBase::Get())) != NULL)
 			config->AddFileNameToSaveList(filename);
 	}
 	else //  fname exist && not save as  - just save
 	{
-		m_edit->SaveFile();
-		if (m_edit->Modified())
+		pedit->SaveFile();
+		if (pedit->Modified())
 		{
 			wxMessageBox(_("Text could not be saved!"), _("Close abort"),
 				wxOK | wxICON_EXCLAMATION);
@@ -477,11 +513,18 @@ void AppFrame::FileChanged()
 	m_view->clear();
 }
 
+
+
 void AppFrame::OnFileNew(wxCommandEvent &event )
 {
+
 	if (DoFileSave(true, false))
 	{
-		m_edit->NewFile((event.GetId() == ID_NEWGCMC) ? FILETYPE_GCMC : FILETYPE_NC);
+		Edit *pedit = new Edit(m_notebook, wxID_ANY);
+		m_notebook->AddPage(pedit, _("unnamed"), false);
+		m_notebook->SetPageToolTip(m_notebook->GetPageCount() - 1, _("New File"));
+		pedit->NewFile((event.GetId() == ID_NEWGCMC) ? FILETYPE_GCMC : FILETYPE_NC);
+		pedit->SelectNone();
 		FileChanged();
 	}
 }
@@ -497,7 +540,7 @@ void AppFrame::OnFileOpen (wxCommandEvent &WXUNUSED(event))
     wxFileDialog dlg (this, _("Open file"), wxEmptyString, wxEmptyString, _("Any file (*)|*"),
                       wxFD_OPEN | wxFD_FILE_MUST_EXIST | wxFD_CHANGE_DIR);
     if (dlg.ShowModal() != wxID_OK) return;
-    fname = dlg.GetPath ();
+    fname = dlg.GetPath();
     FileOpen (fname);
 }
 
@@ -554,8 +597,10 @@ void AppFrame::OnProperties(wxCommandEvent &WXUNUSED(event))
 
 void AppFrame::OnMacroses(wxCommandEvent &WXUNUSED(event))
 {
-    if (!m_edit) return;
-    //EditProperties dlg(m_edit, 0);
+	Edit *pedit = GetActiveFile();
+    if (!pedit) return;
+	
+    //EditProperties dlg(pedit, 0);
 	Macroses msc;
 	MacrosesDlg dlg(&msc, this);	
 	int indx = dlg.GetSelected();
@@ -581,6 +626,11 @@ void AppFrame::OnMacroses(wxCommandEvent &WXUNUSED(event))
 
 void AppFrame::DoMathCalc( DoMathBase &mth )
 {
+
+	Edit *pedit = GetActiveFile();
+	if (!pedit)
+		return;
+
 	char strOut[MAX_GCODE_LINELEN];
 	int line_start;
 	int line_end;
@@ -589,35 +639,35 @@ void AppFrame::DoMathCalc( DoMathBase &mth )
 
 	if (mth.InSelected())
 	{
-		m_edit->GetSelection(&from, &to);
+		pedit->GetSelection(&from, &to);
 		if (from == to)
 		{
 			wxMessageBox(_("Uups there is no any selection"));
 			return;
 		}
-		line_start = m_edit->LineFromPosition(from);
-		line_end = m_edit->LineFromPosition(to);
+		line_start = pedit->LineFromPosition(from);
+		line_end = pedit->LineFromPosition(to);
 	}
 	else
 	{
 		line_start = 0;
-		line_end = m_edit->GetLineCount() - 1;
+		line_end = pedit->GetLineCount() - 1;
 	}
 
 	for (int i = line_start; i <= line_end; i++)
 	{
-		wxString str = m_edit->GetLine(i);
+		wxString str = pedit->GetLine(i);
 		if (mth.Process(str.c_str(), strOut))
 		{
-			long from = m_edit->PositionFromLine(i);
+			long from = pedit->PositionFromLine(i);
 			long to = from + str.length();
-			m_edit->Replace(from, to, strOut);
+			pedit->Replace(from, to, strOut);
 		}
 	}
 	if (mth.InSelected())
 	{
-		to = m_edit->PositionFromLine(line_end + 1);
-		m_edit->SetSelection(from, m_edit->PositionBefore(to));
+		to = pedit->PositionFromLine(line_end + 1);
+		pedit->SetSelection(from, pedit->PositionBefore(to));
 	}
 
 }
@@ -625,10 +675,13 @@ void AppFrame::DoMathCalc( DoMathBase &mth )
 // properties event handlers
 void AppFrame::OnMathCalc(wxCommandEvent &WXUNUSED(event))
 {
-	if (!m_edit) return;
-	//EditProperties dlg(m_edit, 0);
+	Edit *pedit = GetActiveFile();
+	if (!pedit)
+		return;
+
+	//EditProperties dlg(pedit, 0);
 	DoMathSimple mth;
-	MathSimpleDlg dlg(&mth, this, m_edit->HasSelection() );
+	MathSimpleDlg dlg(&mth, this, pedit->HasSelection() );
 	if (dlg.ShowModal() != wxID_OK)
 		return;
 	DoMathCalc(mth);
@@ -637,12 +690,13 @@ void AppFrame::OnMathCalc(wxCommandEvent &WXUNUSED(event))
 // properties event handlers
 void AppFrame::OnMathExpression(wxCommandEvent &WXUNUSED(event))
 {
-	if (!m_edit) return;
-
+	Edit *pedit = GetActiveFile();
+	if (!pedit)
+		return;
 	try
 	{
 		DoMathExpression mth;
-		MathExpressionDlg dlg(&mth, this, m_edit->HasSelection());
+		MathExpressionDlg dlg(&mth, this, pedit->HasSelection());
 		if (dlg.ShowModal() != wxID_OK)
 			return;
 		DoMathCalc(mth);
@@ -664,11 +718,14 @@ void AppFrame::OnMathExpression(wxCommandEvent &WXUNUSED(event))
 // edit events
 void AppFrame::OnEdit (wxCommandEvent &event) 
 {
-    if (m_edit) m_edit->GetEventHandler()->ProcessEvent (event);
+	Edit *pedit = GetActiveFile();
+    if (pedit) 
+		pedit->GetEventHandler()->ProcessEvent (event);
 }
 
 
-void AppFrame::On3DView(wxCommandEvent &event) {
+void AppFrame::On3DView(wxCommandEvent &event)
+{
 	if (m_view) m_view->GetEventHandler()->ProcessEvent(event);
 }
 
@@ -699,9 +756,10 @@ void AppFrame::OnContextMenu(wxContextMenuEvent& evt)
 }
 
 // private functions
-void AppFrame::CreateMenu ()
+wxMenuBar *AppFrame::CreateMenu ()
 {
     // File menu
+	wxMenuBar *m_menuBar = new wxMenuBar;
     wxMenu *menuFile = new wxMenu;
 	wxMenu *menuNewFiles = new wxMenu;
 	menuNewFiles->Append(wxID_NEW, _("&GCode File .."));
@@ -844,14 +902,16 @@ void AppFrame::CreateMenu ()
     m_menuBar->Append (menuView, _("&View"));
 	m_menuBar->Append(menuGCode, _("&GCode"));
 	m_menuBar->Append(menu3D, _("&3DView"));
-    m_menuBar->Append (menuHelp, _("&Help"));
-    SetMenuBar (m_menuBar);
+    m_menuBar->Append (menuHelp, _("&Help"));    
+	return m_menuBar;
+
 }
 
-wxToolBar *AppFrame::CreateToolBar()
+
+wxAuiToolBar *AppFrame::CreateToolBar()
 {
-	wxToolBar* toolBar = new wxToolBar(this, wxID_ANY, wxDefaultPosition, wxDefaultSize,
-		wxNO_BORDER | wxTB_FLAT | wxTB_NODIVIDER | wxTB_NOALIGN);
+	wxAuiToolBar* toolBar = new wxAuiToolBar(this, wxID_ANY, wxDefaultPosition, wxDefaultSize,
+		wxAUI_TB_DEFAULT_STYLE | wxAUI_TB_OVERFLOW | wxAUI_TB_HORIZONTAL);
 
 	toolBar->AddTool(wxID_NEW, wxEmptyString, wxBitmap(new_xpm), _("New"));
 	toolBar->AddTool(wxID_OPEN, wxEmptyString, wxBitmap(open_xpm), _("Open"));
@@ -872,7 +932,7 @@ wxToolBar *AppFrame::CreateToolBar()
 	toolBar->AddTool(myID_SEMULATE_PAUSE, wxEmptyString, wxBitmap(pause_xpm), _("pause"));
 	toolBar->AddTool(myID_SEMULATE_STOP, wxEmptyString, wxBitmap(stop_xpm), _("stop"));
 	
-//	toolBar->Realize();
+	toolBar->Realize();
 	return toolBar;
 }
 
@@ -890,13 +950,18 @@ void AppFrame::FileOpen (wxString fname)
 			wxMessageBox(wxString::Format(_("File %s is very lage for the editor"), fname));
 		}
 		else
-		{
-			m_edit->LoadFile(fname);
-			m_edit->SelectNone();
-			FileChanged();
+		{						
+			Edit *pedit = new Edit(m_notebook, wxID_ANY);
+			pedit->LoadFile(fname);
+
+			m_notebook->AddPage(pedit, w.GetName(), false);
+			m_notebook->SetPageToolTip(m_notebook->GetPageCount() - 1, fname );
+
 			ConfigData *config;
 			if ((config = dynamic_cast<ConfigData *>(wxConfigBase::Get())) != NULL)
 				config->AddFileNameToSaveList(fname);
+			pedit->SelectNone();
+			FileChanged();
 		}
 	}
 	catch (...)
@@ -909,13 +974,13 @@ void AppFrame::FileOpen (wxString fname)
 void AppFrame::UpdateTitle()
 {
 	wxString title;
-	if (m_edit)
-	{
-		wxFileName w(m_edit->GetFilename());
-		title = w.GetFullName();
-		if (m_edit->Modified())
-			title += "*";
-	}
+	//if (pedit)
+	//{
+	//	wxFileName w(pedit->GetFilename());
+	//	title = w.GetFullName();
+	//	if (pedit->Modified())
+	//		title += "*";
+	//}
 
 	if (!title.IsEmpty())
 	{
@@ -1030,8 +1095,9 @@ wxThread::ExitCode SimulateGCodeThread::Entry()
 
 wxString AppFrame::GetText()
 {
-	if (m_edit)
-		return m_edit->GetText();
+	Edit *pedit = GetActiveFile();
+	if (pedit)
+		return pedit->GetText();
 	else
 		return wxString();
 }
@@ -1069,16 +1135,23 @@ wxString AppFrame::GetSavedFileName()
 {
 	if ( !DoFileSave(false, false) )
 		return wxString();
-	return m_edit->GetFilename();
+	
+	Edit *pedit = GetActiveFile();
+	return  pedit ? pedit->GetFilename() : wxString();
 }
+
 
 void  AppFrame::OnCheck(wxCommandEvent &event)
 {
+	Edit *pedit = GetActiveFile();
+	if (!pedit)
+		return;
+
 	wxString fname = GetSavedFileName();
 	if (fname.empty())
 		return;	
 	logwnd->Clear();
-	if (m_edit->GetFileType() == FILETYPE_NC)
+	if (pedit->GetFileType() == FILETYPE_NC)
 	{
 		checkThread = new IntGCodeThread(this, fname);
 		if (checkThread->Run() != wxTHREAD_NO_ERROR)
@@ -1088,7 +1161,7 @@ void  AppFrame::OnCheck(wxCommandEvent &event)
 			checkThread = NULL;
 		}
 	}
-	else if (m_edit->GetFileType() == FILETYPE_GCMC)
+	else if (pedit->GetFileType() == FILETYPE_GCMC)
 	{
 		DoConvertGcmc(ConvertGcmcNothing);
 	}
@@ -1096,16 +1169,20 @@ void  AppFrame::OnCheck(wxCommandEvent &event)
 
 void  AppFrame::OnSimulate(wxCommandEvent &event)
 {
+	Edit *pedit = GetActiveFile();
+	if (!pedit)
+		return;
+
 	wxString fname = GetSavedFileName();
 	if (fname.empty())
 		return;
 	logwnd->Clear();
 
-	if (m_edit->GetFileType() == FILETYPE_NC)
+	if (pedit->GetFileType() == FILETYPE_NC)
 	{
 		DoSimulate( fname.c_str() );
 	}
-	else if (m_edit->GetFileType() == FILETYPE_GCMC)
+	else if (pedit->GetFileType() == FILETYPE_GCMC)
 	{
 		DoConvertGcmc( ConvertGcmcRunSimilate );
 	}
@@ -1266,7 +1343,11 @@ void AppFrame::GcmcProcessTerminated(int status, const wchar_t *dst_fname, DoAft
 			if (what_to_do == ConvertGcmcOpenFile)
 				FileOpen(dst_fname);
 			else if (what_to_do == ConvertGcmcPasteFile)
-				m_edit->PasteFile(dst_fname) ;
+			{
+				Edit *pedit = GetActiveFile();
+				if (!pedit)
+					pedit->PasteFile(dst_fname);
+			}
 			else if (what_to_do == ConvertGcmcRunSimilate)
 				DoSimulate(dst_fname);
 		}
@@ -1277,7 +1358,11 @@ void AppFrame::GcmcProcessTerminated(int status, const wchar_t *dst_fname, DoAft
 
 int AppFrame::DoConvertGcmc(DoAfterConvertGcmc what_to_do)
 {
-	wxString src_fname = m_edit->GetFilename();
+	Edit *pedit = GetActiveFile();
+	if (!pedit)
+		return 1;
+
+	wxString src_fname = pedit->GetFilename();
 	if (src_fname.IsEmpty())
 		return 1;
 	wxString dst_fname = src_fname.BeforeLast('.');
@@ -1301,7 +1386,7 @@ void AppFrame::OnConvertGcmc(wxCommandEvent &event)
 
 void AppFrame::OnUpdateConvertGcmc(wxUpdateUIEvent& event)
 {
-	//event.Enable(m_edit->GetFileType() == FILETYPE_GCMC);
+	//event.Enable(pedit->GetFileType() == FILETYPE_GCMC);
 	event.Enable(true);
 }
 

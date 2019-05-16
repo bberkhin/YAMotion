@@ -1,7 +1,7 @@
 #pragma once
 
-#include "appframe.h"
-
+//#include "appframe.h"
+#include "wx/aui/aui.h"
 
 enum DoAfterConvertGcmc
 {
@@ -97,10 +97,12 @@ private:
 	void GcmcProcessTerminated(int status, const wchar_t *dst_fname, DoAfterConvertGcmc what_to_do);
 	void DoMathCalc(DoMathBase &mth);
 	void ShowWelcome();
-	
+	wxAuiNotebook* CreateNotebook();
+	wxAuiToolBar *CreateToolBar();
+	ViewGCode* CreateGLView();
+	Edit *GetActiveFile();
 private:
 	// edit object
-	Edit *m_edit;
 	LogWindow *logwnd;
 	ViewGCode *m_view;
 	wxTimer m_timer;
@@ -115,12 +117,16 @@ private:
 	void UpdateTitle();
 
 	//! creates the application menu bar
-	wxMenuBar *m_menuBar;
-	void CreateMenu();
-	wxToolBar *CreateToolBar();
+	wxMenuBar *CreateMenu();
 
 	// print preview position and size
 	wxRect DeterminePrintSize();
+	//AUI
+	wxAuiManager m_mgr;
+	wxAuiNotebook *m_notebook;
+	long m_notebook_style;
+	long m_notebook_theme;
+
 
 	wxDECLARE_EVENT_TABLE();
 };
