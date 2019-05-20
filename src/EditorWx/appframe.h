@@ -3,6 +3,7 @@
 //#include "appframe.h"
 #include "wx/aui/aui.h"
 
+
 enum DoAfterConvertGcmc
 {
 	ConvertGcmcNothing,
@@ -82,12 +83,18 @@ public:
 	void OnSimulateUpdate(wxThreadEvent&);
 	void OnSimulateCompletion(wxThreadEvent&);
 
+	void OnNotebookPageClose(wxAuiNotebookEvent& evt);
+	void OnFileChanged(wxCommandEvent& event);
 
-	LogWindow *getLogWnd() { return logwnd; }
+
+	LogWindow *getLogWnd() { return m_logwnd; }
 	wxString GetText();
+	void UpdateTitle();
 private:
+	bool CheckNewName(const wxString &new_file_name);
 	wxString GetSavedFileName();
-	bool DoFileSave(bool askToSave, bool bSaveAs);
+	bool DoSaveAllFiles();
+	bool DoFileSave(bool askToSave, bool bSaveAs, Edit *pedit = NULL);
 	void FileChanged();
 	void DoSimulate(const wchar_t *fname);
 	int DoConvertGcmc(DoAfterConvertGcmc what_to_do);
@@ -97,13 +104,14 @@ private:
 	void GcmcProcessTerminated(int status, const wchar_t *dst_fname, DoAfterConvertGcmc what_to_do);
 	void DoMathCalc(DoMathBase &mth);
 	void ShowWelcome();
+	void HideWelcome();
 	wxAuiNotebook* CreateNotebook();
 	wxAuiToolBar *CreateToolBar();
 	ViewGCode* CreateGLView();
 	Edit *GetActiveFile();
 private:
 	// edit object
-	LogWindow *logwnd;
+	LogWindow *m_logwnd;
 	ViewGCode *m_view;
 	wxTimer m_timer;
 
@@ -111,10 +119,10 @@ private:
 	SimulateGCodeThread *simulateThread;
 	wxCriticalSection critsect;
 	GcmcProcess *gcmcProcess;
-	unsigned int gcmc_running_in_sec;
+	unsigned int m_gcmc_running_in_sec;
 
 	void FileOpen(wxString fname);
-	void UpdateTitle();
+	
 
 	//! creates the application menu bar
 	wxMenuBar *CreateMenu();

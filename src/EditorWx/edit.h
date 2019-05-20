@@ -114,15 +114,15 @@ public:
 	int GetFileType() {	return ((m_language != 0 ) ? m_language->file_type : FILETYPE_UNKNOW); }
 
     //! load/save file
-	bool NewFile(int filetype);
+	bool NewFile(int filetype, const wxString &filename);
     bool LoadFile (const wxString &filename);
     bool SaveFile ();
     bool SaveFile (const wxString &filename);
     bool Modified ();
     wxString GetFilename () {return m_filename;}
-    void SetFilename (const wxString &filename) {m_filename = filename;}
 	void PasteFile(std::wstring fname, bool toend = false);
 	bool DoLoadFile(const wxString& filename, int WXUNUSED(fileType));
+	bool IsNew() { return m_newfile; }
 
 	//find
 	void DoFind(wxEventType type, int flag, const wxString &strfind);
@@ -144,7 +144,8 @@ private:
 	//find
 	wxFindReplaceDialog *dlg_find;
 	wxFindReplaceData find_data;
-
+	bool m_modified;
+	bool m_newfile;
 	
     wxDECLARE_EVENT_TABLE();
 };

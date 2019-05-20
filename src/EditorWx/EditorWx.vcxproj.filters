@@ -244,5 +244,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\resources\intro_gocde.htm" />
+    <None Include="..\..\resources\welcome.htm" />
   </ItemGroup>
 </Project>

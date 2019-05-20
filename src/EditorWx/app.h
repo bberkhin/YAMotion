@@ -21,9 +21,10 @@ public:
 	void Restart();
 	bool GetUptadeInfo(wxString &out);
 	IEnvironment *GetEnvironment() { return env.get(); }
+
 private:
 	//! frame window
-	AppFrame* m_frame;
+	AppFrame *m_frame;
 
 protected:
 	// Lang support

@@ -13,7 +13,9 @@
 enum {
     // menu IDs
     myID_PROPERTIES = wxID_HIGHEST,
+	ID_NEWNC,
 	ID_NEWGCMC,
+	ID_OPENFILE,
 	ID_MACROSES,
 	ID_MATHCALC,
 	ID_MATHEXPRESSION,
@@ -124,4 +126,8 @@ private:
 	int m_data;
 };
 
+
+// this is typically in a header: it just declares MY_EVENT event type
+wxDECLARE_EVENT(FILE_MODIFYED_EVENT, wxCommandEvent);
+// this is a definition so can't be in a header
 #endif // _WX_DEFSEXT_H_

@@ -6,6 +6,7 @@
 #include "edit.h"        // edit module
 #include "codedescription.h"
 #include "configdata.h"
+#include "appframe.h"
 
 
 #if wxUSE_FFILE
@@ -33,6 +34,8 @@ const int ANNOTATION_STYLE = wxSTC_STYLE_LASTPREDEFINED + 1;
 //----------------------------------------------------------------------------
 // Edit
 //----------------------------------------------------------------------------
+
+wxDEFINE_EVENT(FILE_MODIFYED_EVENT, wxCommandEvent);
 
 wxBEGIN_EVENT_TABLE(Edit, wxStyledTextCtrl)
 	// common
@@ -113,10 +116,11 @@ Edit::Edit (wxWindow *parent, wxWindowID id,  const wxPoint &pos, const wxSize &
 {
 
     m_filename = wxEmptyString;
-
+	m_newfile = true;
     m_LineNrID = 0;
     m_DividerID = 1;
     m_FoldingID = 2;
+	m_modified = false;
 
     // initialize language
     m_language = NULL;
@@ -484,12 +488,18 @@ void Edit::OnCharAdded (wxStyledTextEvent &event) {
 	
 }
 
-void Edit::OnChanged(wxStyledTextEvent &event) 
+void Edit::OnChanged(wxStyledTextEvent & ) 
 {
-	if (Modified())
+	if ((Modified() && !m_modified) || (!Modified() && m_modified) )
 	{
-		;// ((wxFrame *)GetParent())->SetTitle(" * ");
-	}
+		m_modified = Modified();
+	//	wxCommandEvent *ev = new wxCommandEvent(wxEVT_MENU, myID_SELECTLINE);
+//		ev->SetClientObject(dataCmd);
+		//wxQueueEvent(GetParent(), event.Clone() );
+		wxCommandEvent event(FILE_MODIFYED_EVENT, GetId());
+		event.SetEventObject(this);
+		ProcessWindowEvent(event);
+	}	
 }
 
 static wxString GetWord(const wxString &in, int pos)
@@ -741,13 +751,15 @@ bool Edit::InitializePrefs (const wxString &name) {
     return true;
 }
 
-bool Edit::NewFile (int filetype )
+bool Edit::NewFile (int filetype, const wxString &filename)
 {
-	SetFilename(wxEmptyString);
 	ClearAll();
 	SetSavePoint();
 	EmptyUndoBuffer();
 	InitializePrefs(DeterminePrefs(filetype));
+	m_modified = false;
+	m_newfile = true;
+	m_filename = filename;
 	return true;
 }
 
@@ -755,7 +767,8 @@ bool Edit::NewFile (int filetype )
 bool Edit::LoadFile (const wxString &filename) {
 
     // load file in edit and clear undo
-    if (!filename.empty()) m_filename = filename;
+    if ( !filename.empty() ) 
+		m_filename = filename;
 
     wxStyledTextCtrl::LoadFile(m_filename);
 
@@ -764,7 +777,8 @@ bool Edit::LoadFile (const wxString &filename) {
     // determine lexer language
     wxFileName fname (m_filename);
     InitializePrefs (DeterminePrefs (fname.GetFullName()));
-
+	m_modified = false;
+	m_newfile = false;
     return true;
 }
 
@@ -774,23 +788,8 @@ bool Edit::SaveFile ()
     return SaveFile (m_filename);
 }
 
-bool Edit::SaveFile (const wxString &filename) {
-
-    // return if no change
-    //if (!Modified()) return true;
-
-//     // save edit in file and clear undo
-//     if (!filename.empty()) m_filename = filename;
-//     wxFile file (m_filename, wxFile::write);
-//     if (!file.IsOpened()) return false;
-//     wxString buf = GetText();
-//     bool okay = file.Write (buf);
-//     file.Close();
-//     if (!okay) return false;
-//     EmptyUndoBuffer();
-//     SetSavePoint();
-
-//     return true;
+bool Edit::SaveFile (const wxString &filename) 
+{
 	EmptyUndoBuffer();
 	SetSavePoint();
     bool bok =  wxStyledTextCtrl::SaveFile(filename);
@@ -798,6 +797,8 @@ bool Edit::SaveFile (const wxString &filename) {
 	{
 		m_filename = filename;
 	}
+	m_modified = false;
+	m_newfile = false;
 	return  bok;
 
 }
@@ -941,38 +942,6 @@ bool Edit::DoLoadFile(const wxString& filename, int WXUNUSED(fileType))
 		SetSavePoint();
 
 		return true;
-
-		/*
-		wxString text;
-		if (file.ReadAll(&text, *wxConvCurrent))
-		//if (file.ReadAll(&text, wxConvUTF8))
-		{
-			// Detect the EOL: we use just the first line because there is not
-			// much we can do if the file uses inconsistent EOLs anyhow, we'd
-			// need to ask the user about the one we should really use and we
-			// don't currently provide a way to do it.
-			//
-			// We also only check for Unix and DOS EOLs but not classic Mac
-			// CR-only one as it's obsolete by now.
-			const wxString::size_type posLF = text.find('\n');
-			if (posLF != wxString::npos)
-			{
-				// Set EOL mode to ensure that the new lines inserted into the
-				// text use the same EOLs as the existing ones.
-				if (posLF > 0 && text[posLF - 1] == '\r')
-					SetEOLMode(wxSTC_EOL_CRLF);
-				else
-					SetEOLMode(wxSTC_EOL_LF);
-			}
-			//else: Use the default EOL for the current platform.
-
-			SetValue(text);
-			EmptyUndoBuffer();
-			SetSavePoint();
-
-			return true;
-		}
-		*/
 	}
 #endif // !wxUSE_FFILE && !wxUSE_FILE
 

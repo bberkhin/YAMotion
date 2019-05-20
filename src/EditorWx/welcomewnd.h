@@ -8,6 +8,7 @@ class WelcomeWnd : 	public wxHtmlWindow
 
 public:
 	WelcomeWnd(wxWindow *parent); 
+	~WelcomeWnd();
 	void OnHtmlLinkClicked(wxHtmlLinkEvent &event);
 	void ShowWelcome(bool bShow);
 	void SetHomePage();

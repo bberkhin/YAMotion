@@ -103,6 +103,9 @@
     <None Include="..\..\resources\intro_gocde.htm">
       <DeploymentContent>true</DeploymentContent>
     </None>
+    <None Include="..\..\resources\welcome.htm">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>
