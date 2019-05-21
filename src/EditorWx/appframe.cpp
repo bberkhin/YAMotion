@@ -30,6 +30,7 @@
 #include "mathsimpledlg.h"
 #include "mathexpressiondlg.h"
 #include "welcomewnd.h"
+#include "dirtree.h"
 
 
 //Bitmaps
@@ -238,7 +239,8 @@ wxBEGIN_EVENT_TABLE (AppFrame, wxFrame)
 	
 
 	EVT_AUINOTEBOOK_PAGE_CLOSE(wxID_ANY, AppFrame::OnNotebookPageClose)
-	EVT_COMMAND(wxID_ANY, FILE_MODIFYED_EVENT, AppFrame::OnFileChanged)
+	EVT_COMMAND(wxID_ANY,FILE_MODIFYED_EVENT, AppFrame::OnFileChanged)
+	EVT_COMMAND(wxID_ANY,FILE_OPEN_EVENT, AppFrame::OnFileOpenEvent)
 // PROCESSING
 
 	EVT_THREAD(CHECK_GCODE_UPDATE, AppFrame::OnThreadUpdate)
@@ -296,6 +298,13 @@ AppFrame::AppFrame (const wxString &title)
 		Right().Layer(1).Position(1).
 		CloseButton(true).MaximizeButton(true));
 
+
+	DirTreeCtrl *ptree = new DirTreeCtrl(this);
+	m_mgr.AddPane(ptree, wxAuiPaneInfo().
+		Name("Folders").Caption("Folders").
+		Left().Layer(1).Position(1).
+		CloseButton(true).MaximizeButton(true));
+	
 
 	m_logwnd = new LogWindow(this, this, wxID_ANY);
 	int iconSize = m_mgr.GetArtProvider()->GetMetric(wxAUI_DOCKART_CAPTION_SIZE);
@@ -648,6 +657,12 @@ void AppFrame::OnFileOpen (wxCommandEvent &event )
 
 	if (event.GetClientData() != NULL)
 		HideWelcome();
+}
+
+void AppFrame::OnFileOpenEvent(wxCommandEvent &event)
+{
+	FileOpen( event.GetString() );
+	HideWelcome();
 }
 
 void AppFrame::OnOpenLastFile(wxCommandEvent &event)
@@ -1058,15 +1073,14 @@ void AppFrame::FileOpen (wxString fname)
 		{						
 			Edit *pedit = new Edit(m_notebook, wxID_ANY);
 			pedit->LoadFile(fname);
-
-			m_notebook->AddPage(pedit, w.GetName(), true);
-			m_notebook->SetPageToolTip(m_notebook->GetPageCount() - 1, fname );
+			m_notebook->AddPage(pedit, w.GetFullName(), true);
+			FileChanged();
+			UpdateTitle();
 
 			ConfigData *config;
 			if ((config = dynamic_cast<ConfigData *>(wxConfigBase::Get())) != NULL)
 				config->AddFileNameToSaveList(fname);
-			pedit->SelectNone();
-			FileChanged();
+
 		}
 	}
 	catch (...)

@@ -6,7 +6,6 @@
 #include "edit.h"        // edit module
 #include "codedescription.h"
 #include "configdata.h"
-#include "appframe.h"
 
 
 #if wxUSE_FFILE
@@ -773,12 +772,13 @@ bool Edit::LoadFile (const wxString &filename) {
     wxStyledTextCtrl::LoadFile(m_filename);
 
     EmptyUndoBuffer();
-
+	SelectNone();
     // determine lexer language
     wxFileName fname (m_filename);
     InitializePrefs (DeterminePrefs (fname.GetFullName()));
 	m_modified = false;
 	m_newfile = false;
+
     return true;
 }
 

@@ -49,9 +49,8 @@ public:
 	void OnTimerEvent(wxTimerEvent &event);
 	//! file
 	void OnFileNew(wxCommandEvent &event);
-	void OnFileNewFrame(wxCommandEvent &event);
 	void OnFileOpen(wxCommandEvent &event);
-	void OnFileOpenFrame(wxCommandEvent &event);
+	void OnFileOpenEvent(wxCommandEvent &event);
 	void OnFileSave(wxCommandEvent &event);
 	void OnFileSaveAs(wxCommandEvent &event);
 	void OnFileClose(wxCommandEvent &event);
