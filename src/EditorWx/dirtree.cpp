@@ -60,15 +60,17 @@ wxBEGIN_EVENT_TABLE(DirTreeCtrl, wxGenericTreeCtrl)
 #else
 wxBEGIN_EVENT_TABLE(DirTreeCtrl, wxTreeCtrl)
 #endif
+	EVT_MENU(ID_TREE_FILE_OPEN, DirTreeCtrl::OnFileOpen)
+	EVT_MENU(ID_TREE_FILE_RENAME, DirTreeCtrl::OnFileReneme)
+	EVT_MENU(ID_TREE_FILE_DELETE, DirTreeCtrl::OnFileDelete)
+	EVT_MENU(ID_TREE_FOLDER_OPEN, DirTreeCtrl::OnFolderOpen)
+
     EVT_TREE_BEGIN_DRAG(wxID_ANY, DirTreeCtrl::OnBeginDrag)
     EVT_TREE_BEGIN_RDRAG(wxID_ANY, DirTreeCtrl::OnBeginRDrag)
     EVT_TREE_END_DRAG(wxID_ANY, DirTreeCtrl::OnEndDrag)
     EVT_TREE_BEGIN_LABEL_EDIT(wxID_ANY, DirTreeCtrl::OnBeginLabelEdit)
     EVT_TREE_END_LABEL_EDIT(wxID_ANY, DirTreeCtrl::OnEndLabelEdit)
     EVT_TREE_DELETE_ITEM(wxID_ANY, DirTreeCtrl::OnDeleteItem)
-#if 0       // there are so many of those that logging them causes flicker
-    EVT_TREE_GET_INFO(wxID_ANY, DirTreeCtrl::OnGetInfo)
-#endif
     EVT_TREE_SET_INFO(wxID_ANY, DirTreeCtrl::OnSetInfo)
     EVT_TREE_ITEM_EXPANDED(wxID_ANY, DirTreeCtrl::OnItemExpanded)
     EVT_TREE_ITEM_EXPANDING(wxID_ANY, DirTreeCtrl::OnItemExpanding)
@@ -81,7 +83,7 @@ wxBEGIN_EVENT_TABLE(DirTreeCtrl, wxTreeCtrl)
     EVT_TREE_ITEM_ACTIVATED(wxID_ANY, DirTreeCtrl::OnItemActivated)
     
     // so many different ways to handle right mouse button clicks...
-    EVT_CONTEXT_MENU(DirTreeCtrl::OnContextMenu)
+    //EVT_CONTEXT_MENU(DirTreeCtrl::OnContextMenu)
     // EVT_TREE_ITEM_MENU is the preferred event for creating context menus
     // on a tree control, because it includes the point of the click or item,
     // meaning that no additional placement calculations are required.
@@ -104,8 +106,7 @@ wxIMPLEMENT_DYNAMIC_CLASS(DirTreeCtrl, wxTreeCtrl);
 
 DirTreeCtrl::DirTreeCtrl(wxWindow *parent, const wxWindowID id )
           : wxTreeCtrl(parent, id, wxDefaultPosition,wxDefaultSize, wxTR_DEFAULT_STYLE | wxTR_EDIT_LABELS | wxTR_HIDE_ROOT| wxSUNKEN_BORDER),
-            m_alternateImages(false),
-            m_alternateStates(false)
+            m_alternateImages(true)
 {
     m_reverseSort = false;
 
@@ -461,7 +462,7 @@ void LogKeyEvent(const wxString& name, const wxKeyEvent& event)
 
 void DirTreeCtrl::OnTreeKeyDown(wxTreeEvent& event)
 {
-    LogKeyEvent("Tree key down ", event.GetKeyEvent());
+    //LogKeyEvent("Tree key down ", event.GetKeyEvent());
     event.Skip();
 }
 
@@ -533,14 +534,21 @@ void DirTreeCtrl::OnBeginLabelEdit(wxTreeEvent& event)
 
 void DirTreeCtrl::OnEndLabelEdit(wxTreeEvent& event)
 {
-    //wxLogMessage("OnEndLabelEdit");
-
-    // don't allow anything except letters in the labels
-    if ( !event.GetLabel().IsWord() )
-    {
-        wxMessageBox("The new label should be a single word.");
-
-        event.Veto();
+	wxTreeItemId itemId = event.GetItem();
+	wxCHECK_RET(itemId.IsOk(), "should have a valid item");
+	DirTreeItemData *item = (DirTreeItemData *)GetItemData(itemId);
+	wxFileName fn( item->GetPtah() );	
+	wxString new_name = event.GetLabel();
+	fn.SetFullName(new_name);
+	try
+	{
+		std::filesystem::rename(item->GetPtah().wc_str(), fn.GetFullPath().wc_str());
+		item->SetPath(fn.GetFullPath());
+	}
+	catch(...)
+	{
+		wxMessageBox(wxString::Format(_("Can not rename %s"), item->GetPtah()), _("Renaming file"), wxOK | wxICON_INFORMATION);
+		event.Veto();
     }
 }
 
@@ -556,15 +564,21 @@ void DirTreeCtrl::OnItemCollapsing(wxTreeEvent& event)
 void DirTreeCtrl::OnItemActivated(wxTreeEvent& event)
 {
     // show some info about this item
-    wxTreeItemId itemId = event.GetItem();
-   DirTreeItemData *item = (DirTreeItemData *)GetItemData(itemId);
-    if ( item != NULL  && item->isFile() )
-    {
+	wxTreeItemId itemId = event.GetItem();
+	wxCHECK_RET(itemId.IsOk(), "should have a valid item");
+	DirTreeItemData *item = (DirTreeItemData *)GetItemData(itemId);
+	OpenFile(item);
+}
+
+void DirTreeCtrl::OpenFile(DirTreeItemData *item)
+{
+	if (item != NULL && item->isFile())
+	{
 		wxCommandEvent event(FILE_OPEN_EVENT, GetId());
-		event.SetString( item->GetPtah() );
+		event.SetString(item->GetPtah());
 		event.SetEventObject(this);
 		ProcessWindowEvent(event);
-    }
+	}
 }
 
 
@@ -579,37 +593,37 @@ void DirTreeCtrl::OnItemMenu(wxTreeEvent& event)
 
     //wxLogMessage("OnItemMenu for item \"%s\" at screen coords (%i, %i)", item ? item->GetDesc() : wxString("unknown"), screenpt.x, screenpt.y);
 
-    ShowMenu(itemId, clientpt);
-    event.Skip();
+    //ShowMenu(itemId, clientpt);
+	wxMenu menu(wxEmptyString);
+
+	if (item->isFile())
+	{
+		menu.Append(ID_TREE_FILE_OPEN, _("&Open"));
+		menu.Append(ID_TREE_FILE_RENAME, _("&Rename"));
+		menu.Append(ID_TREE_FILE_DELETE, _("&Delete"));
+		menu.AppendSeparator();
+	}
+	else
+	{
+		menu.Append(ID_NEWNC, _("&New NC File"));
+		menu.Append(ID_NEWGCMC, _("&New GCMC File"));
+		menu.Append(ID_TREE_FILE_RENAME, _("&Rename"));
+		menu.Append(ID_TREE_FOLDER_OPEN, _("&Open Folder"));
+	}
+	menu.Append(wxID_ABOUT, "&About");
+	menu.AppendSeparator();
+	PopupMenu(&menu, clientpt);
+
+	event.Skip();
 }
 
 void DirTreeCtrl::OnContextMenu(wxContextMenuEvent& event)
 {
     wxPoint pt = event.GetPosition();
 
-    //wxLogMessage("OnContextMenu at screen coords (%i, %i)", pt.x, pt.y);
+    wxLogMessage("OnContextMenu at screen coords (%i, %i)", pt.x, pt.y);
 
     event.Skip();
-}
-
-void DirTreeCtrl::ShowMenu(wxTreeItemId id, const wxPoint& pt)
-{
-    wxString title;
-    if ( id.IsOk() )
-    {
-        title << "Menu for " << GetItemText(id);
-    }
-    else
-    {
-        title = "Menu for no particular item";
-    }
-
-#if wxUSE_MENUS
-    wxMenu menu(title);
-    menu.Append(wxID_ABOUT, "&About");
-    menu.AppendSeparator();
-    PopupMenu(&menu, pt);
-#endif // wxUSE_MENUS
 }
 
 void DirTreeCtrl::OnItemRClick(wxTreeEvent& event)
@@ -655,4 +669,55 @@ void DirTreeCtrl::OnRMouseDClick(wxMouseEvent& event)
     }
 
     event.Skip();
+}
+
+// commands
+
+void DirTreeCtrl::OnFileOpen(wxCommandEvent &WXUNUSED(event))
+{
+	wxTreeItemId id = GetSelection();
+	if (!id)
+		return;
+	DirTreeItemData *item = (DirTreeItemData *)GetItemData(id);
+	OpenFile(item);
+}
+
+void DirTreeCtrl::OnFileReneme(wxCommandEvent &WXUNUSED(event))
+{
+	wxTreeItemId id = GetSelection();
+	if (!id)
+		return;
+	DirTreeItemData *item = (DirTreeItemData *)GetItemData(id);
+	EditLabel(id);
+
+}
+void DirTreeCtrl::OnFileDelete(wxCommandEvent &WXUNUSED(event))
+{
+	wxTreeItemId id = GetSelection();
+	wxCHECK_RET(id.IsOk(), "should have a valid item");
+	DirTreeItemData *item = (DirTreeItemData *)GetItemData(id);
+	try
+	{
+		if( item->isFile() )
+			std::filesystem::remove( item->GetPtah().wc_str());
+		else
+		{
+			std::filesystem::remove_all(item->GetPtah().wc_str());
+		}
+
+	}
+	catch (...)
+	{
+		wxMessageBox(wxString::Format(_("Can not remove %s"), item->GetPtah()), _("Removing file(s)"), wxOK | wxICON_INFORMATION);
+	}
+}
+
+void DirTreeCtrl::OnFolderOpen(wxCommandEvent &WXUNUSED(event))
+{
+	wxTreeItemId id = GetSelection();
+	wxCHECK_RET(id.IsOk(), "should have a valid item");
+	DirTreeItemData *item = (DirTreeItemData *)GetItemData(id);
+//	wxShell( wxString("start /B  ") + item->GetPtah() );
+	wxExecute(wxString("explorer ") + item->GetPtah(), wxEXEC_ASYNC, NULL);
+	
 }

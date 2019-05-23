@@ -17,6 +17,7 @@ class DirTreeItemData : public wxTreeItemData
 public:
 	DirTreeItemData(const wxString& desc, bool isfile = false) : m_path(desc), m_isfile(isfile)  { }
     wxString const& GetPtah() const { return m_path; }
+	void SetPath(const wxString &path) { m_path = path; }
 	bool isFile() { return m_isfile; }
 
 private:
@@ -38,7 +39,12 @@ public:
 	DirTreeCtrl() { m_alternateImages = false; m_alternateStates = false; }
     DirTreeCtrl(wxWindow *parent, const wxWindowID id = wxID_ANY );
     virtual ~DirTreeCtrl(){}
-
+	// commands
+	void OnFileOpen(wxCommandEvent &event);
+	void OnFileReneme(wxCommandEvent &event);
+	void OnFileDelete(wxCommandEvent &event);
+	void OnFolderOpen(wxCommandEvent &event);
+// events
     void OnBeginDrag(wxTreeEvent& event);
     void OnBeginRDrag(wxTreeEvent& event);
     void OnEndDrag(wxTreeEvent& event);
@@ -63,38 +69,21 @@ public:
     void OnRMouseUp(wxMouseEvent& event);
     void OnRMouseDClick(wxMouseEvent& event);
 
+private:
     wxTreeItemId GetLastTreeITem() const;
-    void GetItemsRecursively(const wxTreeItemId& idParent,
-                             wxTreeItemIdValue cookie = 0);
-
+    void GetItemsRecursively(const wxTreeItemId& idParent, wxTreeItemIdValue cookie = 0);
     void CreateImageList(int size = 16);
-
     void AddPath(const wxString &path);
-	
     void DoSortChildren(const wxTreeItemId& item, bool reverse = false)
         { m_reverseSort = reverse; wxTreeCtrl::SortChildren(item); }
 
     void DoToggleIcon(const wxTreeItemId& item);
-    
-    void ShowMenu(wxTreeItemId id, const wxPoint& pt);
-
     int ImageSize(void) const { return m_imageSize; }
-
-    void SetAlternateImages(bool show) { m_alternateImages = show; }
-    bool AlternateImages() const { return m_alternateImages; }
-
-    void SetAlternateStates(bool show) { m_alternateStates = show; }
-    bool AlternateStates() const { return m_alternateStates; }
-
-    void ResetBrokenStateImages()
-    {
-        const size_t count = GetStateImageList()->GetImageCount();
-        int state = count > 0 ? count - 1 : wxTREE_ITEMSTATE_NONE;
-        DoResetBrokenStateImages(GetRootItem(), 0, state);
-    }
 
 protected:
     virtual int OnCompareItems(const wxTreeItemId& i1, const wxTreeItemId& i2) wxOVERRIDE;
+	void OpenFile(DirTreeItemData *item);
+
 
 
 private:

@@ -21,6 +21,7 @@ class ViewGCode;
 class LogWindow;
 class MyGcmcProcess;
 class DoMathBase;
+class DirTreeCtrl;
 
 
 //----------------------------------------------------------------------------
@@ -66,6 +67,9 @@ public:
 	//! 3DViewevents
 	void On3DView(wxCommandEvent &event);
 	void On3DViewUpdate(wxUpdateUIEvent& event);
+	//! dirtree events
+	void OnDirTree(wxCommandEvent &event);
+	
 	//Gcode
 	void OnCheck(wxCommandEvent &event);
 	void OnSimulate(wxCommandEvent &event);
@@ -90,7 +94,7 @@ public:
 	wxString GetText();
 	void UpdateTitle();
 private:
-	bool CheckNewName(const wxString &new_file_name);
+	bool FindPageByFileName(const wxString &new_file_name, size_t *nPage = NULL);
 	wxString GetSavedFileName();
 	bool DoSaveAllFiles();
 	bool DoFileSave(bool askToSave, bool bSaveAs, Edit *pedit = NULL);
@@ -112,6 +116,7 @@ private:
 	// edit object
 	LogWindow *m_logwnd;
 	ViewGCode *m_view;
+	DirTreeCtrl *m_dirtree;
 	wxTimer m_timer;
 
 	IntGCodeThread *checkThread;

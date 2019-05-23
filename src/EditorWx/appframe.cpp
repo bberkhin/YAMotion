@@ -212,6 +212,7 @@ wxBEGIN_EVENT_TABLE (AppFrame, wxFrame)
 	//EVT_MENU(myID_INDENTINC, AppFrame::OnEdit)
 	// And all our edit-related menu commands.
 	EVT_MENU_RANGE(myID_EDIT_FIRST, myID_EDIT_LAST, AppFrame::OnEdit)
+	EVT_MENU_RANGE(ID_DIRTREE_FIRST, ID_DIRTREE_LAST, AppFrame::OnDirTree)
 
 	//menuEdit->Append(myID_INDENTINC, _("&Indent increase\tTab"));
 //menuEdit->Append(myID_INDENTRED, _("I&ndent reduce\tShift+Tab"));
@@ -265,6 +266,7 @@ AppFrame::AppFrame (const wxString &title)
 
 	m_notebook_style = wxAUI_NB_DEFAULT_STYLE | wxAUI_NB_TAB_EXTERNAL_MOVE | wxNO_BORDER;
 	m_notebook_theme = 0;
+	m_dirtree = 0;
 
 
     SetIcon(wxICON(sample));
@@ -299,8 +301,8 @@ AppFrame::AppFrame (const wxString &title)
 		CloseButton(true).MaximizeButton(true));
 
 
-	DirTreeCtrl *ptree = new DirTreeCtrl(this);
-	m_mgr.AddPane(ptree, wxAuiPaneInfo().
+	m_dirtree = new DirTreeCtrl(this);
+	m_mgr.AddPane(m_dirtree, wxAuiPaneInfo().
 		Name("Folders").Caption("Folders").
 		Left().Layer(1).Position(1).
 		CloseButton(true).MaximizeButton(true));
@@ -603,7 +605,7 @@ void AppFrame::FileChanged()
 }
 
 
-bool AppFrame::CheckNewName(const wxString &new_file_name)
+bool AppFrame::FindPageByFileName(const wxString &new_file_name, size_t *nPage)
 {
 	size_t n = m_notebook->GetPageCount();
 	for (size_t i = 0; i < n; ++i)
@@ -612,10 +614,14 @@ bool AppFrame::CheckNewName(const wxString &new_file_name)
 		{
 			Edit *pEdit = dynamic_cast<Edit *>(m_notebook->GetPage(i));
 			if (pEdit->GetFilename() == new_file_name)
-				return false;
+			{
+				if (nPage)
+					*nPage = i;
+				return true;
+			}
 		}
 	}
-	return true;
+	return false;
 
 }
 
@@ -628,7 +634,7 @@ void AppFrame::OnFileNew(wxCommandEvent &event )
 	int n = 0;
 	do
 	{
-		if (CheckNewName(new_file_name))
+		if ( !FindPageByFileName(new_file_name) )
 			break;
 		new_file_name = wxString::Format(_("unnamed%d.%s"),++n, (file_type == FILETYPE_GCMC) ? "gcmc" : "nc");
 	} while (true);
@@ -854,6 +860,12 @@ void AppFrame::On3DViewUpdate(wxUpdateUIEvent& event) {
 	if (m_view) m_view->GetEventHandler()->ProcessEvent(event);
 }
 
+void AppFrame::OnDirTree(wxCommandEvent &event)
+{
+	if (m_dirtree) m_dirtree->GetEventHandler()->ProcessEvent(event);
+}
+
+
 void AppFrame::OnContextMenu(wxContextMenuEvent& evt)
 {
     wxPoint point = evt.GetPosition();
@@ -1061,6 +1073,13 @@ void AppFrame::FileOpen (wxString fname)
     wxFileName w(fname); 
 	w.Normalize(); 
 	fname = w.GetFullPath();
+	// first try  to find the file in the opened tabs
+	size_t nPage = 0;
+	if (FindPageByFileName(fname, &nPage) )
+	{
+		m_notebook->SetSelection(nPage);
+		return;
+	}
 
 	try
 	{
