@@ -218,3 +218,8 @@ const char *gcode_gettext(const char *s)
 {	
 	return wxGetTranslation(s);
 }
+
+void  App::OnEventLoopEnter(wxEventLoopBase* WXUNUSED(loop))
+{
+	m_frame->CreateWatcher();
+}

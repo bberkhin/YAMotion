@@ -242,6 +242,8 @@ wxBEGIN_EVENT_TABLE (AppFrame, wxFrame)
 	EVT_AUINOTEBOOK_PAGE_CLOSE(wxID_ANY, AppFrame::OnNotebookPageClose)
 	EVT_COMMAND(wxID_ANY,FILE_MODIFYED_EVENT, AppFrame::OnFileChanged)
 	EVT_COMMAND(wxID_ANY,FILE_OPEN_EVENT, AppFrame::OnFileOpenEvent)
+	EVT_COMMAND(wxID_ANY, FILE_RENAME_EVENT, AppFrame::OnFileRenamed)
+	EVT_COMMAND(wxID_ANY, FILE_REMOVE_EVENT, AppFrame::OnFileRemoveEvent)
 // PROCESSING
 
 	EVT_THREAD(CHECK_GCODE_UPDATE, AppFrame::OnThreadUpdate)
@@ -267,6 +269,7 @@ AppFrame::AppFrame (const wxString &title)
 	m_notebook_style = wxAUI_NB_DEFAULT_STYLE | wxAUI_NB_TAB_EXTERNAL_MOVE | wxNO_BORDER;
 	m_notebook_theme = 0;
 	m_dirtree = 0;
+	m_watcher = 0;
 
 
     SetIcon(wxICON(sample));
@@ -341,6 +344,8 @@ AppFrame::AppFrame (const wxString &title)
 AppFrame::~AppFrame () 
 {
 
+	if (m_watcher)
+		delete m_watcher;
 }
 
 
@@ -433,6 +438,24 @@ void AppFrame::OnFileChanged(wxCommandEvent &)
 {
 	UpdateTitle();
 }
+
+void AppFrame::OnFileRenamed(wxCommandEvent &evn)
+{
+	wxString oldPath = evn.GetString();
+	size_t nPage = wxNOT_FOUND;
+	if (!FindPageByFileName(oldPath, &nPage))
+		return;
+	wxStringClientData *pstring_data = dynamic_cast<wxStringClientData *>(evn.GetClientObject());
+	if (!pstring_data)
+		return;
+
+	Edit *pedit = dynamic_cast<Edit *>(m_notebook->GetPage(nPage));
+	if (!pedit)
+		return;
+	pedit->SetFileName( pstring_data->GetData() );
+	UpdateTitle(nPage);	
+}
+
 
 void AppFrame::OnNotebookPageClose(wxAuiNotebookEvent& evt)
 {
@@ -568,12 +591,12 @@ bool AppFrame::DoFileSave(bool askToSave, bool bSaveAs, Edit *pedit)
 	// Need save
 	if (bSaveAs || pedit->IsNew() )
 	{
-		wxString filename = pedit->GetFilename();
+		wxString filename = pedit->GetFileName();
 		wxString wildCard;
 		if (pedit->GetFileType() == FILETYPE_GCMC)
 			wildCard = _("GCMC Files (*.gcmc)|*.gcmc");
 		else
-			wildCard = _("GCode Files (*.ngc)|*.ngc");
+			wildCard = _("GCode Files (*.ngc;*.nc)|*.ngc;*.nc");
 
 		wxFileDialog dlg(this, _("Save file As"), wxEmptyString, filename, wildCard, wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
 		if (dlg.ShowModal() != wxID_OK)
@@ -613,7 +636,7 @@ bool AppFrame::FindPageByFileName(const wxString &new_file_name, size_t *nPage)
 		if (m_notebook->GetPage(i)->IsKindOf(CLASSINFO(Edit)))
 		{
 			Edit *pEdit = dynamic_cast<Edit *>(m_notebook->GetPage(i));
-			if (pEdit->GetFilename() == new_file_name)
+			if (pEdit->GetFileName() == new_file_name)
 			{
 				if (nPage)
 					*nPage = i;
@@ -670,6 +693,20 @@ void AppFrame::OnFileOpenEvent(wxCommandEvent &event)
 	FileOpen( event.GetString() );
 	HideWelcome();
 }
+
+
+void AppFrame::OnFileRemoveEvent(wxCommandEvent &event)
+{
+	size_t nPage;
+	if ( FindPageByFileName(event.GetString(), &nPage) )
+	{
+		m_notebook->Freeze();
+		m_notebook->DeletePage(nPage);
+		m_notebook->Thaw();
+	}
+	
+}
+
 
 void AppFrame::OnOpenLastFile(wxCommandEvent &event)
 {
@@ -1109,22 +1146,25 @@ void AppFrame::FileOpen (wxString fname)
 }
 
 
-void AppFrame::UpdateTitle()
+void AppFrame::UpdateTitle(size_t nPage )
 {
-	Edit *pedit = GetActiveFile();
+	if (nPage == wxNOT_FOUND)
+		nPage = m_notebook->GetSelection();
+
+	Edit *pedit = dynamic_cast<Edit *>(m_notebook->GetPage(nPage));
 	if (!pedit)
 		return;
-	wxFileName w(pedit->GetFilename());
+	wxFileName w(pedit->GetFileName());
 	wxString title = w.GetFullName();
 	if (pedit->Modified())
 		title += "*";
-	
-	int page = m_notebook->GetSelection();
-	m_notebook->SetPageText(page, title);
-	m_notebook->SetPageToolTip(page, w.GetFullPath());
+
+	m_notebook->SetPageText(nPage, title);
+	m_notebook->SetPageToolTip(nPage, w.GetFullPath());
 }
 
-wxRect AppFrame::DeterminePrintSize () {
+wxRect AppFrame::DeterminePrintSize () 
+{
 
     wxSize scr = wxGetDisplaySize();
 
@@ -1268,7 +1308,7 @@ wxString AppFrame::GetSavedFileName()
 		return wxString();
 	
 	Edit *pedit = GetActiveFile();
-	return  pedit ? pedit->GetFilename() : wxString();
+	return  pedit ? pedit->GetFileName() : wxString();
 }
 
 
@@ -1493,7 +1533,7 @@ int AppFrame::DoConvertGcmc(DoAfterConvertGcmc what_to_do)
 	if (!pedit)
 		return 1;
 
-	wxString src_fname = pedit->GetFilename();
+	wxString src_fname = pedit->GetFileName();
 	if (src_fname.IsEmpty())
 		return 1;
 	wxString dst_fname = src_fname.BeforeLast('.');
@@ -1535,7 +1575,6 @@ void AppFrame::OnUpdateKillGcmcProcess(wxUpdateUIEvent& event)
 
 void AppFrame::DoSimulate(const wchar_t *fname)
 {
-
 	if (simulateThread == NULL)
 	{
 		simulateThread = new SimulateGCodeThread(this, fname);
@@ -1550,3 +1589,25 @@ void AppFrame::DoSimulate(const wchar_t *fname)
 }
 
 
+
+
+
+void AppFrame::CreateWatcher()
+{
+	if (m_watcher)
+		return;
+
+	m_watcher = new wxFileSystemWatcher();
+	m_watcher->SetOwner(this);
+	Bind(wxEVT_FSWATCHER, &AppFrame::OnFileSystemEvent, this);
+	if (m_dirtree)
+		m_dirtree->SetWatcher(m_watcher);
+
+}
+
+
+void AppFrame::OnFileSystemEvent(wxFileSystemWatcherEvent& event)
+{
+	if (m_dirtree) 
+		m_dirtree->GetEventHandler()->ProcessEvent(event);
+}

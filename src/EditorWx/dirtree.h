@@ -9,8 +9,11 @@
 #endif
 
 #include "wx/treectrl.h"
+#include "wx/fswatcher.h"
 
 // Define a new application type
+
+
 
 class DirTreeItemData : public wxTreeItemData
 {
@@ -38,7 +41,7 @@ public:
     };
 	DirTreeCtrl() { m_alternateImages = false; m_alternateStates = false; }
     DirTreeCtrl(wxWindow *parent, const wxWindowID id = wxID_ANY );
-    virtual ~DirTreeCtrl(){}
+	virtual ~DirTreeCtrl();
 	// commands
 	void OnFileOpen(wxCommandEvent &event);
 	void OnFileReneme(wxCommandEvent &event);
@@ -68,10 +71,12 @@ public:
     void OnRMouseDown(wxMouseEvent& event);
     void OnRMouseUp(wxMouseEvent& event);
     void OnRMouseDClick(wxMouseEvent& event);
+	void OnFileSystemEvent(wxFileSystemWatcherEvent& event);
+	void SetWatcher(wxFileSystemWatcher *watcher);
 
 private:
+	wxTreeItemId FindItemsRecursively(const wxTreeItemId& idParent, const wxString &path);
     wxTreeItemId GetLastTreeITem() const;
-    void GetItemsRecursively(const wxTreeItemId& idParent, wxTreeItemIdValue cookie = 0);
     void CreateImageList(int size = 16);
     void AddPath(const wxString &path);
     void DoSortChildren(const wxTreeItemId& item, bool reverse = false)
@@ -79,6 +84,7 @@ private:
 
     void DoToggleIcon(const wxTreeItemId& item);
     int ImageSize(void) const { return m_imageSize; }
+	
 
 protected:
     virtual int OnCompareItems(const wxTreeItemId& i1, const wxTreeItemId& i2) wxOVERRIDE;
@@ -101,6 +107,7 @@ private:
     bool         m_alternateImages;
     bool         m_alternateStates;
 	wxTreeItemId m_rootId;
+	wxFileSystemWatcher *m_watcher;
 
     // NB: due to an ugly wxMSW hack you _must_ use wxDECLARE_DYNAMIC_CLASS();
     //     if you want your overloaded OnCompareItems() to be called.

@@ -492,9 +492,6 @@ void Edit::OnChanged(wxStyledTextEvent & )
 	if ((Modified() && !m_modified) || (!Modified() && m_modified) )
 	{
 		m_modified = Modified();
-	//	wxCommandEvent *ev = new wxCommandEvent(wxEVT_MENU, myID_SELECTLINE);
-//		ev->SetClientObject(dataCmd);
-		//wxQueueEvent(GetParent(), event.Clone() );
 		wxCommandEvent event(FILE_MODIFYED_EVENT, GetId());
 		event.SetEventObject(this);
 		ProcessWindowEvent(event);

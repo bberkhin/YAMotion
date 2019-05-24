@@ -2,7 +2,7 @@
 
 //#include "appframe.h"
 #include "wx/aui/aui.h"
-
+#include "wx/fswatcher.h"
 
 enum DoAfterConvertGcmc
 {
@@ -52,6 +52,7 @@ public:
 	void OnFileNew(wxCommandEvent &event);
 	void OnFileOpen(wxCommandEvent &event);
 	void OnFileOpenEvent(wxCommandEvent &event);
+	void OnFileRemoveEvent(wxCommandEvent &event);
 	void OnFileSave(wxCommandEvent &event);
 	void OnFileSaveAs(wxCommandEvent &event);
 	void OnFileClose(wxCommandEvent &event);
@@ -88,11 +89,14 @@ public:
 
 	void OnNotebookPageClose(wxAuiNotebookEvent& evt);
 	void OnFileChanged(wxCommandEvent& event);
+	void OnFileRenamed(wxCommandEvent &evt);
 
+	void OnFileSystemEvent(wxFileSystemWatcherEvent& event);
+	void CreateWatcher();
 
 	LogWindow *getLogWnd() { return m_logwnd; }
 	wxString GetText();
-	void UpdateTitle();
+	void UpdateTitle(size_t npage = wxNOT_FOUND);
 private:
 	bool FindPageByFileName(const wxString &new_file_name, size_t *nPage = NULL);
 	wxString GetSavedFileName();
@@ -112,12 +116,14 @@ private:
 	wxAuiToolBar *CreateToolBar();
 	ViewGCode* CreateGLView();
 	Edit *GetActiveFile();
+	
 private:
 	// edit object
 	LogWindow *m_logwnd;
 	ViewGCode *m_view;
 	DirTreeCtrl *m_dirtree;
 	wxTimer m_timer;
+	wxFileSystemWatcher *m_watcher;
 
 	IntGCodeThread *checkThread;
 	SimulateGCodeThread *simulateThread;

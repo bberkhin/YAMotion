@@ -12,6 +12,7 @@
 #include <wx/dir.h>
 
 
+
 #ifdef __WIN32__
     // this is not supported by native control
     #define NO_VARIABLE_HEIGHT
@@ -43,6 +44,8 @@
 #endif
 
 wxDEFINE_EVENT(FILE_OPEN_EVENT, wxCommandEvent);
+wxDEFINE_EVENT(FILE_REMOVE_EVENT, wxCommandEvent);
+wxDEFINE_EVENT(FILE_RENAME_EVENT, wxCommandEvent);
 
 
 // verify that the item is ok and insult the user if it is not
@@ -106,16 +109,23 @@ wxIMPLEMENT_DYNAMIC_CLASS(DirTreeCtrl, wxTreeCtrl);
 
 DirTreeCtrl::DirTreeCtrl(wxWindow *parent, const wxWindowID id )
           : wxTreeCtrl(parent, id, wxDefaultPosition,wxDefaultSize, wxTR_DEFAULT_STYLE | wxTR_EDIT_LABELS | wxTR_HIDE_ROOT| wxSUNKEN_BORDER),
-            m_alternateImages(true)
+            m_alternateImages(true), m_watcher(NULL)
 {
     m_reverseSort = false;
 
     CreateImageList();
-    
 	wxString initPath = StandartPaths::Get()->GetRootPath().c_str();
 	m_rootId = AddRoot("Root",-1, -1, new DirTreeItemData("Root item"));
 	AddPath(initPath);
+	Bind(wxEVT_FSWATCHER, &DirTreeCtrl::OnFileSystemEvent, this);
+
 }
+
+DirTreeCtrl::~DirTreeCtrl()
+{
+
+}
+
 
 void DirTreeCtrl::CreateImageList(int size)
 {
@@ -186,6 +196,27 @@ int DirTreeCtrl::OnCompareItems(const wxTreeItemId& item1,
     }
 }
 
+wxTreeItemId DirTreeCtrl::FindItemsRecursively(const wxTreeItemId& idParent, const wxString &path)
+{	
+	wxTreeItemIdValue cookie;
+	wxTreeItemId child = GetFirstChild(idParent, cookie);
+	while (child.IsOk())
+	{
+		DirTreeItemData *item = (DirTreeItemData *)GetItemData(child);
+		if (item->GetPtah() == path)
+		{
+			return child;
+		}
+		if ( ItemHasChildren(child) )
+		{
+			wxTreeItemId found = FindItemsRecursively(child, path);
+			if (found.IsOk())
+				return found;
+		}
+		child = GetNextChild(idParent, cookie);
+	}
+	return wxTreeItemId();
+}
 
 void DirTreeCtrl::AddItemsRecursively(const wxTreeItemId& idParent, const wxString &path)
 {
@@ -210,6 +241,11 @@ void DirTreeCtrl::AddPath(const wxString &path)
                      
 {
     AddItemsRecursively(m_rootId, path);
+	if (m_watcher)
+	{		
+		wxFileName fn = wxFileName::DirName(path);
+		m_watcher->AddTree(fn, wxFSW_EVENT_DELETE | wxFSW_EVENT_CREATE | wxFSW_EVENT_RENAME);
+	}
 }
 
 wxTreeItemId DirTreeCtrl::GetLastTreeITem() const
@@ -227,27 +263,6 @@ wxTreeItemId DirTreeCtrl::GetLastTreeITem() const
     return item;
 }
 
-void DirTreeCtrl::GetItemsRecursively(const wxTreeItemId& idParent,
-                                     wxTreeItemIdValue cookie)
-{
-    wxTreeItemId id;
-
-    if ( !cookie )
-        id = GetFirstChild(idParent, cookie);
-    else
-        id = GetNextChild(idParent, cookie);
-
-    if ( !id.IsOk() )
-        return;
-
-    wxString text = GetItemText(id);
-    //wxLogMessage(text);
-
-    if (ItemHasChildren(id))
-        GetItemsRecursively(id);
-
-    GetItemsRecursively(idParent, cookie);
-}
 
 void DirTreeCtrl::DoToggleIcon(const wxTreeItemId& item)
 {
@@ -537,13 +552,20 @@ void DirTreeCtrl::OnEndLabelEdit(wxTreeEvent& event)
 	wxTreeItemId itemId = event.GetItem();
 	wxCHECK_RET(itemId.IsOk(), "should have a valid item");
 	DirTreeItemData *item = (DirTreeItemData *)GetItemData(itemId);
-	wxFileName fn( item->GetPtah() );	
+	wxString old_path = item->GetPtah();
+	wxFileName fn(old_path);
 	wxString new_name = event.GetLabel();
 	fn.SetFullName(new_name);
 	try
 	{
-		std::filesystem::rename(item->GetPtah().wc_str(), fn.GetFullPath().wc_str());
-		item->SetPath(fn.GetFullPath());
+		std::filesystem::rename(old_path.wc_str(), fn.GetFullPath().wc_str());
+
+		wxCommandEvent event(FILE_RENAME_EVENT, GetId());
+		wxStringClientData string_data;
+		event.SetString(old_path);
+		string_data.SetData(fn.GetFullPath());
+		event.SetClientObject(&string_data);			
+		ProcessWindowEvent(event);
 	}
 	catch(...)
 	{
@@ -557,7 +579,7 @@ void DirTreeCtrl::OnItemCollapsing(wxTreeEvent& event)
     //wxLogMessage("OnItemCollapsing");
 
     // for testing, prevent the user from collapsing the first child folder
-    wxTreeItemId itemId = event.GetItem();
+    wxTreeItemId itemId = event.GetItem();	
     // event.Veto();
 }
 
@@ -698,13 +720,21 @@ void DirTreeCtrl::OnFileDelete(wxCommandEvent &WXUNUSED(event))
 	DirTreeItemData *item = (DirTreeItemData *)GetItemData(id);
 	try
 	{
+		wxString path = item->GetPtah();
 		if( item->isFile() )
 			std::filesystem::remove( item->GetPtah().wc_str());
 		else
 		{
 			std::filesystem::remove_all(item->GetPtah().wc_str());
 		}
-
+		
+		if ( !path.empty() )
+		{
+			wxCommandEvent event(FILE_REMOVE_EVENT, GetId());
+			event.SetString(path);
+			event.SetEventObject(this);
+			ProcessWindowEvent(event);
+		}
 	}
 	catch (...)
 	{
@@ -718,6 +748,68 @@ void DirTreeCtrl::OnFolderOpen(wxCommandEvent &WXUNUSED(event))
 	wxCHECK_RET(id.IsOk(), "should have a valid item");
 	DirTreeItemData *item = (DirTreeItemData *)GetItemData(id);
 //	wxShell( wxString("start /B  ") + item->GetPtah() );
-	wxExecute(wxString("explorer ") + item->GetPtah(), wxEXEC_ASYNC, NULL);
+	wxExecute(wxString("explorer ") + item->GetPtah(), wxEXEC_ASYNC, NULL);	
+}
+
+
+
+void DirTreeCtrl::SetWatcher(wxFileSystemWatcher *watcher)
+{
+	if (m_watcher)
+		return;
+	m_watcher = watcher;
+
+	wxTreeItemIdValue cookie;
+	wxTreeItemId child = GetFirstChild(m_rootId, cookie);
+	while (child.IsOk())
+	{
+		DirTreeItemData *item = (DirTreeItemData *)GetItemData(child);		
+		wxFileName fn = wxFileName::DirName(item->GetPtah());
+		m_watcher->AddTree(fn);
+		child = GetNextChild(m_rootId, cookie);
+	}
+}
+
+void DirTreeCtrl::OnFileSystemEvent(wxFileSystemWatcherEvent& event)
+{
+
+	int type = event.GetChangeType();
+	wxString eventpath = event.GetPath().GetFullPath();
+	wxString newname = event.GetNewPath().GetFullPath();
+	wxString path = event.GetNewPath().GetPath();
 	
+
+	if (type == wxFSW_EVENT_CREATE)
+	{
+
+		wxTreeItemId id = FindItemsRecursively(m_rootId, path);
+
+		if (id.IsOk() && std::filesystem::is_regular_file(newname.wc_str()))
+		{
+			AppendItem(id, event.GetNewPath().GetFullName(), TreeCtrlIcon_File, TreeCtrlIcon_File + 1, new DirTreeItemData(newname, true));
+		}
+		else if (std::filesystem::is_directory(newname.wc_str()))
+		{
+			if ( id.IsOk() )
+				AddItemsRecursively(id, newname);
+		}
+	}
+	if ((type == wxFSW_EVENT_DELETE) || (type == wxFSW_EVENT_RENAME))
+	{
+		wxTreeItemId id = FindItemsRecursively(m_rootId, eventpath);
+		if ( !id.IsOk())
+			return;
+		if (type == wxFSW_EVENT_RENAME)
+		{
+			// set items label
+			SetItemText(id, event.GetNewPath().GetFullName() );
+			DirTreeItemData *item = (DirTreeItemData *)GetItemData(id);
+			item->SetPath(event.GetNewPath().GetFullPath());
+		}
+		else // DELETE
+		{
+			Delete(id);
+		}
+	}
+
 }

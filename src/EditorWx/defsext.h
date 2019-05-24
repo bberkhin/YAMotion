@@ -136,5 +136,8 @@ private:
 // this is typically in a header: it just declares MY_EVENT event type
 wxDECLARE_EVENT(FILE_MODIFYED_EVENT, wxCommandEvent);
 wxDECLARE_EVENT(FILE_OPEN_EVENT, wxCommandEvent);
+wxDECLARE_EVENT(FILE_REMOVE_EVENT, wxCommandEvent);
+wxDECLARE_EVENT(FILE_RENAME_EVENT, wxCommandEvent);
+
 // this is a definition so can't be in a header
 #endif // _WX_DEFSEXT_H_

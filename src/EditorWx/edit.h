@@ -119,7 +119,9 @@ public:
     bool SaveFile ();
     bool SaveFile (const wxString &filename);
     bool Modified ();
-    wxString GetFilename () {return m_filename;}
+    wxString GetFileName () {return m_filename;}
+	void SetFileName(const wxString &filename) { m_filename = filename; }
+	
 	void PasteFile(std::wstring fname, bool toend = false);
 	bool DoLoadFile(const wxString& filename, int WXUNUSED(fileType));
 	bool IsNew() { return m_newfile; }
