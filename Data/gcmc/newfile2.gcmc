@@ -1,2 +1,9 @@
-﻿goto([0,0,0])
+include("floret-vogel.gcmc");
+include("C:\Projects\YAMotion\YAMotion\Data\gcmc\floret-vogel.gcmc");
+include("C:\Tmp\Доки старые\упор.dwg");
+include("engrave.inc.gcmc");
+include("54.gcmc");
+
+goto([0,0,0])
 ﻿goto([10,10,10])
+1010

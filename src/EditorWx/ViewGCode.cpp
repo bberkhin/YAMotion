@@ -1397,7 +1397,7 @@ void Camera::update_scale()
 {
 	wxASSERT(box.Max.x != box.Min.x);
 	wxASSERT(box.Max.y != box.Min.y);
-	wxASSERT(box.Max.z != box.Min.z);
+	//wxASSERT(box.Max.z != box.Min.z);
 	// box must be in [-1;1] range
 	float k_view = 1;
 	if (height_vp != 0)

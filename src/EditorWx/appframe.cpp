@@ -53,7 +53,6 @@
 #define YA_WRONG_N _("Wrong N value")
 
 
-
 using namespace Interpreter;
 
 //----------------------------------------------------------------------------
@@ -244,6 +243,8 @@ wxBEGIN_EVENT_TABLE (AppFrame, wxFrame)
 	EVT_COMMAND(wxID_ANY,FILE_OPEN_EVENT, AppFrame::OnFileOpenEvent)
 	EVT_COMMAND(wxID_ANY, FILE_RENAME_EVENT, AppFrame::OnFileRenamed)
 	EVT_COMMAND(wxID_ANY, FILE_REMOVE_EVENT, AppFrame::OnFileRemoveEvent)
+	EVT_COMMAND(wxID_ANY, FILE_NEW_EVENT, AppFrame::OnFileNewEvent)
+
 // PROCESSING
 
 	EVT_THREAD(CHECK_GCODE_UPDATE, AppFrame::OnThreadUpdate)
@@ -270,6 +271,7 @@ AppFrame::AppFrame (const wxString &title)
 	m_notebook_theme = 0;
 	m_dirtree = 0;
 	m_watcher = 0;
+	m_view = 0;
 
 
     SetIcon(wxICON(sample));
@@ -338,11 +340,11 @@ AppFrame::AppFrame (const wxString &title)
 	wxLogWindow *m_LogWin = new wxLogWindow(this, "YAMotion Gcode Editor", true, false);
 	wxLog::SetActiveTarget(m_LogWin);
 #endif
-	
 }
 
 AppFrame::~AppFrame () 
 {
+	m_mgr.UnInit();
 
 	if (m_watcher)
 		delete m_watcher;
@@ -371,12 +373,6 @@ Edit *AppFrame::GetActiveFile()
 ViewGCode* AppFrame::CreateGLView()
 {
 	m_view = new ViewGCode(this, this, wxID_ANY);
-
-	/*	wxTreeCtrl* tree = new wxTreeCtrl(this, wxID_ANY,
-			wxPoint(0, 0),
-			FromDIP(wxSize(160, 250)),
-			wxTR_DEFAULT_STYLE | wxNO_BORDER);
-			*/
 	return m_view;
 }
 
@@ -493,7 +489,8 @@ void AppFrame::OnClose (wxCloseEvent &event)
 	if ( m_timer.IsRunning() )
 		m_timer.Stop();
 		
-	m_view->processClosing();
+	if ( m_view )
+		m_view->processClosing();
 	{
 		wxCriticalSectionLocker enter(critsect);
 		if (checkThread)         // does the thread still exist?
@@ -552,6 +549,9 @@ void AppFrame::OnExit (wxCommandEvent &WXUNUSED(event)) {
 
 bool AppFrame::DoSaveAllFiles()
 {
+	if (!m_notebook)
+		return true;
+
 	size_t n = m_notebook->GetPageCount();
 	for (size_t i = 0; i < n; ++i)
 	{
@@ -623,8 +623,8 @@ bool AppFrame::DoFileSave(bool askToSave, bool bSaveAs, Edit *pedit)
 
 void AppFrame::FileChanged()
 {
-	m_logwnd->Clear();
-	m_view->clear();
+	if (m_logwnd) m_logwnd->Clear();
+	if (m_view) m_view->clear();
 }
 
 
@@ -648,26 +648,45 @@ bool AppFrame::FindPageByFileName(const wxString &new_file_name, size_t *nPage)
 
 }
 
-void AppFrame::OnFileNew(wxCommandEvent &event )
+void AppFrame::OnFileNewEvent(wxCommandEvent &event)
 {
-	Edit *pedit = new Edit(m_notebook, wxID_ANY);
-	int file_type = (event.GetId() == ID_NEWGCMC) ? FILETYPE_GCMC : FILETYPE_NC;
+	DoNewFile( event.GetInt(), event.GetString(), false );
+}
 
+void AppFrame::OnFileNew(wxCommandEvent &event)
+{
+	int file_type = (event.GetId() == ID_NEWGCMC) ? FILETYPE_GCMC : FILETYPE_NC;
+	DoNewFile(event.GetInt(), wxEmptyString, event.GetClientData() != NULL );
+}
+
+void AppFrame::DoNewFile(int file_type, const wxString &path, bool closeWelcome )
+{
+	wxFileName defPath;
+	defPath.AssignDir(path);
+	
+	
 	wxString new_file_name = wxString::Format(_("unnamed.%s"), (file_type == FILETYPE_GCMC) ? "gcmc" : "nc");
+	defPath.SetFullName(new_file_name);
 	int n = 0;
 	do
 	{
-		if ( !FindPageByFileName(new_file_name) )
+		if ( !FindPageByFileName(defPath.GetFullPath()) )
 			break;
 		new_file_name = wxString::Format(_("unnamed%d.%s"),++n, (file_type == FILETYPE_GCMC) ? "gcmc" : "nc");
+		defPath.SetFullName(new_file_name);
 	} while (true);
 
+	m_notebook->Freeze();
+	
+	Edit *pedit = new Edit(m_notebook, wxID_ANY);
 	m_notebook->AddPage(pedit, new_file_name , true);
-	//m_notebook->SetPageToolTip(m_notebook->GetPageCount() - 1, _("New File"));
-	pedit->NewFile(file_type, new_file_name );
+	pedit->NewFile(file_type, defPath.GetFullPath());
 	FileChanged();
 	UpdateTitle();
-	if (event.GetClientData() != NULL )
+
+	m_notebook->Thaw();
+
+	if (closeWelcome)
 		HideWelcome();
 }
 
@@ -690,7 +709,44 @@ void AppFrame::OnFileOpen (wxCommandEvent &event )
 
 void AppFrame::OnFileOpenEvent(wxCommandEvent &event)
 {
-	FileOpen( event.GetString() );
+	
+	// we should check all possible files dir
+
+	wxFileName fname( event.GetString() );
+	if (!fname.IsAbsolute())
+	{
+		wxPathList paths; 
+		Edit *pedit = dynamic_cast<Edit *>(event.GetEventObject());
+		// try to add path from parent sender
+		if (pedit)
+		{
+			wxFileName fn = pedit->GetFileName();
+			paths.Add( fn.GetPath() );
+			fn.AppendDir(L"library");
+			paths.Add( fn.GetPath() );
+		}
+		
+		paths.Add(StandartPaths::Get()->GetRootPath().c_str());
+		paths.Add(StandartPaths::Get()->GetMacrosPath().c_str());
+
+		wxString abs_fname  = paths.FindAbsoluteValidPath(fname.GetFullPath());
+		if (abs_fname.empty())
+		{
+			wxString msg = wxString::Format(_("Can not open file %s in catalogs:\n"), fname.GetFullPath());
+			//for (int i = 0; i auto p = paths.begin() p != paths.end(); ++p)
+			for (auto p = paths.begin(); p != paths.end(); ++p)
+			{
+				msg += *p;
+				msg += L"\n";
+			}
+			wxMessageBox(msg,_("Error opening file"));
+			return;
+		}
+		else
+			fname = abs_fname;
+	}
+	
+	FileOpen( fname.GetFullPath() );	
 	HideWelcome();
 }
 
@@ -868,7 +924,7 @@ void AppFrame::OnMathExpression(wxCommandEvent &WXUNUSED(event))
 	{
 		wxString errMsg;
 		errMsg += wxString::Format(_("Error%s pos: %d"), e.GetMsg().c_str(), (int)e.GetPos());
-		wxMessageBox(errMsg);
+		wxMessageBox(errMsg, _("Expression error") );
 	}
 	catch (...)
 	{
@@ -1118,6 +1174,7 @@ void AppFrame::FileOpen (wxString fname)
 		return;
 	}
 
+	m_notebook->Freeze();
 	try
 	{
 		std::uintmax_t fsize = std::filesystem::file_size(fname.wc_str());
@@ -1132,7 +1189,6 @@ void AppFrame::FileOpen (wxString fname)
 			m_notebook->AddPage(pedit, w.GetFullName(), true);
 			FileChanged();
 			UpdateTitle();
-
 			ConfigData *config;
 			if ((config = dynamic_cast<ConfigData *>(wxConfigBase::Get())) != NULL)
 				config->AddFileNameToSaveList(fname);
@@ -1141,8 +1197,9 @@ void AppFrame::FileOpen (wxString fname)
 	}
 	catch (...)
 	{
-		wxMessageBox(wxString::Format(_("Can not open file %s!"), fname ));
+		wxMessageBox(wxString::Format(_("Can not open file %s!"), fname ), _("Error opening file") );
 	}
+	m_notebook->Thaw();
 }
 
 
@@ -1150,7 +1207,8 @@ void AppFrame::UpdateTitle(size_t nPage )
 {
 	if (nPage == wxNOT_FOUND)
 		nPage = m_notebook->GetSelection();
-
+	if (nPage == wxNOT_FOUND)
+		return;
 	Edit *pedit = dynamic_cast<Edit *>(m_notebook->GetPage(nPage));
 	if (!pedit)
 		return;

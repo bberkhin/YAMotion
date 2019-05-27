@@ -21,7 +21,7 @@
 #include <filesystem>
 #include "defsext.h"     // additional definitions
 #include "dirtree.h"
-
+#include "prefs.h"
 #include "standartpaths.h"
 //
 #include "bitmaps/icon1.xpm"
@@ -46,6 +46,7 @@
 wxDEFINE_EVENT(FILE_OPEN_EVENT, wxCommandEvent);
 wxDEFINE_EVENT(FILE_REMOVE_EVENT, wxCommandEvent);
 wxDEFINE_EVENT(FILE_RENAME_EVENT, wxCommandEvent);
+wxDEFINE_EVENT(FILE_NEW_EVENT, wxCommandEvent);
 
 
 // verify that the item is ok and insult the user if it is not
@@ -67,6 +68,9 @@ wxBEGIN_EVENT_TABLE(DirTreeCtrl, wxTreeCtrl)
 	EVT_MENU(ID_TREE_FILE_RENAME, DirTreeCtrl::OnFileReneme)
 	EVT_MENU(ID_TREE_FILE_DELETE, DirTreeCtrl::OnFileDelete)
 	EVT_MENU(ID_TREE_FOLDER_OPEN, DirTreeCtrl::OnFolderOpen)
+	EVT_MENU(ID_TREE_NEWNC, DirTreeCtrl::OnFileNew)
+	EVT_MENU(ID_TREE_NEWGCMC, DirTreeCtrl::OnFileNew)
+
 
     EVT_TREE_BEGIN_DRAG(wxID_ANY, DirTreeCtrl::OnBeginDrag)
     EVT_TREE_BEGIN_RDRAG(wxID_ANY, DirTreeCtrl::OnBeginRDrag)
@@ -627,8 +631,8 @@ void DirTreeCtrl::OnItemMenu(wxTreeEvent& event)
 	}
 	else
 	{
-		menu.Append(ID_NEWNC, _("&New NC File"));
-		menu.Append(ID_NEWGCMC, _("&New GCMC File"));
+		menu.Append(ID_TREE_NEWNC, _("&New NC File"));
+		menu.Append(ID_TREE_NEWGCMC, _("&New GCMC File"));
 		menu.Append(ID_TREE_FILE_RENAME, _("&Rename"));
 		menu.Append(ID_TREE_FOLDER_OPEN, _("&Open Folder"));
 	}
@@ -694,6 +698,22 @@ void DirTreeCtrl::OnRMouseDClick(wxMouseEvent& event)
 }
 
 // commands
+
+
+void DirTreeCtrl::OnFileNew(wxCommandEvent &ev)
+{
+	wxTreeItemId id = GetSelection();
+	if (!id)
+		return;
+	DirTreeItemData *item = (DirTreeItemData *)GetItemData(id);
+
+	wxCommandEvent event(FILE_NEW_EVENT, GetId());
+	event.SetInt((ev.GetId() == ID_TREE_NEWGCMC) ? FILETYPE_GCMC : FILETYPE_NC);
+	event.SetString(item->GetPtah());
+	event.SetEventObject(this);
+	ProcessWindowEvent(event);
+
+}
 
 void DirTreeCtrl::OnFileOpen(wxCommandEvent &WXUNUSED(event))
 {

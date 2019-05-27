@@ -39,6 +39,8 @@ wxDEFINE_EVENT(FILE_MODIFYED_EVENT, wxCommandEvent);
 wxBEGIN_EVENT_TABLE(Edit, wxStyledTextCtrl)
 	// common
 	EVT_SIZE(Edit::OnSize)
+	EVT_CONTEXT_MENU(Edit::OnContextMenu)
+	EVT_MENU(ID_INCLUSE_FILE_OPEN, Edit::OnIncludeOpen)
 	// edit
 	EVT_MENU(wxID_CLEAR, Edit::OnEditClear)
 	EVT_MENU(wxID_CUT, Edit::OnEditCut)
@@ -173,7 +175,7 @@ Edit::Edit (wxWindow *parent, wxWindowID id,  const wxPoint &pos, const wxSize &
  
     CmdKeyClear (wxSTC_KEY_TAB, 0); // this is done by the menu accelerator key
     SetLayoutCache (wxSTC_CACHE_PAGE);
-    UsePopUp(wxSTC_POPUP_ALL);
+    UsePopUp(wxSTC_POPUP_NEVER); //wxSTC_POPUP_ALL
 
 	CallTipSetBackground(*wxYELLOW);
 	CallTipSetForeground(*wxBLACK);
@@ -455,10 +457,7 @@ void Edit::OnMultipleSelectionsTyping(wxCommandEvent& WXUNUSED(event)) {
     SetAdditionalSelectionTyping(!isSet);
 }
 
-void Edit::OnCustomPopup(wxCommandEvent& evt)
-{
-    UsePopUp(evt.IsChecked() ? wxSTC_POPUP_NEVER : wxSTC_POPUP_ALL);
-}
+
 
 //! misc
 void Edit::OnMarginClick (wxStyledTextEvent &event) {
@@ -1112,4 +1111,60 @@ void Edit::DoReplace(wxEventType type, int flag, const wxString &strfind, const 
 	}
 
 	
+}
+
+
+void Edit::OnIncludeOpen(wxCommandEvent& event)
+{
+	wxString incl_file = GetGcmcIncludeFileName();
+	if (!incl_file.empty())
+	{		
+		wxCommandEvent event(FILE_OPEN_EVENT, GetId());
+		event.SetString(incl_file);
+		event.SetEventObject(this);
+		ProcessWindowEvent(event);
+	}
+}
+
+wxString Edit::GetGcmcIncludeFileName()
+{
+	int pos = GetCurrentPos();	
+	wxString strWord;
+	int lineN = LineFromPosition(pos);
+	wxString str = GetLineText(lineN);
+	if (str.empty())
+		return str;
+	int n =  0;
+	//include("involute-gear.inc.gcmc");
+	if ((n = str.Find(L"include")) != wxNOT_FOUND)
+	{
+		str = str.AfterFirst('\"');
+		str = str.BeforeFirst('\"');
+		return str;
+	}
+	return wxEmptyString;
+}
+
+void Edit::OnContextMenu(wxContextMenuEvent& event)
+{
+//	wxPoint clientpt = event.GetPosition();
+//	wxPoint screenpt = ClientToScreen(clientpt);
+	wxMenu menu(wxEmptyString);
+
+	wxString incl_file = GetGcmcIncludeFileName();
+	if (!incl_file.empty())
+	{
+		menu.Append(ID_INCLUSE_FILE_OPEN, wxString::Format(_("Open file: \"%s\""), incl_file));
+	}
+	menu.AppendSeparator();
+	menu.Append(wxID_UNDO, _("Undo"));
+	menu.AppendSeparator();
+	menu.Append(wxID_CUT, _("Cut"));
+	menu.Append(wxID_COPY, _("Copy"));
+	menu.Append(wxID_PASTE, _("Paste"));
+	menu.AppendSeparator();
+	menu.Append(wxID_SELECTALL, "Select All");
+
+	PopupMenu(&menu, ScreenToClient(event.GetPosition()) );
+	event.Skip();
 }

@@ -47,6 +47,7 @@ public:
 	void OnFileReneme(wxCommandEvent &event);
 	void OnFileDelete(wxCommandEvent &event);
 	void OnFolderOpen(wxCommandEvent &event);
+	void OnFileNew(wxCommandEvent &event);
 // events
     void OnBeginDrag(wxTreeEvent& event);
     void OnBeginRDrag(wxTreeEvent& event);

@@ -52,6 +52,8 @@ public:
     // event handlers
     // common
     void OnSize( wxSizeEvent &event );
+	void OnContextMenu(wxContextMenuEvent& event);
+	
     // edit
     void OnEditRedo (wxCommandEvent &event);
     void OnEditUndo (wxCommandEvent &event);
@@ -59,6 +61,7 @@ public:
     void OnEditCut (wxCommandEvent &event);
     void OnEditCopy (wxCommandEvent &event);
     void OnEditPaste (wxCommandEvent &event);
+	void OnIncludeOpen(wxCommandEvent& event);
     // find
     void OnFind (wxCommandEvent &event);
     void OnFindNext (wxCommandEvent &event);
@@ -95,7 +98,7 @@ public:
     void OnMultipleSelections(wxCommandEvent& event);
     void OnMultiPaste(wxCommandEvent& event);
     void OnMultipleSelectionsTyping(wxCommandEvent& event);
-    void OnCustomPopup(wxCommandEvent& evt);
+
     // stc
     void OnMarginClick (wxStyledTextEvent &event);
     void OnCharAdded  (wxStyledTextEvent &event);
@@ -121,6 +124,7 @@ public:
     bool Modified ();
     wxString GetFileName () {return m_filename;}
 	void SetFileName(const wxString &filename) { m_filename = filename; }
+	wxString GetGcmcIncludeFileName();
 	
 	void PasteFile(std::wstring fname, bool toend = false);
 	bool DoLoadFile(const wxString& filename, int WXUNUSED(fileType));

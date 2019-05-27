@@ -19,7 +19,7 @@ class IntGCodeThread;
 class SimulateGCodeThread;
 class ViewGCode;
 class LogWindow;
-class MyGcmcProcess;
+class GcmcProcess;
 class DoMathBase;
 class DirTreeCtrl;
 
@@ -53,6 +53,7 @@ public:
 	void OnFileOpen(wxCommandEvent &event);
 	void OnFileOpenEvent(wxCommandEvent &event);
 	void OnFileRemoveEvent(wxCommandEvent &event);
+	void OnFileNewEvent(wxCommandEvent &event);
 	void OnFileSave(wxCommandEvent &event);
 	void OnFileSaveAs(wxCommandEvent &event);
 	void OnFileClose(wxCommandEvent &event);
@@ -103,6 +104,7 @@ private:
 	bool DoSaveAllFiles();
 	bool DoFileSave(bool askToSave, bool bSaveAs, Edit *pedit = NULL);
 	void FileChanged();
+	void DoNewFile(int file_type, const wxString &path, bool closeWelcome);
 	void DoSimulate(const wchar_t *fname);
 	int DoConvertGcmc(DoAfterConvertGcmc what_to_do);
 	int RunGcmc(const wchar_t *src_fname, const  wchar_t *dst_fname, const wchar_t *args, DoAfterConvertGcmc what_to_do);

@@ -37,10 +37,10 @@ wxEND_EVENT_TABLE()
 
 
 // language data
-const wxLanguage g_langIds[] =
-{
-	wxLANGUAGE_DEFAULT,
-	wxLANGUAGE_RUSSIAN,
+const wxLanguage g_langIds[] =  
+{	
+	wxLANGUAGE_DEFAULT,	
+	wxLANGUAGE_RUSSIAN,	
 	wxLANGUAGE_FRENCH,
 /*
 	wxLANGUAGE_ITALIAN,
@@ -65,10 +65,10 @@ const wxLanguage g_langIds[] =
 
 // note that it makes no sense to translate these strings, they are
 // shown before we set the locale anyhow
-const wxString g_langNames[] =
-{
-	"English",
-	"Russian",
+const wxString g_langNames[] = 
+{	
+	"English",	
+	"Russian",	
 	"French",
 /*
 	"Italian",
