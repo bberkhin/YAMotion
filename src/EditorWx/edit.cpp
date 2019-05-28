@@ -182,6 +182,9 @@ Edit::Edit (wxWindow *parent, wxWindowID id,  const wxPoint &pos, const wxSize &
 	SetMouseDwellTime(2000);
 	int ntsb = GetTabWidth();
 	SetTabWidth(4);
+
+	SetDropTarget(0);
+	
 }
 
 Edit::~Edit () 

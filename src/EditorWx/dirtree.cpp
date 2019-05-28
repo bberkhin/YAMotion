@@ -68,13 +68,14 @@ wxBEGIN_EVENT_TABLE(DirTreeCtrl, wxTreeCtrl)
 	EVT_MENU(ID_TREE_FILE_RENAME, DirTreeCtrl::OnFileReneme)
 	EVT_MENU(ID_TREE_FILE_DELETE, DirTreeCtrl::OnFileDelete)
 	EVT_MENU(ID_TREE_FOLDER_OPEN, DirTreeCtrl::OnFolderOpen)
+	EVT_MENU(ID_TREE_FOLDER_REMOVE, DirTreeCtrl::OnFolderRemoveFromPoroject)
 	EVT_MENU(ID_TREE_NEWNC, DirTreeCtrl::OnFileNew)
 	EVT_MENU(ID_TREE_NEWGCMC, DirTreeCtrl::OnFileNew)
 
 
-    EVT_TREE_BEGIN_DRAG(wxID_ANY, DirTreeCtrl::OnBeginDrag)
-    EVT_TREE_BEGIN_RDRAG(wxID_ANY, DirTreeCtrl::OnBeginRDrag)
-    EVT_TREE_END_DRAG(wxID_ANY, DirTreeCtrl::OnEndDrag)
+    //EVT_TREE_BEGIN_DRAG(wxID_ANY, DirTreeCtrl::OnBeginDrag)
+    //EVT_TREE_BEGIN_RDRAG(wxID_ANY, DirTreeCtrl::OnBeginRDrag)
+    //EVT_TREE_END_DRAG(wxID_ANY, DirTreeCtrl::OnEndDrag)
     EVT_TREE_BEGIN_LABEL_EDIT(wxID_ANY, DirTreeCtrl::OnBeginLabelEdit)
     EVT_TREE_END_LABEL_EDIT(wxID_ANY, DirTreeCtrl::OnEndLabelEdit)
     EVT_TREE_DELETE_ITEM(wxID_ANY, DirTreeCtrl::OnDeleteItem)
@@ -120,8 +121,10 @@ DirTreeCtrl::DirTreeCtrl(wxWindow *parent, const wxWindowID id )
     CreateImageList();
 	wxString initPath = StandartPaths::Get()->GetRootPath().c_str();
 	m_rootId = AddRoot("Root",-1, -1, new DirTreeItemData("Root item"));
-	AddPath(initPath);
+	//AddPath(initPath);
 	Bind(wxEVT_FSWATCHER, &DirTreeCtrl::OnFileSystemEvent, this);
+	
+	SetDropTarget(new DnDFile(this));
 
 }
 
@@ -207,7 +210,7 @@ wxTreeItemId DirTreeCtrl::FindItemsRecursively(const wxTreeItemId& idParent, con
 	while (child.IsOk())
 	{
 		DirTreeItemData *item = (DirTreeItemData *)GetItemData(child);
-		if (item->GetPtah() == path)
+		if (item->GetPath() == path)
 		{
 			return child;
 		}
@@ -241,14 +244,37 @@ void DirTreeCtrl::AddItemsRecursively(const wxTreeItemId& idParent, const wxStri
 	}
 }
 
-void DirTreeCtrl::AddPath(const wxString &path)
-                     
+void DirTreeCtrl::AddPath(const wxString &path)                     
 {
-    AddItemsRecursively(m_rootId, path);
-	if (m_watcher)
-	{		
-		wxFileName fn = wxFileName::DirName(path);
-		m_watcher->AddTree(fn, wxFSW_EVENT_DELETE | wxFSW_EVENT_CREATE | wxFSW_EVENT_RENAME);
+	
+	wxFileName fn = path;
+	if (std::filesystem::is_directory(path.wc_str()))
+	{
+		AddItemsRecursively(m_rootId, path);
+		if (m_watcher)
+		{
+			wxFileName fn = wxFileName::DirName(path);
+			m_watcher->AddTree(fn, wxFSW_EVENT_DELETE | wxFSW_EVENT_CREATE | wxFSW_EVENT_RENAME);
+		}
+	}
+	else if (std::filesystem::is_regular_file(path.wc_str()))
+	{
+		//just open file in the editor
+
+		wxCommandEvent event(FILE_OPEN_EVENT, GetId());
+		event.SetString(path);
+		event.SetEventObject(this);
+		ProcessWindowEvent(event);
+		/*
+		AppendItem(m_rootId, fn.GetFullName(), TreeCtrlIcon_File, TreeCtrlIcon_File + 1, new DirTreeItemData(path, true));
+		if (m_watcher)
+		{
+			wxString s2 = fn.GetPath();
+			fn = wxFileName::DirName(s2);
+			//m_watcher->AddTree(fn, wxFSW_EVENT_DELETE | wxFSW_EVENT_CREATE | wxFSW_EVENT_RENAME);
+			m_watcher->Add(fn, wxFSW_EVENT_DELETE | wxFSW_EVENT_CREATE | wxFSW_EVENT_RENAME);
+		}
+		*/
 	}
 }
 
@@ -556,7 +582,7 @@ void DirTreeCtrl::OnEndLabelEdit(wxTreeEvent& event)
 	wxTreeItemId itemId = event.GetItem();
 	wxCHECK_RET(itemId.IsOk(), "should have a valid item");
 	DirTreeItemData *item = (DirTreeItemData *)GetItemData(itemId);
-	wxString old_path = item->GetPtah();
+	wxString old_path = item->GetPath();
 	wxFileName fn(old_path);
 	wxString new_name = event.GetLabel();
 	fn.SetFullName(new_name);
@@ -573,7 +599,7 @@ void DirTreeCtrl::OnEndLabelEdit(wxTreeEvent& event)
 	}
 	catch(...)
 	{
-		wxMessageBox(wxString::Format(_("Can not rename %s"), item->GetPtah()), _("Renaming file"), wxOK | wxICON_INFORMATION);
+		wxMessageBox(wxString::Format(_("Can not rename %s"), item->GetPath()), _("Renaming file"), wxOK | wxICON_INFORMATION);
 		event.Veto();
     }
 }
@@ -601,7 +627,7 @@ void DirTreeCtrl::OpenFile(DirTreeItemData *item)
 	if (item != NULL && item->isFile())
 	{
 		wxCommandEvent event(FILE_OPEN_EVENT, GetId());
-		event.SetString(item->GetPtah());
+		event.SetString(item->GetPath());
 		event.SetEventObject(this);
 		ProcessWindowEvent(event);
 	}
@@ -631,13 +657,15 @@ void DirTreeCtrl::OnItemMenu(wxTreeEvent& event)
 	}
 	else
 	{
-		menu.Append(ID_TREE_NEWNC, _("&New NC File"));
-		menu.Append(ID_TREE_NEWGCMC, _("&New GCMC File"));
-		menu.Append(ID_TREE_FILE_RENAME, _("&Rename"));
-		menu.Append(ID_TREE_FOLDER_OPEN, _("&Open Folder"));
+		menu.Append(ID_TREE_NEWNC, _("&ew NC File"));
+		menu.Append(ID_TREE_NEWGCMC, _("New GCMC File"));
+		menu.Append(ID_TREE_FILE_RENAME, _("Rename"));
+		menu.Append(ID_TREE_FOLDER_OPEN, _("Open Folder"));
+		if(GetItemParent(itemId) == m_rootId)
+			menu.Append(ID_TREE_FOLDER_REMOVE, _("Remove Folder from Project"));
 	}
-	menu.Append(wxID_ABOUT, "&About");
-	menu.AppendSeparator();
+	
+	SelectItem(itemId);
 	PopupMenu(&menu, clientpt);
 
 	event.Skip();
@@ -706,10 +734,19 @@ void DirTreeCtrl::OnFileNew(wxCommandEvent &ev)
 	if (!id)
 		return;
 	DirTreeItemData *item = (DirTreeItemData *)GetItemData(id);
+	wxString defptah;
+	
+	if (item->isFile())
+	{
+		wxFileName fn = item->GetPath();
+		defptah = fn.GetPath();
+	}
+	else
+		defptah = item->GetPath();
 
 	wxCommandEvent event(FILE_NEW_EVENT, GetId());
 	event.SetInt((ev.GetId() == ID_TREE_NEWGCMC) ? FILETYPE_GCMC : FILETYPE_NC);
-	event.SetString(item->GetPtah());
+	event.SetString(defptah);
 	event.SetEventObject(this);
 	ProcessWindowEvent(event);
 
@@ -740,12 +777,12 @@ void DirTreeCtrl::OnFileDelete(wxCommandEvent &WXUNUSED(event))
 	DirTreeItemData *item = (DirTreeItemData *)GetItemData(id);
 	try
 	{
-		wxString path = item->GetPtah();
+		wxString path = item->GetPath();
 		if( item->isFile() )
-			std::filesystem::remove( item->GetPtah().wc_str());
+			std::filesystem::remove( item->GetPath().wc_str());
 		else
 		{
-			std::filesystem::remove_all(item->GetPtah().wc_str());
+			std::filesystem::remove_all(item->GetPath().wc_str());
 		}
 		
 		if ( !path.empty() )
@@ -758,7 +795,7 @@ void DirTreeCtrl::OnFileDelete(wxCommandEvent &WXUNUSED(event))
 	}
 	catch (...)
 	{
-		wxMessageBox(wxString::Format(_("Can not remove %s"), item->GetPtah()), _("Removing file(s)"), wxOK | wxICON_INFORMATION);
+		wxMessageBox(wxString::Format(_("Can not remove %s"), item->GetPath()), _("Removing file(s)"), wxOK | wxICON_INFORMATION);
 	}
 }
 
@@ -767,10 +804,27 @@ void DirTreeCtrl::OnFolderOpen(wxCommandEvent &WXUNUSED(event))
 	wxTreeItemId id = GetSelection();
 	wxCHECK_RET(id.IsOk(), "should have a valid item");
 	DirTreeItemData *item = (DirTreeItemData *)GetItemData(id);
-//	wxShell( wxString("start /B  ") + item->GetPtah() );
-	wxExecute(wxString("explorer ") + item->GetPtah(), wxEXEC_ASYNC, NULL);	
+//	wxShell( wxString("start /B  ") + item->GetPath() );
+	wxExecute(wxString("explorer ") + item->GetPath(), wxEXEC_ASYNC, NULL);	
 }
 
+
+
+void DirTreeCtrl::OnFolderRemoveFromPoroject(wxCommandEvent &WXUNUSED(event))
+{
+	wxTreeItemId id = GetSelection();
+	wxCHECK_RET(id.IsOk(), "should have a valid item");
+	DirTreeItemData *item = (DirTreeItemData *)GetItemData(id);
+	wxCHECK_RET(!item->isFile(), "should be a folder");
+	wxCHECK_RET((GetItemParent(id) == m_rootId), "should be a root folder");
+	if (m_watcher)
+	{
+		wxFileName fn = wxFileName::DirName(item->GetPath());
+		m_watcher->RemoveTree(fn);
+	}
+	Delete(id);
+	
+}
 
 
 void DirTreeCtrl::SetWatcher(wxFileSystemWatcher *watcher)
@@ -784,12 +838,98 @@ void DirTreeCtrl::SetWatcher(wxFileSystemWatcher *watcher)
 	while (child.IsOk())
 	{
 		DirTreeItemData *item = (DirTreeItemData *)GetItemData(child);		
-		wxFileName fn = wxFileName::DirName(item->GetPtah());
+		wxFileName fn = wxFileName::DirName(item->GetPath());
 		m_watcher->AddTree(fn);
 		child = GetNextChild(m_rootId, cookie);
 	}
 }
 
+class DirTreeActor
+{
+public:
+	DirTreeActor(DirTreeCtrl *pOwner, int type, const wxFileName &newname) : m_pOwner(pOwner), m_type(type),m_newname(newname) { }
+	void Do(const wxTreeItemId &id, DirTreeItemData *item )
+	{		
+		if (!id.IsOk())
+			return;
+
+		if (m_type == wxFSW_EVENT_CREATE)
+		{
+			wxTreeItemId idexist = m_pOwner->FindItemsRecursively(id, m_newname.GetFullPath());
+			if (!idexist.IsOk() &&  std::filesystem::is_regular_file(m_newname.GetFullPath().wc_str()))
+			{
+				m_pOwner->AppendItem(id, m_newname.GetFullName(), DirTreeCtrl::TreeCtrlIcon_File, DirTreeCtrl::TreeCtrlIcon_File + 1, new DirTreeItemData(m_newname.GetFullPath(), true));
+			}
+			else if (!idexist.IsOk() && std::filesystem::is_directory(m_newname.GetFullPath().wc_str()))
+			{
+				m_pOwner->AddItemsRecursively(id, m_newname.GetFullPath());
+			}
+		}
+		else if (m_type == wxFSW_EVENT_RENAME)
+		{
+			// set items label
+			m_pOwner->SetItemText(id, m_newname.GetFullName());
+			item->SetPath(m_newname.GetFullPath());
+		}
+		else if (m_type == wxFSW_EVENT_DELETE) // DELETE
+		{
+			m_pOwner->Delete(id);
+		}
+
+
+	}
+private:
+	DirTreeCtrl *m_pOwner;
+	int m_type;
+	wxFileName m_newname;
+	
+};
+
+bool DirTreeCtrl::ForEachItemRecursively(const wxTreeItemId& idParent, const wxString &path, DirTreeActor *pactor)
+{
+	wxTreeItemIdValue cookie;
+	wxTreeItemId child = GetFirstChild(idParent, cookie);
+	bool stop;
+	bool isRoot = (idParent == m_rootId);
+	while (child.IsOk())
+	{
+		DirTreeItemData *item = (DirTreeItemData *)GetItemData(child);
+		if (item && item->GetPath() == path)
+		{
+			pactor->Do( child, item);
+			if (!isRoot)
+				return true;
+		}
+		else if (ItemHasChildren(child))
+		{
+			stop = ForEachItemRecursively(child, path, pactor);			
+			if (stop & !isRoot)
+				return true;
+		}
+		child = GetNextChild(idParent, cookie);
+	}
+	return false;
+}
+
+
+
+void DirTreeCtrl::OnFileSystemEvent(wxFileSystemWatcherEvent& event)
+{
+
+	int type = event.GetChangeType();
+	DirTreeActor actor(this,type, event.GetNewPath());
+	if (type == wxFSW_EVENT_CREATE)
+	{
+		wxString path = event.GetNewPath().GetPath();
+		ForEachItemRecursively(m_rootId, path, &actor);
+	}
+	if ((type == wxFSW_EVENT_DELETE) || (type == wxFSW_EVENT_RENAME))
+	{
+		ForEachItemRecursively(m_rootId, event.GetPath().GetFullPath(), &actor);
+	}
+
+}
+/*
 void DirTreeCtrl::OnFileSystemEvent(wxFileSystemWatcherEvent& event)
 {
 
@@ -832,4 +972,18 @@ void DirTreeCtrl::OnFileSystemEvent(wxFileSystemWatcherEvent& event)
 		}
 	}
 
+}
+*/
+
+bool DnDFile::OnDropFiles(wxCoord, wxCoord, const wxArrayString& filenames)
+{
+	size_t nFiles = filenames.GetCount();
+	wxString str;	
+	if (m_pOwner != NULL)
+	{
+		for (size_t n = 0; n < nFiles; n++)
+			m_pOwner->AddPath(filenames[n]);
+	}
+
+	return true;
 }

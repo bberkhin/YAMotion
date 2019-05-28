@@ -9,6 +9,7 @@ enum DoAfterConvertGcmc
 	ConvertGcmcNothing,
 	ConvertGcmcOpenFile,
 	ConvertGcmcPasteFile,
+	ConvertGcmcNewFile,
 	ConvertGcmcRunSimilate
 };
 
@@ -22,6 +23,7 @@ class LogWindow;
 class GcmcProcess;
 class DoMathBase;
 class DirTreeCtrl;
+class DropFileOpen;
 
 
 //----------------------------------------------------------------------------
@@ -31,6 +33,7 @@ class AppFrame : public wxFrame {
 	friend class IntGCodeThread;
 	friend class SimulateGCodeThread;
 	friend class GcmcProcess;
+	friend class DropFileOpen;
 
 public:
 	//! constructor
@@ -104,7 +107,7 @@ private:
 	bool DoSaveAllFiles();
 	bool DoFileSave(bool askToSave, bool bSaveAs, Edit *pedit = NULL);
 	void FileChanged();
-	void DoNewFile(int file_type, const wxString &path, bool closeWelcome);
+	void DoNewFile(int file_type, const wxString &defpath, bool closeWelcome, const wxString &contextFile = wxEmptyString);
 	void DoSimulate(const wchar_t *fname);
 	int DoConvertGcmc(DoAfterConvertGcmc what_to_do);
 	int RunGcmc(const wchar_t *src_fname, const  wchar_t *dst_fname, const wchar_t *args, DoAfterConvertGcmc what_to_do);

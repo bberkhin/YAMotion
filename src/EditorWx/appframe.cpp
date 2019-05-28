@@ -173,6 +173,28 @@ bool GcmcProcess::HasInput()
 	return hasInput;
 }
 
+class DropFileOpen : public wxFileDropTarget
+{
+public:
+	DropFileOpen(AppFrame *pOwner) : m_pOwner(pOwner) {  }
+
+	virtual bool OnDropFiles(wxCoord x, wxCoord y,const wxArrayString& filenames) wxOVERRIDE
+	{
+		size_t nFiles = filenames.GetCount();
+		wxString str;
+		if (m_pOwner != NULL)
+		{
+			for (size_t n = 0; n < nFiles; n++)
+				m_pOwner->FileOpen(filenames[n]);
+		}
+		return true;
+	}
+
+private:
+	AppFrame *m_pOwner;
+};
+
+
 //----------------------------------------------------------------------------
 // AppFrame
 //----------------------------------------------------------------------------
@@ -261,7 +283,7 @@ wxEND_EVENT_TABLE ()
 
 
 AppFrame::AppFrame (const wxString &title)
-        : m_timer(this), wxFrame ((wxFrame *)NULL, wxID_ANY, title, wxDefaultPosition, wxSize(750,550),
+        : m_timer(this), wxFrame ((wxFrame *)NULL, wxID_ANY, title, wxDefaultPosition, wxSize(840,650),
                     wxDEFAULT_FRAME_STYLE | wxNO_FULL_REPAINT_ON_RESIZE)
 {
 	// tell wxAuiManager to manage this frame
@@ -334,6 +356,8 @@ AppFrame::AppFrame (const wxString &title)
 
 	m_mgr.Update();
 	ShowWelcome();
+
+	SetDropTarget(new DropFileOpen(this));
 
 #ifdef DOWX_LOGGING
 		//Open a log window, don't show it though
@@ -659,10 +683,10 @@ void AppFrame::OnFileNew(wxCommandEvent &event)
 	DoNewFile(event.GetInt(), wxEmptyString, event.GetClientData() != NULL );
 }
 
-void AppFrame::DoNewFile(int file_type, const wxString &path, bool closeWelcome )
+void AppFrame::DoNewFile(int file_type, const wxString &defpath, bool closeWelcome, const wxString &contextFile)
 {
 	wxFileName defPath;
-	defPath.AssignDir(path);
+	defPath.AssignDir(defpath);
 	
 	
 	wxString new_file_name = wxString::Format(_("unnamed.%s"), (file_type == FILETYPE_GCMC) ? "gcmc" : "nc");
@@ -681,6 +705,10 @@ void AppFrame::DoNewFile(int file_type, const wxString &path, bool closeWelcome 
 	Edit *pedit = new Edit(m_notebook, wxID_ANY);
 	m_notebook->AddPage(pedit, new_file_name , true);
 	pedit->NewFile(file_type, defPath.GetFullPath());
+
+	if (!contextFile.empty())
+		pedit->PasteFile(contextFile.wc_str());
+		
 	FileChanged();
 	UpdateTitle();
 
@@ -839,7 +867,7 @@ void AppFrame::OnMacroses(wxCommandEvent &WXUNUSED(event))
 	std::wstring src_fname = StandartPaths::Get()->GetMacrosPath( desc.gcmcfile.c_str() );
 	std::wstring dst_fname = StandartPaths::Get()->GetTemporaryPath(L"tmp.nc");
 	
-	RunGcmc(src_fname.c_str(), dst_fname.c_str(), args.c_str(), ConvertGcmcPasteFile);
+	RunGcmc(src_fname.c_str(), dst_fname.c_str(), args.c_str(), dlgparam.IsInNewWindow() ? ConvertGcmcNewFile : ConvertGcmcPasteFile);
 }
 
 
@@ -1567,18 +1595,26 @@ void AppFrame::GcmcProcessTerminated(int status, const wchar_t *dst_fname, DoAft
 		m_timer.Stop();
 		wxString inf = wxString::Format(_("Process terminated with exit code %d"), status);
 		m_logwnd->Append(status == 0 ? MSLInfo : MSLError, inf);
+		Edit *pedit;
 		if (status == 0)
 		{
-			if (what_to_do == ConvertGcmcOpenFile)
-				FileOpen(dst_fname);
-			else if (what_to_do == ConvertGcmcPasteFile)
+			switch (what_to_do)
 			{
-				Edit *pedit = GetActiveFile();
-				if (!pedit)
-					pedit->PasteFile(dst_fname);
+				case ConvertGcmcOpenFile: 
+					FileOpen(dst_fname); 
+					break;
+				case ConvertGcmcPasteFile:
+					pedit = GetActiveFile();
+					if (pedit != NULL)
+						pedit->PasteFile(dst_fname);
+					break;
+				case ConvertGcmcNewFile:	
+					DoNewFile(FILETYPE_NC, wxEmptyString, true, dst_fname); 
+					break;
+				case ConvertGcmcRunSimilate:	
+					DoSimulate(dst_fname); 
+					break;
 			}
-			else if (what_to_do == ConvertGcmcRunSimilate)
-				DoSimulate(dst_fname);
 		}
 		delete gcmcProcess;
 		gcmcProcess = NULL;

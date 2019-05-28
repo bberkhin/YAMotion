@@ -10,6 +10,7 @@
 
 #include "wx/treectrl.h"
 #include "wx/fswatcher.h"
+#include "wx/dnd.h"
 
 // Define a new application type
 
@@ -19,7 +20,7 @@ class DirTreeItemData : public wxTreeItemData
 {
 public:
 	DirTreeItemData(const wxString& desc, bool isfile = false) : m_path(desc), m_isfile(isfile)  { }
-    wxString const& GetPtah() const { return m_path; }
+    wxString const& GetPath() const { return m_path; }
 	void SetPath(const wxString &path) { m_path = path; }
 	bool isFile() { return m_isfile; }
 
@@ -28,8 +29,12 @@ private:
 	bool m_isfile;
 };
 
+class DirTreeActor;
+
 class DirTreeCtrl : public wxTreeCtrl
 {
+	friend class DnDFile;
+	friend class DirTreeActor;
 public:
     enum
     {
@@ -48,6 +53,7 @@ public:
 	void OnFileDelete(wxCommandEvent &event);
 	void OnFolderOpen(wxCommandEvent &event);
 	void OnFileNew(wxCommandEvent &event);
+	void OnFolderRemoveFromPoroject(wxCommandEvent &event);
 // events
     void OnBeginDrag(wxTreeEvent& event);
     void OnBeginRDrag(wxTreeEvent& event);
@@ -77,6 +83,7 @@ public:
 
 private:
 	wxTreeItemId FindItemsRecursively(const wxTreeItemId& idParent, const wxString &path);
+	bool ForEachItemRecursively(const wxTreeItemId& idParent, const wxString &path, DirTreeActor *pactor);
     wxTreeItemId GetLastTreeITem() const;
     void CreateImageList(int size = 16);
     void AddPath(const wxString &path);
@@ -117,3 +124,16 @@ private:
     wxDECLARE_DYNAMIC_CLASS(DirTreeCtrl);
     wxDECLARE_EVENT_TABLE();
 };
+
+class DnDFile : public wxFileDropTarget
+{
+public:
+	DnDFile(DirTreeCtrl *pOwner) : m_pOwner(pOwner) {  }
+
+	virtual bool OnDropFiles(wxCoord x, wxCoord y,
+		const wxArrayString& filenames) wxOVERRIDE;
+
+private:
+	DirTreeCtrl *m_pOwner;
+};
+

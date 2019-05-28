@@ -3,11 +3,11 @@
 #include "standartpaths.h"
 #include "macrosparamdlg.h"
 
+#define ID_IN_NEW_WINDOW wxID_HIGHEST+100
 
 
-
-MacrosParamDlg::MacrosParamDlg(MacrosDesc *pm, wxWindow *parent)
-	: mdesc(pm), wxDialog(parent, wxID_ANY, wxEmptyString,
+MacrosParamDlg::MacrosParamDlg(MacrosDesc *pm, wxWindow *parent, bool new_window)
+	: mdesc(pm), m_new_window(new_window),wxDialog(parent, wxID_ANY, wxEmptyString,
 		wxDefaultPosition, wxDefaultSize,
 		wxDEFAULT_DIALOG_STYLE)//| wxRESIZE_BORDER) 
 	{
@@ -53,6 +53,9 @@ MacrosParamDlg::MacrosParamDlg(MacrosDesc *pm, wxWindow *parent)
 			//textinfos->Add(0, 6);
 		}
 		textinfos->Add(sizer, 1, wxALL | wxEXPAND, 10);
+		wxCheckBox *pcheck_newwnd = new wxCheckBox(this, ID_IN_NEW_WINDOW, _("Create new window"));
+		pcheck_newwnd->SetValue(m_new_window);
+		textinfos->Add(pcheck_newwnd);
 		textinfos->Add(Info);	
 		inputpane->Add(textinfos);
 
@@ -129,6 +132,8 @@ int MacrosParamDlg::ShowModal()
 				}
 			}
 		}
+		wxCheckBox *pcheck_newwnd = dynamic_cast<wxCheckBox *>(FindWindow(ID_IN_NEW_WINDOW));
+		m_new_window = pcheck_newwnd->GetValue();
 	}
 	return ret;
 
