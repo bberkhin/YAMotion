@@ -64,7 +64,8 @@
 //----------------------------------------------------------------------------
 // CommonInfo
 
-struct CommonInfo {
+struct CommonInfo 
+{
     // editor functionality prefs
     bool syntaxEnable;
     bool foldEnable;
@@ -78,8 +79,12 @@ struct CommonInfo {
     bool lineNumberEnable;
     bool longLineOnEnable;
     bool whiteSpaceEnable;
+	int tabWidth;
+	wxString gcmc_syntax;
+	wxString nc_syntax;
+	wxString theme_color;
 };
-extern const CommonInfo g_CommonPrefs;
+extern CommonInfo g_CommonPrefs;
 
 //----------------------------------------------------------------------------
 // LanguageInfo
@@ -88,20 +93,8 @@ extern const CommonInfo g_CommonPrefs;
 #define FILETYPE_NC   1
 #define FILETYPE_GCMC 2
 
-struct LanguageInfo {
-    const char *name;
-	int file_type;
-    const char *filepattern;
-    int lexer;
-    struct {
-        int type;
-        const char *words;
-    } styles [STYLE_TYPES_COUNT];
-    int folds;
-};
-
-extern const LanguageInfo g_LanguagePrefs[];
-extern const int g_LanguagePrefsSize;
+//extern const LanguageInfo g_LanguagePrefs[];
+//extern const int g_LanguagePrefsSize;
 
 //----------------------------------------------------------------------------
 // StyleInfo
@@ -115,7 +108,58 @@ struct StyleInfo {
     int lettercase;
 };
 
-extern const StyleInfo g_StylePrefs[];
-extern const int g_StylePrefsSize;
+//extern const StyleInfo g_StylePrefs[];
+//extern const int g_StylePrefsSize;
+
+//struct LanguageInfo {
+//	const char *name;
+//	int file_type;
+//	const char *filepattern;
+//	int lexer;
+//	struct {
+//		int type;
+//		const char *words;
+//	} styles[STYLE_TYPES_COUNT];
+//	int folds;
+//};
+
+typedef std::vector<StyleInfo>  StylesInfos;
+class LanguageInfo
+{
+public:
+	LanguageInfo(const wxString &filename);
+	const StylesInfos &Styles() { return m_styles; }
+	const wxString & GetName() const { return m_name; }
+	int	 GetFileType() { return m_file_type;  }
+	bool Match(const wxString &fname);
+	int  Lexer() const { return lexer; }
+	void Init();
+private:
+	bool Read();
+private:
+	StylesInfos m_styles;
+	wxString m_name;
+	wxString m_filename;
+	wxString m_filepattern;
+	int		 m_file_type;
+	int      lexer;
+	bool m_inited;
+};
+
+class Preferences
+{
+public:
+	Preferences();
+	~Preferences();
+	bool Read();
+	const CommonInfo &Common() const { return m_common;  }
+	const LanguageInfo  &FindByType(int type);
+	const LanguageInfo &FindByFileName(const wxString &name);
+private:
+	CommonInfo m_common;
+	std::vector<LanguageInfo>  m_languages;
+};
+
+
 
 #endif // _PREFS_H_

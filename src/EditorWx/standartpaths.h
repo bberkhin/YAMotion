@@ -8,6 +8,7 @@
 
 #define MACROSES_DIR L"macroses"
 #define RESOURCES_DIR L"resources"
+#define PREFS_DIR L"preferences"
 
 template<typename  Ch> class StandartPathsTm;
 typedef StandartPathsTm<wchar_t> StandartPaths;
@@ -22,6 +23,16 @@ public:
 	static StandartPathsTm<Ch> *Get() { return &global_paths; }
 	void SetLanguageCatalog(const Ch *lang) { lang_cat = lang;  }
 	std::filesystem::path GetRootPath(const Ch *finame = 0) {	return root_path;	}
+	std::filesystem::path GetPreferencesPath(const Ch *finame = 0) 
+	{ 
+		std::filesystem::path  path = GetRootPath();
+		path.append(PREFS_DIR);
+		if (finame)
+		{
+			path.append(finame);
+		}
+		return path;
+	}
 	std::filesystem::path GetMacrosPath(const Ch *finame = 0, bool lan_sub_dir = false )
 	{
 		std::filesystem::path  path  = GetRootPath();

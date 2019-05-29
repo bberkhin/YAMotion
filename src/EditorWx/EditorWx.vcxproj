@@ -32,6 +32,9 @@
     <ClCompile Include="..\Gcode\macrob.cpp" />
     <ClCompile Include="..\Gcode\straight.cpp" />
     <ClCompile Include="..\Gcode\TrajectoryPlanner.cpp" />
+    <ClCompile Include="..\wxJson\jsonreader.cpp" />
+    <ClCompile Include="..\wxJson\jsonval.cpp" />
+    <ClCompile Include="..\wxJson\jsonwriter.cpp" />
     <ClCompile Include="about.cpp" />
     <ClCompile Include="app.cpp" />
     <ClCompile Include="codedescription.cpp" />
@@ -180,7 +183,7 @@
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
       <PreprocessorDefinitions>_UNICODE;MUPARSER_STATIC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(SolutionDir)GCode;C:\WxWidgets\include;C:\WxWidgets\include\msvc;$(SolutionDir)rapidxml;$(SolutionDir)..\..\glm;$(SolutionDir)..\..\;$(SolutionDir)..\..\muparser\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)GCode;C:\WxWidgets\include;C:\WxWidgets\include\msvc;$(SolutionDir)include;$(SolutionDir)rapidxml;$(SolutionDir)..\..\glm;$(SolutionDir)..\..\;$(SolutionDir)..\..\muparser\include</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
@@ -194,7 +197,7 @@
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
-      <AdditionalIncludeDirectories>$(SolutionDir)GCode;C:\WxWidgets\include;C:\WxWidgets\include\msvc;$(SolutionDir)rapidxml;$(SolutionDir)..\..\glm;$(SolutionDir)..\..\;$(SolutionDir)..\..\muparser\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)GCode;C:\WxWidgets\include;C:\WxWidgets\include\msvc;$(SolutionDir)include;$(SolutionDir)rapidxml;$(SolutionDir)..\..\glm;$(SolutionDir)..\..\;$(SolutionDir)..\..\muparser\include</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_UNICODE;MUPARSER_STATIC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
@@ -209,7 +212,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)/GCode;C:\WxWidgets\include;C:\WxWidgets\include\msvc;$(SolutionDir)rapidxml;$(SolutionDir)..\..\glm;$(SolutionDir)..\..\;%(AdditionalIncludeDirectories);$(SolutionDir)..\..\muparser\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)/GCode;C:\WxWidgets\include;C:\WxWidgets\include\msvc;$(SolutionDir)include;$(SolutionDir)rapidxml;$(SolutionDir)..\..\glm;$(SolutionDir)..\..\;%(AdditionalIncludeDirectories);$(SolutionDir)..\..\muparser\include</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <PreprocessorDefinitions>_UNICODE;MUPARSER_STATIC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
@@ -227,7 +230,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)/GCode;C:\WxWidgets\include;C:\WxWidgets\include\msvc;$(SolutionDir)rapidxml;$(SolutionDir)..\..\glm;$(SolutionDir)..\..\;%(AdditionalIncludeDirectories);$(SolutionDir)..\..\muparser\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)/GCode;C:\WxWidgets\include;C:\WxWidgets\include\msvc;$(SolutionDir)include;$(SolutionDir)rapidxml;$(SolutionDir)..\..\glm;$(SolutionDir)..\..\;%(AdditionalIncludeDirectories);$(SolutionDir)..\..\muparser\include</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <PreprocessorDefinitions>_UNICODE;MUPARSER_STATIC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>

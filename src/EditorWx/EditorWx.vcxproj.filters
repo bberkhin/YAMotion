@@ -16,6 +16,9 @@
     <Filter Include="GCode">
       <UniqueIdentifier>{8234d5a8-27d9-46a8-bd67-08ac78509e37}</UniqueIdentifier>
     </Filter>
+    <Filter Include="wxJson">
+      <UniqueIdentifier>{b8870dc6-6319-4ff6-8874-4171046c253d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="edit.cpp">
@@ -125,6 +128,15 @@
     </ClCompile>
     <ClCompile Include="dirtree.cpp">
       <Filter>Исходные файлы</Filter>
+    </ClCompile>
+    <ClCompile Include="..\wxJson\jsonreader.cpp">
+      <Filter>wxJson</Filter>
+    </ClCompile>
+    <ClCompile Include="..\wxJson\jsonval.cpp">
+      <Filter>wxJson</Filter>
+    </ClCompile>
+    <ClCompile Include="..\wxJson\jsonwriter.cpp">
+      <Filter>wxJson</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

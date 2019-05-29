@@ -180,9 +180,7 @@ Edit::Edit (wxWindow *parent, wxWindowID id,  const wxPoint &pos, const wxSize &
 	CallTipSetBackground(*wxYELLOW);
 	CallTipSetForeground(*wxBLACK);
 	SetMouseDwellTime(2000);
-	int ntsb = GetTabWidth();
-	SetTabWidth(4);
-
+	SetTabWidth(g_CommonPrefs.tabWidth);
 	SetDropTarget(0);
 	
 }
@@ -639,7 +637,8 @@ bool Edit::InitializePrefs (const wxString &name) {
     StyleSetForeground (wxSTC_STYLE_LINENUMBER, wxColour ("DARK GREY"));
     StyleSetBackground (wxSTC_STYLE_LINENUMBER, *wxWHITE);
     SetMarginWidth (m_LineNrID, 0); // start out not visible
-	SetMarginWidth(m_LineNrID, m_LineNrMargin);
+	if (g_CommonPrefs.lineNumberEnable )
+		SetMarginWidth(m_LineNrID, m_LineNrMargin);
 
     // annotations style
     StyleSetBackground(ANNOTATION_STYLE, wxColour(244, 220, 220));
@@ -705,7 +704,8 @@ bool Edit::InitializePrefs (const wxString &name) {
     StyleSetBackground (m_FoldingID, *wxWHITE);
     SetMarginWidth (m_FoldingID, 0);
     SetMarginSensitive (m_FoldingID, false);
-    if (g_CommonPrefs.foldEnable) {
+    if (g_CommonPrefs.foldEnable) 
+	{
         SetMarginWidth (m_FoldingID, curInfo->folds != 0? m_FoldingMargin: 0);
         SetMarginSensitive (m_FoldingID, curInfo->folds != 0);
         SetProperty ("fold", curInfo->folds != 0? "1": "0");
@@ -728,7 +728,6 @@ bool Edit::InitializePrefs (const wxString &name) {
                   wxSTC_FOLDFLAG_LINEAFTER_CONTRACTED);
 
     // set spaces and indentation
-    SetTabWidth (4);
     SetUseTabs (false);
     SetTabIndents (true);
     SetBackSpaceUnIndents (true);

@@ -7,6 +7,7 @@
 #include "configdata.h"
 #include "standartpaths.h"
 #include "environmentsimple.h"
+#include "prefs.h"
 
 /// RUNCH
 
@@ -183,6 +184,7 @@ bool App::OnInit()
 		}
 	}
 	
+	ReadPreferences();
 
 	m_frame = new AppFrame(APP_NAME);
 	// open application frame
