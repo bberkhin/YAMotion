@@ -1,15 +1,29 @@
 {
-	"syntax"		: true,
-	"fold" 			: true,
-	"indent" 		: true,
-	"wrapMode"		: false,
-	"displayEOL"	: false,
-	"indentGuide"	: false,
-	"lineNumber"	: true,
-	"longLineOn"	: false,
-	"whiteSpace"	: false,
-	"tabWidth"		: 4,
-	"gcmc_syntax"  	: "gcmc_syntax_white.json",
-	"nc_syntax"    	: "nc_syntax_white.json",
-	"theme_syntax" 	: "them_white.json",
+  "syntax": true,
+  "fold": true,
+  "indent": true,
+  "wrapMode": false,
+  "displayEOL": false,
+  "indentGuide": false,
+  "lineNumber": true,
+  "longLineOn": false,
+  "whiteSpace": false,
+  "tabWidth": 4,
+  "theme_syntax": "them_white.json",
+  "files": [
+    {
+      "name": "GCODE",
+      "syntax": "nc_syntax_white.json",
+      "extensions": "*.ngc;*.nc;*.cnc"
+    },
+    {
+      "name": "GCMC",
+      "syntax": "gcmc_syntax_white.json",
+      "extensions": "*.gcmc;"
+    },
+    {
+      "name": "JSON",
+      "extensions": "*.json;"
+    }
+  ]
 }

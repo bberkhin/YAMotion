@@ -1,7 +1,9 @@
 #pragma once
 #include "ienvironment.h"
 
+
 class AppFrame;
+class Preferences;
 
 //----------------------------------------------------------------------------
 //
@@ -9,7 +11,7 @@ class App : public wxApp
 {
 	friend class AppFrame;
 public:
-	App() : m_restart(false) { }
+	App();
 	~App();
 	
 

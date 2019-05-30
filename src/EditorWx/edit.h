@@ -76,7 +76,7 @@ public:
     void OnEditSelectAll (wxCommandEvent &event);
     void OnEditSelectLine (wxCommandEvent &event);
 	    //! view
-    void OnHighlightLang (wxCommandEvent &event);
+
     void OnDisplayEOL (wxCommandEvent &event);
     void OnIndentGuide (wxCommandEvent &event);
     void OnLineNumber (wxCommandEvent &event);
@@ -110,11 +110,10 @@ public:
 	void OnMouseLeave(wxMouseEvent &event);
 
     //! language/lexer
-	wxString DeterminePrefs(int filetype);
-    wxString DeterminePrefs (const wxString &filename);
-    bool InitializePrefs (const wxString &langname);
+
+    bool InitializePrefs (const LanguageInfo * language);
     //bool UserSettings (const wxString &filename);
-	int GetFileType() {	return ((m_language != 0 ) ? m_language->file_type : FILETYPE_UNKNOW); }
+	int GetFileType() {	return ((m_language != 0 ) ? m_language->GetFileType() : FILETYPE_UNKNOW); }
 
     //! load/save file
 	bool NewFile(int filetype, const wxString &filename);
@@ -138,7 +137,7 @@ private:
     wxString m_filename;
 
     // language properties
-    LanguageInfo const* m_language;
+    const LanguageInfo * m_language;
 
     // margin variables
     int m_LineNrID;

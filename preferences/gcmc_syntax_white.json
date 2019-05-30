@@ -1,55 +1,52 @@
 {
   // this is a comment line in C++ style
-  "name"       : "GCMC",
-  "id"         : 2
-  "extensions" : "*.ngc;*.nc;*.cnc",
-  "fontsize"   : 10
-  "fontname"   : "system"
+  "fontsize"   : 10,
+  "fontname"   : "system",
   "fclr"       : "BLACK",
   "bclr"       : "WHITE",
-  "italic"     : false
+  "italic"     : false,
   "styles"     :
     [
         {  
         "name" : "default",
-        "fclr" : "GRAY",
+        "fclr" : "GRAY"
         },
         {
         "name" : "comment",
-        "fclr" : "FOREST GREEN",
+        "fclr" : "FOREST GREEN"
         },
         {
         "name" : "comment_ml",
-        "fclr" : "FOREST GREEN",
+        "fclr" : "FOREST GREEN"
         },
         {
         "name" : "var",
         "fclr" : "SIENNA",
-        "bold" : true,
+        "bold" : true
         },
         {
         "name" : "number",
         "fclr" : "BLACK",      
-        "bold" : true,
+        "bold" : true
         },         
         {
         "name" : "word1",
         "fclr" : "RED",
-        "bold" : true,
+        "bold" : true
         },
         {
         "name" : "word2",
         "fclr" : "BLUE",
-        "bold" : true,
+        "bold" : true
         },
         {
         "name" : "operators",
         "fclr" : "VIOLET RED",
-        "bold" : true,
+        "bold" : true
         },
         {
         "name" : "identifiers",
-        "fclr" : "BLACK",
+        "fclr" : "BLACK"
         },
         {
         "name" : "strings",

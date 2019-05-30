@@ -92,20 +92,24 @@ extern CommonInfo g_CommonPrefs;
 #define FILETYPE_UNKNOW 0  
 #define FILETYPE_NC   1
 #define FILETYPE_GCMC 2
+#define FILETYPE_JSON 3
 
 //extern const LanguageInfo g_LanguagePrefs[];
 //extern const int g_LanguagePrefsSize;
 
 //----------------------------------------------------------------------------
 // StyleInfo
-struct StyleInfo {
+struct StyleInfo 
+{
     const wxString name;
     const wxString foreground;
     const wxString background;
-    const wxString fontname;
+ //   const wxString fontname;
     int fontsize;
     int fontstyle;
     int lettercase;
+	int style_Id;
+	const char *words;
 };
 
 //extern const StyleInfo g_StylePrefs[];
@@ -127,13 +131,16 @@ typedef std::vector<StyleInfo>  StylesInfos;
 class LanguageInfo
 {
 public:
-	LanguageInfo(const wxString &filename);
-	const StylesInfos &Styles() { return m_styles; }
+	LanguageInfo();
+	LanguageInfo(int file_type, int lexer);
+	const StylesInfos &Styles() const { return m_styles; }
 	const wxString & GetName() const { return m_name; }
-	int	 GetFileType() { return m_file_type;  }
+	int	 GetFileType() const { return m_file_type;  }
 	bool Match(const wxString &fname);
-	int  Lexer() const { return lexer; }
+	int  Lexer() const { return m_lexer; }
+	int  Fold() const { return m_fold; }
 	void Init();
+	void SetFileName(const wxString &filename) { m_filename = filename; }
 private:
 	bool Read();
 private:
@@ -142,9 +149,13 @@ private:
 	wxString m_filename;
 	wxString m_filepattern;
 	int		 m_file_type;
-	int      lexer;
+	int      m_lexer;
+	int      m_fold;
 	bool m_inited;
 };
+
+//class Preferences;
+extern class Preferences global_pprefs;
 
 class Preferences
 {
@@ -152,9 +163,10 @@ public:
 	Preferences();
 	~Preferences();
 	bool Read();
+	static Preferences *Get() { return &global_pprefs; }
 	const CommonInfo &Common() const { return m_common;  }
-	const LanguageInfo  &FindByType(int type);
-	const LanguageInfo &FindByFileName(const wxString &name);
+	const LanguageInfo *FindByType(int type) ;
+	const LanguageInfo *FindByFileName(const wxString &name);
 private:
 	CommonInfo m_common;
 	std::vector<LanguageInfo>  m_languages;

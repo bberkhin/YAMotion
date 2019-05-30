@@ -1085,23 +1085,14 @@ wxMenuBar *AppFrame::CreateMenu ()
 	menuEdit->AppendSeparator();
 	menuEdit->AppendCheckItem(myID_READONLY, _("&Readonly mode"));
 	   	
-
-    // highlight submenu
-    wxMenu *menuHighlight = new wxMenu;
-    int Nr;
-    for (Nr = 0; Nr < g_LanguagePrefsSize; Nr++) {
-        menuHighlight->Append (myID_HIGHLIGHTFIRST + Nr,
-                             g_LanguagePrefs [Nr].name);
-    }
-
-    // charset submenu
+	// charset submenu
     wxMenu *menuCharset = new wxMenu;
     menuCharset->Append (myID_CHARSETANSI, _("&ANSI (Windows)"));
     menuCharset->Append (myID_CHARSETMAC, _("&MAC (Macintosh)"));
 
     // View menu
     wxMenu *menuView = new wxMenu;
-    menuView->Append (myID_HIGHLIGHTLANG, _("&Highlight language .."), menuHighlight);
+    //menuView->Append (myID_HIGHLIGHTLANG, _("&Highlight language .."), menuHighlight);
     menuView->AppendSeparator();
     menuView->AppendCheckItem (myID_DISPLAYEOL, _("Show line &endings"));
     menuView->AppendCheckItem (myID_INDENTGUIDE, _("Show &indent guides"));

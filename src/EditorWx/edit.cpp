@@ -69,8 +69,6 @@ wxBEGIN_EVENT_TABLE(Edit, wxStyledTextCtrl)
 
 
 	// view
-	EVT_MENU_RANGE(myID_HIGHLIGHTFIRST, myID_HIGHLIGHTLAST,
-	Edit::OnHighlightLang)
 	EVT_MENU(myID_DISPLAYEOL, Edit::OnDisplayEOL)
 	EVT_MENU(myID_INDENTGUIDE, Edit::OnIndentGuide)
 	EVT_MENU(myID_LINENUMBER, Edit::OnLineNumber)
@@ -154,7 +152,7 @@ Edit::Edit (wxWindow *parent, wxWindowID id,  const wxPoint &pos, const wxSize &
 	// margin
 	m_LineNrMargin = TextWidth(wxSTC_STYLE_LINENUMBER, "_99999");
 	m_FoldingMargin = 16;
-    InitializePrefs (g_LanguagePrefs[0].name);
+    //InitializePrefs (g_LanguagePrefs[0].name);
 
     // set visibility
     SetVisiblePolicy (wxSTC_VISIBLE_STRICT|wxSTC_VISIBLE_SLOP, 1);
@@ -284,10 +282,6 @@ void Edit::OnEditSelectLine (wxCommandEvent &event )
 		SetSelection(lineStart, lineEnd);
 		
 	}
-}
-
-void Edit::OnHighlightLang (wxCommandEvent &event) {
-    InitializePrefs (g_LanguagePrefs [event.GetId() - myID_HIGHLIGHTFIRST].name);
 }
 
 void Edit::OnDisplayEOL (wxCommandEvent &WXUNUSED(event)) {
@@ -566,71 +560,16 @@ void Edit::OnDwellEnd(wxStyledTextEvent &event)
 
 //----------------------------------------------------------------------------
 // private functions
-wxString Edit::DeterminePrefs (const wxString &filename) 
+
+bool Edit::InitializePrefs (const LanguageInfo * language)
 {
-	// support only GCoDe
-	 LanguageInfo const* curInfo;
-
-	wxString filenamel = filename.Lower();
-   // determine language from filepatterns
-    int languageNr;
-    for (languageNr = 0; languageNr < g_LanguagePrefsSize; languageNr++) {
-        curInfo = &g_LanguagePrefs [languageNr];
-        wxString filepattern = curInfo->filepattern;
-        filepattern.MakeLower();
-        while (!filepattern.empty()) 
-		{
-            wxString cur = filepattern.BeforeFirst (';');
-            if ((cur == filenamel) ||
-                (cur == (filenamel.BeforeLast ('.') + ".*")) ||
-                (cur == ("*." + filenamel.AfterLast ('.')))) {
-                return curInfo->name;
-            }
-            filepattern = filepattern.AfterFirst (';');
-        }
-    }
-	return g_LanguagePrefs[0].name; // def return first type
-}
-
-
-wxString Edit::DeterminePrefs(int filetype)
-{
-	// support only GCoDe
-	LanguageInfo const* curInfo;
-
-	
-	// determine language from filepatterns
-	int languageNr;
-	for (languageNr = 0; languageNr < g_LanguagePrefsSize; languageNr++)
-	{
-		curInfo = &g_LanguagePrefs[languageNr];
-		if (curInfo->file_type == filetype)
-			return curInfo->name;
-	}
-	return g_LanguagePrefs[0].name; // def return first type
-}
-
-bool Edit::InitializePrefs (const wxString &name) {
 
     // initialize styles
     StyleClearAll();
-    LanguageInfo const* curInfo = NULL;
-
-    // determine language
-    bool found = false;
-    int languageNr;
-    for (languageNr = 0; languageNr < g_LanguagePrefsSize; languageNr++) {
-        curInfo = &g_LanguagePrefs [languageNr];
-        if (curInfo->name == name) {
-            found = true;
-            break;
-        }
-    }
-    if (!found) return false;
-
+	m_language = language;
     // set lexer and language
-    SetLexer (curInfo->lexer);
-    m_language = curInfo;
+    SetLexer (m_language->Lexer());
+    
 
     // set margin for line numbers
     SetMarginType (m_LineNrID, wxSTC_MARGIN_NUMBER);
@@ -647,6 +586,7 @@ bool Edit::InitializePrefs (const wxString &name) {
             (StyleGetSizeFractional(wxSTC_STYLE_DEFAULT)*4)/5);
 
     // default fonts for all styles!
+
     int Nr;
     for (Nr = 0; Nr < wxSTC_STYLE_LASTPREDEFINED; Nr++) 
 	{
@@ -660,14 +600,15 @@ bool Edit::InitializePrefs (const wxString &name) {
     StyleSetForeground (wxSTC_STYLE_INDENTGUIDE, wxColour ("DARK GREY"));
 
     // initialize settings
-    if (g_CommonPrefs.syntaxEnable) {
+    if (g_CommonPrefs.syntaxEnable) 
+	{
         int keywordnr = 0;
-
-        for (Nr = 0; Nr < STYLE_TYPES_COUNT; Nr++) 
+		const StylesInfos &styles = m_language->Styles();
+		for (auto it = styles.begin(); it != styles.end(); ++it)
 		{
-			int style = curInfo->styles[Nr].type;
+			int style = it->style_Id;
             if (style == -1) continue;
-            const StyleInfo &curType = g_StylePrefs [style];
+			const StyleInfo &curType = *it;
             wxFont font(wxFontInfo(curType.fontsize)
                             .Family(wxFONTFAMILY_MODERN)
                             .FaceName(curType.fontname));
@@ -684,10 +625,9 @@ bool Edit::InitializePrefs (const wxString &name) {
             StyleSetUnderline (style, (curType.fontstyle & mySTC_STYLE_UNDERL) > 0);
             StyleSetVisible (style, (curType.fontstyle & mySTC_STYLE_HIDDEN) == 0);
             StyleSetCase (style, curType.lettercase);
-            const char *pwords = curInfo->styles[Nr].words;
-            if (pwords) 
+            if (it->words)
 			{
-                SetKeyWords (keywordnr, pwords);
+                SetKeyWords (keywordnr, it->words);
                 keywordnr += 1;
             }
         }
@@ -706,23 +646,23 @@ bool Edit::InitializePrefs (const wxString &name) {
     SetMarginSensitive (m_FoldingID, false);
     if (g_CommonPrefs.foldEnable) 
 	{
-        SetMarginWidth (m_FoldingID, curInfo->folds != 0? m_FoldingMargin: 0);
-        SetMarginSensitive (m_FoldingID, curInfo->folds != 0);
-        SetProperty ("fold", curInfo->folds != 0? "1": "0");
+        SetMarginWidth (m_FoldingID, m_language->Fold() != 0 ? m_FoldingMargin: 0);
+        SetMarginSensitive (m_FoldingID, m_language->Fold() != 0);
+        SetProperty ("fold", m_language->Fold() != 0 ? "1": "0");
         SetProperty ("fold.comment",
-                     (curInfo->folds & mySTC_FOLD_COMMENT) > 0? "1": "0");
+                     (m_language->Fold() & mySTC_FOLD_COMMENT) > 0? "1": "0");
         SetProperty ("fold.compact",
-                     (curInfo->folds & mySTC_FOLD_COMPACT) > 0? "1": "0");
+                     (m_language->Fold() & mySTC_FOLD_COMPACT) > 0? "1": "0");
         SetProperty ("fold.preprocessor",
-                     (curInfo->folds & mySTC_FOLD_PREPROC) > 0? "1": "0");
+                     (m_language->Fold() & mySTC_FOLD_PREPROC) > 0? "1": "0");
         SetProperty ("fold.html",
-                     (curInfo->folds & mySTC_FOLD_HTML) > 0? "1": "0");
+                     (m_language->Fold() & mySTC_FOLD_HTML) > 0? "1": "0");
         SetProperty ("fold.html.preprocessor",
-                     (curInfo->folds & mySTC_FOLD_HTMLPREP) > 0? "1": "0");
+                     (m_language->Fold() & mySTC_FOLD_HTMLPREP) > 0? "1": "0");
         SetProperty ("fold.comment.python",
-                     (curInfo->folds & mySTC_FOLD_COMMENTPY) > 0? "1": "0");
+                     (m_language->Fold() & mySTC_FOLD_COMMENTPY) > 0? "1": "0");
         SetProperty ("fold.quotes.python",
-                     (curInfo->folds & mySTC_FOLD_QUOTESPY) > 0? "1": "0");
+                     (m_language->Fold() & mySTC_FOLD_QUOTESPY) > 0? "1": "0");
     }
     SetFoldFlags (wxSTC_FOLDFLAG_LINEBEFORE_CONTRACTED |
                   wxSTC_FOLDFLAG_LINEAFTER_CONTRACTED);
@@ -752,8 +692,8 @@ bool Edit::NewFile (int filetype, const wxString &filename)
 {
 	ClearAll();
 	SetSavePoint();
-	EmptyUndoBuffer();
-	InitializePrefs(DeterminePrefs(filetype));
+	EmptyUndoBuffer();	
+	InitializePrefs(Preferences::Get()->FindByType(filetype) );
 	m_modified = false;
 	m_newfile = true;
 	m_filename = filename;
@@ -773,7 +713,7 @@ bool Edit::LoadFile (const wxString &filename) {
 	SelectNone();
     // determine lexer language
     wxFileName fname (m_filename);
-    InitializePrefs (DeterminePrefs (fname.GetFullName()));
+    InitializePrefs ( Preferences::Get()->FindByFileName(fname.GetFullName()));
 	m_modified = false;
 	m_newfile = false;
 

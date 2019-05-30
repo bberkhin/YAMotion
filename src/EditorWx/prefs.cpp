@@ -3,7 +3,7 @@
 //#include "defsext.h"     // Additional definitions
 #include "prefs.h"
 #include "wx/stc/stc.h"  // styled text control
-
+#include "..\..\src\stc\scintilla\include\SciLexer.h"
 
 
 //============================================================================
@@ -182,6 +182,8 @@ const int g_StylePrefsSize = WXSIZEOF(g_StylePrefs);
 #include "standartpaths.h"
 #include <wx/wfstream.h>
 
+Preferences global_pprefs;
+
 
 Preferences::Preferences()
 {	
@@ -204,10 +206,36 @@ Preferences::Preferences()
 		"", //nc_syntax
 		"" //them_color
 	};
-	m_languages.push_back( LanguageInfo(wxEmptyString) );
+
+	m_languages.push_back( LanguageInfo() );
+	m_languages.push_back(LanguageInfo(FILETYPE_NC, SCLEX_GCODE));
+	m_languages.push_back(LanguageInfo(FILETYPE_GCMC, SCLEX_GCMC));
+	m_languages.push_back(LanguageInfo(FILETYPE_JSON, SCLEX_JSON));
 
 };
 
+const LanguageInfo  *Preferences::FindByType(int type)
+{
+
+	if (type >= static_cast<int>(m_languages.size()))
+		type = 0;
+	m_languages[type].Init();
+	return &(m_languages[type]);
+}
+
+const  LanguageInfo *Preferences::FindByFileName(const wxString &name)
+{
+	wxString filename = name.Lower();
+
+
+	auto it = std::find_if(m_languages.begin(), m_languages.end(), [filename](LanguageInfo &p)
+	{  return p.Match(filename); });
+
+	LanguageInfo &ln = (it == m_languages.end()) ? m_languages[0] : (*it);
+	ln.Init();
+	return  &ln;
+
+}
 Preferences::~Preferences()
 {
 
@@ -252,40 +280,40 @@ bool Preferences::Read()
 	root["longLineOn"].AsBool(g_CommonPrefs.longLineOnEnable);
 	root["whiteSpace"].AsBool(g_CommonPrefs.whiteSpaceEnable);
 	root["tabWidth"].AsInt(g_CommonPrefs.tabWidth);
-
-	g_CommonPrefs.gcmc_syntax = root["gcmc_syntax"].AsString();
-	g_CommonPrefs.nc_syntax = root["nc_syntax"].AsString();
 	g_CommonPrefs.theme_color = root["theme_syntax"].AsString();
+
+	wxJSONValue &files = root["files"];
+	m_languages.clear();
+	m_languages.push_back(LanguageInfo());
+	
+	for( unsigned int i = 0; i < files.Size();++i)
+	{
+		wxJSONValue &val = files.Item(i);
+		wxString name = val["name"].AsString();
+		wxString filename = val["syntax"].AsString();
+
+		m_languages.push_back(LanguageInfo(i+1, SCLEX_GCODE));
+		m_languages.push_back(LanguageInfo(FILETYPE_GCMC, SCLEX_GCMC));
+		m_languages.push_back(LanguageInfo(FILETYPE_JSON, SCLEX_JSON));
+
+
+		FindByType(i+1)
+
+		SetFileName()
+
+	}
 	return true;
 }
 
 
-const LanguageInfo  &Preferences::FindByType(int type)
+LanguageInfo::LanguageInfo(int file_type, int lexer )
+	:  m_inited(false), m_file_type(file_type), m_lexer(lexer), m_fold(0)
 {
-
-	if (type >= static_cast<int>(m_languages.size()) )
-		type = 0;
-	m_languages[type].Init();
-	return m_languages[type];
-}
-
-const  LanguageInfo &Preferences::FindByFileName(const wxString &name)
-{
-	wxString filename = name.Lower();
-	
-	
-	auto it = std::find_if(m_languages.begin(), m_languages.end(), [filename](LanguageInfo &p)
-	{  return p.Match(filename);} );
-	
-	LanguageInfo &ln = (it == m_languages.end()) ? m_languages[0] : (*it);
-	ln.Init();
-	return  ln;
 
 }
 
-
-LanguageInfo::LanguageInfo(const wxString &filename) 
-	: m_filename(filename), m_inited(false)
+LanguageInfo::LanguageInfo()
+	:  m_inited(false), m_file_type(FILETYPE_UNKNOW), m_lexer(0), m_fold(0)
 {
 
 }
@@ -294,13 +322,11 @@ void LanguageInfo::Init()
 {
 	if (m_inited)
 		return;
-	if (!m_filename.empty() && Read() )
-		return;
 	
-	// Init def
+	if ( !m_filename.empty() )
+		Read();
 
-
-
+	m_inited = true;
 	return;
 }
 

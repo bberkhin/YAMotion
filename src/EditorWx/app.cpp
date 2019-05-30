@@ -97,8 +97,14 @@ wxCOMPILE_TIME_ASSERT(WXSIZEOF(g_langNames) == WXSIZEOF(g_langIds),
 
 const int g_lang_count = WXSIZEOF(g_langNames);
 
+App::App() 
+	: m_restart(false), m_frame(NULL)
+{ 
+}
+
 App::~App()
 {
+
 	if (m_restart)
 	{
 		// argv[0] contains the full path to the executable
@@ -184,7 +190,7 @@ bool App::OnInit()
 		}
 	}
 	
-	ReadPreferences();
+	Preferences::Get()->Read();
 
 	m_frame = new AppFrame(APP_NAME);
 	// open application frame
