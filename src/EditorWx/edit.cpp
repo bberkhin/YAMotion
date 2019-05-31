@@ -129,16 +129,19 @@ Edit::Edit (wxWindow *parent, wxWindowID id,  const wxPoint &pos, const wxSize &
 	if (config)
 		config->ReadFindAndReplase(&find_data);
 
+	const CommonInfo &common_prefs = Preferences::Get()->Common();
+	
+
     // default font for all styles
-    SetViewEOL (g_CommonPrefs.displayEOLEnable);
-    SetIndentationGuides (g_CommonPrefs.indentGuideEnable);
-    SetEdgeMode (g_CommonPrefs.longLineOnEnable?
+    SetViewEOL (common_prefs.displayEOLEnable);
+    SetIndentationGuides (common_prefs.indentGuideEnable);
+    SetEdgeMode (common_prefs.longLineOnEnable?
                  wxSTC_EDGE_LINE: wxSTC_EDGE_NONE);
-    SetViewWhiteSpace (g_CommonPrefs.whiteSpaceEnable?
+    SetViewWhiteSpace (common_prefs.whiteSpaceEnable?
                        wxSTC_WS_VISIBLEALWAYS: wxSTC_WS_INVISIBLE);
-    SetOvertype (g_CommonPrefs.overTypeInitial);
-    SetReadOnly (g_CommonPrefs.readOnlyInitial);
-    SetWrapMode (g_CommonPrefs.wrapModeInitial?
+    SetOvertype (common_prefs.overTypeInitial);
+    SetReadOnly (common_prefs.readOnlyInitial);
+    SetWrapMode (common_prefs.wrapModeInitial?
                  wxSTC_WRAP_WORD: wxSTC_WRAP_NONE);
     wxFont font(wxFontInfo(10).Family(wxFONTFAMILY_MODERN));
     StyleSetFont (wxSTC_STYLE_DEFAULT, font);
@@ -178,7 +181,7 @@ Edit::Edit (wxWindow *parent, wxWindowID id,  const wxPoint &pos, const wxSize &
 	CallTipSetBackground(*wxYELLOW);
 	CallTipSetForeground(*wxBLACK);
 	SetMouseDwellTime(2000);
-	SetTabWidth(g_CommonPrefs.tabWidth);
+	SetTabWidth(common_prefs.tabWidth);
 	SetDropTarget(0);
 	
 }
@@ -192,10 +195,12 @@ Edit::~Edit ()
 
 //----------------------------------------------------------------------------
 // common event handlers
-void Edit::OnSize( wxSizeEvent& event ) {
+void Edit::OnSize( wxSizeEvent& event ) 
+{
+	const CommonInfo &common_prefs = Preferences::Get()->Common();
     int x = GetClientSize().x +
-            (g_CommonPrefs.lineNumberEnable? m_LineNrMargin: 0) +
-            (g_CommonPrefs.foldEnable? m_FoldingMargin: 0);
+            (common_prefs.lineNumberEnable? m_LineNrMargin: 0) +
+            (common_prefs.foldEnable? m_FoldingMargin: 0);
     if (x > 0) SetScrollWidth (x);
     event.Skip();
 }
@@ -566,6 +571,7 @@ bool Edit::InitializePrefs (const LanguageInfo * language)
 
     // initialize styles
     StyleClearAll();
+	const CommonInfo &common_prefs = Preferences::Get()->Common();
 	m_language = language;
     // set lexer and language
     SetLexer (m_language->Lexer());
@@ -576,7 +582,7 @@ bool Edit::InitializePrefs (const LanguageInfo * language)
     StyleSetForeground (wxSTC_STYLE_LINENUMBER, wxColour ("DARK GREY"));
     StyleSetBackground (wxSTC_STYLE_LINENUMBER, *wxWHITE);
     SetMarginWidth (m_LineNrID, 0); // start out not visible
-	if (g_CommonPrefs.lineNumberEnable )
+	if (common_prefs.lineNumberEnable )
 		SetMarginWidth(m_LineNrID, m_LineNrMargin);
 
     // annotations style
@@ -600,7 +606,7 @@ bool Edit::InitializePrefs (const LanguageInfo * language)
     StyleSetForeground (wxSTC_STYLE_INDENTGUIDE, wxColour ("DARK GREY"));
 
     // initialize settings
-    if (g_CommonPrefs.syntaxEnable) 
+    if (common_prefs.syntaxEnable) 
 	{
         int keywordnr = 0;
 		const StylesInfos &styles = m_language->Styles();
@@ -620,10 +626,10 @@ bool Edit::InitializePrefs (const LanguageInfo * language)
             if (curType.background.length()) {
                 StyleSetBackground (style, wxColour (curType.background));
             }
-            StyleSetBold (style, (curType.fontstyle & mySTC_STYLE_BOLD) > 0);
-            StyleSetItalic (style, (curType.fontstyle & mySTC_STYLE_ITALIC) > 0);
-            StyleSetUnderline (style, (curType.fontstyle & mySTC_STYLE_UNDERL) > 0);
-            StyleSetVisible (style, (curType.fontstyle & mySTC_STYLE_HIDDEN) == 0);
+            StyleSetBold (style, curType.bold);
+            StyleSetItalic (style, curType.italic);
+            StyleSetUnderline (style, false);
+            StyleSetVisible (style, true);
             StyleSetCase (style, curType.lettercase);
             if (it->words)
 			{
@@ -644,7 +650,7 @@ bool Edit::InitializePrefs (const LanguageInfo * language)
     StyleSetBackground (m_FoldingID, *wxWHITE);
     SetMarginWidth (m_FoldingID, 0);
     SetMarginSensitive (m_FoldingID, false);
-    if (g_CommonPrefs.foldEnable) 
+    if (common_prefs.foldEnable) 
 	{
         SetMarginWidth (m_FoldingID, m_language->Fold() != 0 ? m_FoldingMargin: 0);
         SetMarginSensitive (m_FoldingID, m_language->Fold() != 0);
@@ -671,18 +677,18 @@ bool Edit::InitializePrefs (const LanguageInfo * language)
     SetUseTabs (false);
     SetTabIndents (true);
     SetBackSpaceUnIndents (true);
-    SetIndent (g_CommonPrefs.indentEnable? 4: 0);
+    SetIndent (common_prefs.indentEnable? 4: 0);
 
     // others
-    SetViewEOL (g_CommonPrefs.displayEOLEnable);
-    SetIndentationGuides (g_CommonPrefs.indentGuideEnable);
+    SetViewEOL (common_prefs.displayEOLEnable);
+    SetIndentationGuides (common_prefs.indentGuideEnable);
     SetEdgeColumn (80);
-    SetEdgeMode (g_CommonPrefs.longLineOnEnable? wxSTC_EDGE_LINE: wxSTC_EDGE_NONE);
-    SetViewWhiteSpace (g_CommonPrefs.whiteSpaceEnable?
+    SetEdgeMode (common_prefs.longLineOnEnable? wxSTC_EDGE_LINE: wxSTC_EDGE_NONE);
+    SetViewWhiteSpace (common_prefs.whiteSpaceEnable?
                        wxSTC_WS_VISIBLEALWAYS: wxSTC_WS_INVISIBLE);
-    SetOvertype (g_CommonPrefs.overTypeInitial);
-    SetReadOnly (g_CommonPrefs.readOnlyInitial);
-    SetWrapMode (g_CommonPrefs.wrapModeInitial?
+    SetOvertype (common_prefs.overTypeInitial);
+    SetReadOnly (common_prefs.readOnlyInitial);
+    SetWrapMode (common_prefs.wrapModeInitial?
                  wxSTC_WRAP_WORD: wxSTC_WRAP_NONE);
 
     return true;

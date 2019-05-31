@@ -10,38 +10,6 @@
 #ifndef _PREFS_H_
 #define _PREFS_H_
 
-//----------------------------------------------------------------------------
-// informations
-//----------------------------------------------------------------------------
-
-
-//----------------------------------------------------------------------------
-// headers
-//----------------------------------------------------------------------------
-
-//! wxWidgets headers
-
-//! wxWidgets/contrib headers
-
-//! application headers
-
-
-//============================================================================
-// declarations
-//============================================================================
-
-//! general style types
-#define mySTC_TYPE_DEFAULT 0
-
-//----------------------------------------------------------------------------
-//! style bits types
-#define mySTC_STYLE_BOLD 1
-#define mySTC_STYLE_ITALIC 2
-#define mySTC_STYLE_UNDERL 4
-#define mySTC_STYLE_HIDDEN 8
-
-//----------------------------------------------------------------------------
-//! general folding types
 #define mySTC_FOLD_COMMENT 1
 #define mySTC_FOLD_COMPACT 2
 #define mySTC_FOLD_PREPROC 4
@@ -55,9 +23,6 @@
 //----------------------------------------------------------------------------
 //! flags
 #define mySTC_FLAG_WRAPMODE 16
-
-
-#define STYLE_TYPES_COUNT 32
 
 
 
@@ -84,7 +49,6 @@ struct CommonInfo
 	wxString nc_syntax;
 	wxString theme_color;
 };
-extern CommonInfo g_CommonPrefs;
 
 //----------------------------------------------------------------------------
 // LanguageInfo
@@ -94,45 +58,29 @@ extern CommonInfo g_CommonPrefs;
 #define FILETYPE_GCMC 2
 #define FILETYPE_JSON 3
 
-//extern const LanguageInfo g_LanguagePrefs[];
-//extern const int g_LanguagePrefsSize;
-
 //----------------------------------------------------------------------------
 // StyleInfo
 struct StyleInfo 
 {
-    const wxString name;
-    const wxString foreground;
-    const wxString background;
- //   const wxString fontname;
+    wxString name;
+    wxString foreground;
+    wxString background;
+    wxString fontname;
     int fontsize;
-    int fontstyle;
+	bool bold;
+	bool italic;
+	bool underline;
     int lettercase;
 	int style_Id;
 	const char *words;
 };
-
-//extern const StyleInfo g_StylePrefs[];
-//extern const int g_StylePrefsSize;
-
-//struct LanguageInfo {
-//	const char *name;
-//	int file_type;
-//	const char *filepattern;
-//	int lexer;
-//	struct {
-//		int type;
-//		const char *words;
-//	} styles[STYLE_TYPES_COUNT];
-//	int folds;
-//};
 
 typedef std::vector<StyleInfo>  StylesInfos;
 class LanguageInfo
 {
 public:
 	LanguageInfo();
-	LanguageInfo(int file_type, int lexer);
+	LanguageInfo(const char *name, int file_type, int lexer, const char *filepattern);
 	const StylesInfos &Styles() const { return m_styles; }
 	const wxString & GetName() const { return m_name; }
 	int	 GetFileType() const { return m_file_type;  }
@@ -141,8 +89,12 @@ public:
 	int  Fold() const { return m_fold; }
 	void Init();
 	void SetFileName(const wxString &filename) { m_filename = filename; }
+	void SetFilePattern(const wxString &filename) { m_filepattern = filename; }
+
 private:
 	bool Read();
+	void InitDef();
+	void AddStyle(int id, const char *clr, const char *clrb, const char *fn, int fsize, bool bold = false, bool italic=false,  const char *words = 0);
 private:
 	StylesInfos m_styles;
 	wxString m_name;
@@ -151,7 +103,10 @@ private:
 	int		 m_file_type;
 	int      m_lexer;
 	int      m_fold;
-	bool m_inited;
+	
+
+
+	bool	m_inited;
 };
 
 //class Preferences;
@@ -165,8 +120,10 @@ public:
 	bool Read();
 	static Preferences *Get() { return &global_pprefs; }
 	const CommonInfo &Common() const { return m_common;  }
-	const LanguageInfo *FindByType(int type) ;
-	const LanguageInfo *FindByFileName(const wxString &name);
+	const LanguageInfo *FindByType(int type,bool init = true) ;
+	const LanguageInfo *FindByFileName(const wxString &name, bool init = true);
+	LanguageInfo *FindByName(const wxString &name, bool init = true);
+
 private:
 	CommonInfo m_common;
 	std::vector<LanguageInfo>  m_languages;

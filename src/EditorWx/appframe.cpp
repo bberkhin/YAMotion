@@ -674,13 +674,14 @@ bool AppFrame::FindPageByFileName(const wxString &new_file_name, size_t *nPage)
 
 void AppFrame::OnFileNewEvent(wxCommandEvent &event)
 {
-	DoNewFile( event.GetInt(), event.GetString(), false );
+	int file_type = (event.GetInt() == ID_NEWGCMC) ? FILETYPE_GCMC : FILETYPE_NC;
+	DoNewFile(file_type, event.GetString(), false );
 }
 
 void AppFrame::OnFileNew(wxCommandEvent &event)
 {
 	int file_type = (event.GetId() == ID_NEWGCMC) ? FILETYPE_GCMC : FILETYPE_NC;
-	DoNewFile(event.GetInt(), wxEmptyString, event.GetClientData() != NULL );
+	DoNewFile(file_type, wxEmptyString, event.GetClientData() != NULL );
 }
 
 void AppFrame::DoNewFile(int file_type, const wxString &defpath, bool closeWelcome, const wxString &contextFile)

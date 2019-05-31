@@ -1,60 +1,81 @@
 {
   // this is a comment line in C++ style
-  "fontsize"   : 10,
-  "fontname"   : "system",
-  "fclr"       : "BLACK",
-  "bclr"       : "WHITE",
-  "italic"     : false,
-  "styles"     :
-    [
-        {  
-        "name" : "default",
-        "fclr" : "GRAY"
-        },
-        {
-        "name" : "comment",
-        "fclr" : "FOREST GREEN"
-        },
-        {
-        "name" : "comment_ml",
-        "fclr" : "FOREST GREEN"
-        },
-        {
-        "name" : "var",
-        "fclr" : "SIENNA",
-        "bold" : true
-        },
-        {
-        "name" : "number",
-        "fclr" : "BLACK",      
-        "bold" : true
-        },         
-        {
-        "name" : "word1",
-        "fclr" : "RED",
-        "bold" : true
-        },
-        {
-        "name" : "word2",
-        "fclr" : "BLUE",
-        "bold" : true
-        },
-        {
-        "name" : "operators",
-        "fclr" : "VIOLET RED",
-        "bold" : true
-        },
-        {
-        "name" : "identifiers",
-        "fclr" : "BLACK"
-        },
-        {
-        "name" : "strings",
-        "fclr" : "GREEN",
-        "bold" : true,
-        "italic" : true
-        }
-    ]
+  //#define SCE_GCMC_DEFAULT 0
+  //SCE_GCMC_COMMENT 1
+  //SCE_GCMC_COMMENT_ML 2
+  //SCE_GCMC_VAR  3
+  //SCE_GCMC_NUMBER" 4,
+  //SCE_GCMC_OPERATORS  5 
+  //SCE_GCMC_IDENTIFIER 6,
+  //SCE_GCMC_WORD1 7
+  //SCE_GCMC_WORD2 8,
+  //SCE_GCMC_STRING 9
+   
+  "fontsize": 10,
+  "fontname": "system",
+  "fclr": "BLACK",
+  "bclr": "WHITE",
+  "italic": false,
+  "styles": [
+    {
+      "nameid": 0,
+      "name": "default",
+      "fclr": "GRAY"
+    },
+    {
+      "nameid": 1,
+      "name": "comment",
+      "fclr": "FOREST GREEN",
+      "italic": true
+    },
+    {
+      "nameid": 2,
+      "name": "comment_ml",
+      "fclr": "FOREST GREEN"
+    },
+    {
+      "nameid": 3,
+      "name": "var",
+      "fclr": "SIENNA",
+      "bold": true
+    },
+    {
+      "nameid": 4,
+      "name": "number",
+      "fclr": "YELLOW",
+      "bold": true
+    },
+    {
+      "nameid": 5,
+      "name": "operators",
+      "fclr": "VIOLET RED",
+      "bold": true
+    },
+    {
+      "nameid": 6,
+      "name": "identifiers",
+      "fclr": "BLACK"
+    },
+    {
+      "nameid": 7,
+      "name": "word1",
+      "fclr": "RED",
+      "bold": true
+    },
+    {
+      "nameid": 8,
+      "name": "word2",
+      "fclr": "BLUE",
+      "bold": true
+    },
+    {
+      "nameid": 9,
+      "name": "strings",
+      "fclr": "GREEN",
+      "bold": true,
+      "italic": true
+    }
+  ]
 }
 	
 	

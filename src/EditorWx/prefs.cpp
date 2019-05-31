@@ -25,6 +25,8 @@ const char* GcmcWordlist1 = "abs acos asin atan atan_xy atan_xz atan_yz ceil com
 "arc_ccw arc_ccw_r arc_cw arc_cw_r circle_ccw circle_ccw_r circle_cw circle_cw_r coolant drill dwell feedmode feedrate fixpos_restore fixpos_store goto goto_r move move_r pathmode "
 "pause plane spindle spindlespeed toolchange";
 const char* GcmcWordlist2 = "for if while do else return function foreach include";
+ 
+const char* jsonWordlist = "true false title description default examples";
 
 /*
 //----------------------------------------------------------------------------
@@ -160,19 +162,19 @@ const StyleInfo g_StylePrefs [] = {
 {"SCE_GCODE_DEFAULT","GRAY", "WHITE", "", 10, 0, 0},
 {"SCE_GCODE_COMMENT", "FOREST GREEN", "WHITE", "", 10, 0, 0},
 {"SCE_GCODE_COMMENT_ML","FOREST GREEN", "WHITE","", 10, 0, 0},
-{"3SCE_GCODE_G","BLUE", "WHITE","", 10, mySTC_STYLE_BOLD, 0},
-{"SCE_GCODE_M","RED", "WHITE","", 10, mySTC_STYLE_BOLD, 0},
-{"SCE_GCODE_PARAM","BROWN", "WHITE","", 10, mySTC_STYLE_BOLD, 0},
-{"SCE_GCODE_VAR","SIENNA", "WHITE","", 10, mySTC_STYLE_BOLD, 0},
-{"SCE_GCODE_NUMBER","BLACK", "WHITE","", 10, mySTC_STYLE_BOLD, 0},
-{"SCE_GCODE_COORDINATE","MAGENTA", "WHITE","", 10, mySTC_STYLE_BOLD, 0},
-{"SCE_GCODE_WORD","RED", "WHITE","", 10, mySTC_STYLE_BOLD, 0},
-{"SCE_GCODE_OPERATORS","VIOLET RED", "WHITE", "", 10, mySTC_STYLE_BOLD, 0},
+{"3SCE_GCODE_G","BLUE", "WHITE","", 10, true, 0},
+{"SCE_GCODE_M","RED", "WHITE","", 10, true, 0},
+{"SCE_GCODE_PARAM","BROWN", "WHITE","", 10, true, 0},
+{"SCE_GCODE_VAR","SIENNA", "WHITE","", 10, true, 0},
+{"SCE_GCODE_NUMBER","BLACK", "WHITE","", 10, true, 0},
+{"SCE_GCODE_COORDINATE","MAGENTA", "WHITE","", 10, true, 0},
+{"SCE_GCODE_WORD","RED", "WHITE","", 10, true, 0},
+{"SCE_GCODE_OPERATORS","VIOLET RED", "WHITE", "", 10, true, 0},
 {"SCE_GCODE_IDENTIFIER","BLACK", "WHITE","", 10, 0, 0},
-{"SCE_GCMC_DEFAULT","BLACK", "WHITE","", 10, mySTC_STYLE_BOLD, 0},
-{"SCE_GCMC_WORD1","RED", "WHITE","", 10, mySTC_STYLE_BOLD, 0},
-{"SCE_GCMC_WORD2","BLUE", "WHITE","", 10, mySTC_STYLE_BOLD, 0},
-{"SCE_GCMC_STRING","GREEN", "WHITE","", 10, mySTC_STYLE_BOLD, 0}
+{"SCE_GCMC_DEFAULT","BLACK", "WHITE","", 10, true, 0},
+{"SCE_GCMC_WORD1","RED", "WHITE","", 10, true, 0},
+{"SCE_GCMC_WORD2","BLUE", "WHITE","", 10, true, 0},
+{"SCE_GCMC_STRING","GREEN", "WHITE","", 10, true, 0}
  };
 
 const int g_StylePrefsSize = WXSIZEOF(g_StylePrefs);
@@ -207,23 +209,35 @@ Preferences::Preferences()
 		"" //them_color
 	};
 
-	m_languages.push_back( LanguageInfo() );
-	m_languages.push_back(LanguageInfo(FILETYPE_NC, SCLEX_GCODE));
-	m_languages.push_back(LanguageInfo(FILETYPE_GCMC, SCLEX_GCMC));
-	m_languages.push_back(LanguageInfo(FILETYPE_JSON, SCLEX_JSON));
+	m_languages.push_back(LanguageInfo("GCODE",FILETYPE_NC, SCLEX_GCODE, "*.ngc; *.nc; *.cnc" ));
+	m_languages.push_back(LanguageInfo("GCMC", FILETYPE_GCMC, SCLEX_GCMC, "*.gcmc"));
+	m_languages.push_back(LanguageInfo("JSON", FILETYPE_JSON, SCLEX_JSON, "*.json"));
+	m_languages.push_back(LanguageInfo());
 
 };
-
-const LanguageInfo  *Preferences::FindByType(int type)
+Preferences::~Preferences()
 {
 
-	if (type >= static_cast<int>(m_languages.size()))
-		type = 0;
-	m_languages[type].Init();
-	return &(m_languages[type]);
 }
 
-const  LanguageInfo *Preferences::FindByFileName(const wxString &name)
+const LanguageInfo  *Preferences::FindByType(int type, bool init)
+{
+	auto it = std::find_if(m_languages.begin(), m_languages.end(), [type](LanguageInfo &p)
+	{  return p.GetFileType() == type; });
+
+	LanguageInfo *pln = 0;
+	if (it == m_languages.end())
+		pln = &(m_languages.back());
+	else
+		pln = &(*it);
+
+	if (init)
+		pln->Init();
+	
+	return  pln;
+}
+
+const  LanguageInfo *Preferences::FindByFileName(const wxString &name, bool init)
 {
 	wxString filename = name.Lower();
 
@@ -232,14 +246,26 @@ const  LanguageInfo *Preferences::FindByFileName(const wxString &name)
 	{  return p.Match(filename); });
 
 	LanguageInfo &ln = (it == m_languages.end()) ? m_languages[0] : (*it);
-	ln.Init();
+	if (init)
+		ln.Init();
 	return  &ln;
 
 }
-Preferences::~Preferences()
-{
 
+LanguageInfo  *Preferences::FindByName(const wxString &name, bool init)
+{
+	wxString filename = name.Lower();
+
+
+	auto it = std::find_if(m_languages.begin(), m_languages.end(), [name](LanguageInfo &p)
+	{  return p.GetName() == name; });
+
+	LanguageInfo &ln = (it == m_languages.end()) ? m_languages[0] : (*it);
+	if (init)
+		ln.Init();
+	return  &ln;
 }
+
 
 bool Preferences::Read()
 {
@@ -269,51 +295,47 @@ bool Preferences::Read()
 		return false;
 	}
 
-	root["syntax"].AsBool(g_CommonPrefs.syntaxEnable);
-	root["fold"].AsBool(g_CommonPrefs.foldEnable);
-	root["indent"].AsBool(g_CommonPrefs.indentEnable);
+	root["syntax"].AsBool(m_common.syntaxEnable);
+	root["fold"].AsBool(m_common.foldEnable);
+	root["indent"].AsBool(m_common.indentEnable);
 	// display defaults prefs
-	root["wrapMode"].AsBool(g_CommonPrefs.wrapModeInitial);
-	root["displayEOL"].AsBool(g_CommonPrefs.displayEOLEnable);
-	root["indentGuide"].AsBool(g_CommonPrefs.indentGuideEnable);
-	root["lineNumber"].AsBool(g_CommonPrefs.lineNumberEnable);
-	root["longLineOn"].AsBool(g_CommonPrefs.longLineOnEnable);
-	root["whiteSpace"].AsBool(g_CommonPrefs.whiteSpaceEnable);
-	root["tabWidth"].AsInt(g_CommonPrefs.tabWidth);
-	g_CommonPrefs.theme_color = root["theme_syntax"].AsString();
+	root["wrapMode"].AsBool(m_common.wrapModeInitial);
+	root["displayEOL"].AsBool(m_common.displayEOLEnable);
+	root["indentGuide"].AsBool(m_common.indentGuideEnable);
+	root["lineNumber"].AsBool(m_common.lineNumberEnable);
+	root["longLineOn"].AsBool(m_common.longLineOnEnable);
+	root["whiteSpace"].AsBool(m_common.whiteSpaceEnable);
+	root["tabWidth"].AsInt(m_common.tabWidth);
+	m_common.theme_color = root["theme_syntax"].AsString();
 
 	wxJSONValue &files = root["files"];
-	m_languages.clear();
-	m_languages.push_back(LanguageInfo());
 	
-	for( unsigned int i = 0; i < files.Size();++i)
+	for (unsigned int i = 0; i < static_cast<unsigned int>(files.Size()); ++i)
 	{
 		wxJSONValue &val = files.Item(i);
 		wxString name = val["name"].AsString();
-		wxString filename = val["syntax"].AsString();
-
-		m_languages.push_back(LanguageInfo(i+1, SCLEX_GCODE));
-		m_languages.push_back(LanguageInfo(FILETYPE_GCMC, SCLEX_GCMC));
-		m_languages.push_back(LanguageInfo(FILETYPE_JSON, SCLEX_JSON));
-
-
-		FindByType(i+1)
-
-		SetFileName()
-
+		wxString filename, filepattern;
+		val["syntax"].AsString(filename);
+		val["pattern"].AsString(filepattern);
+		LanguageInfo *lang = FindByName(name,false);
+		if (lang && !filename.empty())
+			lang->SetFileName(filename );
+		if (lang && !filepattern.empty())
+			lang->SetFilePattern(filepattern);
+			
 	}
 	return true;
 }
 
 
-LanguageInfo::LanguageInfo(int file_type, int lexer )
-	:  m_inited(false), m_file_type(file_type), m_lexer(lexer), m_fold(0)
+LanguageInfo::LanguageInfo(const char *name, int file_type, int lexer, const char *filepattern)
+	: m_name(name), m_inited(false), m_file_type(file_type), m_lexer(lexer), m_fold(0), m_filepattern(filepattern)
 {
 
 }
 
 LanguageInfo::LanguageInfo()
-	:  m_inited(false), m_file_type(FILETYPE_UNKNOW), m_lexer(0), m_fold(0)
+	:  m_inited(false), m_file_type(FILETYPE_UNKNOW), m_lexer(0), m_fold(0), m_filepattern("*.*")
 {
 
 }
@@ -324,10 +346,86 @@ void LanguageInfo::Init()
 		return;
 	
 	if ( !m_filename.empty() )
-		Read();
+		m_inited = Read();
+
+	if (!m_inited)
+		InitDef();
 
 	m_inited = true;
 	return;
+}
+
+void LanguageInfo::AddStyle(int id, const char *clr, const char *clrb, const char *fn, int fsize, bool bold, bool italic, const char *words)
+{
+	m_styles.push_back( StyleInfo() );
+	StyleInfo &st = m_styles.back();
+	//const wxString name;
+	st.style_Id = id;
+	st.foreground = clr;
+	st.background = clrb;
+	st.fontname = fn;
+	st.fontsize = fsize;
+	st.bold = bold;
+	st.italic = italic;
+	st.lettercase = 0;
+	st.words = words;
+}
+
+void LanguageInfo::InitDef()
+{
+	m_styles.clear();
+	switch (m_file_type)
+	{
+		case FILETYPE_UNKNOW:
+			AddStyle(0, "BLACK", "WHITE", "", 10, 0, 0);			
+			break;
+		case FILETYPE_NC:
+			AddStyle(SCE_GCODE_DEFAULT, "GRAY", "WHITE", "", 10, 0, 0);
+			AddStyle(SCE_GCODE_COMMENT, "FOREST GREEN", "WHITE", "", 10, 0, 0);
+			AddStyle(SCE_GCODE_COMMENT_ML, "FOREST GREEN", "WHITE", "", 10, 0, 0);
+			AddStyle(SCE_GCODE_G, "BLUE", "WHITE", "", 10, true, 0);
+			AddStyle(SCE_GCODE_M, "RED", "WHITE", "", 10, true, 0);
+			AddStyle(SCE_GCODE_PARAM, "BROWN", "WHITE", "", 10, true, 0);
+			AddStyle(SCE_GCODE_VAR, "SIENNA", "WHITE", "", 10, true, 0);
+			AddStyle(SCE_GCODE_NUMBER, "BLACK", "WHITE", "", 10, true, 0);
+			AddStyle(SCE_GCODE_COORDINATE, "MAGENTA", "WHITE", "", 10, true, 0);
+			AddStyle(SCE_GCODE_WORD, "RED", "WHITE", "", 10, true, 0, GCoddeWordlist);
+			AddStyle(SCE_GCODE_OPERATORS, "VIOLET RED", "WHITE", "", 10, true, 0);
+			AddStyle(SCE_GCODE_IDENTIFIER, "BLACK", "WHITE", "", 10, 0, 0);
+		break;
+		case FILETYPE_GCMC:
+			AddStyle(SCE_GCMC_DEFAULT, "GRAY", "WHITE", "", 10, true, 0);
+			AddStyle(SCE_GCMC_COMMENT, "FOREST GREEN", "WHITE", "", 10, 0, 0);
+			AddStyle(SCE_GCMC_COMMENT_ML, "FOREST GREEN", "WHITE", "", 10, 0, 0);
+			AddStyle(SCE_GCMC_VAR, "SIENNA", "WHITE", "", 10, true, 0);
+			AddStyle(SCE_GCMC_NUMBER, "BLACK", "WHITE", "", 10, true, 0);
+			AddStyle(SCE_GCMC_OPERATORS, "VIOLET RED", "WHITE", "", 10, true, 0);
+			AddStyle(SCE_GCMC_IDENTIFIER, "BLACK", "WHITE", "", 10, 0, 0);
+			AddStyle(SCE_GCMC_WORD1, "RED", "WHITE", "", 10, true, 0, GcmcWordlist1);
+			AddStyle(SCE_GCMC_WORD2,"BLUE", "WHITE","", 10, true, 0, GcmcWordlist2);
+			AddStyle(SCE_GCMC_STRING, "GREEN", "WHITE", "", 10, true, 0);
+		break;
+		case FILETYPE_JSON:
+			AddStyle(SCE_JSON_DEFAULT, "BLACK", "WHITE", "", 10, 0, 0);
+			AddStyle(SCE_JSON_NUMBER, "BLACK", "WHITE", "", 10, true, 0);
+			AddStyle(SCE_JSON_STRING, "GREEN", "WHITE", "", 10, true, 0); 
+			AddStyle(SCE_JSON_STRINGEOL, "GRAY", "WHITE", "", 10, true, 0);
+			AddStyle(SCE_JSON_PROPERTYNAME, "BROWN", "WHITE", "", 10, true, 0);
+			AddStyle(SCE_JSON_ESCAPESEQUENCE, "GRAY", "WHITE", "", 10, true, 0);
+			AddStyle(SCE_JSON_LINECOMMENT, "FOREST GREEN", "WHITE", "", 10, 0, 0);
+			AddStyle(SCE_JSON_BLOCKCOMMENT, "FOREST GREEN", "WHITE", "", 10, 0, 0);
+			AddStyle(SCE_JSON_OPERATOR, "VIOLET RED", "WHITE", "", 10, true, 0);
+			AddStyle(SCE_JSON_URI, "BLUE", "WHITE", "", 10, true, 0);
+			AddStyle(SCE_JSON_COMPACTIRI, "SIENNA", "WHITE", "", 10, true, 0);
+			AddStyle(SCE_JSON_KEYWORD, "RED", "WHITE", "", 10, true, 0, jsonWordlist);
+			AddStyle(SCE_JSON_LDKEYWORD, "BLUE", "WHITE", "", 10, true, 0, jsonWordlist);
+			AddStyle(SCE_JSON_ERROR, "WHITE", "RED", "", 10, true, 0);
+		break;
+		default:
+			AddStyle(0, "BLACK", "WHITE", "", 10, 0, 0);
+			break;
+		
+	}
 }
 
 bool LanguageInfo::Read()
@@ -357,21 +455,48 @@ bool LanguageInfo::Read()
 		wxMessageBox(msg, _("Error parsing file"));
 		return false;
 	}
-	/*
-	g_CommonPrefs.theme_color = root["theme_syntax"].AsString();	
-	root["syntax"].AsBool(g_CommonPrefs.syntaxEnable);
-	g_CommonPrefs.theme_color = root["theme_syntax"].AsString();
-	"name"       : "GCMC",
+	int defSize = 10; 
+	wxString deffont = "";
+	wxString defClr = "BLACK";
+	wxString defBgClr = "WHITE";
+	bool defitalic = false;
+	bool defbold = false;
 
-	  "id"         : 2,
-	  "extensions" : "*.ngc;*.nc;*.cnc",
-	  "fontsize"   : 10,
-	  "fontname"   : "system",
-	  "fclr"       : "BLACK",
-	  "bclr"       : "WHITE",
-	  "italic"     : false,
-	  "styles"     :
-  */
+	root["fontsize"].AsInt(defSize);
+	root["fontname"].AsString(deffont);
+	root["fclr"].AsString(defClr);
+	root["bclr"].AsString(defBgClr);
+	root["italic"].AsBool(defitalic);
+	root["bold"].AsBool(defbold);
+
+	wxJSONValue &styles = root["styles"];
+
+	for (unsigned int i = 0; i < static_cast<unsigned int>(styles.Size()); ++i)
+	{
+		wxJSONValue &val = styles.Item(i);
+		wxString id = val["nameid"].AsString();
+	
+		auto it = std::find_if(m_styles.begin(), m_styles.end(), [id](StyleInfo &p)
+		{  return p.style_Id == id; });
+		if (it == m_styles.end())
+			continue;
+
+		StyleInfo *st = &(*it);
+		
+		if (!root["fontsize"].AsInt(st->fontsize) )
+			st->fontsize = defSize;
+		if (!root["fontname"].AsString(st->fontname) )
+			st->fontname = deffont;
+		if (!root["fclr"].AsString(defClr) )
+			st->foreground = defClr;
+		if (!root["bclr"].AsString(st->background))
+			st->background = defBgClr;
+		if (!root["italic"].AsBool(st->italic) )
+			st->italic = defitalic;
+		if (!root["bold"].AsBool(st->bold))
+			st->bold = defbold;
+
+	}
 	return false;
 }
 
