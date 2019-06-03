@@ -90,6 +90,7 @@ public:
 	void Init();
 	void SetFileName(const wxString &filename) { m_filename = filename; }
 	void SetFilePattern(const wxString &filename) { m_filepattern = filename; }
+	void Clear();
 
 private:
 	bool Read();
@@ -123,7 +124,8 @@ public:
 	const LanguageInfo *FindByType(int type,bool init = true) ;
 	const LanguageInfo *FindByFileName(const wxString &name, bool init = true);
 	LanguageInfo *FindByName(const wxString &name, bool init = true);
-
+private:
+	bool DoRead(const wxString& fileName, bool errifnoexist);
 private:
 	CommonInfo m_common;
 	std::vector<LanguageInfo>  m_languages;

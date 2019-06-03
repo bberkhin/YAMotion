@@ -110,9 +110,6 @@ public:
 	void OnMouseLeave(wxMouseEvent &event);
 
     //! language/lexer
-
-    bool InitializePrefs (const LanguageInfo * language);
-    //bool UserSettings (const wxString &filename);
 	int GetFileType() {	return ((m_language != 0 ) ? m_language->GetFileType() : FILETYPE_UNKNOW); }
 
     //! load/save file
@@ -123,15 +120,19 @@ public:
     bool Modified ();
     wxString GetFileName () {return m_filename;}
 	void SetFileName(const wxString &filename) { m_filename = filename; }
-	wxString GetGcmcIncludeFileName();
-	
 	void PasteFile(std::wstring fname, bool toend = false);
-	bool DoLoadFile(const wxString& filename, int WXUNUSED(fileType));
 	bool IsNew() { return m_newfile; }
 
 	//find
 	void DoFind(wxEventType type, int flag, const wxString &strfind);
 	void DoReplace(wxEventType type, int flag, const wxString &strfind, const wxString &strReplace);
+	void UpdatePreferences();
+
+private:
+	bool InitializePrefs(const LanguageInfo * language);	
+	wxString GetGcmcIncludeFileName();
+	bool DoLoadFile(const wxString& filename, int WXUNUSED(fileType));
+
 private:
     // file
     wxString m_filename;

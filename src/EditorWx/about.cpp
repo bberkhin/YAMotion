@@ -9,7 +9,7 @@
 //----------------------------------------------------------------------------
 
 wxBEGIN_EVENT_TABLE(AppAbout, wxDialog)
-EVT_TIMER(myID_ABOUTTIMER, AppAbout::OnTimerEvent)
+EVT_TIMER(ID_ABOUTTIMER, AppAbout::OnTimerEvent)
 wxEND_EVENT_TABLE()
 
 AppAbout::AppAbout(wxWindow *parent,
@@ -22,7 +22,7 @@ AppAbout::AppAbout(wxWindow *parent,
 	// set timer if any
 	m_timer = NULL;
 	if (milliseconds > 0) {
-		m_timer = new wxTimer(this, myID_ABOUTTIMER);
+		m_timer = new wxTimer(this, ID_ABOUTTIMER);
 		m_timer->Start(milliseconds, wxTIMER_ONE_SHOT);
 	}
 

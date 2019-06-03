@@ -213,8 +213,6 @@ wxBEGIN_EVENT_TABLE (AppFrame, wxFrame)
     EVT_MENU (wxID_SAVEAS,           AppFrame::OnFileSaveAs)
     EVT_MENU (wxID_CLOSE,            AppFrame::OnFileClose)
 	EVT_MENU_RANGE(wxID_FILE, wxID_FILE9, AppFrame::OnOpenLastFile)
-    // properties
-    EVT_MENU (myID_PROPERTIES,       AppFrame::OnProperties)
 	EVT_MENU (ID_MACROSES,			 AppFrame::OnMacroses)
 	EVT_MENU(ID_MATHCALC,			 AppFrame::OnMathCalc)
 	EVT_MENU(ID_MATHEXPRESSION, AppFrame::OnMathExpression)
@@ -230,14 +228,21 @@ wxBEGIN_EVENT_TABLE (AppFrame, wxFrame)
 	EVT_MENU(wxID_REDO, AppFrame::OnEdit)
 	EVT_MENU(wxID_UNDO, AppFrame::OnEdit)
 	EVT_MENU(wxID_FIND, AppFrame::OnEdit)
-	//EVT_MENU(myID_INDENTINC, AppFrame::OnEdit)
+	//EVT_MENU(ID_INDENTINC, AppFrame::OnEdit)
 	// And all our edit-related menu commands.
-	EVT_MENU_RANGE(myID_EDIT_FIRST, myID_EDIT_LAST, AppFrame::OnEdit)
+	EVT_MENU_RANGE(ID_EDIT_FIRST, ID_EDIT_LAST, AppFrame::OnEdit)
 	EVT_MENU_RANGE(ID_DIRTREE_FIRST, ID_DIRTREE_LAST, AppFrame::OnDirTree)
 
-	//menuEdit->Append(myID_INDENTINC, _("&Indent increase\tTab"));
-//menuEdit->Append(myID_INDENTRED, _("I&ndent reduce\tShift+Tab"));
+	// Preferences
+	EVT_MENU(ID_PROPERTIES, AppFrame::OnProperties)
+	EVT_MENU(ID_GLOBALPREFS, AppFrame::OnDefaultPreferences)
+	EVT_MENU(ID_USERPREFS, AppFrame::OnUserPreferences)
 
+
+// help
+EVT_MENU(wxID_ABOUT, AppFrame::OnAbout)
+EVT_MENU(ID_DOWNLOADUPDATE, AppFrame::OnDownloadUpdate)
+EVT_MENU(ID_SHOWWLCOME, AppFrame::OnShowWelcome)
 
     // help
     EVT_MENU (wxID_ABOUT,            AppFrame::OnAbout)
@@ -256,8 +261,8 @@ wxBEGIN_EVENT_TABLE (AppFrame, wxFrame)
 	EVT_UPDATE_UI(ID_GCODE_CONVERTGCMC, AppFrame::OnUpdateConvertGcmc)
 	EVT_UPDATE_UI(ID_GCODE_KILLGCMCPROCESS, AppFrame::OnUpdateKillGcmcProcess)
 
-	EVT_MENU_RANGE(myID_3D_FIRST, myID_3D_LAST, AppFrame::On3DView)
-	EVT_UPDATE_UI_RANGE(myID_3D_FIRST, myID_3D_LAST, AppFrame::On3DViewUpdate)
+	EVT_MENU_RANGE(ID_3D_FIRST, ID_3D_LAST, AppFrame::On3DView)
+	EVT_UPDATE_UI_RANGE(ID_3D_FIRST, ID_3D_LAST, AppFrame::On3DViewUpdate)
 	
 
 	EVT_AUINOTEBOOK_PAGE_CLOSE(wxID_ANY, AppFrame::OnNotebookPageClose)
@@ -843,6 +848,18 @@ void AppFrame::OnProperties(wxCommandEvent &WXUNUSED(event))
 	}
 }
 
+void AppFrame::OnDefaultPreferences(wxCommandEvent &WXUNUSED(event))
+{
+	std::filesystem::path dirpath = StandartPaths::Get()->GetPreferencesPath(L"Default Preferences.json");	
+	FileOpen(dirpath.c_str());
+}
+
+void AppFrame::OnUserPreferences(wxCommandEvent &WXUNUSED(event))
+{
+	std::filesystem::path dirpath = StandartPaths::Get()->GetPreferencesPath(L"User Preferences.json");
+	FileOpen(dirpath.c_str());
+}
+
 void AppFrame::OnMacroses(wxCommandEvent &WXUNUSED(event))
 {
 	Edit *pedit = GetActiveFile();
@@ -1015,23 +1032,8 @@ wxMenuBar *AppFrame::CreateMenu ()
     // File menu
 	wxMenuBar *m_menuBar = new wxMenuBar;
     wxMenu *menuFile = new wxMenu;
-	wxMenu *menuNewFiles = new wxMenu;
-	menuNewFiles->Append(ID_NEWNC, _("&GCode File .."));
-	menuNewFiles->Append(ID_NEWGCMC, _("G&CMC File .."));
-	menuFile->Append(myID_HIGHLIGHTLANG, _("&New"), menuNewFiles);
-
-    menuFile->Append (ID_OPENFILE, _("&Open ..\tCtrl+O"));
-    menuFile->Append (wxID_SAVE, _("&Save\tCtrl+S"));
-    menuFile->Append (wxID_SAVEAS, _("Save &as ..\tCtrl+Shift+S"));
-    menuFile->Append (wxID_CLOSE, _("&Close\tCtrl+W"));
-    menuFile->AppendSeparator();
-    menuFile->Append (myID_PROPERTIES, _("Proper&ties ..\tCtrl+I"));
-	menuFile->AppendSeparator();
-    menuFile->Append (wxID_PRINT_SETUP, _("Print Set&up .."));
-    menuFile->Append (wxID_PREVIEW, _("Print Pre&view\tCtrl+Shift+P"));
-    menuFile->Append (wxID_PRINT, _("&Print ..\tCtrl+P"));
-	menuFile->AppendSeparator();
-
+	//Open
+	menuFile->Append(ID_OPENFILE, _("Open ..\tCtrl+O")); 
 	wxMenu *menuLastFiles = new wxMenu;
 	ConfigData *config = dynamic_cast<ConfigData *>(wxConfigBase::Get());
 	if (config)
@@ -1042,25 +1044,32 @@ wxMenuBar *AppFrame::CreateMenu ()
 			[menuLastFiles,&n](const wxString &p) {
 			if (n < 10) { menuLastFiles->Append(wxID_FILE + n, p); n++; } });
 	}
-	menuFile->Append(myID_HIGHLIGHTLANG, _("&Last Files"), menuLastFiles);
-
+	menuFile->Append(ID_OPENRECENT, _("Open recent"), menuLastFiles);
 	menuFile->AppendSeparator();
+	//New
+	menuFile->Append(ID_NEWNC, _("New GCODE"));
+	menuFile->Append(ID_NEWGCMC, _("New GCMC"));
+	menuFile->Append(ID_SHOWWLCOME, _("Welcome"));
+	menuFile->AppendSeparator();
+	//Save	
+	menuFile->Append(wxID_SAVE, _("Save\tCtrl+S"));
+	menuFile->Append(wxID_SAVEAS, _("Save  as ..\tCtrl+Shift+S"));
+	menuFile->Append(wxID_CLOSE, _("Close\tCtrl+W"));
+	menuFile->AppendSeparator();
+	
+	menuFile->AppendSeparator();
+
     menuFile->Append (wxID_EXIT, _("&Quit\tCtrl+Q"));
+	
+	// Edit menu
 
 
-
+	
 	// change case submenu
 	wxMenu *menuChangeCase = new wxMenu;
-	menuChangeCase->Append(myID_CHANGEUPPER, _("&Upper case"));
-	menuChangeCase->Append(myID_CHANGELOWER, _("&Lower case"));
+	menuChangeCase->Append(ID_CHANGEUPPER, _("&Upper case"));
+	menuChangeCase->Append(ID_CHANGELOWER, _("&Lower case"));
 
-	// convert EOL submenu
-	wxMenu *menuConvertEOL = new wxMenu;
-	menuConvertEOL->Append(myID_CONVERTCR, _("CR (&Linux)"));
-	menuConvertEOL->Append(myID_CONVERTCRLF, _("CR+LF (&Windows)"));
-	menuConvertEOL->Append(myID_CONVERTLF, _("LF (&Macintosh)"));
-
-    // Edit menu
     wxMenu *menuEdit = new wxMenu;
     menuEdit->Append (wxID_UNDO, _("&Undo\tCtrl+Z"));
     menuEdit->Append (wxID_REDO, _("&Redo\tCtrl+Shift+Z"));
@@ -1070,39 +1079,28 @@ wxMenuBar *AppFrame::CreateMenu ()
     menuEdit->Append (wxID_PASTE, _("&Paste\tCtrl+V"));
     menuEdit->Append (wxID_CLEAR, _("&Delete\tDel"));
     menuEdit->AppendSeparator();
-    menuEdit->Append (wxID_FIND, _("&Find\tCtrl+F"));    
-    menuEdit->Append (myID_FINDNEXT, _("Find &next\tF3"));
-    menuEdit->Append (myID_REPLACE, _("&Replace\tCtrl+H"));
-    menuEdit->Append (myID_REPLACENEXT, _("Replace &again\tShift+F4"));
+    menuEdit->Append (wxID_FIND, _("&Find\tCtrl+F"));
+    menuEdit->Append (ID_FINDNEXT, _("Find &next\tF3"));
+    menuEdit->Append (ID_REPLACE, _("&Replace\tCtrl+H"));
+    menuEdit->Append (ID_REPLACENEXT, _("Replace &again\tShift+F4"));
     menuEdit->AppendSeparator();
-    menuEdit->Append (wxID_SELECTALL, _("&Select all\tCtrl+A"));
-    menuEdit->Append (myID_SELECTLINE, _("Select &line\tCtrl+L"));
+	menuEdit->Append(ID_MATHCALC, _("Transform..."));
 	menuEdit->AppendSeparator();
-	menuEdit->Append(myID_INDENTINC, _("&Indent increase\tTab"));
-	menuEdit->Append(myID_INDENTRED, _("I&ndent reduce\tShift+Tab"));
+	menuEdit->Append(ID_INDENTINC, _("&Indent increase\tTab"));
+	menuEdit->Append(ID_INDENTRED, _("I&ndent reduce\tShift+Tab"));
 	menuEdit->AppendSeparator();
-	menuEdit->Append(myID_CHANGECASE, _("Change &case to .."), menuChangeCase);
-	menuEdit->Append(myID_CONVERTEOL, _("Convert line &endings to .."), menuConvertEOL);
-	menuEdit->AppendSeparator();
-	menuEdit->AppendCheckItem(myID_READONLY, _("&Readonly mode"));
-	   	
-	// charset submenu
-    wxMenu *menuCharset = new wxMenu;
-    menuCharset->Append (myID_CHARSETANSI, _("&ANSI (Windows)"));
-    menuCharset->Append (myID_CHARSETMAC, _("&MAC (Macintosh)"));
-
-    // View menu
+	menuEdit->Append(ID_CHANGECASE, _("Change &case to .."), menuChangeCase);
+  	
+	// View menu
     wxMenu *menuView = new wxMenu;
-    //menuView->Append (myID_HIGHLIGHTLANG, _("&Highlight language .."), menuHighlight);
+    //menuView->Append (ID_HIGHLIGHTLANG, _("&Highlight language .."), menuHighlight);
     menuView->AppendSeparator();
-    menuView->AppendCheckItem (myID_DISPLAYEOL, _("Show line &endings"));
-    menuView->AppendCheckItem (myID_INDENTGUIDE, _("Show &indent guides"));
-    menuView->AppendCheckItem (myID_LINENUMBER, _("Show line &numbers"));
-    menuView->AppendCheckItem (myID_WHITESPACE, _("Show white&space"));
+    menuView->AppendCheckItem (ID_DISPLAYEOL, _("Show line &endings"));
+    menuView->AppendCheckItem (ID_INDENTGUIDE, _("Show &indent guides"));
+    menuView->AppendCheckItem (ID_LINENUMBER, _("Show line &numbers"));
+    menuView->AppendCheckItem (ID_WHITESPACE, _("Show white&space"));
     menuView->AppendSeparator();
-    menuView->Append (myID_USECHARSET, _("Use &code page of .."), menuCharset);
-
-	menuView->FindChildItem(myID_LINENUMBER)->Check(true);
+	menuView->FindChildItem(ID_LINENUMBER)->Check(true);
 
 	// Edit menu
 	wxMenu *menuGCode = new wxMenu;
@@ -1112,18 +1110,18 @@ wxMenuBar *AppFrame::CreateMenu ()
 	menuGCode->Append(ID_GCODE_KILLGCMCPROCESS, _("&Kill Gcmc process"));
 	
 	menuGCode->Append(ID_MACROSES, _("Run Macros"));
-	menuGCode->Append(ID_MATHCALC, _("Calculator"));
+	
 	menuGCode->Append(ID_MATHEXPRESSION, _("Calc by Expression"));
 
 	// 3dView menu
 	wxMenu *menu3D = new wxMenu;
-	menu3D->Append(myID_SETVIEWFIRST + 6, _("&Isometric"));
-	menu3D->Append(myID_SETVIEWFIRST,	  _("&Top"));
-	menu3D->Append(myID_SETVIEWFIRST+1,   _("&Bottom"));
-	menu3D->Append(myID_SETVIEWFIRST+2,   _("&Left"));
-	menu3D->Append(myID_SETVIEWFIRST+3,   _("&Right"));
-	menu3D->Append(myID_SETVIEWFIRST+4,   _("&Front"));
-	menu3D->Append(myID_SETVIEWFIRST+5,   _("&Back"));
+	menu3D->Append(ID_SETVIEWFIRST + 6, _("&Isometric"));
+	menu3D->Append(ID_SETVIEWFIRST,	  _("&Top"));
+	menu3D->Append(ID_SETVIEWFIRST+1,   _("&Bottom"));
+	menu3D->Append(ID_SETVIEWFIRST+2,   _("&Left"));
+	menu3D->Append(ID_SETVIEWFIRST+3,   _("&Right"));
+	menu3D->Append(ID_SETVIEWFIRST+4,   _("&Front"));
+	menu3D->Append(ID_SETVIEWFIRST+5,   _("&Back"));
 	menu3D->AppendSeparator();	
 	menu3D->AppendCheckItem(ID_SHOW2DGRID, _("Show/Hide 2d grid"));
 	menu3D->AppendCheckItem(ID_SHOWBOUNDS, _("Show/Hide bounds"));
@@ -1131,15 +1129,23 @@ wxMenuBar *AppFrame::CreateMenu ()
 	menu3D->AppendCheckItem(ID_SHOWTOOL, _("Show/Hide tool"));
 	menu3D->AppendCheckItem(ID_SHOWAXIS, _("Show/Hide Axis"));
 	menu3D->AppendSeparator();
-	menu3D->Append(myID_SEMULATE_START, _("&Start Simulate"));
-	menu3D->Append(myID_SEMULATE_PAUSE,_("Sto&p Simulate"));
-	menu3D->Append(myID_SEMULATE_STOP, _("Pause"));
-		 
+	menu3D->Append(ID_SEMULATE_START, _("&Start Simulate"));
+	menu3D->Append(ID_SEMULATE_PAUSE,_("Sto&p Simulate"));
+	menu3D->Append(ID_SEMULATE_STOP, _("Pause"));
+	
+	// Pregerences menu
+	wxMenu *menuPref = new wxMenu;
+	menuPref->Append(ID_PROPERTIES, _("Proper&ties ..\tCtrl+I"));
+	menuPref->Append(ID_GLOBALPREFS, _("Defauult Preferences"));
+	menuPref->Append(ID_USERPREFS, _("User Preferences"));
+
      // Help menu
     wxMenu *menuHelp = new wxMenu;
 	menuHelp->Append(ID_DOWNLOADUPDATE, _("&Download ..\tCtrl+D"));
     menuHelp->Append (wxID_ABOUT, _("&About ..\tCtrl+D"));
-	menuHelp->Append(ID_SHOWWLCOME, _("Show Welcome Screen"));
+	
+	
+	
 
     // construct menu
     m_menuBar->Append (menuFile, _("&File"));
@@ -1147,6 +1153,7 @@ wxMenuBar *AppFrame::CreateMenu ()
     m_menuBar->Append (menuView, _("&View"));
 	m_menuBar->Append(menuGCode, _("&GCode"));
 	m_menuBar->Append(menu3D, _("&3DView"));
+	m_menuBar->Append(menuPref, _("Preferences"));
     m_menuBar->Append (menuHelp, _("&Help"));    
 	return m_menuBar;
 
@@ -1165,7 +1172,7 @@ wxAuiToolBar *AppFrame::CreateToolBar()
 	toolBar->AddTool(wxID_UNDO, wxEmptyString, wxBitmap(undo_xpm), _("Cut"));
 	toolBar->AddTool(wxID_REDO, wxEmptyString, wxBitmap(redo_xpm), _("Cut"));
 	toolBar->AddSeparator();
-	toolBar->AddTool(myID_PROPERTIES, wxEmptyString, wxBitmap(cut_xpm), _("Macroses"));
+	toolBar->AddTool(ID_PROPERTIES, wxEmptyString, wxBitmap(cut_xpm), _("Macroses"));
 	toolBar->AddTool(wxID_COPY, wxEmptyString, wxBitmap(copy_xpm), _("Copy"));
 	toolBar->AddTool(wxID_PASTE, wxEmptyString, wxBitmap(paste_xpm), _("Paste"));
 	toolBar->AddSeparator();
@@ -1173,9 +1180,9 @@ wxAuiToolBar *AppFrame::CreateToolBar()
 	toolBar->AddTool(ID_GCODE_SIMULATE, wxEmptyString, wxBitmap(find_xpm), _("Simulate"));
 	toolBar->AddTool(ID_GCODE_CONVERTGCMC, wxEmptyString, wxBitmap(new_xpm), _("Convert"));
 	toolBar->AddSeparator();
-	toolBar->AddTool(myID_SEMULATE_START, wxEmptyString, wxBitmap(simulate_xpm), _("simulate"));
-	toolBar->AddTool(myID_SEMULATE_PAUSE, wxEmptyString, wxBitmap(pause_xpm), _("pause"));
-	toolBar->AddTool(myID_SEMULATE_STOP, wxEmptyString, wxBitmap(stop_xpm), _("stop"));
+	toolBar->AddTool(ID_SEMULATE_START, wxEmptyString, wxBitmap(simulate_xpm), _("simulate"));
+	toolBar->AddTool(ID_SEMULATE_PAUSE, wxEmptyString, wxBitmap(pause_xpm), _("pause"));
+	toolBar->AddTool(ID_SEMULATE_STOP, wxEmptyString, wxBitmap(stop_xpm), _("stop"));
 	
 	toolBar->Realize();
 	return toolBar;
@@ -1685,15 +1692,47 @@ void AppFrame::CreateWatcher()
 
 	m_watcher = new wxFileSystemWatcher();
 	m_watcher->SetOwner(this);
+	// Add Preferences catalog
+	
+	std::filesystem::path prefpath = StandartPaths::Get()->GetPreferencesPath();
+	wxFileName fn = wxFileName::DirName(prefpath.c_str());
+	m_watcher->AddTree(fn);
+
 	Bind(wxEVT_FSWATCHER, &AppFrame::OnFileSystemEvent, this);
 	if (m_dirtree)
 		m_dirtree->SetWatcher(m_watcher);
 
 }
 
+void AppFrame::UpdatePreferences()
+{
+	Preferences::Get()->Read();
+
+	size_t n = m_notebook->GetPageCount();
+	for (size_t i = 0; i < n; ++i)
+	{
+		if (m_notebook->GetPage(i)->IsKindOf(CLASSINFO(Edit)))
+		{
+			Edit *pEdit = dynamic_cast<Edit *>(m_notebook->GetPage(i));
+			pEdit->UpdatePreferences();			
+		}
+	}
+	if (GetActiveFile())
+		GetActiveFile()->Refresh(false);
+	return ;
+}
 
 void AppFrame::OnFileSystemEvent(wxFileSystemWatcherEvent& event)
 {
+	
+	wxFileName prefpath = wxFileName::DirName(StandartPaths::Get()->GetPreferencesPath().c_str());
+	wxString s1 = event.GetPath().GetPath();
+	wxString s2 = prefpath.GetPath();
+	if ( event.GetPath().GetPath() == prefpath.GetPath() )
+	{
+		UpdatePreferences();
+	}
+
 	if (m_dirtree) 
 		m_dirtree->GetEventHandler()->ProcessEvent(event);
 }

@@ -24,6 +24,10 @@
     {
       "name": "JSON",
       "extensions": "*.json;"
+    },
+    {
+      "name": "ALL",
+      "extensions": "*.*;"
     }
   ]
 }

@@ -69,7 +69,7 @@ void LogWindow::DoSinchronize()
 		return;
 
 	IntClientData *dataCmd = data;// new IntClientData(data->GetData());
-	wxCommandEvent *ev = new wxCommandEvent(wxEVT_MENU,myID_SELECTLINE);
+	wxCommandEvent *ev = new wxCommandEvent(wxEVT_MENU,ID_SELECTLINE);
 	ev->SetClientObject(dataCmd);
 	wxQueueEvent(handler, ev);
 }

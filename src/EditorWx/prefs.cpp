@@ -192,7 +192,7 @@ Preferences::Preferences()
 	m_common = {
 		// editor functionality prefs
 		true,  // syntaxEnable
-		true,  // foldEnable
+		false,  // foldEnable
 		true,  // indentEnable
 		// display defaults prefs
 		false, // overTypeInitial
@@ -267,16 +267,40 @@ LanguageInfo  *Preferences::FindByName(const wxString &name, bool init)
 }
 
 
+
+
 bool Preferences::Read()
 {
-	std::filesystem::path dirpath = StandartPaths::Get()->GetPreferencesPath(L"main.json");
-	wxFFileInputStream  file_stream(dirpath.c_str());
+	//Clear
+	std::for_each(m_languages.begin(), m_languages.end(), [](LanguageInfo &p)
+	{  return p.Clear(); });
+
+
+	// read default Preferences
+	std::filesystem::path dirpath = StandartPaths::Get()->GetPreferencesPath(L"Default Preferences.json");
+	if (!DoRead(dirpath.c_str(), true))
+		return false;
+	// Now Read user setting which overrite default
+	dirpath = StandartPaths::Get()->GetPreferencesPath(L"User Preferences.json");
+	DoRead(dirpath.c_str(), false);
+	return true;
+
+}
+
+bool Preferences::DoRead(const wxString& fileName, bool errifnoexist )
+{
+	wxLogNull logNo;
+	wxFFileInputStream  file_stream(fileName );
 	if (!file_stream.IsOk())
 	{
-		wxString msg = wxString::Format(_("Can not open file %s"), dirpath.c_str());
-		wxMessageBox(msg, _("Error opening file"));
+		if( errifnoexist )
+		{
+			wxString msg = wxString::Format(_("Can not open file %s"), fileName);
+			wxMessageBox(msg, _("Error opening file"));
+		}
 		return false;
 	}
+
 	wxJSONReader reader;
 	wxJSONValue root;
 	// now read the JSON text and store it in the 'root' structure
@@ -285,7 +309,7 @@ bool Preferences::Read()
 	if (numErrors > 0)
 	{
 		const wxArrayString& errors = reader.GetErrors();
-		wxString msg = wxString::Format(_("Error parsing file %s\n"), dirpath.c_str());
+		wxString msg = wxString::Format(_("Error parsing file %s\n"), fileName);
 		for (auto p = errors.begin(); p != errors.end(); ++p)
 		{
 			msg += *p;
@@ -340,16 +364,21 @@ LanguageInfo::LanguageInfo()
 
 }
 
+void LanguageInfo::Clear()
+{
+	m_inited = false;
+	m_styles.clear();
+}
+
 void LanguageInfo::Init()
 {
 	if (m_inited)
 		return;
 	
-	if ( !m_filename.empty() )
-		m_inited = Read();
+	InitDef();
 
-	if (!m_inited)
-		InitDef();
+	if ( !m_filename.empty() )
+		Read();
 
 	m_inited = true;
 	return;
@@ -430,6 +459,7 @@ void LanguageInfo::InitDef()
 
 bool LanguageInfo::Read()
 {
+	wxLogNull logNo;
 	std::filesystem::path dirpath = StandartPaths::Get()->GetPreferencesPath(m_filename);
 	wxFFileInputStream  file_stream(dirpath.c_str());
 	if (!file_stream.IsOk())
@@ -474,7 +504,8 @@ bool LanguageInfo::Read()
 	for (unsigned int i = 0; i < static_cast<unsigned int>(styles.Size()); ++i)
 	{
 		wxJSONValue &val = styles.Item(i);
-		wxString id = val["nameid"].AsString();
+		int id = -1;
+		val["nameid"].AsInt(id);
 	
 		auto it = std::find_if(m_styles.begin(), m_styles.end(), [id](StyleInfo &p)
 		{  return p.style_Id == id; });
@@ -483,17 +514,17 @@ bool LanguageInfo::Read()
 
 		StyleInfo *st = &(*it);
 		
-		if (!root["fontsize"].AsInt(st->fontsize) )
+		if (!val["fontsize"].AsInt(st->fontsize) )
 			st->fontsize = defSize;
-		if (!root["fontname"].AsString(st->fontname) )
+		if (!val["fontname"].AsString(st->fontname) )
 			st->fontname = deffont;
-		if (!root["fclr"].AsString(defClr) )
+		if (!val["fclr"].AsString(st->foreground) )
 			st->foreground = defClr;
-		if (!root["bclr"].AsString(st->background))
+		if (!val["bclr"].AsString(st->background))
 			st->background = defBgClr;
-		if (!root["italic"].AsBool(st->italic) )
+		if (!val["italic"].AsBool(st->italic) )
 			st->italic = defitalic;
-		if (!root["bold"].AsBool(st->bold))
+		if (!val["bold"].AsBool(st->bold))
 			st->bold = defbold;
 
 	}

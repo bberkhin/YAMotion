@@ -40,26 +40,26 @@ wxBEGIN_EVENT_TABLE(Edit, wxStyledTextCtrl)
 	// common
 	EVT_SIZE(Edit::OnSize)
 	EVT_CONTEXT_MENU(Edit::OnContextMenu)
-	EVT_MENU(ID_INCLUSE_FILE_OPEN, Edit::OnIncludeOpen)
+	EVT_MENU(ID_INCLUDE_FILE_OPEN, Edit::OnIncludeOpen)
 	// edit
 	EVT_MENU(wxID_CLEAR, Edit::OnEditClear)
 	EVT_MENU(wxID_CUT, Edit::OnEditCut)
 	EVT_MENU(wxID_COPY, Edit::OnEditCopy)
 	EVT_MENU(wxID_PASTE, Edit::OnEditPaste)
 	EVT_MENU(wxID_SELECTALL, Edit::OnEditSelectAll)
-	EVT_MENU(myID_SELECTLINE, Edit::OnEditSelectLine)
+	EVT_MENU(ID_SELECTLINE, Edit::OnEditSelectLine)
 	EVT_MENU(wxID_REDO, Edit::OnEditRedo)
 	EVT_MENU(wxID_UNDO, Edit::OnEditUndo)
-	EVT_MENU(myID_INDENTINC, Edit::OnEditIndentInc)
-	EVT_MENU(myID_INDENTRED, Edit::OnEditIndentRed)
+	EVT_MENU(ID_INDENTINC, Edit::OnEditIndentInc)
+	EVT_MENU(ID_INDENTRED, Edit::OnEditIndentRed)
 
 	// find
 	EVT_MENU(wxID_FIND, Edit::OnFind)
-	EVT_MENU(myID_FINDNEXT, Edit::OnFindNext)
-	EVT_MENU(myID_REPLACE, Edit::OnReplace)
-	EVT_MENU(myID_REPLACENEXT, Edit::OnReplaceNext)
-	EVT_MENU(myID_BRACEMATCH, Edit::OnBraceMatch)
-	EVT_MENU(myID_GOTO, Edit::OnGoto)
+	EVT_MENU(ID_FINDNEXT, Edit::OnFindNext)
+	EVT_MENU(ID_REPLACE, Edit::OnReplace)
+	EVT_MENU(ID_REPLACENEXT, Edit::OnReplaceNext)
+	EVT_MENU(ID_BRACEMATCH, Edit::OnBraceMatch)
+	EVT_MENU(ID_GOTO, Edit::OnGoto)
 	
 	EVT_FIND(wxID_ANY, Edit::OnFindDialog)
 	EVT_FIND_NEXT(wxID_ANY, Edit::OnFindDialog)
@@ -69,33 +69,33 @@ wxBEGIN_EVENT_TABLE(Edit, wxStyledTextCtrl)
 
 
 	// view
-	EVT_MENU(myID_DISPLAYEOL, Edit::OnDisplayEOL)
-	EVT_MENU(myID_INDENTGUIDE, Edit::OnIndentGuide)
-	EVT_MENU(myID_LINENUMBER, Edit::OnLineNumber)
-	EVT_MENU(myID_LONGLINEON, Edit::OnLongLineOn)
-	EVT_MENU(myID_WHITESPACE, Edit::OnWhiteSpace)
-	EVT_MENU(myID_FOLDTOGGLE, Edit::OnFoldToggle)
-	EVT_MENU(myID_OVERTYPE, Edit::OnSetOverType)
-	EVT_MENU(myID_READONLY, Edit::OnSetReadOnly)
-	EVT_MENU(myID_WRAPMODEON, Edit::OnWrapmodeOn)
-	EVT_MENU(myID_CHARSETANSI, Edit::OnUseCharset)
-	EVT_MENU(myID_CHARSETMAC, Edit::OnUseCharset)
+	EVT_MENU(ID_DISPLAYEOL, Edit::OnDisplayEOL)
+	EVT_MENU(ID_INDENTGUIDE, Edit::OnIndentGuide)
+	EVT_MENU(ID_LINENUMBER, Edit::OnLineNumber)
+	EVT_MENU(ID_LONGLINEON, Edit::OnLongLineOn)
+	EVT_MENU(ID_WHITESPACE, Edit::OnWhiteSpace)
+	EVT_MENU(ID_FOLDTOGGLE, Edit::OnFoldToggle)
+	EVT_MENU(ID_OVERTYPE, Edit::OnSetOverType)
+	EVT_MENU(ID_READONLY, Edit::OnSetReadOnly)
+	EVT_MENU(ID_WRAPMODEON, Edit::OnWrapmodeOn)
+	EVT_MENU(ID_CHARSETANSI, Edit::OnUseCharset)
+	EVT_MENU(ID_CHARSETMAC, Edit::OnUseCharset)
 	// annotations
-	EVT_MENU(myID_ANNOTATION_ADD, Edit::OnAnnotationAdd)
-	EVT_MENU(myID_ANNOTATION_REMOVE, Edit::OnAnnotationRemove)
-	EVT_MENU(myID_ANNOTATION_CLEAR, Edit::OnAnnotationClear)
-	EVT_MENU(myID_ANNOTATION_STYLE_HIDDEN, Edit::OnAnnotationStyle)
-	EVT_MENU(myID_ANNOTATION_STYLE_STANDARD, Edit::OnAnnotationStyle)
-	EVT_MENU(myID_ANNOTATION_STYLE_BOXED, Edit::OnAnnotationStyle)
+	EVT_MENU(ID_ANNOTATION_ADD, Edit::OnAnnotationAdd)
+	EVT_MENU(ID_ANNOTATION_REMOVE, Edit::OnAnnotationRemove)
+	EVT_MENU(ID_ANNOTATION_CLEAR, Edit::OnAnnotationClear)
+	EVT_MENU(ID_ANNOTATION_STYLE_HIDDEN, Edit::OnAnnotationStyle)
+	EVT_MENU(ID_ANNOTATION_STYLE_STANDARD, Edit::OnAnnotationStyle)
+	EVT_MENU(ID_ANNOTATION_STYLE_BOXED, Edit::OnAnnotationStyle)
 	// extra
-	EVT_MENU(myID_CHANGELOWER, Edit::OnChangeCase)
-	EVT_MENU(myID_CHANGEUPPER, Edit::OnChangeCase)
-	EVT_MENU(myID_CONVERTCR, Edit::OnConvertEOL)
-	EVT_MENU(myID_CONVERTCRLF, Edit::OnConvertEOL)
-	EVT_MENU(myID_CONVERTLF, Edit::OnConvertEOL)
-	EVT_MENU(myID_MULTIPLE_SELECTIONS, Edit::OnMultipleSelections)
-	EVT_MENU(myID_MULTI_PASTE, Edit::OnMultiPaste)
-	EVT_MENU(myID_MULTIPLE_SELECTIONS_TYPING, Edit::OnMultipleSelectionsTyping)
+	EVT_MENU(ID_CHANGELOWER, Edit::OnChangeCase)
+	EVT_MENU(ID_CHANGEUPPER, Edit::OnChangeCase)
+	EVT_MENU(ID_CONVERTCR, Edit::OnConvertEOL)
+	EVT_MENU(ID_CONVERTCRLF, Edit::OnConvertEOL)
+	EVT_MENU(ID_CONVERTLF, Edit::OnConvertEOL)
+	EVT_MENU(ID_MULTIPLE_SELECTIONS, Edit::OnMultipleSelections)
+	EVT_MENU(ID_MULTI_PASTE, Edit::OnMultiPaste)
+	EVT_MENU(ID_MULTIPLE_SELECTIONS_TYPING, Edit::OnMultipleSelectionsTyping)
 	// stc
 	EVT_STC_MARGINCLICK(wxID_ANY, Edit::OnMarginClick)
 	EVT_STC_CHARADDED(wxID_ANY, Edit::OnCharAdded)
@@ -127,64 +127,12 @@ Edit::Edit (wxWindow *parent, wxWindowID id,  const wxPoint &pos, const wxSize &
 	find_data.SetFlags(wxFR_DOWN);
 	ConfigData *config = dynamic_cast<ConfigData *>(wxConfigBase::Get());
 	if (config)
-		config->ReadFindAndReplase(&find_data);
-
-	const CommonInfo &common_prefs = Preferences::Get()->Common();
+		config->ReadFindAndReplase(&find_data);	
 	
-
-    // default font for all styles
-    SetViewEOL (common_prefs.displayEOLEnable);
-    SetIndentationGuides (common_prefs.indentGuideEnable);
-    SetEdgeMode (common_prefs.longLineOnEnable?
-                 wxSTC_EDGE_LINE: wxSTC_EDGE_NONE);
-    SetViewWhiteSpace (common_prefs.whiteSpaceEnable?
-                       wxSTC_WS_VISIBLEALWAYS: wxSTC_WS_INVISIBLE);
-    SetOvertype (common_prefs.overTypeInitial);
-    SetReadOnly (common_prefs.readOnlyInitial);
-    SetWrapMode (common_prefs.wrapModeInitial?
-                 wxSTC_WRAP_WORD: wxSTC_WRAP_NONE);
-    wxFont font(wxFontInfo(10).Family(wxFONTFAMILY_MODERN));
-    StyleSetFont (wxSTC_STYLE_DEFAULT, font);
-    StyleSetForeground (wxSTC_STYLE_DEFAULT, *wxBLACK);
-    StyleSetBackground (wxSTC_STYLE_DEFAULT, *wxWHITE);
-    StyleSetForeground (wxSTC_STYLE_LINENUMBER, wxColour ("DARK GREY"));
-    StyleSetBackground (wxSTC_STYLE_LINENUMBER, *wxWHITE);
-    StyleSetForeground(wxSTC_STYLE_INDENTGUIDE, wxColour ("DARK GREY"));
-
-
-	// margin
-	m_LineNrMargin = TextWidth(wxSTC_STYLE_LINENUMBER, "_99999");
-	m_FoldingMargin = 16;
-    //InitializePrefs (g_LanguagePrefs[0].name);
-
-    // set visibility
-    SetVisiblePolicy (wxSTC_VISIBLE_STRICT|wxSTC_VISIBLE_SLOP, 1);
-    SetXCaretPolicy (wxSTC_CARET_EVEN|wxSTC_VISIBLE_STRICT|wxSTC_CARET_SLOP, 1);
-    SetYCaretPolicy (wxSTC_CARET_EVEN|wxSTC_VISIBLE_STRICT|wxSTC_CARET_SLOP, 1);
-
-    // markers
-    MarkerDefine (wxSTC_MARKNUM_FOLDER,        wxSTC_MARK_DOTDOTDOT, "BLACK", "BLACK");
-    MarkerDefine (wxSTC_MARKNUM_FOLDEROPEN,    wxSTC_MARK_ARROWDOWN, "BLACK", "BLACK");
-    MarkerDefine (wxSTC_MARKNUM_FOLDERSUB,     wxSTC_MARK_EMPTY,     "BLACK", "BLACK");
-    MarkerDefine (wxSTC_MARKNUM_FOLDEREND,     wxSTC_MARK_DOTDOTDOT, "BLACK", "WHITE");
-    MarkerDefine (wxSTC_MARKNUM_FOLDEROPENMID, wxSTC_MARK_ARROWDOWN, "BLACK", "WHITE");
-    MarkerDefine (wxSTC_MARKNUM_FOLDERMIDTAIL, wxSTC_MARK_EMPTY,     "BLACK", "BLACK");
-    MarkerDefine (wxSTC_MARKNUM_FOLDERTAIL,    wxSTC_MARK_EMPTY,     "BLACK", "BLACK");
-
-    // annotations
-    AnnotationSetVisible(wxSTC_ANNOTATION_BOXED);
- 
-    CmdKeyClear (wxSTC_KEY_TAB, 0); // this is done by the menu accelerator key
-    SetLayoutCache (wxSTC_CACHE_PAGE);
-    UsePopUp(wxSTC_POPUP_NEVER); //wxSTC_POPUP_ALL
-
-	CallTipSetBackground(*wxYELLOW);
-	CallTipSetForeground(*wxBLACK);
-	SetMouseDwellTime(2000);
-	SetTabWidth(common_prefs.tabWidth);
+	UpdatePreferences();
 	SetDropTarget(0);
-	
 }
+
 
 Edit::~Edit () 
 {
@@ -331,8 +279,8 @@ void Edit::OnUseCharset (wxCommandEvent &event) {
     int Nr;
     int charset = GetCodePage();
     switch (event.GetId()) {
-        case myID_CHARSETANSI: {charset = wxSTC_CHARSET_ANSI; break;}
-        case myID_CHARSETMAC: {charset = wxSTC_CHARSET_ANSI; break;}
+        case ID_CHARSETANSI: {charset = wxSTC_CHARSET_ANSI; break;}
+        case ID_CHARSETMAC: {charset = wxSTC_CHARSET_ANSI; break;}
     }
     for (Nr = 0; Nr < wxSTC_STYLE_LASTPREDEFINED; Nr++) {
         StyleSetCharacterSet (Nr, charset);
@@ -397,15 +345,15 @@ void Edit::OnAnnotationStyle(wxCommandEvent& event)
 {
     int style = 0;
     switch (event.GetId()) {
-        case myID_ANNOTATION_STYLE_HIDDEN:
+        case ID_ANNOTATION_STYLE_HIDDEN:
             style = wxSTC_ANNOTATION_HIDDEN;
             break;
 
-        case myID_ANNOTATION_STYLE_STANDARD:
+        case ID_ANNOTATION_STYLE_STANDARD:
             style = wxSTC_ANNOTATION_STANDARD;
             break;
 
-        case myID_ANNOTATION_STYLE_BOXED:
+        case ID_ANNOTATION_STYLE_BOXED:
             style = wxSTC_ANNOTATION_BOXED;
             break;
     }
@@ -413,13 +361,16 @@ void Edit::OnAnnotationStyle(wxCommandEvent& event)
     AnnotationSetVisible(style);
 }
 
-void Edit::OnChangeCase (wxCommandEvent &event) {
-    switch (event.GetId()) {
-        case myID_CHANGELOWER: {
+void Edit::OnChangeCase (wxCommandEvent &event) 
+{
+    switch (event.GetId()) 
+	{
+        case ID_CHANGELOWER: 
+	    {
             CmdKeyExecute (wxSTC_CMD_LOWERCASE);
             break;
         }
-        case myID_CHANGEUPPER: {
+        case ID_CHANGEUPPER: {
             CmdKeyExecute (wxSTC_CMD_UPPERCASE);
             break;
         }
@@ -429,9 +380,9 @@ void Edit::OnChangeCase (wxCommandEvent &event) {
 void Edit::OnConvertEOL (wxCommandEvent &event) {
     int eolMode = GetEOLMode();
     switch (event.GetId()) {
-        case myID_CONVERTCR: { eolMode = wxSTC_EOL_CR; break;}
-        case myID_CONVERTCRLF: { eolMode = wxSTC_EOL_CRLF; break;}
-        case myID_CONVERTLF: { eolMode = wxSTC_EOL_LF; break;}
+        case ID_CONVERTCR: { eolMode = wxSTC_EOL_CR; break;}
+        case ID_CONVERTCRLF: { eolMode = wxSTC_EOL_CRLF; break;}
+        case ID_CONVERTLF: { eolMode = wxSTC_EOL_LF; break;}
     }
     ConvertEOLs (eolMode);
     SetEOLMode (eolMode);
@@ -566,6 +517,78 @@ void Edit::OnDwellEnd(wxStyledTextEvent &event)
 //----------------------------------------------------------------------------
 // private functions
 
+void Edit::UpdatePreferences()
+{
+
+	const CommonInfo &common_prefs = Preferences::Get()->Common();
+
+	// default font for all styles
+	SetViewEOL(common_prefs.displayEOLEnable);
+	SetIndentationGuides(common_prefs.indentGuideEnable);
+	SetEdgeMode(common_prefs.longLineOnEnable ?
+		wxSTC_EDGE_LINE : wxSTC_EDGE_NONE);
+	SetViewWhiteSpace(common_prefs.whiteSpaceEnable ?
+		wxSTC_WS_VISIBLEALWAYS : wxSTC_WS_INVISIBLE);
+	SetOvertype(common_prefs.overTypeInitial);
+	SetReadOnly(common_prefs.readOnlyInitial);
+	SetWrapMode(common_prefs.wrapModeInitial ?
+		wxSTC_WRAP_WORD : wxSTC_WRAP_NONE);
+	wxFont font(wxFontInfo(10).Family(wxFONTFAMILY_MODERN));
+	StyleSetFont(wxSTC_STYLE_DEFAULT, font);
+	StyleSetForeground(wxSTC_STYLE_DEFAULT, *wxBLACK);
+	StyleSetBackground(wxSTC_STYLE_DEFAULT, *wxWHITE);
+	StyleSetForeground(wxSTC_STYLE_LINENUMBER, wxColour("DARK GREY"));
+	StyleSetBackground(wxSTC_STYLE_LINENUMBER, *wxWHITE);
+	StyleSetForeground(wxSTC_STYLE_INDENTGUIDE, wxColour("DARK GREY"));
+	SetEdgeColumn(80);
+
+
+	// margin
+	m_LineNrMargin = TextWidth(wxSTC_STYLE_LINENUMBER, "_99999");
+	m_FoldingMargin = 16;
+	//InitializePrefs (g_LanguagePrefs[0].name);
+
+	// set visibility
+	SetVisiblePolicy(wxSTC_VISIBLE_STRICT | wxSTC_VISIBLE_SLOP, 1);
+	SetXCaretPolicy(wxSTC_CARET_EVEN | wxSTC_VISIBLE_STRICT | wxSTC_CARET_SLOP, 1);
+	SetYCaretPolicy(wxSTC_CARET_EVEN | wxSTC_VISIBLE_STRICT | wxSTC_CARET_SLOP, 1);
+
+	// markers
+	MarkerDefine(wxSTC_MARKNUM_FOLDER, wxSTC_MARK_DOTDOTDOT, "BLACK", "BLACK");
+	MarkerDefine(wxSTC_MARKNUM_FOLDEROPEN, wxSTC_MARK_ARROWDOWN, "BLACK", "BLACK");
+	MarkerDefine(wxSTC_MARKNUM_FOLDERSUB, wxSTC_MARK_EMPTY, "BLACK", "BLACK");
+	MarkerDefine(wxSTC_MARKNUM_FOLDEREND, wxSTC_MARK_DOTDOTDOT, "BLACK", "WHITE");
+	MarkerDefine(wxSTC_MARKNUM_FOLDEROPENMID, wxSTC_MARK_ARROWDOWN, "BLACK", "WHITE");
+	MarkerDefine(wxSTC_MARKNUM_FOLDERMIDTAIL, wxSTC_MARK_EMPTY, "BLACK", "BLACK");
+	MarkerDefine(wxSTC_MARKNUM_FOLDERTAIL, wxSTC_MARK_EMPTY, "BLACK", "BLACK");
+
+	// annotations
+	AnnotationSetVisible(wxSTC_ANNOTATION_BOXED);
+
+	CmdKeyClear(wxSTC_KEY_TAB, 0); // this is done by the menu accelerator key
+	SetLayoutCache(wxSTC_CACHE_PAGE);
+	UsePopUp(wxSTC_POPUP_NEVER); //wxSTC_POPUP_ALL
+
+	CallTipSetBackground(*wxYELLOW);
+	CallTipSetForeground(*wxBLACK);
+	SetMouseDwellTime(2000);
+
+
+	// set spaces and indentation
+	SetUseTabs(false);
+	SetTabIndents(true);
+	SetTabWidth(common_prefs.tabWidth);
+	SetBackSpaceUnIndents(true);
+	SetIndent(common_prefs.indentEnable ? common_prefs.tabWidth : 0);
+	if (m_language)
+	{
+		// we need use FindByType to reinit lanfuage
+		InitializePrefs(Preferences::Get()->FindByType(m_language->GetFileType()));
+	}
+
+}
+
+
 bool Edit::InitializePrefs (const LanguageInfo * language)
 {
 
@@ -596,7 +619,7 @@ bool Edit::InitializePrefs (const LanguageInfo * language)
     int Nr;
     for (Nr = 0; Nr < wxSTC_STYLE_LASTPREDEFINED; Nr++) 
 	{
-        wxFont font(wxFontInfo(10).Family(wxFONTFAMILY_MODERN));
+        wxFont font(wxFontInfo(10).Family(wxFONTFAMILY_DEFAULT));
         StyleSetFont (Nr, font);
 		StyleSetFontEncoding(Nr, wxFONTENCODING_CP1251);
     }
@@ -616,7 +639,7 @@ bool Edit::InitializePrefs (const LanguageInfo * language)
             if (style == -1) continue;
 			const StyleInfo &curType = *it;
             wxFont font(wxFontInfo(curType.fontsize)
-                            .Family(wxFONTFAMILY_MODERN)
+                            .Family(wxFONTFAMILY_DEFAULT)
                             .FaceName(curType.fontname));
             StyleSetFont (style, font);
 			StyleSetFontEncoding(style, wxFONTENCODING_CP1251);
@@ -673,24 +696,7 @@ bool Edit::InitializePrefs (const LanguageInfo * language)
     SetFoldFlags (wxSTC_FOLDFLAG_LINEBEFORE_CONTRACTED |
                   wxSTC_FOLDFLAG_LINEAFTER_CONTRACTED);
 
-    // set spaces and indentation
-    SetUseTabs (false);
-    SetTabIndents (true);
-    SetBackSpaceUnIndents (true);
-    SetIndent (common_prefs.indentEnable? 4: 0);
-
-    // others
-    SetViewEOL (common_prefs.displayEOLEnable);
-    SetIndentationGuides (common_prefs.indentGuideEnable);
-    SetEdgeColumn (80);
-    SetEdgeMode (common_prefs.longLineOnEnable? wxSTC_EDGE_LINE: wxSTC_EDGE_NONE);
-    SetViewWhiteSpace (common_prefs.whiteSpaceEnable?
-                       wxSTC_WS_VISIBLEALWAYS: wxSTC_WS_INVISIBLE);
-    SetOvertype (common_prefs.overTypeInitial);
-    SetReadOnly (common_prefs.readOnlyInitial);
-    SetWrapMode (common_prefs.wrapModeInitial?
-                 wxSTC_WRAP_WORD: wxSTC_WRAP_NONE);
-
+   
     return true;
 }
 
@@ -1102,7 +1108,7 @@ void Edit::OnContextMenu(wxContextMenuEvent& event)
 	wxString incl_file = GetGcmcIncludeFileName();
 	if (!incl_file.empty())
 	{
-		menu.Append(ID_INCLUSE_FILE_OPEN, wxString::Format(_("Open file: \"%s\""), incl_file));
+		menu.Append(ID_INCLUDE_FILE_OPEN, wxString::Format(_("Open file: \"%s\""), incl_file));
 	}
 	menu.AppendSeparator();
 	menu.Append(wxID_UNDO, _("Undo"));

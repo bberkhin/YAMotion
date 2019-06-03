@@ -1,21 +1,23 @@
 {
-  // this is a comment line in C++ style
   //#define SCE_GCMC_DEFAULT 0
   //SCE_GCMC_COMMENT 1
   //SCE_GCMC_COMMENT_ML 2
   //SCE_GCMC_VAR  3
-  //SCE_GCMC_NUMBER" 4,
-  //SCE_GCMC_OPERATORS  5 
+  //SCE_GCMC_NUMBER 4,
+  //SCE_GCMC_OPERATORS  5
   //SCE_GCMC_IDENTIFIER 6,
   //SCE_GCMC_WORD1 7
   //SCE_GCMC_WORD2 8,
   //SCE_GCMC_STRING 9
-   
+  "name": "White GCMC",
+  "type": "GCMC",
   "fontsize": 10,
-  "fontname": "system",
-  "fclr": "BLACK",
+  "fontname" : "",
+  "fontname1" : "Courier new",
+   "fclr": "BLACK",
   "bclr": "WHITE",
   "italic": false,
+  "bold": false,
   "styles": [
     {
       "nameid": 0,
@@ -25,13 +27,14 @@
     {
       "nameid": 1,
       "name": "comment",
-      "fclr": "FOREST GREEN",
-      "italic": true
+      "fclr": "#008040",
+      "italic": false
     },
     {
       "nameid": 2,
       "name": "comment_ml",
-      "fclr": "FOREST GREEN"
+      "fclr": "#008040"
+      //"fclr": "FOREST GREEN"
     },
     {
       "nameid": 3,
@@ -42,7 +45,7 @@
     {
       "nameid": 4,
       "name": "number",
-      "fclr": "YELLOW",
+      "fclr": "0xFF0000",
       "bold": true
     },
     {
@@ -71,7 +74,7 @@
     {
       "nameid": 9,
       "name": "strings",
-      "fclr": "GREEN",
+      "fclr": "FOREST GREEN",
       "bold": true,
       "italic": true
     }

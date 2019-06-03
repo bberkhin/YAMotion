@@ -61,8 +61,11 @@ public:
 	void OnFileSaveAs(wxCommandEvent &event);
 	void OnFileClose(wxCommandEvent &event);
 	void OnOpenLastFile(wxCommandEvent &event);
-	//! dialogs
+	//properties
 	void OnProperties(wxCommandEvent &event);
+	void OnDefaultPreferences(wxCommandEvent &event);
+	void OnUserPreferences(wxCommandEvent &event);
+	//! dialogs
 	void OnMacroses(wxCommandEvent &event);
 	void OnMathCalc(wxCommandEvent &event);
 	void OnMathExpression(wxCommandEvent &event);
@@ -121,6 +124,7 @@ private:
 	wxAuiToolBar *CreateToolBar();
 	ViewGCode* CreateGLView();
 	Edit *GetActiveFile();
+	void UpdatePreferences();
 	
 private:
 	// edit object

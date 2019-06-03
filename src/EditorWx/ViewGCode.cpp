@@ -89,19 +89,19 @@ wxBEGIN_EVENT_TABLE(ViewGCode, wxGLCanvas)
 	EVT_PAINT(ViewGCode::OnPaint)
 	EVT_CHAR(ViewGCode::OnChar)
 	EVT_MOUSE_EVENTS(ViewGCode::OnMouseEvent)
-	EVT_MENU_RANGE(myID_SETVIEWFIRST, myID_SETVIEWLAST, ViewGCode::OnSetView)
+	EVT_MENU_RANGE(ID_SETVIEWFIRST, ID_SETVIEWLAST, ViewGCode::OnSetView)
 	EVT_MENU_RANGE(ID_SETSHOWFIRST, ID_SETSHOWLAST, ViewGCode::OnSetShow)
-	EVT_MENU(myID_SEMULATE_START, ViewGCode::OnSemulateStart)
-	EVT_MENU(myID_SEMULATE_PAUSE, ViewGCode::OnSemulatePause)
-	EVT_MENU(myID_SEMULATE_STOP, ViewGCode::OnSemulateStop)
+	EVT_MENU(ID_SEMULATE_START, ViewGCode::OnSemulateStart)
+	EVT_MENU(ID_SEMULATE_PAUSE, ViewGCode::OnSemulatePause)
+	EVT_MENU(ID_SEMULATE_STOP, ViewGCode::OnSemulateStop)
 
-	EVT_UPDATE_UI_RANGE(myID_SETVIEWFIRST, myID_SETVIEWLAST, ViewGCode::OnSetViewUpdate)
+	EVT_UPDATE_UI_RANGE(ID_SETVIEWFIRST, ID_SETVIEWLAST, ViewGCode::OnSetViewUpdate)
 	EVT_UPDATE_UI_RANGE(ID_SETSHOWFIRST, ID_SETSHOWLAST, ViewGCode::OnSetShowUpdate)
-	EVT_UPDATE_UI(myID_SEMULATE_START, ViewGCode::OnCmdUpdateSimulateStart)
-	EVT_UPDATE_UI(myID_SEMULATE_PAUSE, ViewGCode::OnCmdUpdateSimulatePause)
-	EVT_UPDATE_UI(myID_SEMULATE_STOP, ViewGCode::OnCmdUpdateSimulateStop)
-	EVT_UPDATE_UI(myID_SEMULATE_GOTOBEGIN, ViewGCode::OnCmdUpdateSimulateStop)
-	EVT_UPDATE_UI(myID_SEMULATE_GOTOEND, ViewGCode::OnCmdUpdateSimulateStop)
+	EVT_UPDATE_UI(ID_SEMULATE_START, ViewGCode::OnCmdUpdateSimulateStart)
+	EVT_UPDATE_UI(ID_SEMULATE_PAUSE, ViewGCode::OnCmdUpdateSimulatePause)
+	EVT_UPDATE_UI(ID_SEMULATE_STOP, ViewGCode::OnCmdUpdateSimulateStop)
+	EVT_UPDATE_UI(ID_SEMULATE_GOTOBEGIN, ViewGCode::OnCmdUpdateSimulateStop)
+	EVT_UPDATE_UI(ID_SEMULATE_GOTOEND, ViewGCode::OnCmdUpdateSimulateStop)
 	
 	//EVT_KEY_DOWN(ViewGCode::OnKeyDown)
 
@@ -865,7 +865,7 @@ void ViewGCode::update_tool_coords(float x, float y, float z)
 
 void ViewGCode::OnSetView(wxCommandEvent &event)
 {
-	camera.set_view(View(event.GetId() - myID_SETVIEWFIRST) );
+	camera.set_view(View(event.GetId() - ID_SETVIEWFIRST) );
 	Refresh(false);
 }
 
@@ -1062,7 +1062,7 @@ void ViewGCode::OnSimulateUpdate(wxThreadEvent& ev)
 	{
 		cur_gcode_line = end_simulate_point.line;
 		dataCmd.SetData(cur_gcode_line);
-		wxCommandEvent *ev = new wxCommandEvent(wxEVT_MENU, myID_SELECTLINE);
+		wxCommandEvent *ev = new wxCommandEvent(wxEVT_MENU, ID_SELECTLINE);
 		ev->SetClientObject(&dataCmd);
 		wxQueueEvent(appframe, ev);
 	}
