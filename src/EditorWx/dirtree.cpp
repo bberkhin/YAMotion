@@ -10,6 +10,7 @@
 #include "wx/wupdlock.h"
 #include "wx/event.h"
 #include <wx/dir.h>
+#include "them.h"
 
 
 
@@ -72,10 +73,6 @@ wxBEGIN_EVENT_TABLE(DirTreeCtrl, wxTreeCtrl)
 	EVT_MENU(ID_TREE_NEWNC, DirTreeCtrl::OnFileNew)
 	EVT_MENU(ID_TREE_NEWGCMC, DirTreeCtrl::OnFileNew)
 
-
-    //EVT_TREE_BEGIN_DRAG(wxID_ANY, DirTreeCtrl::OnBeginDrag)
-    //EVT_TREE_BEGIN_RDRAG(wxID_ANY, DirTreeCtrl::OnBeginRDrag)
-    //EVT_TREE_END_DRAG(wxID_ANY, DirTreeCtrl::OnEndDrag)
     EVT_TREE_BEGIN_LABEL_EDIT(wxID_ANY, DirTreeCtrl::OnBeginLabelEdit)
     EVT_TREE_END_LABEL_EDIT(wxID_ANY, DirTreeCtrl::OnEndLabelEdit)
     EVT_TREE_DELETE_ITEM(wxID_ANY, DirTreeCtrl::OnDeleteItem)
@@ -113,7 +110,7 @@ wxIMPLEMENT_DYNAMIC_CLASS(DirTreeCtrl, wxTreeCtrl);
 #endif
 
 DirTreeCtrl::DirTreeCtrl(wxWindow *parent, const wxWindowID id )
-          : wxTreeCtrl(parent, id, wxDefaultPosition,wxDefaultSize, wxTR_DEFAULT_STYLE | wxTR_EDIT_LABELS | wxTR_HIDE_ROOT| wxSUNKEN_BORDER),
+          : wxTreeCtrl(parent, id, wxDefaultPosition,wxDefaultSize, wxTR_DEFAULT_STYLE | wxTR_EDIT_LABELS | wxTR_HIDE_ROOT| wxBORDER_NONE),
             m_alternateImages(true), m_watcher(NULL)
 {
     m_reverseSort = false;
@@ -230,7 +227,9 @@ void DirTreeCtrl::AddItemsRecursively(const wxTreeItemId& idParent, const wxStri
 	
 	wxFileName fn(path);
 	wxTreeItemId id = AppendItem(idParent, fn.GetFullName(), TreeCtrlIcon_Folder, TreeCtrlIcon_Folder+1, new DirTreeItemData(fn.GetFullPath()));
-	
+	SetItemTextColour(id, Preferences::Get()->GetArtProvider()->GetColor(wxAUI_DOCKART_INACTIVE_CAPTION_TEXT_COLOUR));
+
+		
 	for (auto& p : std::filesystem::directory_iterator(path.wc_str()))
 	{
 		if (p.is_directory())
@@ -240,7 +239,10 @@ void DirTreeCtrl::AddItemsRecursively(const wxTreeItemId& idParent, const wxStri
 	for (auto& p : std::filesystem::directory_iterator(path.wc_str()))
 	{
 		if (p.is_regular_file())
-			AppendItem(id, p.path().filename().c_str(), TreeCtrlIcon_File, TreeCtrlIcon_File + 1, new DirTreeItemData(p.path().c_str(), true));
+		{
+			wxTreeItemId id1 = AppendItem(id, p.path().filename().c_str(), TreeCtrlIcon_File, TreeCtrlIcon_File + 1, new DirTreeItemData(p.path().c_str(), true));
+			SetItemTextColour(id1, Preferences::Get()->GetArtProvider()->GetColor(wxAUI_DOCKART_INACTIVE_CAPTION_TEXT_COLOUR));
+		}
 	}
 }
 
@@ -511,62 +513,6 @@ void DirTreeCtrl::OnTreeKeyDown(wxTreeEvent& event)
     event.Skip();
 }
 
-void DirTreeCtrl::OnBeginDrag(wxTreeEvent& event)
-{
-    // need to explicitly allow drag
-    if ( event.GetItem() != GetRootItem() )
-    {
-        m_draggedItem = event.GetItem();
-
-        wxPoint clientpt = event.GetPoint();
-        wxPoint screenpt = ClientToScreen(clientpt);
-
-        wxLogMessage("OnBeginDrag: started dragging %s at screen coords (%i,%i)",
-                     GetItemText(m_draggedItem),
-                     screenpt.x, screenpt.y);
-
-        event.Allow();
-    }
-    else
-    {
-        wxLogMessage("OnBeginDrag: this item can't be dragged.");
-    }
-}
-
-void DirTreeCtrl::OnEndDrag(wxTreeEvent& event)
-{
-    wxTreeItemId itemSrc = m_draggedItem,
-                 itemDst = event.GetItem();
-    m_draggedItem = (wxTreeItemId)0l;
-
-    // where to copy the item?
-    if ( itemDst.IsOk() && !ItemHasChildren(itemDst) )
-    {
-        // copy to the parent then
-        itemDst = GetItemParent(itemDst);
-    }
-
-    if ( !itemDst.IsOk() )
-    {
-        //wxLogMessage("OnEndDrag: can't drop here.");
-
-        return;
-    }
-
-    wxString text = GetItemText(itemSrc);
-    //wxLogMessage("OnEndDrag: '%s' copied to '%s'.", text, GetItemText(itemDst));
-
-    // just do append here - we could also insert it just before/after the item
-    // on which it was dropped, but this requires slightly more work... we also
-    // completely ignore the client data and icon of the old item but could
-    // copy them as well.
-    //
-    // Finally, we only copy one item here but we might copy the entire tree if
-    // we were dragging a folder.
-    int image = TreeCtrlIcon_File ;
-    wxTreeItemId id = AppendItem(itemDst, text, image);
-
-}
 
 void DirTreeCtrl::OnBeginLabelEdit(wxTreeEvent& event)
 {
@@ -858,7 +804,8 @@ public:
 			wxTreeItemId idexist = m_pOwner->FindItemsRecursively(id, m_newname.GetFullPath());
 			if (!idexist.IsOk() &&  std::filesystem::is_regular_file(m_newname.GetFullPath().wc_str()))
 			{
-				m_pOwner->AppendItem(id, m_newname.GetFullName(), DirTreeCtrl::TreeCtrlIcon_File, DirTreeCtrl::TreeCtrlIcon_File + 1, new DirTreeItemData(m_newname.GetFullPath(), true));
+				wxTreeItemId idnew = m_pOwner->AppendItem(id, m_newname.GetFullName(), DirTreeCtrl::TreeCtrlIcon_File, DirTreeCtrl::TreeCtrlIcon_File + 1, new DirTreeItemData(m_newname.GetFullPath(), true));
+				m_pOwner->SetItemTextColour(idnew, Preferences::Get()->GetArtProvider()->GetColor(wxAUI_DOCKART_INACTIVE_CAPTION_TEXT_COLOUR));
 			}
 			else if (!idexist.IsOk() && std::filesystem::is_directory(m_newname.GetFullPath().wc_str()))
 			{
@@ -929,51 +876,30 @@ void DirTreeCtrl::OnFileSystemEvent(wxFileSystemWatcherEvent& event)
 	}
 
 }
-/*
-void DirTreeCtrl::OnFileSystemEvent(wxFileSystemWatcherEvent& event)
+
+void DirTreeCtrl::UpdateThemeColor(const wxTreeItemId& idParent, const wxColor &color)
 {
 
-	int type = event.GetChangeType();
-	wxString eventpath = event.GetPath().GetFullPath();
-	wxString newname = event.GetNewPath().GetFullPath();
-	wxString path = event.GetNewPath().GetPath();
-	
-
-	if (type == wxFSW_EVENT_CREATE)
+	SetItemTextColour(idParent, color);
+	wxTreeItemIdValue cookie;
+	wxTreeItemId child = GetFirstChild(idParent, cookie);
+	bool isRoot = (idParent == m_rootId);
+	while (child.IsOk())
 	{
-
-		wxTreeItemId id = FindItemsRecursively(m_rootId, path);
-
-		if (id.IsOk() && std::filesystem::is_regular_file(newname.wc_str()))
+		SetItemTextColour(child, color);
+		if (ItemHasChildren(child))
 		{
-			AppendItem(id, event.GetNewPath().GetFullName(), TreeCtrlIcon_File, TreeCtrlIcon_File + 1, new DirTreeItemData(newname, true));
+			UpdateThemeColor(child, color);
 		}
-		else if (std::filesystem::is_directory(newname.wc_str()))
-		{
-			if ( id.IsOk() )
-				AddItemsRecursively(id, newname);
-		}
+		child = GetNextChild(idParent, cookie);
 	}
-	if ((type == wxFSW_EVENT_DELETE) || (type == wxFSW_EVENT_RENAME))
-	{
-		wxTreeItemId id = FindItemsRecursively(m_rootId, eventpath);
-		if ( !id.IsOk())
-			return;
-		if (type == wxFSW_EVENT_RENAME)
-		{
-			// set items label
-			SetItemText(id, event.GetNewPath().GetFullName() );
-			DirTreeItemData *item = (DirTreeItemData *)GetItemData(id);
-			item->SetPath(event.GetNewPath().GetFullPath());
-		}
-		else // DELETE
-		{
-			Delete(id);
-		}
-	}
-
 }
-*/
+
+void DirTreeCtrl::UpdateThemeColor()
+{
+	UpdateThemeColor(m_rootId, Preferences::Get()->GetArtProvider()->GetColor(wxAUI_DOCKART_INACTIVE_CAPTION_TEXT_COLOUR));
+}
+
 
 bool DnDFile::OnDropFiles(wxCoord, wxCoord, const wxArrayString& filenames)
 {
@@ -986,4 +912,62 @@ bool DnDFile::OnDropFiles(wxCoord, wxCoord, const wxArrayString& filenames)
 	}
 
 	return true;
+}
+
+
+
+#define ID_ADDFILEBT 100
+
+
+wxBEGIN_EVENT_TABLE(DirPane, wxPanel)
+EVT_BUTTON(ID_ADDFILEBT, DirPane::OnAddButton)
+wxEND_EVENT_TABLE()
+
+DirPane::DirPane(wxWindow *parent)
+	: wxPanel(parent)
+{
+
+	m_ptree = new DirTreeCtrl(this, wxID_ANY);
+	wxBoxSizer *totalpane = new wxBoxSizer(wxVERTICAL);
+	wxStaticText *txt = new wxStaticText(this, wxID_ANY, _("Faforite files and folders:"));
+	totalpane->Add(txt);
+	totalpane->Add(m_ptree, wxEXPAND, wxEXPAND); //wxEXPAND
+	totalpane->Add(0, 10);
+	wxButton *padd = new wxButton(this, ID_ADDFILEBT, _("Add folders"), wxDefaultPosition, wxDefaultSize, wxBU_LEFT ); //wxBORDER_NONE
+	wxBitmap bmp = wxArtProvider::GetBitmap(wxART_GOTO_LAST, wxART_OTHER, FromDIP(wxSize(16, 16)));
+	padd->SetBitmap(bmp, wxRIGHT);
+	totalpane->Add(padd,0, wxEXPAND);
+	SetSizerAndFit(totalpane);
+	UpdateThemeColor();
+}
+
+void DirPane::UpdateThemeColor()
+{
+
+	wxColor bgColor = Preferences::Get()->GetArtProvider()->GetColor(wxAUI_DOCKART_BACKGROUND_COLOUR);
+	wxColor fgColor = Preferences::Get()->GetArtProvider()->GetColor(wxAUI_DOCKART_INACTIVE_CAPTION_TEXT_COLOUR);
+
+	SetBackgroundColour(bgColor);
+	wxWindowList::compatibility_iterator node = GetChildren().GetFirst();
+	while (node)
+	{
+		wxWindow* child = node->GetData();
+		child->SetBackgroundColour(bgColor);
+		child->SetForegroundColour(fgColor);
+		node = node->GetNext();
+	}
+	m_ptree->UpdateThemeColor();
+}
+
+void DirPane::OnAddButton(wxCommandEvent& WXUNUSED(ev))
+{
+	wxDirDialog dlg(NULL, _("Select directory"), "", wxDD_DEFAULT_STYLE | wxDD_DIR_MUST_EXIST);
+	if (dlg.ShowModal() == wxID_OK)
+	{
+		m_ptree->AddPath(dlg.GetPath());
+	}
+}
+
+DirPane::~DirPane()
+{
 }

@@ -35,6 +35,7 @@ class DirTreeCtrl : public wxTreeCtrl
 {
 	friend class DnDFile;
 	friend class DirTreeActor;
+	friend class DirPane;
 public:
     enum
     {
@@ -92,6 +93,8 @@ private:
 
     void DoToggleIcon(const wxTreeItemId& item);
     int ImageSize(void) const { return m_imageSize; }
+	void UpdateThemeColor();
+	void UpdateThemeColor(const wxTreeItemId& idParent, const wxColor &color);
 	
 
 protected:
@@ -137,3 +140,16 @@ private:
 	DirTreeCtrl *m_pOwner;
 };
 
+class  DirPane : public wxPanel
+{
+public:
+	DirPane(wxWindow *parent);
+	~DirPane();
+	void SetWatcher(wxFileSystemWatcher *watcher) { m_ptree->SetWatcher(watcher); }
+	void OnAddButton(wxCommandEvent &ev);
+	void UpdateThemeColor();
+private:
+
+	DirTreeCtrl *m_ptree;
+	wxDECLARE_EVENT_TABLE();
+};

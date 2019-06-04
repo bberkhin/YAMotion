@@ -22,7 +22,7 @@ class ViewGCode;
 class LogWindow;
 class GcmcProcess;
 class DoMathBase;
-class DirTreeCtrl;
+class DirPane;
 class DropFileOpen;
 
 
@@ -130,7 +130,7 @@ private:
 	// edit object
 	LogWindow *m_logwnd;
 	ViewGCode *m_view;
-	DirTreeCtrl *m_dirtree;
+	DirPane *m_dirtree;
 	wxTimer m_timer;
 	wxFileSystemWatcher *m_watcher;
 

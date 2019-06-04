@@ -138,6 +138,12 @@
     <ClCompile Include="..\wxJson\jsonwriter.cpp">
       <Filter>wxJson</Filter>
     </ClCompile>
+    <ClCompile Include="them.cpp">
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
+    <ClCompile Include="editorpanel.cpp">
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h">
@@ -253,6 +259,12 @@
     </ClInclude>
     <ClInclude Include="dirtree.h">
       <Filter>Исходные файлы</Filter>
+    </ClInclude>
+    <ClInclude Include="them.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="editorpanel.h">
+      <Filter>Файлы заголовков</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

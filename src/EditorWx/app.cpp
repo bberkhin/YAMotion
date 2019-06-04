@@ -8,6 +8,7 @@
 #include "standartpaths.h"
 #include "environmentsimple.h"
 #include "prefs.h"
+#include "them.h"
 
 /// RUNCH
 
@@ -18,6 +19,9 @@
 
 #include "..\..\src\stc\scintilla\lexlib\LexerModule.h"
 #include "..\..\src\stc\scintilla\src\Catalogue.h"
+
+
+#include "wx/univ/theme.h"
 
 //============================================================================
 // implementation
@@ -191,6 +195,9 @@ bool App::OnInit()
 	}
 	
 	Preferences::Get()->Read();
+
+	//delete wxTheme::Get();
+	//wxTheme::Set(new YATheme());
 
 	m_frame = new AppFrame(APP_NAME);
 	// open application frame

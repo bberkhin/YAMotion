@@ -535,10 +535,15 @@ void Edit::UpdatePreferences()
 		wxSTC_WRAP_WORD : wxSTC_WRAP_NONE);
 	wxFont font(wxFontInfo(10).Family(wxFONTFAMILY_MODERN));
 	StyleSetFont(wxSTC_STYLE_DEFAULT, font);
-	StyleSetForeground(wxSTC_STYLE_DEFAULT, *wxBLACK);
-	StyleSetBackground(wxSTC_STYLE_DEFAULT, *wxWHITE);
+	//StyleSetForeground(wxSTC_STYLE_DEFAULT, *wxBLACK);
+	//StyleSetBackground(wxSTC_STYLE_DEFAULT, *wxWHITE);
+	StyleSetForeground(wxSTC_STYLE_DEFAULT, *wxWHITE);
+	StyleSetBackground(wxSTC_STYLE_DEFAULT, *wxBLACK);
+	
+
 	StyleSetForeground(wxSTC_STYLE_LINENUMBER, wxColour("DARK GREY"));
 	StyleSetBackground(wxSTC_STYLE_LINENUMBER, *wxWHITE);
+
 	StyleSetForeground(wxSTC_STYLE_INDENTGUIDE, wxColour("DARK GREY"));
 	SetEdgeColumn(80);
 
@@ -602,8 +607,11 @@ bool Edit::InitializePrefs (const LanguageInfo * language)
 
     // set margin for line numbers
     SetMarginType (m_LineNrID, wxSTC_MARGIN_NUMBER);
-    StyleSetForeground (wxSTC_STYLE_LINENUMBER, wxColour ("DARK GREY"));
-    StyleSetBackground (wxSTC_STYLE_LINENUMBER, *wxWHITE);
+	//StyleSetForeground (wxSTC_STYLE_LINENUMBER, wxColour ("DARK GREY"));
+    //StyleSetBackground (wxSTC_STYLE_LINENUMBER, *wxWHITE);
+	StyleSetForeground (wxSTC_STYLE_LINENUMBER, *wxWHITE);
+	StyleSetBackground (wxSTC_STYLE_LINENUMBER, wxColour ("DARK GREY"));
+
     SetMarginWidth (m_LineNrID, 0); // start out not visible
 	if (common_prefs.lineNumberEnable )
 		SetMarginWidth(m_LineNrID, m_LineNrMargin);

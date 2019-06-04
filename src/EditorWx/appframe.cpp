@@ -12,7 +12,8 @@
 #include "app.h"
 #include "appdefs.h"       // Prefs
 #include "defsext.h"     // Additional definitions
-#include "edit.h"        // Edit module
+//#include "edit.h"        // Edit module
+#include "editorpanel.h"
 #include "ViewGCode.h"
 
 #include "about.h"
@@ -293,6 +294,8 @@ AppFrame::AppFrame (const wxString &title)
 {
 	// tell wxAuiManager to manage this frame
 	m_mgr.SetManagedWindow(this);
+	m_mgr.SetArtProvider( Preferences::Get()->GetArtProvider() );
+
 
 	m_notebook_style = wxAUI_NB_DEFAULT_STYLE | wxAUI_NB_TAB_EXTERNAL_MOVE | wxNO_BORDER;
 	m_notebook_theme = 0;
@@ -324,6 +327,9 @@ AppFrame::AppFrame (const wxString &title)
 	SetMenuBar(m_menuBar);
    
 	m_notebook = CreateNotebook();
+	
+	m_notebook->SetArtProvider(wxAuiTabArt);
+
 	m_mgr.AddPane(m_notebook, wxAuiPaneInfo().Name("notebook_content").
 		CenterPane().PaneBorder(false));
 
@@ -333,11 +339,13 @@ AppFrame::AppFrame (const wxString &title)
 		CloseButton(true).MaximizeButton(true));
 
 
-	m_dirtree = new DirTreeCtrl(this);
+	
+	
+	m_dirtree = new DirPane(this);
 	m_mgr.AddPane(m_dirtree, wxAuiPaneInfo().
 		Name("Folders").Caption("Folders").
 		Left().Layer(1).Position(1).
-		CloseButton(true).MaximizeButton(true));
+		CloseButton(false).MaximizeButton(false).CaptionVisible(false));
 	
 
 	m_logwnd = new LogWindow(this, this, wxID_ANY);
@@ -389,13 +397,23 @@ wxAuiNotebook* AppFrame::CreateNotebook()
 		wxPoint(client_size.x, client_size.y),
 		FromDIP(wxSize(330, 200)),
 		m_notebook_style);
+
+	wxColor bgColor = Preferences::Get()->GetArtProvider()->GetColor(wxAUI_DOCKART_BACKGROUND_COLOUR);
+	wxColor fgColor = Preferences::Get()->GetArtProvider()->GetColor(wxAUI_DOCKART_INACTIVE_CAPTION_TEXT_COLOUR);
+
+	ctrl->SetBackgroundColour(bgColor);
+	ctrl->SetForegroundColour(fgColor);
+
 	return ctrl;
 }
 
 Edit *AppFrame::GetActiveFile()
 {
 	wxWindow *wnd = m_notebook->GetCurrentPage();
-	return dynamic_cast<Edit *>(wnd);
+	EditorPanel *panel = dynamic_cast<EditorPanel *>(wnd);
+	if (panel)
+		return panel->GetEdit();
+	return 0;
 }
 
 
@@ -474,10 +492,10 @@ void AppFrame::OnFileRenamed(wxCommandEvent &evn)
 	if (!pstring_data)
 		return;
 
-	Edit *pedit = dynamic_cast<Edit *>(m_notebook->GetPage(nPage));
+	EditorPanel *pedit = dynamic_cast<EditorPanel *>(m_notebook->GetPage(nPage));
 	if (!pedit)
 		return;
-	pedit->SetFileName( pstring_data->GetData() );
+	pedit->GetEdit()->SetFileName( pstring_data->GetData() );
 	UpdateTitle(nPage);	
 }
 
@@ -485,7 +503,7 @@ void AppFrame::OnFileRenamed(wxCommandEvent &evn)
 void AppFrame::OnNotebookPageClose(wxAuiNotebookEvent& evt)
 {
 	wxAuiNotebook* ctrl = (wxAuiNotebook*)evt.GetEventObject();
-	if (ctrl->GetPage(evt.GetSelection())->IsKindOf(CLASSINFO(Edit)))
+	if (ctrl->GetPage(evt.GetSelection())->IsKindOf(CLASSINFO(EditorPanel)))
 	{
 		if ( !DoFileSave(true,false) )
 			evt.Veto();
@@ -584,10 +602,10 @@ bool AppFrame::DoSaveAllFiles()
 	size_t n = m_notebook->GetPageCount();
 	for (size_t i = 0; i < n; ++i)
 	{
-		if (m_notebook->GetPage(i)->IsKindOf(CLASSINFO(Edit)))
+		if (m_notebook->GetPage(i)->IsKindOf(CLASSINFO(EditorPanel)))
 		{
-			Edit *pEdit = dynamic_cast<Edit *>(m_notebook->GetPage(i));
-			if (!DoFileSave(true, false, pEdit ))
+			EditorPanel *pEdit = dynamic_cast<EditorPanel *>(m_notebook->GetPage(i));
+			if (pEdit && !DoFileSave(true, false, pEdit->GetEdit() ))
 			{
 				return false;
 			}
@@ -662,10 +680,10 @@ bool AppFrame::FindPageByFileName(const wxString &new_file_name, size_t *nPage)
 	size_t n = m_notebook->GetPageCount();
 	for (size_t i = 0; i < n; ++i)
 	{
-		if (m_notebook->GetPage(i)->IsKindOf(CLASSINFO(Edit)))
+		if (m_notebook->GetPage(i)->IsKindOf(CLASSINFO(EditorPanel)))
 		{
-			Edit *pEdit = dynamic_cast<Edit *>(m_notebook->GetPage(i));
-			if (pEdit->GetFileName() == new_file_name)
+			EditorPanel *pEdit = dynamic_cast<EditorPanel *>(m_notebook->GetPage(i));
+			if (pEdit->GetEdit()->GetFileName() == new_file_name)
 			{
 				if (nPage)
 					*nPage = i;
@@ -708,12 +726,13 @@ void AppFrame::DoNewFile(int file_type, const wxString &defpath, bool closeWelco
 
 	m_notebook->Freeze();
 	
-	Edit *pedit = new Edit(m_notebook, wxID_ANY);
+	EditorPanel * pedit = new EditorPanel(m_notebook, file_type, defPath.GetFullPath(),true );
+	//Edit *pedit = new Edit(m_notebook, wxID_ANY);
 	m_notebook->AddPage(pedit, new_file_name , true);
-	pedit->NewFile(file_type, defPath.GetFullPath());
+	//pedit->NewFile(file_type, defPath.GetFullPath());
 
-	if (!contextFile.empty())
-		pedit->PasteFile(contextFile.wc_str());
+	if ( !contextFile.empty() )
+		pedit->GetEdit()->PasteFile(contextFile.wc_str());
 		
 	FileChanged();
 	UpdateTitle();
@@ -1211,8 +1230,9 @@ void AppFrame::FileOpen (wxString fname)
 		}
 		else
 		{						
-			Edit *pedit = new Edit(m_notebook, wxID_ANY);
-			pedit->LoadFile(fname);
+			
+			EditorPanel *pedit = new EditorPanel(m_notebook, FILETYPE_UNKNOW, fname, false );
+			//pedit->LoadFile(fname);
 			m_notebook->AddPage(pedit, w.GetFullName(), true);
 			FileChanged();
 			UpdateTitle();
@@ -1236,12 +1256,12 @@ void AppFrame::UpdateTitle(size_t nPage )
 		nPage = m_notebook->GetSelection();
 	if (nPage == wxNOT_FOUND)
 		return;
-	Edit *pedit = dynamic_cast<Edit *>(m_notebook->GetPage(nPage));
+	EditorPanel *pedit = dynamic_cast<EditorPanel *>(m_notebook->GetPage(nPage));
 	if (!pedit)
 		return;
-	wxFileName w(pedit->GetFileName());
+	wxFileName w = pedit->GetEdit()->GetFileName();
 	wxString title = w.GetFullName();
-	if (pedit->Modified())
+	if (pedit->GetEdit()->Modified())
 		title += "*";
 
 	m_notebook->SetPageText(nPage, title);
@@ -1711,10 +1731,10 @@ void AppFrame::UpdatePreferences()
 	size_t n = m_notebook->GetPageCount();
 	for (size_t i = 0; i < n; ++i)
 	{
-		if (m_notebook->GetPage(i)->IsKindOf(CLASSINFO(Edit)))
+		if (m_notebook->GetPage(i)->IsKindOf(CLASSINFO(EditorPanel)))
 		{
-			Edit *pEdit = dynamic_cast<Edit *>(m_notebook->GetPage(i));
-			pEdit->UpdatePreferences();			
+			EditorPanel *pEdit = dynamic_cast<EditorPanel *>(m_notebook->GetPage(i));
+			pEdit->GetEdit()->UpdatePreferences();			
 		}
 	}
 	if (GetActiveFile())

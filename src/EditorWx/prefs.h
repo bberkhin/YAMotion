@@ -113,6 +113,10 @@ private:
 //class Preferences;
 extern class Preferences global_pprefs;
 
+
+
+class  wxAuiDockArt;
+
 class Preferences
 {
 public:
@@ -121,6 +125,7 @@ public:
 	bool Read();
 	static Preferences *Get() { return &global_pprefs; }
 	const CommonInfo &Common() const { return m_common;  }
+	wxAuiDockArt *GetArtProvider();
 	const LanguageInfo *FindByType(int type,bool init = true) ;
 	const LanguageInfo *FindByFileName(const wxString &name, bool init = true);
 	LanguageInfo *FindByName(const wxString &name, bool init = true);
@@ -129,6 +134,7 @@ private:
 private:
 	CommonInfo m_common;
 	std::vector<LanguageInfo>  m_languages;
+	wxAuiDockArt *m_artprovider;
 };
 
 

@@ -1,20 +1,14 @@
 #include "wx/wx.h"
 #include "LexGCode.h"// Preferences
-//#include "defsext.h"     // Additional definitions
 #include "prefs.h"
 #include "wx/stc/stc.h"  // styled text control
 #include "..\..\src\stc\scintilla\include\SciLexer.h"
+#include "wx/jsonreader.h"
+#include "standartpaths.h"
+#include <wx/wfstream.h>
+#include "them.h"
 
 
-//============================================================================
-// declarations
-//============================================================================
-
-
-
-//----------------------------------------------------------------------------
-// keywordlists
-// C++
 
 // GCode 
 const char* GCoddeWordlist = "abs acos asin atan cos exp fix fup ln round sin sqrt tan exists";
@@ -28,166 +22,10 @@ const char* GcmcWordlist2 = "for if while do else return function foreach includ
  
 const char* jsonWordlist = "true false title description default examples";
 
-/*
-//----------------------------------------------------------------------------
-//! languages
-const LanguageInfo g_LanguagePrefs[] = {
-	  // G Code
-	{"G Code",
-	FILETYPE_NC,
-	 "*.ngc;*.nc;*.cnc",
-	SCLEX_GCODE,
-	 {{SCE_GCODE_DEFAULT, NULL},
-	  {SCE_GCODE_COMMENT, NULL},
-	  {SCE_GCODE_COMMENT_ML, NULL},
-	  {SCE_GCODE_G, NULL},
-	  {SCE_GCODE_M, NULL},
-	  {SCE_GCODE_PARAM, NULL},
-	  {SCE_GCODE_VAR, NULL},
-	  {SCE_GCODE_NUMBER, NULL},
-	  {SCE_GCODE_COORDINATE, NULL},
-	  {SCE_GCODE_WORD, GCoddeWordlist },
-	  {SCE_GCODE_OPERATORS,NULL},
-	  {SCE_GCODE_IDENTIFIER, NULL},
-	  {-1, NULL},
-	  {-1, NULL},
-	  {-1, NULL},
-	  {-1, NULL},
-	  {-1, NULL},
-	  {-1, NULL},
-	  {-1, NULL},
-	  {-1, NULL},
-	  {-1, NULL},
-	  {-1, NULL},
-	  {-1, NULL},
-	  {-1, NULL},
-	  {-1, NULL},
-	  {-1, NULL},
-	  {-1, NULL},
-	  {-1, NULL},
-	  {-1, NULL},
-	  {-1, NULL},
-	  {-1, NULL},
-	  {-1, NULL}},
-	 mySTC_FOLD_COMMENT | mySTC_FOLD_COMPACT | mySTC_FOLD_PREPROC},
-	// GCMC
-  {"GCMC",
-   FILETYPE_GCMC,
-   "*.gcmc",
-  SCLEX_GCMC,   
-	{{SCE_GCMC_DEFAULT, NULL},
-	{SCE_GCODE_COMMENT, NULL},
-	{SCE_GCODE_COMMENT_ML, NULL},
-	{SCE_GCODE_G, NULL},
-	{SCE_GCODE_M, NULL},
-	{SCE_GCODE_PARAM, NULL},
-	{SCE_GCODE_VAR, NULL},
-	{SCE_GCODE_NUMBER, NULL},
-	{SCE_GCODE_COORDINATE, NULL},
-	{SCE_GCMC_WORD1, GcmcWordlist1 },
-	{SCE_GCMC_WORD2, GcmcWordlist2 },
-	{SCE_GCMC_WORD2, GcmcWordlist2 },
-	{SCE_GCODE_OPERATORS,NULL},
-	{SCE_GCODE_IDENTIFIER, NULL},
-	{SCE_GCMC_STRING,NULL},	
-	{-1, NULL},
-	{-1, NULL},
-	{-1, NULL},
-	{-1, NULL},
-	{-1, NULL},
-	{-1, NULL},
-	{-1, NULL},
-	{-1, NULL},
-	{-1, NULL},
-	{-1, NULL},
-	{-1, NULL},
-	{-1, NULL},
-	{-1, NULL},
-	{-1, NULL},
-	{-1, NULL},
-	{-1, NULL},
-	{-1, NULL}},
-   mySTC_FOLD_COMMENT | mySTC_FOLD_COMPACT | mySTC_FOLD_PREPROC},
-
-	// * (any)
-{wxTRANSLATE("<default>"), FILETYPE_UNKNOW,
-    "*.*",
-    wxSTC_LEX_PROPERTIES,
-    {{mySTC_TYPE_DEFAULT, NULL},
-    {mySTC_TYPE_DEFAULT, NULL},
-    {mySTC_TYPE_DEFAULT, NULL},
-    {mySTC_TYPE_DEFAULT, NULL},
-    {mySTC_TYPE_DEFAULT, NULL},
-    {-1, NULL},
-    {-1, NULL},
-    {-1, NULL},
-    {-1, NULL},
-    {-1, NULL},
-    {-1, NULL},
-    {-1, NULL},
-    {-1, NULL},
-    {-1, NULL},
-    {-1, NULL},
-    {-1, NULL},
-    {-1, NULL},
-    {-1, NULL},
-    {-1, NULL},
-    {-1, NULL},
-    {-1, NULL},
-    {-1, NULL},
-    {-1, NULL},
-    {-1, NULL},
-    {-1, NULL},
-    {-1, NULL},
-    {-1, NULL},
-    {-1, NULL},
-    {-1, NULL},
-    {-1, NULL},
-    {-1, NULL},
-    {-1, NULL}},
-    0},
-    };
-
-const int g_LanguagePrefsSize = WXSIZEOF(g_LanguagePrefs);
-
-//----------------------------------------------------------------------------
-//! style types
-
-
-
-
-
-
-const StyleInfo g_StylePrefs [] = {
-{"SCE_GCODE_DEFAULT","GRAY", "WHITE", "", 10, 0, 0},
-{"SCE_GCODE_COMMENT", "FOREST GREEN", "WHITE", "", 10, 0, 0},
-{"SCE_GCODE_COMMENT_ML","FOREST GREEN", "WHITE","", 10, 0, 0},
-{"3SCE_GCODE_G","BLUE", "WHITE","", 10, true, 0},
-{"SCE_GCODE_M","RED", "WHITE","", 10, true, 0},
-{"SCE_GCODE_PARAM","BROWN", "WHITE","", 10, true, 0},
-{"SCE_GCODE_VAR","SIENNA", "WHITE","", 10, true, 0},
-{"SCE_GCODE_NUMBER","BLACK", "WHITE","", 10, true, 0},
-{"SCE_GCODE_COORDINATE","MAGENTA", "WHITE","", 10, true, 0},
-{"SCE_GCODE_WORD","RED", "WHITE","", 10, true, 0},
-{"SCE_GCODE_OPERATORS","VIOLET RED", "WHITE", "", 10, true, 0},
-{"SCE_GCODE_IDENTIFIER","BLACK", "WHITE","", 10, 0, 0},
-{"SCE_GCMC_DEFAULT","BLACK", "WHITE","", 10, true, 0},
-{"SCE_GCMC_WORD1","RED", "WHITE","", 10, true, 0},
-{"SCE_GCMC_WORD2","BLUE", "WHITE","", 10, true, 0},
-{"SCE_GCMC_STRING","GREEN", "WHITE","", 10, true, 0}
- };
-
-const int g_StylePrefsSize = WXSIZEOF(g_StylePrefs);
-
-*/
-#include "wx/jsonreader.h"
-#include "standartpaths.h"
-#include <wx/wfstream.h>
-
 Preferences global_pprefs;
 
 
-Preferences::Preferences()
+Preferences::Preferences() : m_artprovider(0)
 {	
 	m_common = {
 		// editor functionality prefs
@@ -351,6 +189,13 @@ bool Preferences::DoRead(const wxString& fileName, bool errifnoexist )
 	return true;
 }
 
+
+wxAuiDockArt *Preferences::GetArtProvider()
+{
+	if ( !m_artprovider )
+		m_artprovider = new ThemArtProvider();
+	return m_artprovider;
+}
 
 LanguageInfo::LanguageInfo(const char *name, int file_type, int lexer, const char *filepattern)
 	: m_name(name), m_inited(false), m_file_type(file_type), m_lexer(lexer), m_fold(0), m_filepattern(filepattern)
@@ -547,3 +392,4 @@ bool  LanguageInfo::Match(const wxString &fname)
 	}
 	return false;
 }
+
