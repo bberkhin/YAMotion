@@ -1,8 +1,7 @@
 #include "wx/wx.h"
 #include "them.h"
 #include "wx\univ\colschem.h"
-
-//#include "wx/aui/auibook.h"
+#include "wx/aui/auibook.h"
 //#include "wx/aui/tabart.h"
 //#include "wx/settings.h"
 //#include "wx/dcclient.h"
@@ -223,3 +222,117 @@ wxColourScheme *YATheme::GetColourScheme()
 
 }
 */
+
+EditorTabArt::EditorTabArt() 
+	: m_maxTabHeight_(0)
+{
+	UpdateColoursFromSystem();
+}
+EditorTabArt::~EditorTabArt()
+{
+}
+
+EditorTabArt *EditorTabArt::Clone()
+{
+	return new EditorTabArt(*this);
+}
+
+int EditorTabArt::GetBorderWidth(wxWindow* )
+{
+	return 1;
+}
+
+
+
+void EditorTabArt::DrawTab(wxDC& dc, wxWindow* wnd,
+	const wxAuiNotebookPage& page,
+	const wxRect& in_rect,
+	int close_button_state,
+	wxRect* out_tab_rect,
+	wxRect* out_button_rect,
+	int* x_extent)
+
+{
+	if (page.active)
+	{
+		dc.SetTextForeground(*wxRED);
+	}
+	else
+	{
+		dc.SetTextForeground(*wxGREEN);
+	}
+
+	wxAuiGenericTabArt::DrawTab(dc, wnd, page, in_rect, close_button_state,
+		out_tab_rect, out_button_rect, x_extent);
+
+}
+
+void EditorTabArt::DrawBackground(wxDC& dc, wxWindow* wnd, const wxRect& rect)
+{
+
+	wxAuiGenericTabArt::DrawBackground(dc, wnd, rect);
+	/*
+	int borderHeight = 2;
+	wxRect drawRect = rect;
+	drawRect.height -= borderHeight;
+
+	// Draw background
+	wxColor clr(*wxBLACK);// = wnd->GetBackgroundColour();
+	dc.SetBrush(wxBrush(clr));
+	dc.SetPen(*wxTRANSPARENT_PEN);
+	dc.DrawRectangle(drawRect);
+	// Draw top border
+	drawRect.y = drawRect.height;
+	drawRect.height = borderHeight + 2;
+	drawRect.Inflate(1, 0);
+	*/
+
+}
+
+wxSize EditorTabArt::GetTabSize(wxDC& dc, wxWindow* wnd, const wxString& caption, const wxBitmap& bitmap, bool active, int closeButtonState, int* xExtent)
+{
+	wxSize sz = wxAuiGenericTabArt::GetTabSize(dc, wnd, caption, bitmap, active, closeButtonState, xExtent);
+	m_maxTabHeight_ = sz.GetHeight();
+	return sz;
+}
+
+void EditorTabArt::DrawBorder(wxDC& dc, wxWindow* wnd, const wxRect& rect)
+{
+	wxAuiGenericTabArt::DrawBorder(dc, wnd, rect);
+	//wxRect drawRect(rect);
+	//drawRect.y += m_maxTabHeight_ + wnd->FromDIP(1);
+	//drawRect.height -= m_maxTabHeight_;
+
+	//// Mask border not covered by native theme
+	//wxRect topDrawRect(rect);
+	//topDrawRect.height = drawRect.height;
+
+	//wxColor clrbg("GREEN");
+	//int borderw = 2;
+
+	//dc.SetPen(wxPen(clrbg, borderw));
+	////dc.DrawRectangle(topDrawRect);
+	//dc.DrawRectangle(drawRect);
+}
+
+
+void EditorTabArt::UpdateColoursFromSystem()
+{
+
+	wxColor baseColour(*wxBLACK);
+
+	if ((255 - baseColour.Red()) +
+		(255 - baseColour.Green()) +
+		(255 - baseColour.Blue()) < 60)
+	{
+		baseColour = baseColour.ChangeLightness(92);
+	}
+
+	m_activeColour = *wxYELLOW;
+	m_baseColour = baseColour;
+	wxColor borderColour = baseColour;//  *wxYELLOW;//baseColour.ChangeLightness(75);
+
+	m_borderPen = wxPen(borderColour);
+	m_baseColourPen = wxPen(m_baseColour);
+	m_baseColourBrush = wxBrush(m_baseColour);
+}

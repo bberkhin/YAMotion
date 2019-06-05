@@ -4,6 +4,7 @@
 #include "prefs.h"
 #include "wx/aui/framemanager.h"
 #include "wx/aui/dockart.h"
+#include "flatbuttom.h"
 
 wxBEGIN_EVENT_TABLE(EditorPanel, wxPanel)
 wxEND_EVENT_TABLE()
@@ -13,6 +14,8 @@ wxIMPLEMENT_ABSTRACT_CLASS(EditorPanel, wxPanel);
 EditorPanel::EditorPanel(wxWindow *parent, int filetype, const wxString &filename, bool isnew) :
 	wxPanel(parent)
 {
+	long style = GetWindowStyle();
+	SetWindowStyle(style | wxBORDER_NONE);
 
 	m_pedit = new Edit(this, wxID_ANY);
 	if (isnew)
@@ -49,14 +52,14 @@ wxBoxSizer *EditorPanel::CreateHeaderPanel()
 		totalpane->Add(txt, 1, wxALIGN_CENTRE_VERTICAL);// wxEXPAND);
 	}
 
-	wxButton *padd = new wxButton(this, 100, _("3D VIEW"), wxDefaultPosition, wxDefaultSize, wxBU_LEFT); //wxBORDER_NONE
-	wxBitmap bmp = wxArtProvider::GetBitmap(wxART_GOTO_LAST, wxART_OTHER, FromDIP(wxSize(16, 16)));
-	padd->SetBitmap(bmp, wxRIGHT);
+	FlatButtom *padd = new FlatButtom(this, 100, _("3D VIEW"));// , wxDefaultPosition, wxDefaultSize, wxBU_LEFT); //wxBORDER_NONE
+	//wxBitmap bmp = wxArtProvider::GetBitmap(wxART_GOTO_LAST, wxART_OTHER, FromDIP(wxSize(16, 16)));
+	//padd->SetBitmap(bmp, wxRIGHT);
 	totalpane->Add(padd, 0, wxRIGHT);
 
-	wxButton *padd1 = new wxButton(this, 101, _("CHECK"), wxDefaultPosition, wxDefaultSize, wxBU_LEFT); //wxBORDER_NONE
-	wxBitmap bmp1 = wxArtProvider::GetBitmap(wxART_ADD_BOOKMARK, wxART_OTHER, FromDIP(wxSize(16, 16)));
-	padd1->SetBitmap(bmp1, wxRIGHT);
+	FlatButtom *padd1 = new FlatButtom(this, 101, _("CHECK"));// , wxDefaultPosition, wxDefaultSize, wxBU_LEFT); //wxBORDER_NONE
+	//wxBitmap bmp1 = wxArtProvider::GetBitmap(wxART_ADD_BOOKMARK, wxART_OTHER, FromDIP(wxSize(16, 16)));
+	//padd1->SetBitmap(bmp1, wxRIGHT);
 	totalpane->Add(padd1, 0,  wxRIGHT);
 	return totalpane;
 }

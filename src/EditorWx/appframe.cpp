@@ -32,6 +32,7 @@
 #include "mathexpressiondlg.h"
 #include "welcomewnd.h"
 #include "dirtree.h"
+#include "them.h"
 
 
 //Bitmaps
@@ -294,7 +295,7 @@ AppFrame::AppFrame (const wxString &title)
 {
 	// tell wxAuiManager to manage this frame
 	m_mgr.SetManagedWindow(this);
-	m_mgr.SetArtProvider( Preferences::Get()->GetArtProvider() );
+	m_mgr.SetArtProvider( Preferences::Get()->GetArtProvider(true) );
 
 
 	m_notebook_style = wxAUI_NB_DEFAULT_STYLE | wxAUI_NB_TAB_EXTERNAL_MOVE | wxNO_BORDER;
@@ -315,7 +316,7 @@ AppFrame::AppFrame (const wxString &title)
 
     // set icon and background
     SetTitle (APP_NAME);
-    SetBackgroundColour ("WHITE");
+    //SetBackgroundColour ("GREEN");
 
 
 	ConfigData *config;
@@ -325,10 +326,9 @@ AppFrame::AppFrame (const wxString &title)
     // create menu
 	wxMenuBar *m_menuBar = CreateMenu();
 	SetMenuBar(m_menuBar);
-   
-	m_notebook = CreateNotebook();
+
 	
-	m_notebook->SetArtProvider(wxAuiTabArt);
+	m_notebook = CreateNotebook();
 
 	m_mgr.AddPane(m_notebook, wxAuiPaneInfo().Name("notebook_content").
 		CenterPane().PaneBorder(false));
@@ -368,6 +368,7 @@ AppFrame::AppFrame (const wxString &title)
 		ToolbarPane().Top().Row(1));
 
 	m_mgr.Update();
+	
 	ShowWelcome();
 
 	SetDropTarget(new DropFileOpen(this));
@@ -387,23 +388,33 @@ AppFrame::~AppFrame ()
 		delete m_watcher;
 }
 
+class StubNotebook : public wxAuiNotebook
+{
+public:
+	StubNotebook() { }
+	~StubNotebook() {}
+
+	void SetAuiArtProvider()
+	{
+		m_mgr.SetArtProvider(Preferences::Get()->GetArtProvider(true));
+	}
+};
+
+
 
 wxAuiNotebook* AppFrame::CreateNotebook()
 {
 	// create the notebook off-window to avoid flicker
 	wxSize client_size = GetClientSize();
 
-	wxAuiNotebook* ctrl = new wxAuiNotebook(this, wxID_ANY,
+	StubNotebook* ctrl = new StubNotebook();
+	ctrl->SetAuiArtProvider();
+
+	ctrl->Create(this, wxID_ANY,
 		wxPoint(client_size.x, client_size.y),
 		FromDIP(wxSize(330, 200)),
 		m_notebook_style);
-
-	wxColor bgColor = Preferences::Get()->GetArtProvider()->GetColor(wxAUI_DOCKART_BACKGROUND_COLOUR);
-	wxColor fgColor = Preferences::Get()->GetArtProvider()->GetColor(wxAUI_DOCKART_INACTIVE_CAPTION_TEXT_COLOUR);
-
-	ctrl->SetBackgroundColour(bgColor);
-	ctrl->SetForegroundColour(fgColor);
-
+	ctrl->SetArtProvider(Preferences::Get()->GetTabArtProvider());
 	return ctrl;
 }
 

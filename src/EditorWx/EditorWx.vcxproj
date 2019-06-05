@@ -45,6 +45,7 @@
     <ClCompile Include="editorpanel.cpp" />
     <ClCompile Include="executorlog.cpp" />
     <ClCompile Include="executorview.cpp" />
+    <ClCompile Include="flatbuttom.cpp" />
     <ClCompile Include="LexGcmc.cxx" />
     <ClCompile Include="LexGCode.cxx" />
     <ClCompile Include="logwindow.cpp" />
@@ -90,6 +91,7 @@
     <ClInclude Include="editorpanel.h" />
     <ClInclude Include="executorlog.h" />
     <ClInclude Include="executorview.h" />
+    <ClInclude Include="flatbuttom.h" />
     <ClInclude Include="LexGCode.h" />
     <ClInclude Include="logwindow.h" />
     <ClInclude Include="macroses.h" />

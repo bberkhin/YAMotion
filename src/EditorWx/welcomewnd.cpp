@@ -44,7 +44,8 @@ public:
 WelcomeWnd::WelcomeWnd(wxWindow *parent) : wxHtmlWindow()
 {
 	// tempoary create own frame
-
+	long style = GetWindowStyle();
+	SetWindowStyle(style | wxBORDER_NONE );
 	pWelcomeFrame = new wxFrame(parent, wxID_ANY, _("Welcome Wnd"));
 	Create(pWelcomeFrame);
 	SetRelatedFrame(pWelcomeFrame, _("Welcome Wnd1"));

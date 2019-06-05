@@ -190,12 +190,20 @@ bool Preferences::DoRead(const wxString& fileName, bool errifnoexist )
 }
 
 
-wxAuiDockArt *Preferences::GetArtProvider()
+wxAuiDockArt *Preferences::GetArtProvider(bool createnew)
 {
-	if ( !m_artprovider )
+	if ( !m_artprovider || createnew )
 		m_artprovider = new ThemArtProvider();
 	return m_artprovider;
 }
+
+wxAuiTabArt *Preferences::GetTabArtProvider()
+{
+	if (!m_tabartprovider)
+		m_tabartprovider = new EditorTabArt();
+	return m_tabartprovider;
+}
+
 
 LanguageInfo::LanguageInfo(const char *name, int file_type, int lexer, const char *filepattern)
 	: m_name(name), m_inited(false), m_file_type(file_type), m_lexer(lexer), m_fold(0), m_filepattern(filepattern)
