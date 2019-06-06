@@ -10,6 +10,8 @@
 #ifndef _PREFS_H_
 #define _PREFS_H_
 
+#include "them.h"
+
 #define mySTC_FOLD_COMMENT 1
 #define mySTC_FOLD_COMPACT 2
 #define mySTC_FOLD_PREPROC 4
@@ -115,8 +117,9 @@ extern class Preferences global_pprefs;
 
 
 
-class  wxAuiDockArt;
+class wxAuiDockArt;
 class wxAuiTabArt;
+
 
 class Preferences
 {
@@ -128,6 +131,8 @@ public:
 	const CommonInfo &Common() const { return m_common;  }
 	wxAuiDockArt *GetArtProvider(bool createnew = false);
 	wxAuiTabArt *GetTabArtProvider();
+	ColourScheme *GetColorScheme();
+	const wxColor & GetStdColor(ColourScheme::StdColour code);
 	const LanguageInfo *FindByType(int type,bool init = true) ;
 	const LanguageInfo *FindByFileName(const wxString &name, bool init = true);
 	LanguageInfo *FindByName(const wxString &name, bool init = true);
@@ -138,8 +143,8 @@ private:
 	std::vector<LanguageInfo>  m_languages;
 	wxAuiDockArt *m_artprovider;
 	wxAuiTabArt *m_tabartprovider;
+	ColourScheme *m_colors;
 };
-
 
 
 #endif // _PREFS_H_

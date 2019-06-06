@@ -6,6 +6,7 @@
 #include "edit.h"        // edit module
 #include "codedescription.h"
 #include "configdata.h"
+#include "prefs.h"
 
 
 #if wxUSE_FFILE
@@ -14,21 +15,6 @@
 #include "wx/file.h"
 #endif
 
-//----------------------------------------------------------------------------
-// resources
-//----------------------------------------------------------------------------
-
-
-//============================================================================
-// declarations
-//============================================================================
-
-// The (uniform) style used for the annotations.
-const int ANNOTATION_STYLE = wxSTC_STYLE_LASTPREDEFINED + 1;
-
-//============================================================================
-// implementation
-//============================================================================
 
 //----------------------------------------------------------------------------
 // Edit
@@ -80,13 +66,6 @@ wxBEGIN_EVENT_TABLE(Edit, wxStyledTextCtrl)
 	EVT_MENU(ID_WRAPMODEON, Edit::OnWrapmodeOn)
 	EVT_MENU(ID_CHARSETANSI, Edit::OnUseCharset)
 	EVT_MENU(ID_CHARSETMAC, Edit::OnUseCharset)
-	// annotations
-	EVT_MENU(ID_ANNOTATION_ADD, Edit::OnAnnotationAdd)
-	EVT_MENU(ID_ANNOTATION_REMOVE, Edit::OnAnnotationRemove)
-	EVT_MENU(ID_ANNOTATION_CLEAR, Edit::OnAnnotationClear)
-	EVT_MENU(ID_ANNOTATION_STYLE_HIDDEN, Edit::OnAnnotationStyle)
-	EVT_MENU(ID_ANNOTATION_STYLE_STANDARD, Edit::OnAnnotationStyle)
-	EVT_MENU(ID_ANNOTATION_STYLE_BOXED, Edit::OnAnnotationStyle)
 	// extra
 	EVT_MENU(ID_CHANGELOWER, Edit::OnChangeCase)
 	EVT_MENU(ID_CHANGEUPPER, Edit::OnChangeCase)
@@ -288,79 +267,6 @@ void Edit::OnUseCharset (wxCommandEvent &event) {
     SetCodePage (charset);
 }
 
-void Edit::OnAnnotationAdd(wxCommandEvent& WXUNUSED(event))
-{
-    const int line = GetCurrentLine();
-
-    wxString ann = AnnotationGetText(line);
-    ann = wxGetTextFromUser
-          (
-            wxString::Format("Enter annotation for the line %d", line),
-            "Edit annotation",
-            ann,
-            this
-          );
-    if ( ann.empty() )
-        return;
-
-    AnnotationSetText(line, ann);
-    AnnotationSetStyle(line, ANNOTATION_STYLE);
-
-    // Scintilla doesn't update the scroll width for annotations, even with
-    // scroll width tracking on, so do it manually.
-    const int width = GetScrollWidth();
-
-    // NB: The following adjustments are only needed when using
-    //     wxSTC_ANNOTATION_BOXED annotations style, but we apply them always
-    //     in order to make things simpler and not have to redo the width
-    //     calculations when the annotations visibility changes. In a real
-    //     program you'd either just stick to a fixed annotations visibility or
-    //     update the width when it changes.
-
-    // Take into account the fact that the annotation is shown indented, with
-    // the same indent as the line it's attached to.
-    int indent = GetLineIndentation(line);
-
-    // This is just a hack to account for the width of the box, there doesn't
-    // seem to be any way to get it directly from Scintilla.
-    indent += 3;
-
-    const int widthAnn = TextWidth(ANNOTATION_STYLE, ann + wxString(indent, ' '));
-
-    if (widthAnn > width)
-        SetScrollWidth(widthAnn);
-}
-
-void Edit::OnAnnotationRemove(wxCommandEvent& WXUNUSED(event))
-{
-    AnnotationSetText(GetCurrentLine(), wxString());
-}
-
-void Edit::OnAnnotationClear(wxCommandEvent& WXUNUSED(event))
-{
-    AnnotationClearAll();
-}
-
-void Edit::OnAnnotationStyle(wxCommandEvent& event)
-{
-    int style = 0;
-    switch (event.GetId()) {
-        case ID_ANNOTATION_STYLE_HIDDEN:
-            style = wxSTC_ANNOTATION_HIDDEN;
-            break;
-
-        case ID_ANNOTATION_STYLE_STANDARD:
-            style = wxSTC_ANNOTATION_STANDARD;
-            break;
-
-        case ID_ANNOTATION_STYLE_BOXED:
-            style = wxSTC_ANNOTATION_BOXED;
-            break;
-    }
-
-    AnnotationSetVisible(style);
-}
-
 void Edit::OnChangeCase (wxCommandEvent &event) 
 {
     switch (event.GetId()) 
@@ -520,6 +426,7 @@ void Edit::OnDwellEnd(wxStyledTextEvent &event)
 void Edit::UpdatePreferences()
 {
 
+	ColourScheme *clrs = Preferences::Get()->GetColorScheme();
 	const CommonInfo &common_prefs = Preferences::Get()->Common();
 
 	// default font for all styles
@@ -535,16 +442,15 @@ void Edit::UpdatePreferences()
 		wxSTC_WRAP_WORD : wxSTC_WRAP_NONE);
 	wxFont font(wxFontInfo(10).Family(wxFONTFAMILY_MODERN));
 	StyleSetFont(wxSTC_STYLE_DEFAULT, font);
-	//StyleSetForeground(wxSTC_STYLE_DEFAULT, *wxBLACK);
-	//StyleSetBackground(wxSTC_STYLE_DEFAULT, *wxWHITE);
-	StyleSetForeground(wxSTC_STYLE_DEFAULT, *wxWHITE);
-	StyleSetBackground(wxSTC_STYLE_DEFAULT, *wxBLACK);
+	
+	StyleSetForeground(wxSTC_STYLE_DEFAULT, clrs->Get(ColourScheme::WINDOW_TEXT));
+	StyleSetBackground(wxSTC_STYLE_DEFAULT, clrs->Get(ColourScheme::WINDOW));
 	
 
-	StyleSetForeground(wxSTC_STYLE_LINENUMBER, wxColour("DARK GREY"));
-	StyleSetBackground(wxSTC_STYLE_LINENUMBER, *wxWHITE);
+	StyleSetForeground(wxSTC_STYLE_LINENUMBER, clrs->Get(ColourScheme::LINENUMBER_TEXT));
+	StyleSetBackground(wxSTC_STYLE_LINENUMBER, clrs->Get(ColourScheme::LINENUMBER));
 
-	StyleSetForeground(wxSTC_STYLE_INDENTGUIDE, wxColour("DARK GREY"));
+	StyleSetForeground(wxSTC_STYLE_INDENTGUIDE, clrs->Get(ColourScheme::LINENUMBER_TEXT));
 	SetEdgeColumn(80);
 
 
@@ -574,8 +480,8 @@ void Edit::UpdatePreferences()
 	SetLayoutCache(wxSTC_CACHE_PAGE);
 	UsePopUp(wxSTC_POPUP_NEVER); //wxSTC_POPUP_ALL
 
-	CallTipSetBackground(*wxYELLOW);
-	CallTipSetForeground(*wxBLACK);
+	CallTipSetBackground(clrs->Get(ColourScheme::CALLTIP));
+	CallTipSetForeground(clrs->Get(ColourScheme::CALLTIP_TEXT));
 	SetMouseDwellTime(2000);
 
 
@@ -597,6 +503,8 @@ void Edit::UpdatePreferences()
 bool Edit::InitializePrefs (const LanguageInfo * language)
 {
 
+	ColourScheme *clrs = Preferences::Get()->GetColorScheme();
+
     // initialize styles
     StyleClearAll();
 	const CommonInfo &common_prefs = Preferences::Get()->Common();
@@ -607,20 +515,14 @@ bool Edit::InitializePrefs (const LanguageInfo * language)
 
     // set margin for line numbers
     SetMarginType (m_LineNrID, wxSTC_MARGIN_NUMBER);
-	//StyleSetForeground (wxSTC_STYLE_LINENUMBER, wxColour ("DARK GREY"));
-    //StyleSetBackground (wxSTC_STYLE_LINENUMBER, *wxWHITE);
-	StyleSetForeground (wxSTC_STYLE_LINENUMBER, *wxWHITE);
-	StyleSetBackground (wxSTC_STYLE_LINENUMBER, wxColour ("DARK GREY"));
+
+	StyleSetForeground(wxSTC_STYLE_LINENUMBER, clrs->Get(ColourScheme::LINENUMBER_TEXT));
+	StyleSetBackground(wxSTC_STYLE_LINENUMBER, clrs->Get(ColourScheme::LINENUMBER));
+
 
     SetMarginWidth (m_LineNrID, 0); // start out not visible
 	if (common_prefs.lineNumberEnable )
 		SetMarginWidth(m_LineNrID, m_LineNrMargin);
-
-    // annotations style
-    StyleSetBackground(ANNOTATION_STYLE, wxColour(244, 220, 220));
-    StyleSetForeground(ANNOTATION_STYLE, *wxBLACK);
-    StyleSetSizeFractional(ANNOTATION_STYLE,
-            (StyleGetSizeFractional(wxSTC_STYLE_DEFAULT)*4)/5);
 
     // default fonts for all styles!
 
@@ -633,8 +535,10 @@ bool Edit::InitializePrefs (const LanguageInfo * language)
     }
 
     // set common styles
-    StyleSetForeground (wxSTC_STYLE_DEFAULT, wxColour ("DARK GREY"));
-    StyleSetForeground (wxSTC_STYLE_INDENTGUIDE, wxColour ("DARK GREY"));
+    StyleSetForeground (wxSTC_STYLE_DEFAULT, clrs->Get(ColourScheme::WINDOW_TEXT));
+    StyleSetForeground (wxSTC_STYLE_INDENTGUIDE, clrs->Get(ColourScheme::WINDOW_TEXT));
+	StyleSetBackground(wxSTC_STYLE_DEFAULT, clrs->Get(ColourScheme::WINDOW));
+	StyleSetBackground(wxSTC_STYLE_INDENTGUIDE, clrs->Get(ColourScheme::WINDOW));
 
     // initialize settings
     if (common_prefs.syntaxEnable) 
@@ -651,10 +555,10 @@ bool Edit::InitializePrefs (const LanguageInfo * language)
                             .FaceName(curType.fontname));
             StyleSetFont (style, font);
 			StyleSetFontEncoding(style, wxFONTENCODING_CP1251);
-            if (curType.foreground.length()) {
+            if (!curType.foreground.IsEmpty()) {
                 StyleSetForeground (style, wxColour (curType.foreground));
             }
-            if (curType.background.length()) {
+            if (!curType.background.IsEmpty()) {
                 StyleSetBackground (style, wxColour (curType.background));
             }
             StyleSetBold (style, curType.bold);
@@ -675,6 +579,7 @@ bool Edit::InitializePrefs (const LanguageInfo * language)
     SetMarginWidth (m_DividerID, 0);
     SetMarginSensitive (m_DividerID, false);
 
+	/*
     // folding
     SetMarginType (m_FoldingID, wxSTC_MARGIN_SYMBOL);
     SetMarginMask (m_FoldingID, wxSTC_MASK_FOLDERS);
@@ -704,7 +609,7 @@ bool Edit::InitializePrefs (const LanguageInfo * language)
     SetFoldFlags (wxSTC_FOLDFLAG_LINEBEFORE_CONTRACTED |
                   wxSTC_FOLDFLAG_LINEAFTER_CONTRACTED);
 
-   
+   */
     return true;
 }
 

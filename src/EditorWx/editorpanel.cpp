@@ -6,7 +6,12 @@
 #include "wx/aui/dockart.h"
 #include "flatbuttom.h"
 
+#define ID_TO3DBUTTON 100
+#define ID_TOGCODEBUTTON 101
+
 wxBEGIN_EVENT_TABLE(EditorPanel, wxPanel)
+EVT_BUTTON(ID_TO3DBUTTON, EditorPanel::OnTo3DButton)
+EVT_BUTTON(ID_TOGCODEBUTTON, EditorPanel::OnToGcodeButton)
 wxEND_EVENT_TABLE()
 
 wxIMPLEMENT_ABSTRACT_CLASS(EditorPanel, wxPanel);
@@ -52,15 +57,22 @@ wxBoxSizer *EditorPanel::CreateHeaderPanel()
 		totalpane->Add(txt, 1, wxALIGN_CENTRE_VERTICAL);// wxEXPAND);
 	}
 
-	FlatButtom *padd = new FlatButtom(this, 100, _("3D VIEW"));// , wxDefaultPosition, wxDefaultSize, wxBU_LEFT); //wxBORDER_NONE
-	//wxBitmap bmp = wxArtProvider::GetBitmap(wxART_GOTO_LAST, wxART_OTHER, FromDIP(wxSize(16, 16)));
-	//padd->SetBitmap(bmp, wxRIGHT);
-	totalpane->Add(padd, 0, wxRIGHT);
 
-	FlatButtom *padd1 = new FlatButtom(this, 101, _("CHECK"));// , wxDefaultPosition, wxDefaultSize, wxBU_LEFT); //wxBORDER_NONE
-	//wxBitmap bmp1 = wxArtProvider::GetBitmap(wxART_ADD_BOOKMARK, wxART_OTHER, FromDIP(wxSize(16, 16)));
-	//padd1->SetBitmap(bmp1, wxRIGHT);
+	
+	FlatButtom *padd = new FlatButtom(this, ID_TO3DBUTTON, _("3D VIEW") );// , wxDefaultPosition, wxDefaultSize, wxBU_LEFT );
+	wxBitmap bmp = wxArtProvider::GetBitmap(wxART_GOTO_LAST, wxART_OTHER, FromDIP(wxSize(16, 16)));
+	padd->SetWindowStyle(wxBORDER_NONE);
+	padd->SetBitmap(bmp);
+	totalpane->Add(padd, 0, wxRIGHT);
+	totalpane->AddSpacer(10);
+
+
+
+	FlatButtom *padd1 = new FlatButtom(this, ID_TOGCODEBUTTON, _("CHECK"));// , wxDefaultPosition, wxDefaultSize, wxBU_LEFT); //wxBORDER_NONE
+	wxBitmap bmp1 = wxArtProvider::GetBitmap(wxART_ADD_BOOKMARK, wxART_OTHER, FromDIP(wxSize(16, 16)));
+	padd1->SetBitmap(bmp1);
 	totalpane->Add(padd1, 0,  wxRIGHT);
+	totalpane->AddSpacer(10);
 	return totalpane;
 }
 
@@ -73,12 +85,15 @@ EditorPanel::~EditorPanel()
 
 void EditorPanel::UpdateThemeColor()
 {
-
-	wxColor bgColor = Preferences::Get()->GetArtProvider()->GetColor(wxAUI_DOCKART_BACKGROUND_COLOUR);
-	wxColor fgColor = Preferences::Get()->GetArtProvider()->GetColor(wxAUI_DOCKART_INACTIVE_CAPTION_TEXT_COLOUR);
+	ColourScheme *clrs = Preferences::Get()->GetColorScheme();
+	wxColor bgColor = clrs->Get(ColourScheme::WINDOW);
+	wxColor fgColor = clrs->Get(ColourScheme::WINDOW_TEXT);
 
 	SetBackgroundColour(bgColor);
 	SetForegroundColour(fgColor);
+	//m_pedit->SetBackgroundColour(bgColor);
+	//m_pedit->SetForegroundColour(fgColor);
+
 	wxWindowList::compatibility_iterator node = GetChildren().GetFirst();
 	while (node)
 	{
@@ -88,3 +103,9 @@ void EditorPanel::UpdateThemeColor()
 		node = node->GetNext();
 	}
 }
+
+void EditorPanel::OnTo3DButton(wxCommandEvent& WXUNUSED(ev))
+{}
+
+void EditorPanel::OnToGcodeButton(wxCommandEvent& WXUNUSED(ev))
+{}

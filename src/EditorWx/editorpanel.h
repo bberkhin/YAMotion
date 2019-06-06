@@ -9,6 +9,9 @@ public:
 	virtual ~EditorPanel();
 	Edit *GetEdit() { return m_pedit; }
 	void UpdateThemeColor();
+	void OnTo3DButton(wxCommandEvent& ev);
+	void OnToGcodeButton(wxCommandEvent& ev);
+
 protected:
 
 	wxBoxSizer *CreateHeaderPanel();

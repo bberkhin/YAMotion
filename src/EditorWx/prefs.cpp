@@ -6,7 +6,7 @@
 #include "wx/jsonreader.h"
 #include "standartpaths.h"
 #include <wx/wfstream.h>
-#include "them.h"
+
 
 
 
@@ -25,7 +25,7 @@ const char* jsonWordlist = "true false title description default examples";
 Preferences global_pprefs;
 
 
-Preferences::Preferences() : m_artprovider(0)
+Preferences::Preferences() : m_artprovider(0), m_tabartprovider(0)
 {	
 	m_common = {
 		// editor functionality prefs
@@ -47,6 +47,7 @@ Preferences::Preferences() : m_artprovider(0)
 		"" //them_color
 	};
 
+	m_colors = new ColourScheme();
 	m_languages.push_back(LanguageInfo("GCODE",FILETYPE_NC, SCLEX_GCODE, "*.ngc; *.nc; *.cnc" ));
 	m_languages.push_back(LanguageInfo("GCMC", FILETYPE_GCMC, SCLEX_GCMC, "*.gcmc"));
 	m_languages.push_back(LanguageInfo("JSON", FILETYPE_JSON, SCLEX_JSON, "*.json"));
@@ -55,7 +56,7 @@ Preferences::Preferences() : m_artprovider(0)
 };
 Preferences::~Preferences()
 {
-
+	delete m_colors;
 }
 
 const LanguageInfo  *Preferences::FindByType(int type, bool init)
@@ -168,7 +169,9 @@ bool Preferences::DoRead(const wxString& fileName, bool errifnoexist )
 	root["longLineOn"].AsBool(m_common.longLineOnEnable);
 	root["whiteSpace"].AsBool(m_common.whiteSpaceEnable);
 	root["tabWidth"].AsInt(m_common.tabWidth);
-	m_common.theme_color = root["theme_syntax"].AsString();
+	
+	root["theme_syntax"].AsString(m_common.theme_color);	
+	m_colors->SetFileName(m_common.theme_color);
 
 	wxJSONValue &files = root["files"];
 	
@@ -202,6 +205,16 @@ wxAuiTabArt *Preferences::GetTabArtProvider()
 	if (!m_tabartprovider)
 		m_tabartprovider = new EditorTabArt();
 	return m_tabartprovider;
+}
+
+ColourScheme *Preferences::GetColorScheme()
+{
+	return m_colors;
+}
+
+const wxColor &Preferences::GetStdColor(ColourScheme::StdColour code)
+{
+	return m_colors->Get(code);
 }
 
 
@@ -262,49 +275,49 @@ void LanguageInfo::InitDef()
 			AddStyle(0, "BLACK", "WHITE", "", 10, 0, 0);			
 			break;
 		case FILETYPE_NC:
-			AddStyle(SCE_GCODE_DEFAULT, "GRAY", "WHITE", "", 10, 0, 0);
-			AddStyle(SCE_GCODE_COMMENT, "FOREST GREEN", "WHITE", "", 10, 0, 0);
-			AddStyle(SCE_GCODE_COMMENT_ML, "FOREST GREEN", "WHITE", "", 10, 0, 0);
-			AddStyle(SCE_GCODE_G, "BLUE", "WHITE", "", 10, true, 0);
-			AddStyle(SCE_GCODE_M, "RED", "WHITE", "", 10, true, 0);
-			AddStyle(SCE_GCODE_PARAM, "BROWN", "WHITE", "", 10, true, 0);
-			AddStyle(SCE_GCODE_VAR, "SIENNA", "WHITE", "", 10, true, 0);
-			AddStyle(SCE_GCODE_NUMBER, "BLACK", "WHITE", "", 10, true, 0);
-			AddStyle(SCE_GCODE_COORDINATE, "MAGENTA", "WHITE", "", 10, true, 0);
-			AddStyle(SCE_GCODE_WORD, "RED", "WHITE", "", 10, true, 0, GCoddeWordlist);
-			AddStyle(SCE_GCODE_OPERATORS, "VIOLET RED", "WHITE", "", 10, true, 0);
-			AddStyle(SCE_GCODE_IDENTIFIER, "BLACK", "WHITE", "", 10, 0, 0);
+			AddStyle(SCE_GCODE_DEFAULT, "GRAY", "", "", 10, 0, 0);
+			AddStyle(SCE_GCODE_COMMENT, "FOREST GREEN", "", "", 10, 0, 0);
+			AddStyle(SCE_GCODE_COMMENT_ML, "FOREST GREEN", "", "", 10, 0, 0);
+			AddStyle(SCE_GCODE_G, "BLUE", "", "", 10, true, 0);
+			AddStyle(SCE_GCODE_M, "RED", "", "", 10, true, 0);
+			AddStyle(SCE_GCODE_PARAM, "BROWN", "", "", 10, true, 0);
+			AddStyle(SCE_GCODE_VAR, "SIENNA", "", "", 10, true, 0);
+			AddStyle(SCE_GCODE_NUMBER, "BLACK", "", "", 10, true, 0);
+			AddStyle(SCE_GCODE_COORDINATE, "MAGENTA", "", "", 10, true, 0);
+			AddStyle(SCE_GCODE_WORD, "RED", "", "", 10, true, 0, GCoddeWordlist);
+			AddStyle(SCE_GCODE_OPERATORS, "VIOLET RED", "", "", 10, true, 0);
+			AddStyle(SCE_GCODE_IDENTIFIER, "BLACK", "", "", 10, 0, 0);
 		break;
 		case FILETYPE_GCMC:
-			AddStyle(SCE_GCMC_DEFAULT, "GRAY", "WHITE", "", 10, true, 0);
-			AddStyle(SCE_GCMC_COMMENT, "FOREST GREEN", "WHITE", "", 10, 0, 0);
-			AddStyle(SCE_GCMC_COMMENT_ML, "FOREST GREEN", "WHITE", "", 10, 0, 0);
-			AddStyle(SCE_GCMC_VAR, "SIENNA", "WHITE", "", 10, true, 0);
-			AddStyle(SCE_GCMC_NUMBER, "BLACK", "WHITE", "", 10, true, 0);
-			AddStyle(SCE_GCMC_OPERATORS, "VIOLET RED", "WHITE", "", 10, true, 0);
-			AddStyle(SCE_GCMC_IDENTIFIER, "BLACK", "WHITE", "", 10, 0, 0);
-			AddStyle(SCE_GCMC_WORD1, "RED", "WHITE", "", 10, true, 0, GcmcWordlist1);
-			AddStyle(SCE_GCMC_WORD2,"BLUE", "WHITE","", 10, true, 0, GcmcWordlist2);
-			AddStyle(SCE_GCMC_STRING, "GREEN", "WHITE", "", 10, true, 0);
+			AddStyle(SCE_GCMC_DEFAULT, "GRAY", "", "", 10, true, 0);
+			AddStyle(SCE_GCMC_COMMENT, "FOREST GREEN", "", "", 10, 0, 0);
+			AddStyle(SCE_GCMC_COMMENT_ML, "FOREST GREEN", "", "", 10, 0, 0);
+			AddStyle(SCE_GCMC_VAR, "SIENNA", "", "", 10, true, 0);
+			AddStyle(SCE_GCMC_NUMBER, "BLACK", "", "", 10, true, 0);
+			AddStyle(SCE_GCMC_OPERATORS, "VIOLET RED", "", "", 10, true, 0);
+			AddStyle(SCE_GCMC_IDENTIFIER, "BLACK", "", "", 10, 0, 0);
+			AddStyle(SCE_GCMC_WORD1, "RED", "", "", 10, true, 0, GcmcWordlist1);
+			AddStyle(SCE_GCMC_WORD2,"BLUE", "","", 10, true, 0, GcmcWordlist2);
+			AddStyle(SCE_GCMC_STRING, "GREEN", "", "", 10, true, 0);
 		break;
 		case FILETYPE_JSON:
-			AddStyle(SCE_JSON_DEFAULT, "BLACK", "WHITE", "", 10, 0, 0);
-			AddStyle(SCE_JSON_NUMBER, "BLACK", "WHITE", "", 10, true, 0);
-			AddStyle(SCE_JSON_STRING, "GREEN", "WHITE", "", 10, true, 0); 
-			AddStyle(SCE_JSON_STRINGEOL, "GRAY", "WHITE", "", 10, true, 0);
-			AddStyle(SCE_JSON_PROPERTYNAME, "BROWN", "WHITE", "", 10, true, 0);
-			AddStyle(SCE_JSON_ESCAPESEQUENCE, "GRAY", "WHITE", "", 10, true, 0);
-			AddStyle(SCE_JSON_LINECOMMENT, "FOREST GREEN", "WHITE", "", 10, 0, 0);
-			AddStyle(SCE_JSON_BLOCKCOMMENT, "FOREST GREEN", "WHITE", "", 10, 0, 0);
-			AddStyle(SCE_JSON_OPERATOR, "VIOLET RED", "WHITE", "", 10, true, 0);
-			AddStyle(SCE_JSON_URI, "BLUE", "WHITE", "", 10, true, 0);
-			AddStyle(SCE_JSON_COMPACTIRI, "SIENNA", "WHITE", "", 10, true, 0);
-			AddStyle(SCE_JSON_KEYWORD, "RED", "WHITE", "", 10, true, 0, jsonWordlist);
-			AddStyle(SCE_JSON_LDKEYWORD, "BLUE", "WHITE", "", 10, true, 0, jsonWordlist);
+			AddStyle(SCE_JSON_DEFAULT, "BLACK", "", "", 10, 0, 0);
+			AddStyle(SCE_JSON_NUMBER, "BLACK", "", "", 10, true, 0);
+			AddStyle(SCE_JSON_STRING, "GREEN", "", "", 10, true, 0); 
+			AddStyle(SCE_JSON_STRINGEOL, "GRAY", "", "", 10, true, 0);
+			AddStyle(SCE_JSON_PROPERTYNAME, "BROWN", "", "", 10, true, 0);
+			AddStyle(SCE_JSON_ESCAPESEQUENCE, "GRAY", "", "", 10, true, 0);
+			AddStyle(SCE_JSON_LINECOMMENT, "FOREST GREEN", "", "", 10, 0, 0);
+			AddStyle(SCE_JSON_BLOCKCOMMENT, "FOREST GREEN", "", "", 10, 0, 0);
+			AddStyle(SCE_JSON_OPERATOR, "VIOLET RED", "", "", 10, true, 0);
+			AddStyle(SCE_JSON_URI, "BLUE", "", "", 10, true, 0);
+			AddStyle(SCE_JSON_COMPACTIRI, "SIENNA", "", "", 10, true, 0);
+			AddStyle(SCE_JSON_KEYWORD, "RED", "", "", 10, true, 0, jsonWordlist);
+			AddStyle(SCE_JSON_LDKEYWORD, "BLUE", "", "", 10, true, 0, jsonWordlist);
 			AddStyle(SCE_JSON_ERROR, "WHITE", "RED", "", 10, true, 0);
 		break;
 		default:
-			AddStyle(0, "BLACK", "WHITE", "", 10, 0, 0);
+			AddStyle(0, "BLACK", "", "", 10, 0, 0);
 			break;
 		
 	}
@@ -312,6 +325,7 @@ void LanguageInfo::InitDef()
 
 bool LanguageInfo::Read()
 {
+	
 	wxLogNull logNo;
 	std::filesystem::path dirpath = StandartPaths::Get()->GetPreferencesPath(m_filename);
 	wxFFileInputStream  file_stream(dirpath.c_str());
@@ -341,7 +355,7 @@ bool LanguageInfo::Read()
 	int defSize = 10; 
 	wxString deffont = "";
 	wxString defClr = "BLACK";
-	wxString defBgClr = "WHITE";
+	wxString defBgClr = "";
 	bool defitalic = false;
 	bool defbold = false;
 

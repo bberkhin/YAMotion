@@ -1,0 +1,23 @@
+{
+    "frame": "#000000",
+    "window": "#3C3C3C",
+    "window_txt": "#FFFFFF",
+    "linenumber": "#5A5A5A",
+    "linenumber_txt": "#F0F0F0",
+    "calltip": "#FFE179",
+    "calltip_txt": "#F0F0F0",
+    "ctrl": "#F0F0F0",
+    "ctrl_pressed": "#000000",
+    "ctrl_hover": "#000000",
+    "ctrl_text": "#FFFFFF",
+    "ctrl_text_dis": "#3C3C3C",
+    "scrollbar": "#000000",
+    "scrollbar_tubm": "#00FFFF",
+    "highlight": "#000000",
+    "highlight_txt": "#000000",
+    "titlebar": "#000000",
+    "titlebar_active": "#000000",
+    "titlebar_txt": "#000000",
+    "titlebar_txt_active": "#000000",
+    "border": "#000000"
+}

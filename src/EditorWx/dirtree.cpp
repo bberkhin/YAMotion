@@ -11,7 +11,7 @@
 #include "wx/event.h"
 #include <wx/dir.h>
 #include "them.h"
-
+#include "flatbuttom.h"
 
 
 #ifdef __WIN32__
@@ -933,9 +933,13 @@ DirPane::DirPane(wxWindow *parent)
 	totalpane->Add(txt);
 	totalpane->Add(m_ptree, wxEXPAND, wxEXPAND); //wxEXPAND
 	totalpane->Add(0, 10);
-	wxButton *padd = new wxButton(this, ID_ADDFILEBT, _("Add folders"), wxDefaultPosition, wxDefaultSize, wxBU_LEFT ); //wxBORDER_NONE
+	
+	FlatButtom *padd = new FlatButtom(this, ID_ADDFILEBT, _("Add folders") );//| wxBORDER_NONE); 
+	//wxButton *padd = new wxButton(this, ID_ADDFILEBT, _("Add folders"), wxDefaultPosition, wxDefaultSize, wxBU_LEFT);//| wxBORDER_NONE); 
 	wxBitmap bmp = wxArtProvider::GetBitmap(wxART_GOTO_LAST, wxART_OTHER, FromDIP(wxSize(16, 16)));
-	padd->SetBitmap(bmp, wxRIGHT);
+	//padd->SetBitmap(bmp, wxRIGHT);
+	padd->SetBitmap(bmp);
+
 	totalpane->Add(padd,0, wxEXPAND);
 	SetSizerAndFit(totalpane);
 	UpdateThemeColor();

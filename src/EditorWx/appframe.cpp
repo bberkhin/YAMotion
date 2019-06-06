@@ -409,12 +409,12 @@ wxAuiNotebook* AppFrame::CreateNotebook()
 
 	StubNotebook* ctrl = new StubNotebook();
 	ctrl->SetAuiArtProvider();
-
 	ctrl->Create(this, wxID_ANY,
 		wxPoint(client_size.x, client_size.y),
 		FromDIP(wxSize(330, 200)),
 		m_notebook_style);
 	ctrl->SetArtProvider(Preferences::Get()->GetTabArtProvider());
+	ctrl->SetBackgroundColour(Preferences::Get()->GetStdColor(ColourScheme::WINDOW));
 	return ctrl;
 }
 

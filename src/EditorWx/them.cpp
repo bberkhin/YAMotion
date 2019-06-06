@@ -1,14 +1,11 @@
 #include "wx/wx.h"
 #include "them.h"
+#include "prefs.h"
 #include "wx\univ\colschem.h"
 #include "wx/aui/auibook.h"
-//#include "wx/aui/tabart.h"
-//#include "wx/settings.h"
-//#include "wx/dcclient.h"
-//#include "wx/image.h"
-
-
-//WX_USE_THEME_IMPL(Win32);  
+#include "wx/jsonreader.h"
+#include "standartpaths.h"
+#include <wx/wfstream.h>
 
 
 ThemArtProvider::ThemArtProvider() : wxAuiDefaultDockArt() 
@@ -23,7 +20,10 @@ ThemArtProvider::~ThemArtProvider()
 
 void ThemArtProvider::UpdateColoursFromSystem()
 {
-	wxColor baseColour = wxColor(0, 0, 0);
+
+	ColourScheme *clrs = Preferences::Get()->GetColorScheme();
+
+	wxColor baseColour = clrs->Get(ColourScheme::FRAME);
 
 	// the baseColour is too pale to use as our base colour,
 	// so darken it a bit --
@@ -34,26 +34,25 @@ void ThemArtProvider::UpdateColoursFromSystem()
 		baseColour = baseColour.ChangeLightness(92);
 	}
 
-	m_baseColour = baseColour;
+	m_baseColour = clrs->Get(ColourScheme::FRAME);;
 	wxColor darker1Colour = baseColour.ChangeLightness(85);
 	wxColor darker2Colour = baseColour.ChangeLightness(75);
 	wxColor darker3Colour = baseColour.ChangeLightness(60);
 	//wxColor darker4Colour = baseColour.ChangeLightness(50);
 	wxColor darker5Colour = baseColour.ChangeLightness(40);
 
-	m_activeCaptionColour = *wxBLACK;;
-	m_activeCaptionGradientColour = m_activeCaptionColour;
-	m_activeCaptionTextColour = *wxWHITE;;
-	m_inactiveCaptionColour = *wxBLACK;
-	m_inactiveCaptionGradientColour = baseColour.ChangeLightness(97);
-	m_inactiveCaptionTextColour = *wxWHITE;;
+	m_activeCaptionColour = clrs->Get(ColourScheme::TITLEBAR_ACTIVE);
+	m_activeCaptionGradientColour = clrs->Get(ColourScheme::TITLEBAR_ACTIVE);
+	m_activeCaptionTextColour = clrs->Get(ColourScheme::TITLEBAR_ACTIVE_TEXT);
+	m_inactiveCaptionColour = clrs->Get(ColourScheme::TITLEBAR);
+	m_inactiveCaptionGradientColour = clrs->Get(ColourScheme::TITLEBAR);
+	m_inactiveCaptionTextColour = clrs->Get(ColourScheme::TITLEBAR_TEXT);
 
 	m_sashBrush = wxBrush(baseColour);
 	m_backgroundBrush = wxBrush(baseColour);
 	m_gripperBrush = wxBrush(baseColour);
 
-	//m_borderPen = wxPen(wxColor(128,128,128));
-	m_borderPen = wxPen(wxColor(255, 0, 0));
+	m_borderPen = wxPen(clrs->Get(ColourScheme::BORDER));
 	int pen_width = wxWindow::FromDIP(1, NULL);
 	m_gripperPen1 = wxPen(darker5Colour, pen_width);
 	m_gripperPen2 = wxPen(darker3Colour, pen_width);
@@ -62,169 +61,7 @@ void ThemArtProvider::UpdateColoursFromSystem()
 }
 
 
-
-// ----------------------------------------------------------------------------
-// wxWin32ColourScheme: uses (default) Win32 colours
-// ----------------------------------------------------------------------------
-
-class YAColourScheme : public wxColourScheme
-{
-public:
-	virtual wxColour Get(StdColour col) const;
-	virtual wxColour GetBackground(wxWindow *win) const;
-};
-
-
-
-// ============================================================================
-// wxWin32ColourScheme
-// ============================================================================
-
-wxColour YAColourScheme::GetBackground(wxWindow *win) const
-{
-	wxColour col(*wxBLACK);
-//	if (win->UseBgCol())
-//	{
-//		// use the user specified colour
-//		col = win->GetBackgroundColour();
-//	}
-//
-//	if (!win->ShouldInheritColours())
-//	{
-//#if wxUSE_TEXTCTRL
-//		wxTextCtrl *text = wxDynamicCast(win, wxTextCtrl);
-//#endif // wxUSE_TEXTCTRL
-//#if wxUSE_LISTBOX
-//		wxListBox* listBox = wxDynamicCast(win, wxListBox);
-//#endif // wxUSE_LISTBOX
-//
-//#if wxUSE_TEXTCTRL
-//		if (text
-//#if wxUSE_LISTBOX
-//			|| listBox
-//#endif
-//			)
-//		{
-//			if (!win->IsEnabled()) // not IsEditable()
-//				col = Get(CONTROL);
-//			else
-//			{
-//				if (!col.IsOk())
-//				{
-//					// doesn't depend on the state
-//					col = Get(WINDOW);
-//				}
-//			}
-//		}
-//#endif // wxUSE_TEXTCTRL
-//
-//		if (!col.IsOk())
-//			col = Get(CONTROL); // Most controls should be this colour, not WINDOW
-//	}
-//	else
-//	{
-//		int flags = win->GetStateFlags();
-//
-//		// the colour set by the user should be used for the normal state
-//		// and for the states for which we don't have any specific colours
-//		if (!col.IsOk() || (flags & wxCONTROL_PRESSED) != 0)
-//		{
-//#if wxUSE_SCROLLBAR
-//			if (wxDynamicCast(win, wxScrollBar))
-//				col = Get(flags & wxCONTROL_PRESSED ? SCROLLBAR_PRESSED
-//					: SCROLLBAR);
-//			else
-//#endif // wxUSE_SCROLLBAR
-//				col = Get(CONTROL);
-//		}
-//	}
-//
-	return col;
-}
-
-wxColour YAColourScheme::Get(YAColourScheme::StdColour col) const
-{
-	switch (col)
-	{
-		// use the system colours under Windows
-		// use the standard Windows colours elsewhere
-	case WINDOW:            return *wxBLACK; //*wxWHITE;
-
-	case CONTROL_PRESSED:    return wxColour(0x00FF00); //wxColour(0xc0c0c0);
-	case CONTROL_CURRENT:    return wxColour(0xFF0000);
-	case CONTROL:           return wxColour(0x0000FF); //wxColour(0xc0c0c0);
-
-	case CONTROL_TEXT:      return *wxWHITE;
-
-	case SCROLLBAR:         return *wxYELLOW; //wxColour(0xe0e0e0);
-	case SCROLLBAR_PRESSED: return *wxRED; //*wxBLACK;
-
-	case HIGHLIGHT:         return wxColour(0xe0e0e0);// wxColour(0x800000);
-	case HIGHLIGHT_TEXT:    return  *wxBLACK; //wxColour(0x000000);
-
-	case SHADOW_DARK:       return *wxBLACK;
-
-	case CONTROL_TEXT_DISABLED:return wxColour(0xe0e0e0);
-	case SHADOW_HIGHLIGHT:  return wxColour(0xffffff);
-
-	case SHADOW_IN:         return wxColour(0xc0c0c0);
-
-	case CONTROL_TEXT_DISABLED_SHADOW:
-	case SHADOW_OUT:        return wxColour(0x7f7f7f);
-
-	case TITLEBAR:          return wxColour(0xaeaaae);
-	case TITLEBAR_ACTIVE:   return wxColour(0x820300);
-	case TITLEBAR_TEXT:     return wxColour(0xc0c0c0);
-	case TITLEBAR_ACTIVE_TEXT:return *wxWHITE;
-
-	case DESKTOP:           return wxColour(0x808000);
-	case FRAME:             return wxColour(0x808080);
-	case GAUGE:             return Get(HIGHLIGHT);
-	case MAX:
-	default:
-		wxFAIL_MSG(wxT("invalid standard colour"));
-		return *wxBLACK;
-	}
-}
-
-
-/*
-class  YATheme : public wxDelegateTheme
-{
-public:
-	YATheme();
-	~YATheme();
-	virtual wxColourScheme *GetColourScheme();
-private:
-	wxColourScheme *m_scheme;
-};
-
-
-YATheme::YATheme() 
-	: m_scheme(0), wxDelegateTheme("win32")
-{
-}
-YATheme::~YATheme() 
-{ 
-	delete m_scheme;
-}
-
-
-
-
-wxColourScheme *YATheme::GetColourScheme()
-{
-	if (!m_scheme)
-	{
-		m_scheme = new YAColourScheme;
-	}
-	return m_scheme;
-
-}
-*/
-
-EditorTabArt::EditorTabArt() 
-	: m_maxTabHeight_(0)
+EditorTabArt::EditorTabArt() 	
 {
 	UpdateColoursFromSystem();
 }
@@ -255,11 +92,11 @@ void EditorTabArt::DrawTab(wxDC& dc, wxWindow* wnd,
 {
 	if (page.active)
 	{
-		dc.SetTextForeground(*wxRED);
+		dc.SetTextForeground(Preferences::Get()->GetStdColor(ColourScheme::TITLEBAR_ACTIVE_TEXT));
 	}
 	else
 	{
-		dc.SetTextForeground(*wxGREEN);
+		dc.SetTextForeground(Preferences::Get()->GetStdColor(ColourScheme::TITLEBAR_TEXT));
 	}
 
 	wxAuiGenericTabArt::DrawTab(dc, wnd, page, in_rect, close_button_state,
@@ -269,70 +106,167 @@ void EditorTabArt::DrawTab(wxDC& dc, wxWindow* wnd,
 
 void EditorTabArt::DrawBackground(wxDC& dc, wxWindow* wnd, const wxRect& rect)
 {
-
 	wxAuiGenericTabArt::DrawBackground(dc, wnd, rect);
-	/*
-	int borderHeight = 2;
-	wxRect drawRect = rect;
-	drawRect.height -= borderHeight;
-
-	// Draw background
-	wxColor clr(*wxBLACK);// = wnd->GetBackgroundColour();
-	dc.SetBrush(wxBrush(clr));
-	dc.SetPen(*wxTRANSPARENT_PEN);
-	dc.DrawRectangle(drawRect);
-	// Draw top border
-	drawRect.y = drawRect.height;
-	drawRect.height = borderHeight + 2;
-	drawRect.Inflate(1, 0);
-	*/
-
 }
+
+int  EditorTabArt::GetBestTabCtrlSize(wxWindow* wnd, const wxAuiNotebookPageArray& pages, const wxSize& requiredBmpSize) 
+{
+	int h = wxAuiGenericTabArt::GetBestTabCtrlSize(wnd, pages, requiredBmpSize);
+	//h -= 20;
+	return h;
+}
+
+
 
 wxSize EditorTabArt::GetTabSize(wxDC& dc, wxWindow* wnd, const wxString& caption, const wxBitmap& bitmap, bool active, int closeButtonState, int* xExtent)
 {
 	wxSize sz = wxAuiGenericTabArt::GetTabSize(dc, wnd, caption, bitmap, active, closeButtonState, xExtent);
-	m_maxTabHeight_ = sz.GetHeight();
 	return sz;
 }
 
 void EditorTabArt::DrawBorder(wxDC& dc, wxWindow* wnd, const wxRect& rect)
 {
 	wxAuiGenericTabArt::DrawBorder(dc, wnd, rect);
-	//wxRect drawRect(rect);
-	//drawRect.y += m_maxTabHeight_ + wnd->FromDIP(1);
-	//drawRect.height -= m_maxTabHeight_;
-
-	//// Mask border not covered by native theme
-	//wxRect topDrawRect(rect);
-	//topDrawRect.height = drawRect.height;
-
-	//wxColor clrbg("GREEN");
-	//int borderw = 2;
-
-	//dc.SetPen(wxPen(clrbg, borderw));
-	////dc.DrawRectangle(topDrawRect);
-	//dc.DrawRectangle(drawRect);
 }
 
 
 void EditorTabArt::UpdateColoursFromSystem()
 {
 
-	wxColor baseColour(*wxBLACK);
-
-	if ((255 - baseColour.Red()) +
-		(255 - baseColour.Green()) +
-		(255 - baseColour.Blue()) < 60)
-	{
-		baseColour = baseColour.ChangeLightness(92);
-	}
-
-	m_activeColour = *wxYELLOW;
-	m_baseColour = baseColour;
-	wxColor borderColour = baseColour;//  *wxYELLOW;//baseColour.ChangeLightness(75);
-
-	m_borderPen = wxPen(borderColour);
+	ColourScheme *clrs = Preferences::Get()->GetColorScheme();
+	m_baseColour = clrs->Get(ColourScheme::FRAME);;
+	m_activeColour = clrs->Get(ColourScheme::WINDOW);
+	m_borderPen = wxPen(clrs->Get(ColourScheme::WINDOW));
 	m_baseColourPen = wxPen(m_baseColour);
 	m_baseColourBrush = wxBrush(m_baseColour);
+}
+
+
+
+
+ColourScheme::ColourScheme()
+	:m_inited(false)
+{}
+
+ColourScheme::~ColourScheme()
+{}
+
+const wxColour &ColourScheme::Get(ColourScheme::StdColour col)
+{
+	if (!m_inited)
+	{
+		InitDef();
+		Read();
+		m_inited = true;
+	}
+	return m_colors[col];
+}
+
+void ColourScheme::SetFileName(const wxString &filename)
+{
+	m_filename = filename;
+	m_inited = false;
+	m_colors.clear();
+}
+
+inline  void ReadColor(wxJSONValue  &val, wxColor &clr)
+{
+	if (val.IsString())
+	{
+		clr = val.AsString();
+	}
+}
+
+void ColourScheme::Read()
+{
+
+	if (m_filename.empty())
+		return;
+
+	wxString fileName(StandartPaths::Get()->GetPreferencesPath(m_filename).c_str());
+
+	wxLogNull logNo;
+	wxFFileInputStream  file_stream(fileName);
+	if (!file_stream.IsOk())
+	{
+		wxString msg = wxString::Format(_("Can not open file %s"), fileName);
+		wxMessageBox(msg, _("Error opening file"));
+		return;
+	}
+
+	wxJSONReader reader;
+	wxJSONValue root;
+	// now read the JSON text and store it in the 'root' structure
+  // check for errors before retreiving values...
+	int numErrors = reader.Parse(file_stream, &root);
+	if (numErrors > 0)
+	{
+		const wxArrayString& errors = reader.GetErrors();
+		wxString msg = wxString::Format(_("Error parsing file %s\n"), fileName);
+		for (auto p = errors.begin(); p != errors.end(); ++p)
+		{
+			msg += *p;
+			msg += L"\n";
+		}
+		wxMessageBox(msg, _("Error parsing file"));
+		return;
+	}
+
+	ReadColor( root["frame"], m_colors[FRAME]);
+	ReadColor(root["window"],m_colors[WINDOW]);
+	ReadColor(root["window_txt"], m_colors[WINDOW_TEXT]);
+	ReadColor(root["linenumber"], m_colors[LINENUMBER]);
+	ReadColor(root["linenumber_txt"], m_colors[LINENUMBER_TEXT]);
+	ReadColor(root["calltip"], m_colors[CALLTIP]);
+	ReadColor(root["calltip_txt"], m_colors[CALLTIP_TEXT]);
+	ReadColor(root["ctrl"],m_colors[CONTROL]);
+	ReadColor(root["ctrl_pressed"],m_colors[CONTROL_PRESSED]);
+	ReadColor(root["ctrl_hover"],m_colors[CONTROL_HOVER]);
+	ReadColor(root["ctrl_text"],m_colors[CONTROL_TEXT]);
+	ReadColor(root["ctrl_text_dis"],m_colors[CONTROL_TEXT_DISABLED]);
+	ReadColor(root["scrollbar"],m_colors[SCROLLBAR]);
+	ReadColor(root["scrollbar_tubm"],m_colors[SCROLLBAR_TUMB]);
+	ReadColor(root["highlight"],m_colors[HIGHLIGHT]);
+	ReadColor(root["highlight_txt"],m_colors[HIGHLIGHT_TEXT]);
+	ReadColor(root["titlebar"],m_colors[TITLEBAR]);
+	ReadColor(root["titlebar_active"],m_colors[TITLEBAR_ACTIVE]);
+	ReadColor(root["titlebar_txt"],m_colors[TITLEBAR_TEXT]);
+	ReadColor(root["titlebar_txt_active"],m_colors[TITLEBAR_ACTIVE_TEXT]);
+	ReadColor(root["border"],m_colors[BORDER]);
+}
+
+
+void ColourScheme::InitDef()
+{
+	m_colors.resize(StdColour::MAX);
+	m_colors[FRAME] = wxColor(0,0,0);
+	// the background colour for a window
+	m_colors[WINDOW] = wxColor(0, 0, 0);
+	m_colors[WINDOW_TEXT] = wxColor(0xFFFFFF);
+	m_colors[LINENUMBER] = wxColor(32, 32, 32);
+	m_colors[LINENUMBER_TEXT] = wxColor(192, 192, 192);
+	m_colors[CALLTIP] = wxColor(0, 255, 255);
+	m_colors[CALLTIP_TEXT]= wxColor(192, 192, 192);
+		// the different background and text colours for the control
+	m_colors[CONTROL] = wxColour(0xe0e0e0);
+	m_colors[CONTROL_PRESSED] = wxColour(0xe0e000);
+	m_colors[CONTROL_HOVER] = wxColour(0x00e000);
+	// the label text for the normal and the disabled state
+	m_colors[CONTROL_TEXT] = wxColour(0xFFFFFF);
+	m_colors[CONTROL_TEXT_DISABLED] = m_colors[CONTROL_TEXT].MakeDisabled();	
+		// the scrollbar background colour for the normal and pressed states
+	m_colors[SCROLLBAR] = m_colors[WINDOW].ChangeLightness(25);
+	m_colors[SCROLLBAR_TUMB] = m_colors[WINDOW].ChangeLightness(50);
+	// the background and text colour for the highlighted item
+	m_colors[HIGHLIGHT] = m_colors[WINDOW].ChangeLightness(25);;
+	m_colors[HIGHLIGHT_TEXT] = m_colors[CONTROL_TEXT];
+
+		// the titlebar background colours for the normal and focused states
+	m_colors[TITLEBAR] = wxColour(0xe0e0e0); 
+	m_colors[TITLEBAR_ACTIVE] = wxColour(0xe00000);
+		// the titlebar text colours
+	m_colors[TITLEBAR_TEXT] = m_colors[CONTROL_TEXT];
+	m_colors[TITLEBAR_ACTIVE_TEXT] = m_colors[CONTROL_TEXT];
+		// border
+	m_colors[BORDER] = wxColour(0xFF0000);
 }

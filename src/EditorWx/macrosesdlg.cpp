@@ -26,16 +26,7 @@ MacrosesDlg::MacrosesDlg(Macroses *pm,wxWindow *parent)
 	textinfos->Add(ptext, 0, 0);
 	textinfos->Add(0, 6);
 
-	// buttons
-	//wxBoxSizer* buttonSizer = new wxBoxSizer(wxHORIZONTAL);
 
-	/*wxButton* bt;
-	wxStdDialogButtonSizer *buttonSizer = CreateStdDialogButtonSizer(wxOK | wxCANCEL);
-	bt = new wxButton(this, wxID_OK, "Ok");
-	buttonSizer->AddButton(bt);
-	bt = new wxButton(this, wxID_CANCEL, "Cancel");
-	buttonSizer->AddButton(bt);*/
-	
 	// total pane
 	wxBoxSizer *totalpane = new wxBoxSizer(wxVERTICAL);
 	totalpane->Add(textinfos, 0, wxEXPAND | wxLEFT | wxRIGHT, 10);

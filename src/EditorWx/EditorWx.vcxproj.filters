@@ -282,4 +282,9 @@
     <None Include="..\..\resources\intro_gocde.htm" />
     <None Include="..\..\resources\welcome.htm" />
   </ItemGroup>
+  <ItemGroup>
+    <Image Include="bitmap1.bmp">
+      <Filter>Файлы ресурсов</Filter>
+    </Image>
+  </ItemGroup>
 </Project>
