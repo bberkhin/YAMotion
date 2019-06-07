@@ -73,6 +73,7 @@ public:
 		// the scrollbar background colour for the normal and pressed states
 		SCROLLBAR,
 		SCROLLBAR_TUMB,		
+		SCROLLBAR_TUMB_HOVER,
 		// the background and text colour for the highlighted item
 		HIGHLIGHT,
 		HIGHLIGHT_TEXT,

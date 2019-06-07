@@ -5,6 +5,7 @@
 #include "wx/aui/framemanager.h"
 #include "wx/aui/dockart.h"
 #include "flatbuttom.h"
+#include "FlatScrollBar.h"
 
 #define ID_TO3DBUTTON 100
 #define ID_TOGCODEBUTTON 101
@@ -23,6 +24,10 @@ EditorPanel::EditorPanel(wxWindow *parent, int filetype, const wxString &filenam
 	SetWindowStyle(style | wxBORDER_NONE);
 
 	m_pedit = new Edit(this, wxID_ANY);
+	//wxScrollBar *bar = CreateScrollBar();
+	//m_pedit->SetVScrollBar(bar);	
+	FlatScrollBar *bar = new FlatScrollBar(this, wxID_ANY);
+
 	if (isnew)
 		m_pedit->NewFile(filetype, filename);
 	else
@@ -32,9 +37,17 @@ EditorPanel::EditorPanel(wxWindow *parent, int filetype, const wxString &filenam
 	wxBoxSizer *totalpane = new wxBoxSizer(wxVERTICAL);
 	wxBoxSizer *pHeader = CreateHeaderPanel();
 	totalpane->Add(pHeader, 0, wxEXPAND);
-	totalpane->Add(m_pedit, wxEXPAND, wxEXPAND); //wxEXPAND
+
+
 	
-	
+	wxBoxSizer *paneEdit = new wxBoxSizer(wxHORIZONTAL);
+	paneEdit->Add(m_pedit, wxEXPAND, wxEXPAND); //wxEXPAND
+	paneEdit->Add(bar, 0, wxEXPAND);
+	totalpane->Add(paneEdit, wxEXPAND, wxEXPAND); //wxEXPAND
+	//totalpane->Add(m_pedit, wxEXPAND, wxEXPAND); //wxEXPAND	
+
+
+	bar->SetScrollbar(2, 10, 100,  1);
 	UpdateThemeColor();
 	SetSizerAndFit(totalpane);
 }
@@ -59,7 +72,7 @@ wxBoxSizer *EditorPanel::CreateHeaderPanel()
 
 
 	
-	FlatButtom *padd = new FlatButtom(this, ID_TO3DBUTTON, _("3D VIEW") );// , wxDefaultPosition, wxDefaultSize, wxBU_LEFT );
+	FlatButtom *padd = new FlatButtom(this, ID_TO3DBUTTON, _("3D VIEW"),true );// , wxDefaultPosition, wxDefaultSize, wxBU_LEFT );
 	wxBitmap bmp = wxArtProvider::GetBitmap(wxART_GOTO_LAST, wxART_OTHER, FromDIP(wxSize(16, 16)));
 	padd->SetWindowStyle(wxBORDER_NONE);
 	padd->SetBitmap(bmp);
@@ -68,7 +81,7 @@ wxBoxSizer *EditorPanel::CreateHeaderPanel()
 
 
 
-	FlatButtom *padd1 = new FlatButtom(this, ID_TOGCODEBUTTON, _("CHECK"));// , wxDefaultPosition, wxDefaultSize, wxBU_LEFT); //wxBORDER_NONE
+	FlatButtom *padd1 = new FlatButtom(this, ID_TOGCODEBUTTON, _("CHECK"), true);// , wxDefaultPosition, wxDefaultSize, wxBU_LEFT); //wxBORDER_NONE
 	wxBitmap bmp1 = wxArtProvider::GetBitmap(wxART_ADD_BOOKMARK, wxART_OTHER, FromDIP(wxSize(16, 16)));
 	padd1->SetBitmap(bmp1);
 	totalpane->Add(padd1, 0,  wxRIGHT);
@@ -76,6 +89,18 @@ wxBoxSizer *EditorPanel::CreateHeaderPanel()
 	return totalpane;
 }
 
+
+wxScrollBar *EditorPanel::CreateScrollBar()
+{
+	ColourScheme *clrs = Preferences::Get()->GetColorScheme();
+	wxColor bgColor = clrs->Get(ColourScheme::WINDOW);
+
+	wxScrollBar *bar = new wxScrollBar(this, wxID_ANY, wxDefaultPosition,
+			wxDefaultSize, wxSB_VERTICAL);
+	bar->SetBackgroundColour(bgColor);
+	return bar;
+
+}
 
 EditorPanel::~EditorPanel()
 {

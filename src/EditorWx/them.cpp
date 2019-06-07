@@ -226,6 +226,7 @@ void ColourScheme::Read()
 	ReadColor(root["ctrl_text_dis"],m_colors[CONTROL_TEXT_DISABLED]);
 	ReadColor(root["scrollbar"],m_colors[SCROLLBAR]);
 	ReadColor(root["scrollbar_tubm"],m_colors[SCROLLBAR_TUMB]);
+	ReadColor(root["scrollbar_tumb_hvr"], m_colors[SCROLLBAR_TUMB_HOVER]);	
 	ReadColor(root["highlight"],m_colors[HIGHLIGHT]);
 	ReadColor(root["highlight_txt"],m_colors[HIGHLIGHT_TEXT]);
 	ReadColor(root["titlebar"],m_colors[TITLEBAR]);
@@ -257,6 +258,7 @@ void ColourScheme::InitDef()
 		// the scrollbar background colour for the normal and pressed states
 	m_colors[SCROLLBAR] = m_colors[WINDOW].ChangeLightness(25);
 	m_colors[SCROLLBAR_TUMB] = m_colors[WINDOW].ChangeLightness(50);
+	m_colors[SCROLLBAR_TUMB_HOVER] = m_colors[WINDOW].ChangeLightness(80);
 	// the background and text colour for the highlighted item
 	m_colors[HIGHLIGHT] = m_colors[WINDOW].ChangeLightness(25);;
 	m_colors[HIGHLIGHT_TEXT] = m_colors[CONTROL_TEXT];

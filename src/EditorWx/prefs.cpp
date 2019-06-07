@@ -41,6 +41,7 @@ Preferences::Preferences() : m_artprovider(0), m_tabartprovider(0)
 		true,  // lineNumberEnable
 		false, // longLineOnEnable
 		false, // whiteSpaceEnable
+		false, // visibleHSB
 		4,//tabWidth
 		"", // gcmc_sybatx;
 		"", //nc_syntax
@@ -168,6 +169,8 @@ bool Preferences::DoRead(const wxString& fileName, bool errifnoexist )
 	root["lineNumber"].AsBool(m_common.lineNumberEnable);
 	root["longLineOn"].AsBool(m_common.longLineOnEnable);
 	root["whiteSpace"].AsBool(m_common.whiteSpaceEnable);
+	root["visibleHSB"].AsBool(m_common.visibleHSB);
+
 	root["tabWidth"].AsInt(m_common.tabWidth);
 	
 	root["theme_syntax"].AsString(m_common.theme_color);	

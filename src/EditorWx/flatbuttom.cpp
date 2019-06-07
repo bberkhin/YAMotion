@@ -4,14 +4,11 @@
 
 
 
-FlatButtom::FlatButtom(wxWindow *parent, int id,  wxString text )
-	: m_text(text),m_marginBmpX(6), m_marginBmpY(4),  wxWindow(parent, id)
+FlatButtom::FlatButtom(wxWindow *parent, int id,  wxString text, bool transparent)
+	: m_text(text),m_marginBmpX(6), m_marginBmpY(4), m_transparentbg(transparent),  wxWindow(parent, id)
 {
 	m_status = statusNone;
 	SetBestClientSize();
-	
-//	m_winCapture = NULL;
-//	m_winHasMouse = false;
 }
 
 
@@ -86,10 +83,12 @@ void FlatButtom::DrawBackground(wxDC&  dc, const wxRect &rc)
 {
 	ColourScheme *clrs = Preferences::Get()->GetColorScheme();
 	wxColor clr; 
-	if ( m_status == statusHover )
+	if (m_status == statusHover)
 		clr = clrs->Get(ColourScheme::CONTROL_HOVER);
-	else if(m_status == statusPressed)
+	else if (m_status == statusPressed)
 		clr = clrs->Get(ColourScheme::CONTROL_PRESSED);
+	else if (m_transparentbg)
+		return;
 	else
 		clr = clrs->Get(ColourScheme::CONTROL);
 

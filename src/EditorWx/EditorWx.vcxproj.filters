@@ -147,6 +147,9 @@
     <ClCompile Include="flatbuttom.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
+    <ClCompile Include="FlatScrollBar.cpp">
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h">
@@ -270,6 +273,9 @@
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
     <ClInclude Include="flatbuttom.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="FlatScrollBar.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
   </ItemGroup>

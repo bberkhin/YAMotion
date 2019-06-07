@@ -5,7 +5,7 @@ class FlatButtom :
 {
 	enum { statusNone, statusHover, statusPressed };
 public:
-	FlatButtom(wxWindow *parent, int Id, wxString text);
+	FlatButtom(wxWindow *parent, int Id, wxString text, bool transparentbg = false);
 	~FlatButtom();
 public:
 	void SetBitmap(const wxBitmap& bitmap);
@@ -26,7 +26,6 @@ public:
 	virtual void DoClick();
 private:
 	void SetBestClientSize();
-	void DrawBorder(wxDC&  dc, const wxRect &rc);
 	void DrawBackground(wxDC&  dc, const wxRect &rc);
 	void DrawLabel(wxDC&  dc, const wxRect &rc);
 	void DrawBitmap(wxDC&  dc, const wxRect &rc);
@@ -36,6 +35,7 @@ private:
 	wxBitmap m_bitmap;
 	int m_marginBmpX;
 	int m_marginBmpY;
+	bool m_transparentbg;
 	DECLARE_EVENT_TABLE()
 };
 

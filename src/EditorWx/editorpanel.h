@@ -14,6 +14,7 @@ public:
 
 protected:
 
+	wxScrollBar *CreateScrollBar();
 	wxBoxSizer *CreateHeaderPanel();
 private:
 	Edit *m_pedit;

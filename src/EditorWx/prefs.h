@@ -46,7 +46,9 @@ struct CommonInfo
     bool lineNumberEnable;
     bool longLineOnEnable;
     bool whiteSpaceEnable;
+	bool visibleHSB;
 	int tabWidth;
+
 	wxString gcmc_syntax;
 	wxString nc_syntax;
 	wxString theme_color;

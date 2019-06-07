@@ -485,6 +485,10 @@ void Edit::UpdatePreferences()
 	SetMouseDwellTime(2000);
 
 
+	SetUseHorizontalScrollBar(common_prefs.visibleHSB);
+	//SetUseVerticalScrollBar(false);
+	
+
 	// set spaces and indentation
 	SetUseTabs(false);
 	SetTabIndents(true);
