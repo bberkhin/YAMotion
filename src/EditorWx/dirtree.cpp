@@ -934,7 +934,7 @@ DirPane::DirPane(wxWindow *parent)
 	totalpane->Add(m_ptree, wxEXPAND, wxEXPAND); //wxEXPAND
 	totalpane->Add(0, 10);
 	
-	FlatButtom *padd = new FlatButtom(this, ID_ADDFILEBT, _("Add folders") );//| wxBORDER_NONE); 
+	FlatButton *padd = new FlatButton(this, ID_ADDFILEBT, _("Add folders") );//| wxBORDER_NONE); 
 	//wxButton *padd = new wxButton(this, ID_ADDFILEBT, _("Add folders"), wxDefaultPosition, wxDefaultSize, wxBU_LEFT);//| wxBORDER_NONE); 
 	wxBitmap bmp = wxArtProvider::GetBitmap(wxART_GOTO_LAST, wxART_OTHER, FromDIP(wxSize(16, 16)));
 	//padd->SetBitmap(bmp, wxRIGHT);

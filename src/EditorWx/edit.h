@@ -36,22 +36,12 @@ class Edit: public wxStyledTextCtrl {
 
 public:
     //! constructor
-    Edit (wxWindow *parent, wxWindowID id = wxID_ANY,
-          const wxPoint &pos = wxDefaultPosition,
-          const wxSize &size = wxDefaultSize,
-          long style =
-#ifndef __WXMAC__
-          wxSUNKEN_BORDER|
-#endif
-          wxVSCROLL
-         );
-
-    //! destructor
+	Edit(wxWindow *parent, wxWindowID id);
     ~Edit ();
+	bool Create(wxWindow *parent, wxWindowID id);
 
     // event handlers
     // common
-    void OnSize( wxSizeEvent &event );
 	void OnContextMenu(wxContextMenuEvent& event);
 	
     // edit

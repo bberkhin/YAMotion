@@ -13,8 +13,6 @@ public:
 	void OnToGcodeButton(wxCommandEvent& ev);
 
 protected:
-
-	wxScrollBar *CreateScrollBar();
 	wxBoxSizer *CreateHeaderPanel();
 private:
 	Edit *m_pedit;

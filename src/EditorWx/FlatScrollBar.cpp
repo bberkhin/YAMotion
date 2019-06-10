@@ -2,11 +2,23 @@
 #include "prefs.h"
 #include "FlatScrollBar.h"
 
+// scroll the bar
+#define wxACTION_SCROLL_START       wxT("start")     // to the beginning
+#define wxACTION_SCROLL_END         wxT("end")       // to the end
+#define wxACTION_SCROLL_LINE_UP     wxT("lineup")    // one line up/left
+#define wxACTION_SCROLL_PAGE_UP     wxT("pageup")    // one page up/left
+#define wxACTION_SCROLL_LINE_DOWN   wxT("linedown")  // one line down/right
+#define wxACTION_SCROLL_PAGE_DOWN   wxT("pagedown")  // one page down/right
+#define wxACTION_SCROLL_THUMB_DRAG      wxT("thumbdrag")
+#define wxACTION_SCROLL_THUMB_MOVE      wxT("thumbmove")
+#define wxACTION_SCROLL_THUMB_RELEASE   wxT("thumbrelease")
 
 
-FlatScrollBar::FlatScrollBar(wxWindow *parent, int id, int type)
-	: m_status(statusNone),m_type(type),
-	wxWindow(parent,id)
+
+
+FlatScrollBar::FlatScrollBar(wxWindow *parent, wxEvtHandler *handler, int id,  int type)
+	: m_handler(handler), m_status(statusNone),m_type(type),
+	wxScrollBar()
 {
 	m_pageSize = 0;
 	m_thumbPos = 0;
@@ -16,8 +28,13 @@ FlatScrollBar::FlatScrollBar(wxWindow *parent, int id, int type)
 	m_dirty = false;
 	m_htLast = -1;
 	m_ofsMouse = -1;
+	m_capture = false;
 
 	SetBestClientSize();
+	wxWindow::Create(parent, id);
+	if (IsVertical())
+		SetWindowStyle(GetWindowStyle() | wxVERTICAL);
+
 }
 
 
@@ -90,12 +107,23 @@ wxCoord FlatScrollBar::GetMouseCoord( const wxMouseEvent& event) const
 void FlatScrollBar::mouseDown(wxMouseEvent& event)
 {
 	CaptureMouse();
+	m_capture = true;
 	int ht = HitTestBar( event.GetPosition() );
 	 
 	if (ht == Element_Thumb)
 	{
 		m_ofsMouse = GetMouseCoord(event) - ScrollbarToPixel();
 	}
+	else if (ht == Element_Bar_1)  //UP
+	{
+		PerformAction(wxACTION_SCROLL_PAGE_UP);
+
+	}
+	else if (ht == Element_Bar_2) //Dawn
+	{
+		PerformAction(wxACTION_SCROLL_PAGE_DOWN);
+	}
+
 	m_htLast = ht;
 	
 	m_status = statusPressed;
@@ -105,20 +133,14 @@ void FlatScrollBar::mouseDown(wxMouseEvent& event)
 void FlatScrollBar::mouseReleased(wxMouseEvent& event) 
 {
 	m_status = statusNone;
-	ReleaseMouse();
+	if (m_capture)
+	{
+		ReleaseMouse();
+		m_capture = false;
+	}
 	paintNow();
 }
 
-// scroll the bar
-#define wxACTION_SCROLL_START       wxT("start")     // to the beginning
-#define wxACTION_SCROLL_END         wxT("end")       // to the end
-#define wxACTION_SCROLL_LINE_UP     wxT("lineup")    // one line up/left
-#define wxACTION_SCROLL_PAGE_UP     wxT("pageup")    // one page up/left
-#define wxACTION_SCROLL_LINE_DOWN   wxT("linedown")  // one line down/right
-#define wxACTION_SCROLL_PAGE_DOWN   wxT("pagedown")  // one page down/right
-#define wxACTION_SCROLL_THUMB_DRAG      wxT("thumbdrag")
-#define wxACTION_SCROLL_THUMB_MOVE      wxT("thumbmove")
-#define wxACTION_SCROLL_THUMB_RELEASE   wxT("thumbrelease")
 
 void FlatScrollBar::mouseMoved(wxMouseEvent& event) 
 {
@@ -166,15 +188,12 @@ void FlatScrollBar::rightClick(wxMouseEvent& event) {}
 
 void FlatScrollBar::SetBestClientSize()
 {
-	SetMinSize(FromDIP(wxSize(10, 100)));
+	if( IsVertical() )
+		SetMinSize(FromDIP(wxSize(10, 100)));
+	else
+		SetMinSize(FromDIP(wxSize(100, 10)));
 }
-//
-//void FlatScrollBar::DoClick()
-//{
-//	wxCommandEvent event(wxEVT_BUTTON, GetId());
-//	event.SetEventObject(this);
-//	ProcessWindowEvent(event);
-//}
+
 
 
 static void GetScrollBarThumbSize(wxCoord length,
@@ -417,6 +436,11 @@ void FlatScrollBar::SetScrollbar(int position, int thumbSize, int range, int pag
 		(thumbSize != m_thumbSize) ||
 		(pageSize != m_pageSize);
 
+	if (!IsVertical())
+	{
+		//temp
+		m_range = range;
+	}
 	// set all parameters
 	m_range = range;
 	m_thumbSize = thumbSize;
@@ -462,6 +486,8 @@ void FlatScrollBar::DoSetThumb(int pos)
 
 	m_thumbPos = pos;
 	m_dirty = true;
+	// Orginally thay use virtual m_dirty and void OnInternalIdle(); for redrawing
+	paintNow();
 }
 
 
@@ -480,7 +506,7 @@ bool FlatScrollBar::PerformAction(const wxString& action,long numArg,const wxStr
 	   // VS: we have to force redraw here, otherwise the thumb will lack
 		//     behind mouse cursor
 		//UpdateThumb();
-		this->paintNow();
+		//this->paintNow();
 		scrollType = wxEVT_SCROLLWIN_THUMBTRACK;
 	}
 	else if (action == wxACTION_SCROLL_LINE_UP)
@@ -542,7 +568,8 @@ bool FlatScrollBar::PerformAction(const wxString& action,long numArg,const wxStr
 			wxScrollEvent event(scrollType, this->GetId(), m_thumbPos,
 				IsVertical() ? wxVERTICAL : wxHORIZONTAL);
 			event.SetEventObject(this);
-			GetEventHandler()->ProcessEvent(event);
+			//GetEventHandler()->ProcessEvent(event);
+			m_handler->ProcessEvent(event);
 		}
 		else // part of the window
 		{

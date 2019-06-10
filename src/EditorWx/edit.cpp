@@ -7,6 +7,7 @@
 #include "codedescription.h"
 #include "configdata.h"
 #include "prefs.h"
+//#include "..\..\src\stc\ScintillaWX.h"
 
 
 #if wxUSE_FFILE
@@ -22,9 +23,7 @@
 
 wxDEFINE_EVENT(FILE_MODIFYED_EVENT, wxCommandEvent);
 
-wxBEGIN_EVENT_TABLE(Edit, wxStyledTextCtrl)
-	// common
-	EVT_SIZE(Edit::OnSize)
+wxBEGIN_EVENT_TABLE(Edit, wxStyledTextCtrl)	
 	EVT_CONTEXT_MENU(Edit::OnContextMenu)
 	EVT_MENU(ID_INCLUDE_FILE_OPEN, Edit::OnIncludeOpen)
 	// edit
@@ -89,27 +88,33 @@ wxBEGIN_EVENT_TABLE(Edit, wxStyledTextCtrl)
 
 wxEND_EVENT_TABLE()
 
-Edit::Edit (wxWindow *parent, wxWindowID id,  const wxPoint &pos, const wxSize &size, long style)
-    : wxStyledTextCtrl (parent, id, pos, size, style) 
+
+
+Edit::Edit(wxWindow *parent, wxWindowID id)
+	: wxStyledTextCtrl()
 {
-
-    m_filename = wxEmptyString;
+	m_filename = wxEmptyString;
 	m_newfile = true;
-    m_LineNrID = 0;
-    m_DividerID = 1;
-    m_FoldingID = 2;
+	m_LineNrID = 0;
+	m_DividerID = 1;
+	m_FoldingID = 2;
 	m_modified = false;
-
-    // initialize language
-    m_language = NULL;
+	// initialize language
+	m_language = NULL;
 	dlg_find = NULL;
 	find_data.SetFlags(wxFR_DOWN);
 	ConfigData *config = dynamic_cast<ConfigData *>(wxConfigBase::Get());
 	if (config)
-		config->ReadFindAndReplase(&find_data);	
-	
+		config->ReadFindAndReplase(&find_data);
+	Create(parent, id);
 	UpdatePreferences();
-	SetDropTarget(0);
+
+}
+
+bool Edit::Create(wxWindow *parent, wxWindowID id)
+{
+
+	return wxStyledTextCtrl::Create(parent, id, wxDefaultPosition, wxDefaultSize, wxVSCROLL | wxHSCROLL | wxNO_BORDER | wxCLIP_CHILDREN);
 }
 
 
@@ -121,16 +126,7 @@ Edit::~Edit ()
 }
 
 //----------------------------------------------------------------------------
-// common event handlers
-void Edit::OnSize( wxSizeEvent& event ) 
-{
-	const CommonInfo &common_prefs = Preferences::Get()->Common();
-    int x = GetClientSize().x +
-            (common_prefs.lineNumberEnable? m_LineNrMargin: 0) +
-            (common_prefs.foldEnable? m_FoldingMargin: 0);
-    if (x > 0) SetScrollWidth (x);
-    event.Skip();
-}
+
 
 // edit event handlers
 void Edit::OnEditRedo (wxCommandEvent &WXUNUSED(event)) {
@@ -484,11 +480,8 @@ void Edit::UpdatePreferences()
 	CallTipSetForeground(clrs->Get(ColourScheme::CALLTIP_TEXT));
 	SetMouseDwellTime(2000);
 
-
 	SetUseHorizontalScrollBar(common_prefs.visibleHSB);
-	//SetUseVerticalScrollBar(false);
 	
-
 	// set spaces and indentation
 	SetUseTabs(false);
 	SetTabIndents(true);

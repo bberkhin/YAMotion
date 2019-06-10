@@ -24,6 +24,7 @@ public:
 	bool GetUptadeInfo(wxString &out);
 	IEnvironment *GetEnvironment() { return env.get(); }
 	virtual void OnEventLoopEnter(wxEventLoopBase* WXUNUSED(loop)) wxOVERRIDE;
+	AppFrame  *GetFrame() { return m_frame; }
 
 	// create the file system watcher here, because it needs an active loop
 	

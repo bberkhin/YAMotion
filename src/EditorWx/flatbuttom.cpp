@@ -1,39 +1,42 @@
 #include "wx/wx.h"
 #include "flatbuttom.h"
 #include "prefs.h"
+#include "app.h"
+#include "appframe.h"
 
 
 
-FlatButtom::FlatButtom(wxWindow *parent, int id,  wxString text, bool transparent)
-	: m_text(text),m_marginBmpX(6), m_marginBmpY(4), m_transparentbg(transparent),  wxWindow(parent, id)
+FlatButton::FlatButton(wxWindow *parent, int id, wxString text, int cmd)
+	:  m_text(text),m_cmd(cmd), m_marginBmpX(6), m_marginBmpY(4),  wxWindow(parent, id)
 {
 	m_status = statusNone;
+	m_captured = false;
 	SetBestClientSize();
 }
 
 
-void FlatButtom::SetBitmap(const wxBitmap& bitmap)
+void FlatButton::SetBitmap(const wxBitmap& bitmap)
 {
 	m_bitmap = bitmap;
 	SetBestClientSize();
 }
 
-FlatButtom::~FlatButtom()
+FlatButton::~FlatButton()
 {
 }
 
-BEGIN_EVENT_TABLE(FlatButtom, wxWindow)
-	EVT_MOTION(FlatButtom::mouseMoved)
-	EVT_LEFT_DOWN(FlatButtom::mouseDown)
-	EVT_LEFT_UP(FlatButtom::mouseReleased)
-	EVT_RIGHT_DOWN(FlatButtom::rightClick)
-	EVT_ENTER_WINDOW(FlatButtom::mouseEnterWindow)
-	EVT_LEAVE_WINDOW(FlatButtom::mouseLeftWindow)
-	EVT_KEY_DOWN(FlatButtom::keyPressed)
-	EVT_KEY_UP(FlatButtom::keyReleased)
-	EVT_MOUSEWHEEL(FlatButtom::mouseWheelMoved)
+BEGIN_EVENT_TABLE(FlatButton, wxWindow)
+	EVT_MOTION(FlatButton::mouseMoved)
+	EVT_LEFT_DOWN(FlatButton::mouseDown)
+	EVT_LEFT_UP(FlatButton::mouseReleased)
+	EVT_RIGHT_DOWN(FlatButton::rightClick)
+	EVT_ENTER_WINDOW(FlatButton::mouseEnterWindow)
+	EVT_LEAVE_WINDOW(FlatButton::mouseLeftWindow)
+	EVT_KEY_DOWN(FlatButton::keyPressed)
+	EVT_KEY_UP(FlatButton::keyReleased)
+	EVT_MOUSEWHEEL(FlatButton::mouseWheelMoved)
 	// catch paint events
-	EVT_PAINT(FlatButtom::paintEvent)
+	EVT_PAINT(FlatButton::paintEvent)
 END_EVENT_TABLE()
 
 
@@ -43,7 +46,7 @@ END_EVENT_TABLE()
  * calling Refresh()/Update().
  */
 
-void FlatButtom::paintEvent(wxPaintEvent & evt)
+void FlatButton::paintEvent(wxPaintEvent & evt)
 {
 	// depending on your system you may need to look at double-buffered dcs
 	wxPaintDC dc(this);
@@ -58,7 +61,7 @@ void FlatButtom::paintEvent(wxPaintEvent & evt)
  * background, and expects you will redraw it when the window comes
  * back (by sending a paint event).
  */
-void FlatButtom::paintNow()
+void FlatButton::paintNow()
 {
 	// depending on your system you may need to look at double-buffered dcs
 	wxClientDC dc(this);
@@ -70,7 +73,7 @@ void FlatButtom::paintNow()
  * method so that it can work no matter what type of DC
  * (e.g. wxPaintDC or wxClientDC) is used.
  */
-void FlatButtom::render(wxDC&  dc)
+void FlatButton::render(wxDC&  dc)
 {
 	wxRect rc = GetClientRect();
 	DrawBackground(dc, rc);
@@ -78,19 +81,27 @@ void FlatButtom::render(wxDC&  dc)
 	DrawBitmap(dc, rc);
 	
 }
-
-void FlatButtom::DrawBackground(wxDC&  dc, const wxRect &rc)
+wxColor FlatButton::GetButtonColor(int clr)
 {
 	ColourScheme *clrs = Preferences::Get()->GetColorScheme();
+	auto it = m_colors.find(clr);
+	return (it != m_colors.end()) ? clrs->Get(static_cast<ColourScheme::StdColour>(it->second)) : clrs->Get(static_cast<ColourScheme::StdColour>(clr));
+}
+
+void FlatButton::SetCustomColor(int clrIn, int clOut)
+{
+	m_colors[clrIn] = clOut;
+}
+
+void FlatButton::DrawBackground(wxDC&  dc, const wxRect &rc)
+{
 	wxColor clr; 
 	if (m_status == statusHover)
-		clr = clrs->Get(ColourScheme::CONTROL_HOVER);
+		clr = GetButtonColor(ColourScheme::CONTROL_HOVER);
 	else if (m_status == statusPressed)
-		clr = clrs->Get(ColourScheme::CONTROL_PRESSED);
-	else if (m_transparentbg)
-		return;
+		clr = GetButtonColor(ColourScheme::CONTROL_PRESSED);	
 	else
-		clr = clrs->Get(ColourScheme::CONTROL);
+		clr = GetButtonColor(ColourScheme::CONTROL);
 
 	dc.SetBrush(wxBrush(clr));
 
@@ -98,23 +109,22 @@ void FlatButtom::DrawBackground(wxDC&  dc, const wxRect &rc)
 		dc.SetPen(*wxTRANSPARENT_PEN);
 	else
 	{
-		dc.SetPen(clrs->Get(ColourScheme::BORDER));
+		dc.SetPen(GetButtonColor(ColourScheme::BORDER));
 	}
 	
 	dc.DrawRectangle(rc);
 }
 
-void FlatButtom::DrawLabel(wxDC&  dc, const wxRect &rc)
+void FlatButton::DrawLabel(wxDC&  dc, const wxRect &rc)
 {
 
-	ColourScheme *clrs = Preferences::Get()->GetColorScheme();
 	wxColor clr;
 	if (m_status == statusHover)
-		clr = clrs->Get(ColourScheme::CONTROL_TEXT);
+		clr = GetButtonColor(ColourScheme::CONTROL_TEXT);
 	else if(m_status == statusPressed)
-		clr = clrs->Get(ColourScheme::CONTROL_TEXT);
+		clr = GetButtonColor(ColourScheme::CONTROL_TEXT);
 	else
-		clr = clrs->Get(ColourScheme::CONTROL_TEXT);
+		clr = GetButtonColor(ColourScheme::CONTROL_TEXT);
 	
 	dc.SetTextBackground(wxColor());
 	dc.SetTextForeground(clr);
@@ -123,7 +133,7 @@ void FlatButtom::DrawLabel(wxDC&  dc, const wxRect &rc)
 	dc.DrawLabel(m_text, rcLabel, wxALIGN_LEFT| wxALIGN_CENTER_VERTICAL);
 };
 
-void FlatButtom::DrawBitmap(wxDC&  dc, const wxRect &rc)
+void FlatButton::DrawBitmap(wxDC&  dc, const wxRect &rc)
 {
 	if (!m_bitmap.IsOk())
 		return;
@@ -135,17 +145,23 @@ void FlatButtom::DrawBitmap(wxDC&  dc, const wxRect &rc)
 }
 
 
-void FlatButtom::mouseDown(wxMouseEvent& event)
+void FlatButton::mouseDown(wxMouseEvent& event)
 {
 	m_status = statusPressed;
 	CaptureMouse();
+	m_captured = true;
 
 	paintNow();
 }
-void FlatButtom::mouseReleased(wxMouseEvent& event)
+void FlatButton::mouseReleased(wxMouseEvent& event)
 {
 	m_status = statusNone;
-	ReleaseMouse();
+	if (m_captured)
+	{
+		ReleaseMouse();
+		m_captured = false;
+	}
+
 	paintNow();
 	
 	wxPoint pt = event.GetPosition();
@@ -154,7 +170,7 @@ void FlatButtom::mouseReleased(wxMouseEvent& event)
 		DoClick();
 }
 
-void FlatButtom::mouseLeftWindow(wxMouseEvent& event)
+void FlatButton::mouseLeftWindow(wxMouseEvent& event)
 {
 	if (m_status != statusPressed)
 	{
@@ -163,7 +179,7 @@ void FlatButtom::mouseLeftWindow(wxMouseEvent& event)
 	}
 }
 
-void FlatButtom::mouseEnterWindow(wxMouseEvent& event)
+void FlatButton::mouseEnterWindow(wxMouseEvent& event)
 {
 	if (m_status != statusPressed)
 	{
@@ -175,17 +191,17 @@ void FlatButtom::mouseEnterWindow(wxMouseEvent& event)
 
 
 // currently unused events
-void FlatButtom::mouseMoved(wxMouseEvent& event) {}
-void FlatButtom::mouseWheelMoved(wxMouseEvent& event) {}
-void FlatButtom::rightClick(wxMouseEvent& event) {}
-void FlatButtom::keyPressed(wxKeyEvent& event) {}
-void FlatButtom::keyReleased(wxKeyEvent& event) {}
+void FlatButton::mouseMoved(wxMouseEvent& event) {}
+void FlatButton::mouseWheelMoved(wxMouseEvent& event) {}
+void FlatButton::rightClick(wxMouseEvent& event) {}
+void FlatButton::keyPressed(wxKeyEvent& event) {}
+void FlatButton::keyReleased(wxKeyEvent& event) {}
 
 
 
-void FlatButtom::SetBestClientSize() 
+void FlatButton::SetBestClientSize() 
 {
-	wxClientDC dc(wxConstCast(this, FlatButtom));
+	wxClientDC dc(wxConstCast(this, FlatButton));
 	wxCoord width, height;
 	dc.GetMultiLineTextExtent(m_text, &width, &height);
 
@@ -202,9 +218,16 @@ void FlatButtom::SetBestClientSize()
 	SetMinSize(wxSize(width, height));
 }
 
-void FlatButtom::DoClick()
+void FlatButton::DoClick()
 {
+	
 	wxCommandEvent event(wxEVT_BUTTON, GetId());
 	event.SetEventObject(this);
 	ProcessWindowEvent(event);
+
+	if (m_cmd > 0)
+	{
+		wxCommandEvent *ev = new wxCommandEvent(wxEVT_MENU, m_cmd);
+		wxQueueEvent( wxGetApp().GetFrame(), ev);
+	}
 }

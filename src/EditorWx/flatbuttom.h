@@ -1,12 +1,14 @@
 #pragma once
 
-class FlatButtom :
+#include <map>
+
+class FlatButton :
 	public wxWindow
 {
 	enum { statusNone, statusHover, statusPressed };
 public:
-	FlatButtom(wxWindow *parent, int Id, wxString text, bool transparentbg = false);
-	~FlatButtom();
+	FlatButton(wxWindow *parent, int Id, wxString text, int cmd = -1);
+	~FlatButton();
 public:
 	void SetBitmap(const wxBitmap& bitmap);
 
@@ -24,18 +26,23 @@ public:
 	void keyPressed(wxKeyEvent& event);
 	void keyReleased(wxKeyEvent& event);
 	virtual void DoClick();
+	void SetCustomColor(int clrIn, int clOut);
 private:
 	void SetBestClientSize();
 	void DrawBackground(wxDC&  dc, const wxRect &rc);
 	void DrawLabel(wxDC&  dc, const wxRect &rc);
 	void DrawBitmap(wxDC&  dc, const wxRect &rc);
+	wxColor GetButtonColor(int clr);
+
 private:
 	int  m_status;
 	wxString m_text;
 	wxBitmap m_bitmap;
 	int m_marginBmpX;
 	int m_marginBmpY;
-	bool m_transparentbg;
+	int m_cmd;
+	bool m_captured;
+	std::map< int, int> m_colors;
 	DECLARE_EVENT_TABLE()
 };
 

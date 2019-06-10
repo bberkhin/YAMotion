@@ -9,6 +9,7 @@
   "longLineOn": false,
   "whiteSpace": false,
   "tabWidth": 4,
+  "visibleHSB": true,
   "theme_syntax": "them_black.json",
   "files": [
     {

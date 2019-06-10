@@ -760,7 +760,7 @@ void AppFrame::OnFileOpen (wxCommandEvent &event )
   
 	wxString fname;
     wxFileDialog dlg (this, _("Open file"), wxEmptyString, wxEmptyString, 
-		_("GCMC and NC files (*.gcmc;*.nc;*.ngc)|*.gcmc;*.nc;*.ngc|GCMC files (*.gcmc)|*.gcmc|NC files (*.nc;*.ngc)|*.nc;*.ngc|Any file(* |*"),
+		_("GCMC and NC files (*.gcmc;*.nc;*.ngc)|*.gcmc;*.nc;*.ngc|GCMC files (*.gcmc)|*.gcmc|NC files (*.nc;*.ngc)|*.nc;*.ngc|Any file(*.*) |*"),
         wxFD_OPEN | wxFD_FILE_MUST_EXIST | wxFD_CHANGE_DIR);
 
     if (dlg.ShowModal() != wxID_OK) return;

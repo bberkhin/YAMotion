@@ -1,7 +1,7 @@
 #pragma once
 
 class FlatScrollBar :
-	public wxWindow
+	public wxScrollBar
 {
 public:
 	enum { statusNone, statusHover, statusPressed };
@@ -9,7 +9,7 @@ public:
 	enum { Element_None, Element_Thumb, Element_Bar_1, Element_Bar_2 };
 	
 public:
-	FlatScrollBar(wxWindow *parent, int id, int type = typeVertical);
+	FlatScrollBar(wxWindow *parent, wxEvtHandler *handler, int id, int type = typeVertical);
 	virtual ~FlatScrollBar();
 
 	int GetThumbPosition() const;
@@ -57,6 +57,9 @@ protected:
 	bool m_dirty;
 	int m_htLast;
 	int m_ofsMouse;
+	wxEvtHandler *m_handler;
+	bool m_capture;
+	
 
 	DECLARE_EVENT_TABLE()
 };
