@@ -8,6 +8,31 @@
 #include <wx/wfstream.h>
 
 
+static const unsigned char close_bits[] = {
+	 0xFF, 0xFF, 0xFF, 0xFF, 0x0F, 0xFE, 0x03, 0xF8, 0x01, 0xF0, 0x19, 0xF3,
+	 0xB8, 0xE3, 0xF0, 0xE1, 0xE0, 0xE0, 0xF0, 0xE1, 0xB8, 0xE3, 0x19, 0xF3,
+	 0x01, 0xF0, 0x03, 0xF8, 0x0F, 0xFE, 0xFF, 0xFF };
+
+static const unsigned char left_bits[] = {
+   0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xfe, 0x7f, 0xfe, 0x3f, 0xfe,
+   0x1f, 0xfe, 0x0f, 0xfe, 0x1f, 0xfe, 0x3f, 0xfe, 0x7f, 0xfe, 0xff, 0xfe,
+   0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff };
+
+static const unsigned char right_bits[] = {
+   0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xdf, 0xff, 0x9f, 0xff, 0x1f, 0xff,
+   0x1f, 0xfe, 0x1f, 0xfc, 0x1f, 0xfe, 0x1f, 0xff, 0x9f, 0xff, 0xdf, 0xff,
+   0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff };
+
+static const unsigned char list_bits[] = {
+   0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
+   0x0f, 0xf8, 0xff, 0xff, 0x0f, 0xf8, 0x1f, 0xfc, 0x3f, 0xfe, 0x7f, 0xff,
+   0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff };
+
+
+
+wxBitmap wxAuiBitmapFromBits(const unsigned char bits[], int w, int h,	const wxColour& color);
+
+
 ThemArtProvider::ThemArtProvider() : wxAuiDefaultDockArt() 
 { 
 	UpdateColoursFromSystem();
@@ -111,11 +136,22 @@ void EditorTabArt::DrawBackground(wxDC& dc, wxWindow* wnd, const wxRect& rect)
 
 int  EditorTabArt::GetBestTabCtrlSize(wxWindow* wnd, const wxAuiNotebookPageArray& pages, const wxSize& requiredBmpSize) 
 {
-	int h = wxAuiGenericTabArt::GetBestTabCtrlSize(wnd, pages, requiredBmpSize);
-	//h -= 20;
-	return h;
+	return  wxAuiGenericTabArt::GetBestTabCtrlSize(wnd, pages, requiredBmpSize);
 }
 
+void EditorTabArt::DrawButton(wxDC& dc, wxWindow* wnd, const wxRect& inRect, int bitmapId, int buttonState, int orientation, wxRect* outRect)
+{
+	wxAuiGenericTabArt::DrawButton(dc, wnd, inRect, bitmapId, buttonState, orientation, outRect);	
+	/*
+	wxRect rc(inRect);
+	rc.width /= 2;
+	wxColor clr(*wxYELLOW);
+	//Draw background
+	dc.SetBrush(wxBrush(clr));
+	dc.SetPen(*wxTRANSPARENT_PEN);
+	dc.DrawRectangle(rc);
+	*/
+}
 
 
 wxSize EditorTabArt::GetTabSize(wxDC& dc, wxWindow* wnd, const wxString& caption, const wxBitmap& bitmap, bool active, int closeButtonState, int* xExtent)
@@ -134,11 +170,22 @@ void EditorTabArt::UpdateColoursFromSystem()
 {
 
 	ColourScheme *clrs = Preferences::Get()->GetColorScheme();
-	m_baseColour = clrs->Get(ColourScheme::FRAME);;
+	m_baseColour = clrs->Get(ColourScheme::FRAME);
 	m_activeColour = clrs->Get(ColourScheme::WINDOW);
 	m_borderPen = wxPen(clrs->Get(ColourScheme::WINDOW));
-	m_baseColourPen = wxPen(m_baseColour);
-	m_baseColourBrush = wxBrush(m_baseColour);
+	
+	//m_baseColourPen = wxPen(m_baseColour);
+	//m_baseColourBrush = wxBrush(m_baseColour);
+	m_baseColourBrush = wxBrush(m_activeColour);
+	m_baseColourPen = wxPen(m_activeColour);
+
+	wxColor clrBtn(clrs->Get(ColourScheme::WINDOW_TEXT));
+
+	m_activeCloseBmp = wxAuiBitmapFromBits(close_bits, 16, 16, clrBtn);
+	m_activeLeftBmp = wxAuiBitmapFromBits(left_bits, 16, 16, clrBtn);
+	m_activeRightBmp = wxAuiBitmapFromBits(right_bits, 16, 16, clrBtn);
+	m_activeWindowListBmp = wxAuiBitmapFromBits(list_bits, 16, 16, clrBtn);
+	
 }
 
 

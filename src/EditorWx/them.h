@@ -31,7 +31,7 @@ public:
 	void DrawBackground(wxDC& dc, wxWindow* wnd, const wxRect& rect) wxOVERRIDE;
 	void DrawTab(wxDC& dc, wxWindow* wnd, const wxAuiNotebookPage& pane, const wxRect& inRect, int closeButtonState,
 		wxRect* outTabRect,	wxRect* outButtonRect,	int* xExtent) wxOVERRIDE;
-//	void DrawButton( wxDC& dc, wxWindow* wnd, const wxRect& inRect,	int bitmapId, int buttonState, int orientation,	wxRect* outRect) wxOVERRIDE;
+	void DrawButton( wxDC& dc, wxWindow* wnd, const wxRect& inRect,	int bitmapId, int buttonState, int orientation,	wxRect* outRect) wxOVERRIDE;
 //	int GetIndentSize() wxOVERRIDE;
 	int GetBorderWidth(	wxWindow* wnd) wxOVERRIDE;
 //	int GetAdditionalBorderSpace(wxWindow* wnd) wxOVERRIDE;

@@ -15,8 +15,8 @@
     "type": "GCODE",
     "fontsize": 10,
     "fontname": "Comic",
-    "fclr": "BLACK",
-    "bclr": "WHITE",
+    "fclr": "WHITE",
+    "bclr": "",
     "italic": false,
     "bold": false,
     "styles": [
@@ -28,17 +28,17 @@
         {
             "nameid": 1,
             "name": "comment",
-            "fclr": "#008040"
+            "fclr": "#00FF00"
         },
         {
             "nameid": 2,
             "name": "comment_ml",
-            "fclr": "#008040"
+            "fclr": "#00FF00"
         },
         {
             "nameid": 3,
             "name": "G",
-            "fclr": "BLUE",
+            "fclr": "#000080",
             "bold": true
         },
         {
@@ -62,7 +62,7 @@
         {
             "nameid": 7,
             "name": "number",
-            "fclr": "BLACK",
+            "fclr": "WHITE",
             "bold": true
         },
         {
@@ -86,7 +86,7 @@
         {
             "nameid": 11,
             "name": "identifiers",
-            "fclr": "BLACK"
+            "fclr": "WHITE"
         }
     ]
 }

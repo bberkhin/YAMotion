@@ -14,8 +14,8 @@
   "fontsize": 10,
   "fontname" : "",
   "fontname1" : "Courier new",
-   "fclr": "BLACK",
-  "bclr": "WHITE",
+   "fclr": "WHITE",
+  "bclr": "",
   "italic": false,
   "bold": false,
   "styles": [
