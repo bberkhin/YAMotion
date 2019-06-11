@@ -14,7 +14,7 @@
 #include "defsext.h"     // Additional definitions
 //#include "edit.h"        // Edit module
 #include "editorpanel.h"
-#include "ViewGCode.h"
+#include "View3D.h"
 
 #include "about.h"
 #include "propertiesdlg.h"
@@ -105,12 +105,22 @@ public:
 		pexec = new ExecutorView(plogger);
 		plogger = new LoggerWnd(m_pHandler);
 		ppret = new GCodeInterpreter(wxGetApp().GetEnvironment(), pexec, plogger);
+		m_3Dview = m_pHandler->GetActive3DView();
 
 	}
 	~SimulateGCodeThread();
 
 	std::vector<TrackPoint> *getTack() { return pexec->getTrack(); }
 	CoordsBox getBox() { return pexec->getBox(); }
+
+	void Update3DView()
+	{
+		if (m_3Dview)
+		{
+			m_3Dview->setTrack(getTack());
+			m_3Dview->setBox(getBox());
+		}
+	}
 
 protected:
 	virtual wxThread::ExitCode Entry();
@@ -119,6 +129,7 @@ protected:
 	LoggerWnd *plogger;
 	GCodeInterpreter *ppret;
 	wxString fname;
+	View3D *m_3Dview;
 };
 
 
@@ -302,8 +313,6 @@ AppFrame::AppFrame (const wxString &title)
 	m_notebook_theme = 0;
 	m_dirtree = 0;
 	m_watcher = 0;
-	m_view = 0;
-
 
     SetIcon(wxICON(sample));
 
@@ -333,12 +342,13 @@ AppFrame::AppFrame (const wxString &title)
 	m_mgr.AddPane(m_notebook, wxAuiPaneInfo().Name("notebook_content").
 		CenterPane().PaneBorder(false));
 
+	/*
 	m_mgr.AddPane(CreateGLView(), wxAuiPaneInfo().
 		Name("ViewGCode").Caption("3D View").
 		Right().Layer(1).Position(1).
 		CloseButton(true).MaximizeButton(true));
 
-
+		*/
 	
 	
 	m_dirtree = new DirPane(this);
@@ -421,17 +431,19 @@ wxAuiNotebook* AppFrame::CreateNotebook()
 Edit *AppFrame::GetActiveFile()
 {
 	wxWindow *wnd = m_notebook->GetCurrentPage();
-	EditorPanel *panel = dynamic_cast<EditorPanel *>(wnd);
+	FilePage *panel = dynamic_cast<FilePage *>(wnd);
 	if (panel)
 		return panel->GetEdit();
 	return 0;
 }
 
-
-ViewGCode* AppFrame::CreateGLView()
+View3D *AppFrame::GetActive3DView()
 {
-	m_view = new ViewGCode(this, this, wxID_ANY);
-	return m_view;
+	wxWindow *wnd = m_notebook->GetCurrentPage();
+	FilePage *panel = dynamic_cast<FilePage *>(wnd);
+	if (panel)
+		return panel->Get3D();
+	return 0;
 }
 
 
@@ -503,7 +515,7 @@ void AppFrame::OnFileRenamed(wxCommandEvent &evn)
 	if (!pstring_data)
 		return;
 
-	EditorPanel *pedit = dynamic_cast<EditorPanel *>(m_notebook->GetPage(nPage));
+	FilePage *pedit = dynamic_cast<FilePage *>(m_notebook->GetPage(nPage));
 	if (!pedit)
 		return;
 	pedit->GetEdit()->SetFileName( pstring_data->GetData() );
@@ -514,7 +526,7 @@ void AppFrame::OnFileRenamed(wxCommandEvent &evn)
 void AppFrame::OnNotebookPageClose(wxAuiNotebookEvent& evt)
 {
 	wxAuiNotebook* ctrl = (wxAuiNotebook*)evt.GetEventObject();
-	if (ctrl->GetPage(evt.GetSelection())->IsKindOf(CLASSINFO(EditorPanel)))
+	if (ctrl->GetPage(evt.GetSelection())->IsKindOf(CLASSINFO(FilePage)))
 	{
 		if ( !DoFileSave(true,false) )
 			evt.Veto();
@@ -546,9 +558,12 @@ void AppFrame::OnClose (wxCloseEvent &event)
 
 	if ( m_timer.IsRunning() )
 		m_timer.Stop();
-		
-	if ( m_view )
-		m_view->processClosing();
+	
+	View3D *view = AppFrame::GetActive3DView();
+	if ( view )
+		view->processClosing();
+
+
 	{
 		wxCriticalSectionLocker enter(critsect);
 		if (checkThread)         // does the thread still exist?
@@ -613,9 +628,9 @@ bool AppFrame::DoSaveAllFiles()
 	size_t n = m_notebook->GetPageCount();
 	for (size_t i = 0; i < n; ++i)
 	{
-		if (m_notebook->GetPage(i)->IsKindOf(CLASSINFO(EditorPanel)))
+		if (m_notebook->GetPage(i)->IsKindOf(CLASSINFO(FilePage)))
 		{
-			EditorPanel *pEdit = dynamic_cast<EditorPanel *>(m_notebook->GetPage(i));
+			FilePage *pEdit = dynamic_cast<FilePage *>(m_notebook->GetPage(i));
 			if (pEdit && !DoFileSave(true, false, pEdit->GetEdit() ))
 			{
 				return false;
@@ -681,8 +696,7 @@ bool AppFrame::DoFileSave(bool askToSave, bool bSaveAs, Edit *pedit)
 
 void AppFrame::FileChanged()
 {
-	if (m_logwnd) m_logwnd->Clear();
-	if (m_view) m_view->clear();
+	if (m_logwnd) m_logwnd->Clear();	
 }
 
 
@@ -691,9 +705,9 @@ bool AppFrame::FindPageByFileName(const wxString &new_file_name, size_t *nPage)
 	size_t n = m_notebook->GetPageCount();
 	for (size_t i = 0; i < n; ++i)
 	{
-		if (m_notebook->GetPage(i)->IsKindOf(CLASSINFO(EditorPanel)))
+		if (m_notebook->GetPage(i)->IsKindOf(CLASSINFO(FilePage)))
 		{
-			EditorPanel *pEdit = dynamic_cast<EditorPanel *>(m_notebook->GetPage(i));
+			FilePage *pEdit = dynamic_cast<FilePage *>(m_notebook->GetPage(i));
 			if (pEdit->GetEdit()->GetFileName() == new_file_name)
 			{
 				if (nPage)
@@ -737,7 +751,7 @@ void AppFrame::DoNewFile(int file_type, const wxString &defpath, bool closeWelco
 
 	m_notebook->Freeze();
 	
-	EditorPanel * pedit = new EditorPanel(m_notebook, file_type, defPath.GetFullPath(),true );
+	FilePage * pedit = new FilePage(m_notebook, file_type, defPath.GetFullPath(),true );
 	//Edit *pedit = new Edit(m_notebook, wxID_ANY);
 	m_notebook->AddPage(pedit, new_file_name , true);
 	//pedit->NewFile(file_type, defPath.GetFullPath());
@@ -1021,12 +1035,17 @@ void AppFrame::OnEdit (wxCommandEvent &event)
 
 void AppFrame::On3DView(wxCommandEvent &event)
 {
-	if (m_view) m_view->GetEventHandler()->ProcessEvent(event);
+	View3D *view = AppFrame::GetActive3DView();
+	if (view)
+		view->GetEventHandler()->ProcessEvent(event);
 }
 
 
-void AppFrame::On3DViewUpdate(wxUpdateUIEvent& event) {
-	if (m_view) m_view->GetEventHandler()->ProcessEvent(event);
+void AppFrame::On3DViewUpdate(wxUpdateUIEvent& event)
+{
+	View3D *view = AppFrame::GetActive3DView();
+	if (view)
+		view->GetEventHandler()->ProcessEvent(event);
 }
 
 void AppFrame::OnDirTree(wxCommandEvent &event)
@@ -1242,7 +1261,7 @@ void AppFrame::FileOpen (wxString fname)
 		else
 		{						
 			
-			EditorPanel *pedit = new EditorPanel(m_notebook, FILETYPE_UNKNOW, fname, false );
+			FilePage *pedit = new FilePage(m_notebook, FILETYPE_UNKNOW, fname, false );
 			//pedit->LoadFile(fname);
 			m_notebook->AddPage(pedit, w.GetFullName(), true);
 			FileChanged();
@@ -1267,7 +1286,7 @@ void AppFrame::UpdateTitle(size_t nPage )
 		nPage = m_notebook->GetSelection();
 	if (nPage == wxNOT_FOUND)
 		return;
-	EditorPanel *pedit = dynamic_cast<EditorPanel *>(m_notebook->GetPage(nPage));
+	FilePage *pedit = dynamic_cast<FilePage *>(m_notebook->GetPage(nPage));
 	if (!pedit)
 		return;
 	wxFileName w = pedit->GetEdit()->GetFileName();
@@ -1349,11 +1368,8 @@ wxThread::ExitCode IntGCodeThread::Entry()
 SimulateGCodeThread::~SimulateGCodeThread()
 {
 	wxCriticalSectionLocker enter(m_pHandler->critsect);
-	// the thread is being destroyed; make sure not to leave dangling pointers around
-	
-	m_pHandler->m_view->setTrack( getTack() );
-	m_pHandler->m_view->setBox(getBox());
-
+	// the thread is being destroyed; make sure not to leave dangling pointers around	
+	Update3DView();
 	m_pHandler->simulateThread = NULL;
 	if (pexec) delete pexec;
 	if (plogger) delete plogger;
@@ -1411,10 +1427,9 @@ void AppFrame::OnSimulateCompletion(wxThreadEvent&)
 {
 	//drea
 	wxCriticalSectionLocker enter(critsect);
-	if (simulateThread && m_view )
+	if (simulateThread )
 	{
-		m_view->setTrack(simulateThread->getTack());
-		m_view->setBox(simulateThread->getBox());
+		simulateThread->Update3DView();
 	}
 }
 
@@ -1742,9 +1757,9 @@ void AppFrame::UpdatePreferences()
 	size_t n = m_notebook->GetPageCount();
 	for (size_t i = 0; i < n; ++i)
 	{
-		if (m_notebook->GetPage(i)->IsKindOf(CLASSINFO(EditorPanel)))
+		if (m_notebook->GetPage(i)->IsKindOf(CLASSINFO(FilePage)))
 		{
-			EditorPanel *pEdit = dynamic_cast<EditorPanel *>(m_notebook->GetPage(i));
+			FilePage *pEdit = dynamic_cast<FilePage *>(m_notebook->GetPage(i));
 			pEdit->GetEdit()->UpdatePreferences();			
 		}
 	}

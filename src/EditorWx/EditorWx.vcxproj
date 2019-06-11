@@ -62,7 +62,7 @@
     <ClCompile Include="appframe.cpp" />
     <ClCompile Include="standartpaths.cpp" />
     <ClCompile Include="them.cpp" />
-    <ClCompile Include="ViewGCode.cpp" />
+    <ClCompile Include="View3D.cpp" />
     <ClCompile Include="welcomewnd.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -106,7 +106,7 @@
     <ClInclude Include="resource.h" />
     <ClInclude Include="standartpaths.h" />
     <ClInclude Include="them.h" />
-    <ClInclude Include="ViewGCode.h" />
+    <ClInclude Include="View3D.h" />
     <ClInclude Include="welcomewnd.h" />
   </ItemGroup>
   <ItemGroup>

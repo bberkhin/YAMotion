@@ -11,7 +11,7 @@ G90 ( Use absolute distance mode )
 G94 ( Units Per Minute feed rate mode )
 G64 ( Enable path blending for best speed )
 (-- prologue end --)
-F400.00000000
+F200.00000000
 G0 Z1.00000000
 G0 X0.00000000 Y59.41784542
 G0 X5.70548131 Y59.14328227

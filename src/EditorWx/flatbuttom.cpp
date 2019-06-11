@@ -6,11 +6,19 @@
 
 
 
-FlatButton::FlatButton(wxWindow *parent, int id, wxString text, int cmd)
+FlatButton::FlatButton(wxWindow *parent, int id, wxString text, int cmd, bool setwndcolor)
 	:  m_text(text),m_cmd(cmd), m_marginBmpX(6), m_marginBmpY(4),  wxWindow(parent, id)
 {
 	m_status = statusNone;
 	m_captured = false;
+
+	if (setwndcolor)
+	{
+		SetCustomColor(ColourScheme::CONTROL, ColourScheme::WINDOW);
+		SetCustomColor(ColourScheme::CONTROL_HOVER, ColourScheme::FRAME);
+		SetCustomColor(ColourScheme::CONTROL_PRESSED, ColourScheme::FRAME);
+	}
+
 	SetBestClientSize();
 }
 

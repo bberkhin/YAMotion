@@ -18,7 +18,7 @@ class wxSimpleHtmlListBox;
 class wxToolBar;
 class IntGCodeThread;
 class SimulateGCodeThread;
-class ViewGCode;
+class View3D;
 class LogWindow;
 class GcmcProcess;
 class DoMathBase;
@@ -122,14 +122,13 @@ private:
 	void HideWelcome();
 	wxAuiNotebook* CreateNotebook();
 	wxAuiToolBar *CreateToolBar();
-	ViewGCode* CreateGLView();
 	Edit *GetActiveFile();
+	View3D *GetActive3DView();
 	void UpdatePreferences();
 	
 private:
 	// edit object
 	LogWindow *m_logwnd;
-	ViewGCode *m_view;
 	DirPane *m_dirtree;
 	wxTimer m_timer;
 	wxFileSystemWatcher *m_watcher;

@@ -7,7 +7,7 @@ class FlatButton :
 {
 	enum { statusNone, statusHover, statusPressed };
 public:
-	FlatButton(wxWindow *parent, int Id, wxString text, int cmd = -1);
+	FlatButton(wxWindow *parent, int Id, wxString text, int cmd = -1, bool setwndcolor = false);
 	~FlatButton();
 public:
 	void SetBitmap(const wxBitmap& bitmap);

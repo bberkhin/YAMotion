@@ -106,15 +106,15 @@ struct Object3d
 
 class SimulateCutting;
 
-class ViewGCode : public wxGLCanvas
+class View3D : public wxGLCanvas
 {
 	friend class SimulateCutting;
 public:
-	ViewGCode(wxWindow *frame, wxWindow *parent,
+	View3D(wxWindow *parent,
 		wxWindowID id = wxID_ANY,
 		int *gl_attrib = NULL);
 
-	virtual ~ViewGCode();
+	virtual ~View3D();
 
 	//void setTrack(std::vector<TrackPointGL> *ptr) { track.assign( ptr->begin(), ptr->end() ); }
 	void setTrack(std::vector<TrackPoint> *ptr);	
@@ -195,7 +195,7 @@ private:
 	GLuint fontOffset;
 	
 
-	wxDECLARE_NO_COPY_CLASS(ViewGCode);
+	wxDECLARE_NO_COPY_CLASS(View3D);
 	wxDECLARE_EVENT_TABLE();
 };
 

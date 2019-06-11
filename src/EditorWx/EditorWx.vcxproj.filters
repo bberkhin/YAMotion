@@ -51,9 +51,6 @@
     <ClCompile Include="..\Gcode\ilogger.cpp">
       <Filter>GCode</Filter>
     </ClCompile>
-    <ClCompile Include="ViewGCode.cpp">
-      <Filter>Исходные файлы</Filter>
-    </ClCompile>
     <ClCompile Include="executorview.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
@@ -150,6 +147,9 @@
     <ClCompile Include="FlatScrollBar.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
+    <ClCompile Include="View3D.cpp">
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h">
@@ -193,9 +193,6 @@
     </ClInclude>
     <ClInclude Include="..\Gcode\ilogger.h">
       <Filter>GCode</Filter>
-    </ClInclude>
-    <ClInclude Include="ViewGCode.h">
-      <Filter>Файлы заголовков</Filter>
     </ClInclude>
     <ClInclude Include="executorview.h">
       <Filter>Файлы заголовков</Filter>
@@ -276,6 +273,9 @@
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
     <ClInclude Include="FlatScrollBar.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="View3D.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
   </ItemGroup>

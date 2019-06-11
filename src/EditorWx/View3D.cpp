@@ -7,9 +7,12 @@
 
 #include <wx/timer.h>
 #include <wx/math.h>
-#include "ViewGCode.h"
+#include "View3D.h"
 #include "defsext.h"     // additional definitions
 #include "configdata.h"
+#include "app.h"
+#include "appframe.h"    
+
 
 #include <glm/gtc/matrix_transform.hpp>
 //#include <glm/gtc/constants.hpp>
@@ -70,7 +73,7 @@ static const GLubyte digits[][13] = {
 class SimulateCutting : public wxThread
 {
 public:
-	SimulateCutting(ViewGCode *handler)
+	SimulateCutting(View3D *handler)
 		: view(handler), wxThread(wxTHREAD_DETACHED)
 	{
 
@@ -79,40 +82,40 @@ public:
 
 protected:
 	virtual wxThread::ExitCode Entry();
-	ViewGCode *view;
+	View3D *view;
 };
 
 
 
-wxBEGIN_EVENT_TABLE(ViewGCode, wxGLCanvas)
-	EVT_SIZE(ViewGCode::OnSize)
-	EVT_PAINT(ViewGCode::OnPaint)
-	EVT_CHAR(ViewGCode::OnChar)
-	EVT_MOUSE_EVENTS(ViewGCode::OnMouseEvent)
-	EVT_MENU_RANGE(ID_SETVIEWFIRST, ID_SETVIEWLAST, ViewGCode::OnSetView)
-	EVT_MENU_RANGE(ID_SETSHOWFIRST, ID_SETSHOWLAST, ViewGCode::OnSetShow)
-	EVT_MENU(ID_SEMULATE_START, ViewGCode::OnSemulateStart)
-	EVT_MENU(ID_SEMULATE_PAUSE, ViewGCode::OnSemulatePause)
-	EVT_MENU(ID_SEMULATE_STOP, ViewGCode::OnSemulateStop)
+wxBEGIN_EVENT_TABLE(View3D, wxGLCanvas)
+	EVT_SIZE(View3D::OnSize)
+	EVT_PAINT(View3D::OnPaint)
+	EVT_CHAR(View3D::OnChar)
+	EVT_MOUSE_EVENTS(View3D::OnMouseEvent)
+	EVT_MENU_RANGE(ID_SETVIEWFIRST, ID_SETVIEWLAST, View3D::OnSetView)
+	EVT_MENU_RANGE(ID_SETSHOWFIRST, ID_SETSHOWLAST, View3D::OnSetShow)
+	EVT_MENU(ID_SEMULATE_START, View3D::OnSemulateStart)
+	EVT_MENU(ID_SEMULATE_PAUSE, View3D::OnSemulatePause)
+	EVT_MENU(ID_SEMULATE_STOP, View3D::OnSemulateStop)
 
-	EVT_UPDATE_UI_RANGE(ID_SETVIEWFIRST, ID_SETVIEWLAST, ViewGCode::OnSetViewUpdate)
-	EVT_UPDATE_UI_RANGE(ID_SETSHOWFIRST, ID_SETSHOWLAST, ViewGCode::OnSetShowUpdate)
-	EVT_UPDATE_UI(ID_SEMULATE_START, ViewGCode::OnCmdUpdateSimulateStart)
-	EVT_UPDATE_UI(ID_SEMULATE_PAUSE, ViewGCode::OnCmdUpdateSimulatePause)
-	EVT_UPDATE_UI(ID_SEMULATE_STOP, ViewGCode::OnCmdUpdateSimulateStop)
-	EVT_UPDATE_UI(ID_SEMULATE_GOTOBEGIN, ViewGCode::OnCmdUpdateSimulateStop)
-	EVT_UPDATE_UI(ID_SEMULATE_GOTOEND, ViewGCode::OnCmdUpdateSimulateStop)
+	EVT_UPDATE_UI_RANGE(ID_SETVIEWFIRST, ID_SETVIEWLAST, View3D::OnSetViewUpdate)
+	EVT_UPDATE_UI_RANGE(ID_SETSHOWFIRST, ID_SETSHOWLAST, View3D::OnSetShowUpdate)
+	EVT_UPDATE_UI(ID_SEMULATE_START, View3D::OnCmdUpdateSimulateStart)
+	EVT_UPDATE_UI(ID_SEMULATE_PAUSE, View3D::OnCmdUpdateSimulatePause)
+	EVT_UPDATE_UI(ID_SEMULATE_STOP, View3D::OnCmdUpdateSimulateStop)
+	EVT_UPDATE_UI(ID_SEMULATE_GOTOBEGIN, View3D::OnCmdUpdateSimulateStop)
+	EVT_UPDATE_UI(ID_SEMULATE_GOTOEND, View3D::OnCmdUpdateSimulateStop)
 	
-	//EVT_KEY_DOWN(ViewGCode::OnKeyDown)
+	//EVT_KEY_DOWN(View3D::OnKeyDown)
 
-	EVT_THREAD(CUTTING_SIMULATE_UPDATE, ViewGCode::OnSimulateUpdate)
-	EVT_THREAD(CUTTING_SIMULATE_COMPLETE, ViewGCode::OnSimulateCompletion)
+	EVT_THREAD(CUTTING_SIMULATE_UPDATE, View3D::OnSimulateUpdate)
+	EVT_THREAD(CUTTING_SIMULATE_COMPLETE, View3D::OnSimulateCompletion)
 
 wxEND_EVENT_TABLE()
 
-ViewGCode::ViewGCode(wxWindow *frame, wxWindow *parent,wxWindowID id, int* gl_attrib)
-	: appframe(frame), wxGLCanvas(parent, id, gl_attrib, wxDefaultPosition, wxDefaultSize, wxWANTS_CHARS | wxFULL_REPAINT_ON_RESIZE)	
-{
+View3D::View3D( wxWindow *parent,wxWindowID id, int* gl_attrib)
+	:  wxGLCanvas(parent, id, gl_attrib, wxDefaultPosition, wxDefaultSize, wxWANTS_CHARS | wxFULL_REPAINT_ON_RESIZE)	
+{	
 	simulateCut = NULL;
 	tickdelay = 50;
 	distancefortick = 5.;
@@ -131,14 +134,14 @@ ViewGCode::ViewGCode(wxWindow *frame, wxWindow *parent,wxWindowID id, int* gl_at
 	
 }
 
-ViewGCode::~ViewGCode()
+View3D::~View3D()
 {
 	delete m_glRC;
 	//save_config();
 }
 
 
-void ViewGCode::load_config()
+void View3D::load_config()
 {
 	ConfigData *config = dynamic_cast<ConfigData *>(wxConfigBase::Get());
 	wxASSERT(config);
@@ -153,7 +156,7 @@ void ViewGCode::load_config()
 	config->SetPath(strOldPath);
 }
 
-void ViewGCode::save_config()
+void View3D::save_config()
 {
 	ConfigData *config = dynamic_cast<ConfigData *>(wxConfigBase::Get());
 	wxASSERT(config);
@@ -167,7 +170,7 @@ void ViewGCode::save_config()
 	config->SetPath(strOldPath);
 }
 
-void ViewGCode::initializeGL()
+void View3D::initializeGL()
 {
 	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 	glShadeModel(GL_FLAT);
@@ -209,13 +212,13 @@ void ViewGCode::initializeGL()
 
 
 
-void ViewGCode::resizeGL(int nWidth, int nHeight)
+void View3D::resizeGL(int nWidth, int nHeight)
 {
 	glViewport(0, 0, nWidth, nHeight);
 	camera.set_viewport(nWidth, nHeight);
 }
 
-void ViewGCode::OnPaint(wxPaintEvent& WXUNUSED(event))
+void View3D::OnPaint(wxPaintEvent& WXUNUSED(event))
 {
 	// This is a dummy, to avoid an endless succession of paint messages.
 	// OnPaint handlers must always create a wxPaintDC.
@@ -266,7 +269,7 @@ void ViewGCode::OnPaint(wxPaintEvent& WXUNUSED(event))
 	SwapBuffers();
 }
 
-void ViewGCode::OnSize(wxSizeEvent& event)
+void View3D::OnSize(wxSizeEvent& event)
 {
 	// This is normally only necessary if there is more than one wxGLCanvas
 	// or more than one wxGLContext in the application.
@@ -276,7 +279,7 @@ void ViewGCode::OnSize(wxSizeEvent& event)
 }
 
 
-void ViewGCode::OnChar(wxKeyEvent& event)
+void View3D::OnChar(wxKeyEvent& event)
 {
 	switch (event.GetKeyCode())
 	{
@@ -313,7 +316,7 @@ void ViewGCode::OnChar(wxKeyEvent& event)
 	Refresh(false);
 }
 
-void ViewGCode::OnMouseEvent(wxMouseEvent& event)
+void View3D::OnMouseEvent(wxMouseEvent& event)
 {
 	static int dragging = 0;
 	static float last_x, last_y;
@@ -366,7 +369,7 @@ void ViewGCode::OnMouseEvent(wxMouseEvent& event)
 }
 
 
-void ViewGCode::clear()
+void View3D::clear()
 {
 	wxCriticalSectionLocker enter(critsect);
 	track.clear();
@@ -375,7 +378,7 @@ void ViewGCode::clear()
 	Refresh(false);	
 }
 
-void ViewGCode::setBox(const CoordsBox &bx)
+void View3D::setBox(const CoordsBox &bx)
 {
 //	box = bx; 	
 	camera.set_box(bx);
@@ -386,7 +389,7 @@ void ViewGCode::setBox(const CoordsBox &bx)
 	Refresh(false);
 }
 
-void ViewGCode::setTrack(std::vector<TrackPoint> *ptr)
+void View3D::setTrack(std::vector<TrackPoint> *ptr)
 {	
 	
 	if (simulateCut)
@@ -412,7 +415,7 @@ void ViewGCode::setTrack(std::vector<TrackPoint> *ptr)
 
 
 //--------------------------------------------------------------------
-void ViewGCode::draw_track()
+void View3D::draw_track()
 {
 	wxCriticalSectionLocker enter(critsect);
 	glBegin(GL_LINES);
@@ -480,7 +483,7 @@ void make_axis(const glm::vec4 &color, const glm::vec3 &rot, float len, Object3d
 
 
 
-void ViewGCode::draw_axis()
+void View3D::draw_axis()
 {
 	float len = camera.pix_to_mm(60);
 	axisX.scale = glm::vec3(len, len, len);
@@ -495,7 +498,7 @@ void ViewGCode::draw_axis()
 
 
 //--------------------------------------------------------------------
-void ViewGCode::draw_bounds()
+void View3D::draw_bounds()
 {
 	glColor3f(0.0f, 1.0f, 0.0f);
 
@@ -543,7 +546,7 @@ void ViewGCode::draw_bounds()
 }
 
 //--------------------------------------------------------------------
-void ViewGCode::draw_3d_grid()
+void View3D::draw_3d_grid()
 {
 	CoordsBox &box = camera.get_box();
 	glColor3f(1.0f, 0.0f, 0.0f);
@@ -564,7 +567,7 @@ void ViewGCode::draw_3d_grid()
 }
 /*
 //--------------------------------------------------------------------
-void ViewGCode::draw_grid1()
+void View3D::draw_grid1()
 {
 	//при масштабе 1:1 квадрат занимает 500 пикселей, это его максимальный размер
 	//на 1 толстую линию еще 10 тонких
@@ -666,7 +669,7 @@ void ViewGCode::draw_grid1()
 }
 
 */
-void ViewGCode::draw_grid()
+void View3D::draw_grid()
 {
 	glColor3f(0.0, 0.0, 1.0);
 
@@ -767,7 +770,7 @@ void ViewGCode::draw_grid()
 }
 
 
-void ViewGCode::print_string(const glm::vec4 &color, int x, int y, char *s, int len )
+void View3D::print_string(const glm::vec4 &color, int x, int y, char *s, int len )
 {
 	glPushAttrib(GL_LIST_BIT);
 	//glColor3fv(&color.x);
@@ -779,7 +782,7 @@ void ViewGCode::print_string(const glm::vec4 &color, int x, int y, char *s, int 
 }
 
 
-void ViewGCode::draw_axis_letters()// test draw axis Letter
+void View3D::draw_axis_letters()// test draw axis Letter
 {
 
 	char s[4] = "XYZ";
@@ -801,7 +804,7 @@ void ViewGCode::draw_axis_letters()// test draw axis Letter
 }
 
 //--------------------------------------------------------------------
-void ViewGCode::draw_border()
+void View3D::draw_border()
 {
 	glColor3f(0.0, 0.0, 1.0);
 
@@ -830,7 +833,7 @@ void ViewGCode::draw_border()
 }
 
 //--------------------------------------------------------------------
-void ViewGCode::update_tool_coords(float x, float y, float z)
+void View3D::update_tool_coords(float x, float y, float z)
 {
 	tool.position = glm::vec3(x, y, z);
 	if (realTrack.empty() || realTrack.back() != tool.position)
@@ -863,7 +866,7 @@ void ViewGCode::update_tool_coords(float x, float y, float z)
 // view
 
 
-void ViewGCode::OnSetView(wxCommandEvent &event)
+void View3D::OnSetView(wxCommandEvent &event)
 {
 	camera.set_view(View(event.GetId() - ID_SETVIEWFIRST) );
 	Refresh(false);
@@ -871,12 +874,12 @@ void ViewGCode::OnSetView(wxCommandEvent &event)
 
 
 
-void ViewGCode::OnSetViewUpdate(wxUpdateUIEvent& event)
+void View3D::OnSetViewUpdate(wxUpdateUIEvent& event)
 {
 	event.Enable(true);
 }
 
-void ViewGCode::OnSetShow(wxCommandEvent &event)
+void View3D::OnSetShow(wxCommandEvent &event)
 {
 	switch (event.GetId())
 	{
@@ -889,7 +892,7 @@ void ViewGCode::OnSetShow(wxCommandEvent &event)
 	Refresh(false);
 }
 
-void ViewGCode::OnSetShowUpdate(wxUpdateUIEvent& event)
+void View3D::OnSetShowUpdate(wxUpdateUIEvent& event)
 {
 	event.Enable(true);
 	switch (event.GetId())
@@ -997,13 +1000,13 @@ SimulateCutting::~SimulateCutting()
 	view->simulateCut = NULL;
 }
 
-void ViewGCode::setSimulationSpeed(double mm_per_sec)
+void View3D::setSimulationSpeed(double mm_per_sec)
 {
 	// tickdelay will safe th coonstsnt 
 	distancefortick = mm_per_sec * (tickdelay / 1000.f);
 }
 
-void ViewGCode::processClosing()
+void View3D::processClosing()
 {
 
 	save_config();
@@ -1028,7 +1031,7 @@ void ViewGCode::processClosing()
 	}
 }
 
-void ViewGCode::OnSemulateStart(wxCommandEvent &event)
+void View3D::OnSemulateStart(wxCommandEvent &event)
 {
 	if (simulateCut)
 	{
@@ -1051,7 +1054,7 @@ void ViewGCode::OnSemulateStart(wxCommandEvent &event)
 
 }
 
-void ViewGCode::OnSimulateUpdate(wxThreadEvent& ev)
+void View3D::OnSimulateUpdate(wxThreadEvent& ev)
 {
 	static IntClientData dataCmd;
 	SimulateThreadEvent &evs = dynamic_cast<SimulateThreadEvent &>(ev);
@@ -1064,13 +1067,13 @@ void ViewGCode::OnSimulateUpdate(wxThreadEvent& ev)
 		dataCmd.SetData(cur_gcode_line);
 		wxCommandEvent *ev = new wxCommandEvent(wxEVT_MENU, ID_SELECTLINE);
 		ev->SetClientObject(&dataCmd);
-		wxQueueEvent(appframe, ev);
+		wxQueueEvent(wxGetApp().GetFrame(), ev);
 	}
 	Refresh(false);
 }
 
 
-void ViewGCode::OnCmdUpdateSimulateStart(wxUpdateUIEvent& event)
+void View3D::OnCmdUpdateSimulateStart(wxUpdateUIEvent& event)
 {
 	if (track.empty() || (simulateCut && simulateCut->IsRunning()) )
 		event.Enable(false);
@@ -1078,7 +1081,7 @@ void ViewGCode::OnCmdUpdateSimulateStart(wxUpdateUIEvent& event)
 		event.Enable(true);
 }
 
-void ViewGCode::OnCmdUpdateSimulateStop(wxUpdateUIEvent& event)
+void View3D::OnCmdUpdateSimulateStop(wxUpdateUIEvent& event)
 {
 	if (simulateCut )
 		event.Enable(true);
@@ -1087,7 +1090,7 @@ void ViewGCode::OnCmdUpdateSimulateStop(wxUpdateUIEvent& event)
 }
 
 
-void ViewGCode::OnCmdUpdateSimulatePause(wxUpdateUIEvent& event)
+void View3D::OnCmdUpdateSimulatePause(wxUpdateUIEvent& event)
 {
 	if (simulateCut && simulateCut->IsRunning())
 		event.Enable(true);
@@ -1096,18 +1099,18 @@ void ViewGCode::OnCmdUpdateSimulatePause(wxUpdateUIEvent& event)
 }
 
 
-void ViewGCode::OnSimulateCompletion(wxThreadEvent&)
+void View3D::OnSimulateCompletion(wxThreadEvent&)
 {
 	; // do somt
 }
 
-void ViewGCode::OnSemulatePause(wxCommandEvent &event)
+void View3D::OnSemulatePause(wxCommandEvent &event)
 {
 	if (simulateCut && simulateCut->IsRunning())
 		simulateCut->Pause();
 }
 
-void ViewGCode::OnSemulateStop(wxCommandEvent &event)
+void View3D::OnSemulateStop(wxCommandEvent &event)
 {
 	if ( simulateCut )
 		simulateCut->Delete();
