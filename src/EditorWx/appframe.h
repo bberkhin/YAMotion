@@ -14,10 +14,9 @@ enum DoAfterConvertGcmc
 };
 
 class Edit;
-class wxSimpleHtmlListBox;
 class wxToolBar;
-class IntGCodeThread;
-class SimulateGCodeThread;
+
+
 class View3D;
 class LogWindow;
 class GcmcProcess;
@@ -28,10 +27,9 @@ class DropFileOpen;
 
 //----------------------------------------------------------------------------
 //! frame of the application APP_VENDOR-APP_NAME.
-class AppFrame : public wxFrame {
+class AppFrame : public wxFrame 
+{
 
-	friend class IntGCodeThread;
-	friend class SimulateGCodeThread;
 	friend class GcmcProcess;
 	friend class DropFileOpen;
 
@@ -106,12 +104,10 @@ public:
 	void UpdateTitle(size_t npage = wxNOT_FOUND);
 private:
 	bool FindPageByFileName(const wxString &new_file_name, size_t *nPage = NULL);
-	wxString GetSavedFileName();
 	bool DoSaveAllFiles();
 	bool DoFileSave(bool askToSave, bool bSaveAs, Edit *pedit = NULL);
 	void FileChanged();
 	void DoNewFile(int file_type, const wxString &defpath, bool closeWelcome, const wxString &contextFile = wxEmptyString);
-	void DoSimulate(const wchar_t *fname);
 	int DoConvertGcmc(DoAfterConvertGcmc what_to_do);
 	int RunGcmc(const wchar_t *src_fname, const  wchar_t *dst_fname, const wchar_t *args, DoAfterConvertGcmc what_to_do);
 	bool CheckFileExist(const wchar_t *fname);
@@ -133,8 +129,7 @@ private:
 	wxTimer m_timer;
 	wxFileSystemWatcher *m_watcher;
 
-	IntGCodeThread *checkThread;
-	SimulateGCodeThread *simulateThread;
+	
 	wxCriticalSection critsect;
 	GcmcProcess *gcmcProcess;
 	unsigned int m_gcmc_running_in_sec;

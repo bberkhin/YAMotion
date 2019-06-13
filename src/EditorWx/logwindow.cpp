@@ -11,6 +11,12 @@ EVT_KEY_DOWN(LogWindow::OnKeyDown)
 
 wxEND_EVENT_TABLE()
 
+LogWindow::LogWindow(wxEvtHandler *_handler ) 
+	: handler(_handler), wxSimpleHtmlListBox()
+{
+
+}
+
 LogWindow::LogWindow(wxWindow *parent, wxEvtHandler *_handler, wxWindowID id )
 	: handler(_handler) , wxSimpleHtmlListBox(parent, id, wxDefaultPosition, wxDefaultSize,
 		0, NULL, 0)

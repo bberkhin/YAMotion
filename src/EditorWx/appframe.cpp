@@ -1,6 +1,5 @@
 #include "wx/wx.h"
 #include "wx/filename.h" // filename support
-#include "wx/splitter.h"
 #include "wx/event.h"
 #include <wx/thread.h>
 #include "wx/process.h"
@@ -19,10 +18,6 @@
 #include "about.h"
 #include "propertiesdlg.h"
 #include "appframe.h"       // Prefs
-#include "environmentsimple.h"
-#include "executorlog.h"
-#include "ExecutorView.h"
-#include "GCodeInterpreter.h"
 #include "macrosesdlg.h"
 #include "macrosparamdlg.h"
 #include "standartpaths.h"
@@ -52,6 +47,13 @@
 #include "bitmaps/stop.xpm"
 
 
+
+#include "environmentsimple.h"
+#include "executorlog.h"
+#include "ExecutorView.h"
+#include "GCodeInterpreter.h"
+
+
 #define YA_WRONG_N _("Wrong N value")
 
 
@@ -67,10 +69,10 @@ using namespace Interpreter;
 #endif
 
 
-class IntGCodeThread : public wxThread
+class CheckGCodeThread : public wxThread
 {
 public:
-	IntGCodeThread(AppFrame *handler, wxString &fname_)
+	CheckGCodeThread(AppFrame *handler, wxString &fname_)
 		: fname(fname_), wxThread(wxTHREAD_DETACHED)
 	{
 
@@ -80,7 +82,7 @@ public:
 		ppret = new GCodeInterpreter(wxGetApp().GetEnvironment(), pexec, plogger);
 
 	}
-	~IntGCodeThread();
+	~CheckGCodeThread();
 private:
 
 
@@ -93,44 +95,6 @@ protected:
 	wxString fname;
 };
 
-
-class SimulateGCodeThread : public wxThread
-{
-public:
-	SimulateGCodeThread(AppFrame *handler, const wchar_t *fname_)
-		: fname(fname_), wxThread(wxTHREAD_DETACHED)
-	{
-
-		m_pHandler = handler;
-		pexec = new ExecutorView(plogger);
-		plogger = new LoggerWnd(m_pHandler);
-		ppret = new GCodeInterpreter(wxGetApp().GetEnvironment(), pexec, plogger);
-		m_3Dview = m_pHandler->GetActive3DView();
-
-	}
-	~SimulateGCodeThread();
-
-	std::vector<TrackPoint> *getTack() { return pexec->getTrack(); }
-	CoordsBox getBox() { return pexec->getBox(); }
-
-	void Update3DView()
-	{
-		if (m_3Dview)
-		{
-			m_3Dview->setTrack(getTack());
-			m_3Dview->setBox(getBox());
-		}
-	}
-
-protected:
-	virtual wxThread::ExitCode Entry();
-	AppFrame *m_pHandler;	
-	ExecutorView *pexec;
-	LoggerWnd *plogger;
-	GCodeInterpreter *ppret;
-	wxString fname;
-	View3D *m_3Dview;
-};
 
 
 // A specialization of MyProcess for redirecting the output
@@ -264,13 +228,13 @@ EVT_MENU(ID_SHOWWLCOME, AppFrame::OnShowWelcome)
 
   //  EVT_CONTEXT_MENU(                AppFrame::OnContextMenu)
 //GCode
-	EVT_MENU(ID_GCODE_CHECK, AppFrame::OnCheck)
-	EVT_MENU(ID_GCODE_SIMULATE, AppFrame::OnSimulate)
+	//EVT_MENU(ID_GCODE_CHECK, AppFrame::OnCheck)
+	//EVT_MENU(ID_GCODE_SIMULATE, AppFrame::OnSimulate)
 	EVT_MENU(ID_GCODE_CONVERTGCMC, AppFrame::OnConvertGcmc)
 	EVT_MENU(ID_GCODE_KILLGCMCPROCESS, AppFrame::OnKillGcmcProcess)
 
-	EVT_UPDATE_UI(ID_GCODE_CHECK, AppFrame::OnUpdateCheck)
-	EVT_UPDATE_UI(ID_GCODE_SIMULATE, AppFrame::OnUpdateSimulate)
+	//EVT_UPDATE_UI(ID_GCODE_CHECK, AppFrame::OnUpdateCheck)
+	//EVT_UPDATE_UI(ID_GCODE_SIMULATE, AppFrame::OnUpdateSimulate)
 	EVT_UPDATE_UI(ID_GCODE_CONVERTGCMC, AppFrame::OnUpdateConvertGcmc)
 	EVT_UPDATE_UI(ID_GCODE_KILLGCMCPROCESS, AppFrame::OnUpdateKillGcmcProcess)
 
@@ -316,8 +280,8 @@ AppFrame::AppFrame (const wxString &title)
 
     SetIcon(wxICON(sample));
 
-	checkThread = NULL;
-	simulateThread = NULL;
+	
+	
 	gcmcProcess = NULL;
 	m_gcmc_running_in_sec = 0;
 	
@@ -563,29 +527,6 @@ void AppFrame::OnClose (wxCloseEvent &event)
 	if ( view )
 		view->processClosing();
 
-
-	{
-		wxCriticalSectionLocker enter(critsect);
-		if (checkThread)         // does the thread still exist?
-		{
-			checkThread->Delete();
-		}
-		if (simulateThread)
-		{
-			simulateThread->Delete();
-		}
-	}       // exit from the critical section to give the thread
-			// the possibility to enter its destructor
-			// (which is guarded with m_pThreadCS critical section!)
-	while (1)
-	{
-		{ // was the ~MyThread() function executed?
-			wxCriticalSectionLocker enter(critsect);
-			if (!checkThread && !simulateThread ) break;
-		}
-		// wait for thread completion
-		wxThread::This()->Sleep(1);
-	}
 // save all modified files
 	if (!DoSaveAllFiles() )
 	{
@@ -631,63 +572,10 @@ bool AppFrame::DoSaveAllFiles()
 		if (m_notebook->GetPage(i)->IsKindOf(CLASSINFO(FilePage)))
 		{
 			FilePage *pEdit = dynamic_cast<FilePage *>(m_notebook->GetPage(i));
-			if (pEdit && !DoFileSave(true, false, pEdit->GetEdit() ))
+			if (pEdit && !pEdit->DoFileSave(true, false))
 			{
 				return false;
 			}
-		}
-	}
-	return true;
-}
-
-bool AppFrame::DoFileSave(bool askToSave, bool bSaveAs, Edit *pedit)
-{
-	if (pedit == NULL )
-		pedit = GetActiveFile();
-	
-	if (!pedit) 
-		return true;
-
-	if ( !pedit->Modified() && !bSaveAs )
-		return true;
-
-	// Ask need to save
-	if (askToSave)
-	{
-		int rez = wxMessageBox(_("Text is not saved, save before closing?"), _("Save file"),
-			wxYES_NO | wxCANCEL | wxICON_QUESTION);
-		if (rez == wxCANCEL)
-			return false;
-		else if (rez == wxNO)
-			return true;
-	}
-	// Need save
-	if (bSaveAs || pedit->IsNew() )
-	{
-		wxString filename = pedit->GetFileName();
-		wxString wildCard;
-		if (pedit->GetFileType() == FILETYPE_GCMC)
-			wildCard = _("GCMC Files (*.gcmc)|*.gcmc");
-		else
-			wildCard = _("GCode Files (*.ngc;*.nc)|*.ngc;*.nc");
-
-		wxFileDialog dlg(this, _("Save file As"), wxEmptyString, filename, wildCard, wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
-		if (dlg.ShowModal() != wxID_OK)
-			return false;
-		filename = dlg.GetPath();
-		pedit->SaveFile(filename);
-		ConfigData *config;
-		if ((config = dynamic_cast<ConfigData *>(wxConfigBase::Get())) != NULL)
-			config->AddFileNameToSaveList(filename);
-	}
-	else //  fname exist && not save as  - just save
-	{
-		pedit->SaveFile();
-		if (pedit->Modified())
-		{
-			wxMessageBox(_("Text could not be saved!"), _("Close abort"),
-				wxOK | wxICON_EXCLAMATION);
-			return false;
 		}
 	}
 	return true;
@@ -866,13 +754,19 @@ void AppFrame::OnOpenLastFile(wxCommandEvent &event)
 
 void AppFrame::OnFileSave (wxCommandEvent &WXUNUSED(event)) 
 {
-	DoFileSave( false, false );
+	wxWindow *wnd = m_notebook->GetCurrentPage();
+	FilePage *panel = dynamic_cast<FilePage *>(wnd);
+	if (panel)
+		panel->DoFileSave( false, false );
     UpdateTitle();
 }
 
 void AppFrame::OnFileSaveAs(wxCommandEvent &WXUNUSED(event))
 {
-	DoFileSave(false, true);
+	wxWindow *wnd = m_notebook->GetCurrentPage();
+	FilePage *panel = dynamic_cast<FilePage *>(wnd);
+	if (panel)
+		panel->DoFileSave(false, true);
 	UpdateTitle();
 }
 
@@ -1315,86 +1209,6 @@ wxRect AppFrame::DeterminePrintSize ()
 
 
 
-void AppFrame::OnUpdateCheck(wxUpdateUIEvent& event)
-{
-	if (checkThread && checkThread->IsRunning() )
-		event.Enable(false);
-	else
-		event.Enable(true);
-}
-
-void AppFrame::OnUpdateSimulate(wxUpdateUIEvent& event)
-{
-	if (simulateThread && simulateThread->IsRunning())
-		event.Enable(false);
-	else
-		event.Enable(true);
-}
-
-
-IntGCodeThread::~IntGCodeThread()
-{
-	wxCriticalSectionLocker enter(m_pHandler->critsect);
-	// the thread is being destroyed; make sure not to leave dangling pointers around
-	m_pHandler->checkThread = NULL;
-	if(pexec) delete pexec;
-	if(plogger) delete plogger;
-	if(ppret) delete ppret;
-}
-
-
-wxThread::ExitCode IntGCodeThread::Entry()
-{
-	if (ppret)
-	{
-		if (!ppret->open_nc_file(fname.c_str()))
-		{
-			plogger->log(LOG_ERROR, _("Can not open file: %s"), fname.c_str() );
-			return NULL;
-		}
-		ppret->execute_file();
-	}
-	plogger->log(LOG_INFORMATIONSUM, _("Feed Lenght: %f"), pexec->get_feed_len());
-	plogger->log(LOG_INFORMATIONSUM, _("Traverce Lenght: %f"), pexec->get_traverce_len());
-	plogger->log(LOG_INFORMATIONSUM, _("X Min: %f X Max %f"), pexec->getBox().Min.x, pexec->getBox().Max.x);
-	plogger->log(LOG_INFORMATIONSUM, _("Y Min: %f Y Max %f"), pexec->getBox().Min.y, pexec->getBox().Max.y);
-	plogger->log(LOG_INFORMATIONSUM, _("Z Min: %f Z Max %f"), pexec->getBox().Min.z, pexec->getBox().Max.z);
-
-	wxQueueEvent(m_pHandler, new wxThreadEvent(wxEVT_THREAD, CHECK_GCODE_COMPLETE));
-	return NULL;
-}
-
-
-SimulateGCodeThread::~SimulateGCodeThread()
-{
-	wxCriticalSectionLocker enter(m_pHandler->critsect);
-	// the thread is being destroyed; make sure not to leave dangling pointers around	
-	Update3DView();
-	m_pHandler->simulateThread = NULL;
-	if (pexec) delete pexec;
-	if (plogger) delete plogger;
-	if (ppret) delete ppret;
-}
-
-
-wxThread::ExitCode SimulateGCodeThread::Entry()
-{
-	if (ppret)
-	{
-		if (!ppret->open_nc_file(fname.c_str()))
-		{
-			plogger->log(LOG_ERROR, _("Can not open file: %s"), fname.c_str());
-			return NULL;
-		}
-		ppret->execute_file();
-	}
-	//output stat
-
-	wxQueueEvent(m_pHandler, new wxThreadEvent(wxEVT_THREAD, CHECK_SIMULATE_COMPLETE));
-	return NULL;
-}
-
-
 
 wxString AppFrame::GetText()
 {
@@ -1423,72 +1237,6 @@ void AppFrame::OnSimulateUpdate(wxThreadEvent &ev)
 	m_logwnd->Append(MSLInfo, ev.GetString());
 }
 
-void AppFrame::OnSimulateCompletion(wxThreadEvent&)
-{
-	//drea
-	wxCriticalSectionLocker enter(critsect);
-	if (simulateThread )
-	{
-		simulateThread->Update3DView();
-	}
-}
-
-wxString AppFrame::GetSavedFileName()
-{
-	if ( !DoFileSave(false, false) )
-		return wxString();
-	
-	Edit *pedit = GetActiveFile();
-	return  pedit ? pedit->GetFileName() : wxString();
-}
-
-
-void  AppFrame::OnCheck(wxCommandEvent &event)
-{
-	Edit *pedit = GetActiveFile();
-	if (!pedit)
-		return;
-
-	wxString fname = GetSavedFileName();
-	if (fname.empty())
-		return;	
-	m_logwnd->Clear();
-	if (pedit->GetFileType() == FILETYPE_NC)
-	{
-		checkThread = new IntGCodeThread(this, fname);
-		if (checkThread->Run() != wxTHREAD_NO_ERROR)
-		{
-			wxLogError("Can't create the thread!");
-			delete checkThread;
-			checkThread = NULL;
-		}
-	}
-	else if (pedit->GetFileType() == FILETYPE_GCMC)
-	{
-		DoConvertGcmc(ConvertGcmcNothing);
-	}
-}
-
-void  AppFrame::OnSimulate(wxCommandEvent &event)
-{
-	Edit *pedit = GetActiveFile();
-	if (!pedit)
-		return;
-
-	wxString fname = GetSavedFileName();
-	if (fname.empty())
-		return;
-	m_logwnd->Clear();
-
-	if (pedit->GetFileType() == FILETYPE_NC)
-	{
-		DoSimulate( fname.c_str() );
-	}
-	else if (pedit->GetFileType() == FILETYPE_GCMC)
-	{
-		DoConvertGcmc( ConvertGcmcRunSimilate );
-	}
-}
 
 
 bool AppFrame::CheckFileExist(const wchar_t *fname)
@@ -1657,7 +1405,7 @@ void AppFrame::GcmcProcessTerminated(int status, const wchar_t *dst_fname, DoAft
 					DoNewFile(FILETYPE_NC, wxEmptyString, true, dst_fname); 
 					break;
 				case ConvertGcmcRunSimilate:	
-					DoSimulate(dst_fname); 
+					;// DoSimulate(dst_fname);
 					break;
 			}
 		}
@@ -1709,22 +1457,6 @@ void AppFrame::OnKillGcmcProcess(wxCommandEvent &event)
 void AppFrame::OnUpdateKillGcmcProcess(wxUpdateUIEvent& event)
 {
 	event.Enable(gcmcProcess ? true : false);
-}
-
-
-void AppFrame::DoSimulate(const wchar_t *fname)
-{
-	if (simulateThread == NULL)
-	{
-		simulateThread = new SimulateGCodeThread(this, fname);
-		if (simulateThread->Run() != wxTHREAD_NO_ERROR)
-		{
-			m_logwnd->Append(MSLError, _("Can't create the thread to run simulate"));
-			delete simulateThread;
-			simulateThread = NULL;
-
-		}
-	}
 }
 
 

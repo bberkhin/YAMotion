@@ -4,24 +4,31 @@
 #include "prefs.h"
 #include "wx/aui/framemanager.h"
 #include "wx/aui/dockart.h"
+#include "wx/splitter.h"
 #include "flatbuttom.h"
 #include "FlatScrollBar.h"
 #include "defsext.h"
 #include "View3D.h"
+#include "logwindow.h"
+#include "configdata.h"
+#include "workingthreads.h"
+
 
 #define ID_TO3DBUTTON 100
 #define ID_TOGCODEBUTTON 101
 #define ID_CHECKBUTTON 102
+#define ID_CLOSEOUTPUT 103
 
 wxBEGIN_EVENT_TABLE(EditorPanel, wxPanel)
 EVT_BUTTON(ID_TO3DBUTTON, EditorPanel::OnTo3DButton)
 EVT_BUTTON(ID_TOGCODEBUTTON, EditorPanel::OnToGcodeButton)
+EVT_BUTTON(ID_CHECKBUTTON, EditorPanel::OnCheckButton)
 wxEND_EVENT_TABLE()
 
 wxIMPLEMENT_ABSTRACT_CLASS(EditorPanel, wxPanel);
 
-EditorPanel::EditorPanel(wxWindow *parent, int filetype, const wxString &filename, bool isnew) :
-	wxPanel(parent)
+EditorPanel::EditorPanel(wxWindow *parent, FilePage *fp, int filetype, const wxString &filename, bool isnew) :
+	m_fp(fp), wxPanel(parent)
 {
 	ColourScheme *clrs = Preferences::Get()->GetColorScheme();
 	const CommonInfo &common_prefs = Preferences::Get()->Common();
@@ -99,7 +106,7 @@ wxBoxSizer *EditorPanel::CreateHeaderPanel()
 		totalpane->AddSpacer(10);
 		if (ftype == FILETYPE_GCMC)
 		{
-			FlatButton *pConvertBt = new FlatButton(this, ID_CHECKBUTTON, _("Convert"), ID_GCODE_CONVERTGCMC, true);
+			FlatButton *pConvertBt = new FlatButton(this, ID_TOGCODEBUTTON, _("Convert"), ID_GCODE_CONVERTGCMC, true);
 			wxBitmap bmp1 = wxArtProvider::GetBitmap(wxART_HELP_BOOK, wxART_OTHER, FromDIP(wxSize(16, 16)));
 			pConvertBt->SetBitmap(bmp1);
 			totalpane->Add(pConvertBt, 0, wxRIGHT);
@@ -139,12 +146,24 @@ void EditorPanel::UpdateThemeColor()
 
 void EditorPanel::OnTo3DButton(wxCommandEvent &ev)
 {
+	// todo via message
+	if (m_fp)
+		m_fp->HideLog();
 }
 
 void EditorPanel::OnToGcodeButton(wxCommandEvent& WXUNUSED(ev))
-{
+{	
+	if (m_fp)
+		m_fp->ShowLog();
 }
-
+void EditorPanel::OnCheckButton(wxCommandEvent& WXUNUSED(ev))
+{
+	if (m_fp)
+	{
+		m_fp->CheckGCode();
+	}
+				
+}
 
 
 wxBEGIN_EVENT_TABLE(View3DPanel, wxPanel)
@@ -245,6 +264,71 @@ wxSizer *View3DPanel::CreateFooterPanel()
 }
 
 
+wxBEGIN_EVENT_TABLE(LogPane, wxPanel)
+EVT_BUTTON(ID_CLOSEOUTPUT, LogPane::OnClose)
+wxEND_EVENT_TABLE()
+
+LogPane::LogPane(wxWindow *parent, FilePage *fb)
+	: m_fb(fb), wxPanel(parent,-1,wxDefaultPosition,wxDefaultSize, wxTAB_TRAVERSAL | wxNO_BORDER | wxCAPTION)
+{
+
+	wxBoxSizer *header = new wxBoxSizer(wxHORIZONTAL);
+	wxStaticText *txt = new wxStaticText(this, wxID_ANY, _("Output"));
+	
+	header->Add(10,0);
+	header->Add(txt, 1, wxALIGN_CENTRE_VERTICAL);
+	
+	FlatButton *padd = new FlatButton(this, ID_CLOSEOUTPUT, _("Close"));//| wxBORDER_NONE); 
+	wxBitmap bmp = wxArtProvider::GetBitmap(wxART_GOTO_LAST, wxART_OTHER, FromDIP(wxSize(16, 16)));
+	padd->SetBitmap(bmp);
+	header->Add(padd, 0, wxRIGHT);
+
+
+	wxBoxSizer *totalpane = new wxBoxSizer(wxVERTICAL);
+	m_plog = new LogWindow(this, m_fb, wxID_ANY);
+	m_plog->SetWindowStyle(m_plog->GetWindowStyle() | wxNO_BORDER);
+	
+
+	totalpane->Add(header, 0, wxEXPAND);
+	totalpane->Add(m_plog, wxEXPAND, wxEXPAND); //wxEXPAND
+	
+	SetSizerAndFit(totalpane);
+	UpdateThemeColor();
+}
+
+void LogPane::UpdateThemeColor()
+{
+	
+	ColourScheme *clrs = Preferences::Get()->GetColorScheme();
+	wxColor bgColor = clrs->Get(ColourScheme::WINDOW);
+	wxColor fgColor = clrs->Get(ColourScheme::WINDOW_TEXT);
+	wxColor bgColorFr = clrs->Get(ColourScheme::FRAME);
+	
+	
+	SetBackgroundColour(bgColorFr);
+	SetForegroundColour(fgColor);
+
+	wxWindowList::compatibility_iterator node = GetChildren().GetFirst();
+	while (node)
+	{
+		wxWindow* child = node->GetData();
+		child->SetBackgroundColour(bgColorFr);
+		child->SetForegroundColour(fgColor);
+		node = node->GetNext();
+	}
+
+	m_plog->SetBackgroundColour(bgColor);
+	m_plog->SetForegroundColour(fgColor);
+
+
+}
+
+void LogPane::OnClose(wxCommandEvent& WXUNUSED(ev))
+{
+	m_fb->HideLog();
+}
+
+
 wxBEGIN_EVENT_TABLE(FilePage, wxPanel)
 wxEND_EVENT_TABLE()
 
@@ -252,18 +336,31 @@ wxIMPLEMENT_ABSTRACT_CLASS(FilePage, wxPanel);
 
 
 FilePage::FilePage(wxWindow *parent, int filetype, const wxString &filename, bool isnew) :
-	wxPanel(parent)
+	m_logwn(0), wxPanel(parent)
 {
 	
+	m_worker = new Worker(this);
+	m_splitter = new wxSplitterWindow(this);
 
-	m_editor = new EditorPanel(this, filetype, filename, isnew);
+	m_splitter->SetSize(GetClientSize());
+	m_splitter->SetSashGravity(1.0);
+
+	m_editor = new EditorPanel(m_splitter,this, filetype, filename, isnew);	
+	//m_editor->SetEventHandler(this);
+	m_logwn = new LogPane(m_splitter,this );
+	//m_logwn->SetEventHandler(this);
+	
+	m_logwn->Show(false);
+	m_splitter->Initialize(m_editor);
+	m_splitter->SetMinimumPaneSize(40);
 
 	wxGridSizer *totalpane;
 	int ftype = m_editor->GetEdit()->GetFileType();
 	if ((ftype == FILETYPE_NC) || (ftype == FILETYPE_GCMC))
 	{
 		totalpane = new wxGridSizer(2);
-		totalpane->Add(m_editor, 0, wxEXPAND);
+		//totalpane->Add(m_editor, 0, wxEXPAND);
+		totalpane->Add(m_splitter, 0, wxEXPAND);
 		m_view3d = new View3DPanel(this);
 		totalpane->Add(m_view3d, 1, wxEXPAND);
 	}
@@ -279,9 +376,87 @@ FilePage::FilePage(wxWindow *parent, int filetype, const wxString &filename, boo
 
 FilePage::~FilePage()
 {
+	delete m_worker;
 
 }
 
+
+void FilePage::CheckGCode()
+{
+	ShowLog();
+	m_worker->CheckGCode();
+}
+
+
 void FilePage::UpdateThemeColor()
 {
+}
+
+void FilePage::ShowLog( )
+{
+	if (m_splitter->IsSplit())
+		return;
+		
+	m_editor->Show(true);
+	m_logwn->Show(true);
+	m_splitter->SplitHorizontally(m_editor, m_logwn,-50);
+}
+
+void FilePage::HideLog()
+{
+	if (m_splitter->IsSplit())
+		m_splitter->Unsplit();
+}
+
+
+bool FilePage::DoFileSave(bool askToSave, bool bSaveAs)
+{
+	Edit *pedit = this->GetEdit();
+
+	if (!pedit)
+		return true;
+
+	if (!pedit->Modified() && !bSaveAs)
+		return true;
+
+	// Ask need to save
+	if (askToSave)
+	{
+		int rez = wxMessageBox(_("Text is not saved, save before closing?"), _("Save file"),
+			wxYES_NO | wxCANCEL | wxICON_QUESTION);
+		if (rez == wxCANCEL)
+			return false;
+		else if (rez == wxNO)
+			return true;
+	}
+	// Need save
+	if (bSaveAs || pedit->IsNew())
+	{
+		wxString filename = pedit->GetFileName();
+		wxString wildCard;
+		if (pedit->GetFileType() == FILETYPE_GCMC)
+			wildCard = _("GCMC Files (*.gcmc)|*.gcmc");
+		else
+			wildCard = _("GCode Files (*.ngc;*.nc)|*.ngc;*.nc");
+
+		wxFileDialog dlg(this, _("Save file As"), wxEmptyString, filename, wildCard, wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
+		if (dlg.ShowModal() != wxID_OK)
+			return false;
+		filename = dlg.GetPath();
+		pedit->SaveFile(filename);
+		ConfigData *config;
+		if ((config = dynamic_cast<ConfigData *>(wxConfigBase::Get())) != NULL)
+			config->AddFileNameToSaveList(filename);
+	}
+	else //  fname exist && not save as  - just save
+	{
+		pedit->SaveFile();
+		if (pedit->Modified())
+		{
+			wxMessageBox(_("Text could not be saved!"), _("Close abort"),
+				wxOK | wxICON_EXCLAMATION);
+			return false;
+		}
+	}
+	return true;
 }
