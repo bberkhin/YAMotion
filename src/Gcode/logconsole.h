@@ -32,15 +32,22 @@ public:
 	void set_dwell(long millseconds);
 	void process_probe(const Coords &position);
 	CoordsBox getBox() { return box; }
+	double get_traverce_len() { return traverce_len; }
+	double get_feed_len() { return feed_len; }
 
 protected:
 	virtual void addTrackPoint(TypeMove type, const Coords &pt);
     virtual void output(const std::string &str  );
 	virtual void output(const std::string &str, const Coords &position );
+	virtual void update_position(const Coords &position);
+	virtual double distance(const Coords &cur_position, const Coords &position);
 protected:
 	int nline;
 	bool doprint;
 	CoordsBox box;
+	Coords  cur_position;
+	double traverce_len;
+	double feed_len;	
 };
 
 

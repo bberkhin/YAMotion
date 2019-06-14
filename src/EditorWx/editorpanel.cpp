@@ -9,15 +9,28 @@
 #include "FlatScrollBar.h"
 #include "defsext.h"
 #include "View3D.h"
+#include "edit.h"    
 #include "logwindow.h"
 #include "configdata.h"
-#include "workingthreads.h"
+
 
 
 #define ID_TO3DBUTTON 100
 #define ID_TOGCODEBUTTON 101
 #define ID_CHECKBUTTON 102
 #define ID_CLOSEOUTPUT 103
+enum
+{
+	ID_CTRL_MINX = 150,
+	ID_CTRL_MINY,
+	ID_CTRL_MINZ,
+	ID_CTRL_MAXX,
+	ID_CTRL_MAXY,
+	ID_CTRL_MAXZ,
+	ID_CTRL_PATH,
+	ID_CTRL_TRAVERCE
+};
+
 
 wxBEGIN_EVENT_TABLE(EditorPanel, wxPanel)
 EVT_BUTTON(ID_TO3DBUTTON, EditorPanel::OnTo3DButton)
@@ -91,14 +104,14 @@ wxBoxSizer *EditorPanel::CreateHeaderPanel()
 	if ((ftype == FILETYPE_NC) || (ftype == FILETYPE_GCMC) )
 	{
 	
-		FlatButton *p3dViewBt = new FlatButton(this, ID_TO3DBUTTON, _("3D view"), ID_GCODE_SIMULATE, true);
+		FlatButton *p3dViewBt = new FlatButton(this, ID_TO3DBUTTON, _("3D view"), true);
 		wxBitmap bmp = wxArtProvider::GetBitmap(wxART_GOTO_LAST, wxART_OTHER, FromDIP(wxSize(16, 16)));
 		//padd->SetWindowStyle(wxBORDER_NONE);
 		p3dViewBt->SetBitmap(bmp);
 		totalpane->Add(p3dViewBt, 0, wxRIGHT);
 		totalpane->AddSpacer(10);
 
-		FlatButton *pCheckBt = new FlatButton(this, ID_CHECKBUTTON, _("Check"), ID_GCODE_CHECK, true);
+		FlatButton *pCheckBt = new FlatButton(this, ID_CHECKBUTTON, _("Check"), true);
 		wxBitmap bmp1 = wxArtProvider::GetBitmap(wxART_ADD_BOOKMARK, wxART_OTHER, FromDIP(wxSize(16, 16)));
 		pCheckBt->SetBitmap(bmp1);
 
@@ -106,7 +119,7 @@ wxBoxSizer *EditorPanel::CreateHeaderPanel()
 		totalpane->AddSpacer(10);
 		if (ftype == FILETYPE_GCMC)
 		{
-			FlatButton *pConvertBt = new FlatButton(this, ID_TOGCODEBUTTON, _("Convert"), ID_GCODE_CONVERTGCMC, true);
+			FlatButton *pConvertBt = new FlatButton(this, ID_TOGCODEBUTTON, _("Convert"), true);
 			wxBitmap bmp1 = wxArtProvider::GetBitmap(wxART_HELP_BOOK, wxART_OTHER, FromDIP(wxSize(16, 16)));
 			pConvertBt->SetBitmap(bmp1);
 			totalpane->Add(pConvertBt, 0, wxRIGHT);
@@ -146,21 +159,21 @@ void EditorPanel::UpdateThemeColor()
 
 void EditorPanel::OnTo3DButton(wxCommandEvent &ev)
 {
-	// todo via message
-	if (m_fp)
-		m_fp->HideLog();
+	if(m_fp)
+		m_fp->Draw3D();
+	
 }
 
 void EditorPanel::OnToGcodeButton(wxCommandEvent& WXUNUSED(ev))
 {	
 	if (m_fp)
-		m_fp->ShowLog();
+		m_fp->ConvertGcmc();
 }
 void EditorPanel::OnCheckButton(wxCommandEvent& WXUNUSED(ev))
 {
 	if (m_fp)
 	{
-		m_fp->CheckGCode();
+		m_fp->Check();
 	}
 				
 }
@@ -244,24 +257,53 @@ wxSizer *View3DPanel::CreateFooterPanel()
 {
 	// about info
 	wxFlexGridSizer  *gd = new wxFlexGridSizer(4,wxSize(10,5));// 2, 0, 0);
-	//gd->AddGrowableCol(0);
-	//gd->AddGrowableCol(1);
-	//gd->AddGrowableCol(2);
-	//gd->AddGrowableCol(3);
 
+	gd->Add(new wxStaticText(this, wxID_ANY, _("X Min: ")),	0, wxALIGN_LEFT);
+	gd->Add(new wxStaticText(this, ID_CTRL_MINX, _("     ")), 0, wxALIGN_LEFT); 
+	gd->Add(new wxStaticText(this, wxID_ANY, _("X Max: ")), 0, wxALIGN_LEFT);
+	gd->Add(new wxStaticText(this, ID_CTRL_MAXX, _("     ")), 0, wxALIGN_LEFT); 
+	gd->Add(new wxStaticText(this, wxID_ANY, _("Y Min: ")), 0, wxALIGN_LEFT);
+	gd->Add(new wxStaticText(this, ID_CTRL_MINY, _("     ")), 0, wxALIGN_LEFT); 
+	gd->Add(new wxStaticText(this, wxID_ANY, _("Y Max: ")), 0, wxALIGN_LEFT);
+	gd->Add(new wxStaticText(this, ID_CTRL_MAXY, _("     ")), 0, wxALIGN_LEFT); 
+	gd->Add(new wxStaticText(this, wxID_ANY, _("Z Min: ")), 0, wxALIGN_LEFT);
+	gd->Add(new wxStaticText(this, ID_CTRL_MINZ, _("     ")), 0, wxALIGN_LEFT); 
+	gd->Add(new wxStaticText(this, wxID_ANY, _("Z Max: ")), 0, wxALIGN_LEFT);
+	gd->Add(new wxStaticText(this, ID_CTRL_MAXZ, _("     ")), 0, wxALIGN_LEFT); 
 	
-	gd->Add(new wxStaticText(this, wxID_ANY, _("Width: ")),	0, wxALIGN_LEFT);
-	gd->Add(new wxStaticText(this, wxID_ANY, _("456mm ")), 0, wxALIGN_LEFT); // width val
-	gd->Add(new wxStaticText(this, wxID_ANY, _("Height: ")), 0, wxALIGN_LEFT);
-	gd->Add(new wxStaticText(this, wxID_ANY, _("116mm ")), 0, wxALIGN_LEFT); // height val
-	gd->Add(new wxStaticText(this, wxID_ANY, _("Lenght: ")),0, wxALIGN_LEFT); 
-	gd->Add(new wxStaticText(this, wxID_ANY, _("04040406mm ")),	0, wxALIGN_LEFT); // lenght val
+	gd->Add(new wxStaticText(this, wxID_ANY, _("Traverce: ")),0, wxALIGN_LEFT); 
+	gd->Add(new wxStaticText(this, ID_CTRL_TRAVERCE, _("       ")),	0, wxALIGN_LEFT); // lenght val
 	gd->Add(new wxStaticText(this, wxID_ANY, _("Path: ")),	0, wxALIGN_LEFT);
-	gd->Add(new wxStaticText(this, wxID_ANY, _("550406mm ")),0, wxALIGN_LEFT); // path val
-	
+	gd->Add(new wxStaticText(this, ID_CTRL_PATH, _("       ")),0, wxALIGN_LEFT); // path val
 	
 	return gd;
 }
+
+void View3DPanel::SetValue(int id, const double &val)
+{
+
+	wxStaticText *ptxt = dynamic_cast<wxStaticText *>(FindWindowById(id,this));
+	if (ptxt)
+	{
+		wxString txt = wxString::Format("%g mm.", val);
+		ptxt->SetLabelText(txt);
+	}
+}
+
+void View3DPanel::UpdateStatistics(const ConvertGCMCInfo &dt)
+{
+	SetValue(ID_CTRL_MINX, dt.box.Min.x);
+	SetValue(ID_CTRL_MINY, dt.box.Min.y);
+	SetValue(ID_CTRL_MINZ, dt.box.Min.z);
+	SetValue(ID_CTRL_MAXX, dt.box.Max.x);
+	SetValue(ID_CTRL_MAXY, dt.box.Max.y);
+	SetValue(ID_CTRL_MAXZ, dt.box.Max.z);
+	SetValue(ID_CTRL_PATH, dt.feed_len);
+	SetValue(ID_CTRL_TRAVERCE, dt.traverce_len);
+	
+	Layout();
+}
+
 
 
 wxBEGIN_EVENT_TABLE(LogPane, wxPanel)
@@ -339,6 +381,8 @@ FilePage::FilePage(wxWindow *parent, int filetype, const wxString &filename, boo
 	m_logwn(0), wxPanel(parent)
 {
 	
+	m_view3d = 0;
+
 	m_worker = new Worker(this);
 	m_splitter = new wxSplitterWindow(this);
 
@@ -380,13 +424,26 @@ FilePage::~FilePage()
 
 }
 
-
-void FilePage::CheckGCode()
+void FilePage::Draw3D()
 {
 	ShowLog();
-	m_worker->CheckGCode();
+	m_worker->Draw3D();
 }
 
+
+void FilePage::Check()
+{
+	ShowLog();
+	m_worker->Check();
+}
+
+
+
+void FilePage::ConvertGcmc()
+{
+	ShowLog();
+	m_worker->DoConvertGcmc(ConvertGcmcOpenFile);
+}
 
 void FilePage::UpdateThemeColor()
 {
@@ -399,7 +456,7 @@ void FilePage::ShowLog( )
 		
 	m_editor->Show(true);
 	m_logwn->Show(true);
-	m_splitter->SplitHorizontally(m_editor, m_logwn,-50);
+	m_splitter->SplitHorizontally(m_editor, m_logwn,-250);
 }
 
 void FilePage::HideLog()
@@ -408,13 +465,20 @@ void FilePage::HideLog()
 		m_splitter->Unsplit();
 }
 
+void FilePage::UpdateStatistics(const ConvertGCMCInfo &dt)
+{
+	if (m_view3d)
+		m_view3d->UpdateStatistics(dt);
+}
 
 bool FilePage::DoFileSave(bool askToSave, bool bSaveAs)
 {
-	Edit *pedit = this->GetEdit();
 
+	Edit *pedit = GetEdit();
 	if (!pedit)
 		return true;
+
+	m_worker->StopAll();
 
 	if (!pedit->Modified() && !bSaveAs)
 		return true;

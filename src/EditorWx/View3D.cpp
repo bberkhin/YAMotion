@@ -1072,6 +1072,10 @@ void View3D::OnSimulateUpdate(wxThreadEvent& ev)
 	Refresh(false);
 }
 
+void View3D::OnSimulateCompletion(wxThreadEvent&)
+{
+
+}
 
 void View3D::OnCmdUpdateSimulateStart(wxUpdateUIEvent& event)
 {
@@ -1098,11 +1102,6 @@ void View3D::OnCmdUpdateSimulatePause(wxUpdateUIEvent& event)
 		event.Enable(false);
 }
 
-
-void View3D::OnSimulateCompletion(wxThreadEvent&)
-{
-	; // do somt
-}
 
 void View3D::OnSemulatePause(wxCommandEvent &event)
 {

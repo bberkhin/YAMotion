@@ -7,6 +7,9 @@
 #include "codedescription.h"
 #include "configdata.h"
 #include "prefs.h"
+#include "app.h"
+#include "appframe.h"
+
 //#include "..\..\src\stc\ScintillaWX.h"
 
 
@@ -346,7 +349,8 @@ void Edit::OnChanged(wxStyledTextEvent & )
 		m_modified = Modified();
 		wxCommandEvent event(FILE_MODIFYED_EVENT, GetId());
 		event.SetEventObject(this);
-		ProcessWindowEvent(event);
+		wxGetApp().GetFrame()->ProcessWindowEvent(event);
+		//wxQueueEvent(&wxGetApp(), event.Clone());
 	}	
 }
 

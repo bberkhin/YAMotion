@@ -1,5 +1,5 @@
 (gcmc compiled code, do not change)
-(2019-06-13 12:37:39)
+(2019-06-14 20:12:15)
 (-- prologue begin --)
 G17 ( Use XY plane )
 G21 ( Use mm )
@@ -12,7 +12,7 @@ G94 ( Units Per Minute feed rate mode )
 G64 ( Enable path blending for best speed )
 (-- prologue end --)
 F400.00000000
-G0 Z1.00000000
+G0 Z3.00000000
 G0 X0.00000000 Y45.00000000
 G0 X0.59523810 Y47.50000000
 G1 Z0.00000000

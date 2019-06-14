@@ -1,23 +1,21 @@
 #include "wx/wx.h"
 #include "wx/filename.h" // filename support
 #include "wx/event.h"
-#include <wx/thread.h>
-#include "wx/process.h"
-#include "wx/txtstrm.h"
 #include "wx/artprov.h"
 
 
 //! application headers
+#include "appframe.h"       // Prefs
 #include "app.h"
-#include "appdefs.h"       // Prefs
-#include "defsext.h"     // Additional definitions
-//#include "edit.h"        // Edit module
+#include "appdefs.h"      
+#include "defsext.h"     
+#include "prefs.h"
 #include "editorpanel.h"
+#include "edit.h"
 #include "View3D.h"
 
 #include "about.h"
 #include "propertiesdlg.h"
-#include "appframe.h"       // Prefs
 #include "macrosesdlg.h"
 #include "macrosparamdlg.h"
 #include "standartpaths.h"
@@ -54,101 +52,8 @@
 #include "GCodeInterpreter.h"
 
 
-#define YA_WRONG_N _("Wrong N value")
-
-
 using namespace Interpreter;
 
-//----------------------------------------------------------------------------
-// resources
-//----------------------------------------------------------------------------
-
-// the application icon (under Windows it is in resources)
-#ifndef wxHAS_IMAGES_IN_RESOURCES
-//    #include "../sample.xpm"
-#endif
-
-
-class CheckGCodeThread : public wxThread
-{
-public:
-	CheckGCodeThread(AppFrame *handler, wxString &fname_)
-		: fname(fname_), wxThread(wxTHREAD_DETACHED)
-	{
-
-		m_pHandler = handler;
-		pexec = new ExecutorLogWnd(m_pHandler, true);
-		plogger = new LoggerWnd(m_pHandler);
-		ppret = new GCodeInterpreter(wxGetApp().GetEnvironment(), pexec, plogger);
-
-	}
-	~CheckGCodeThread();
-private:
-
-
-protected:
-	virtual wxThread::ExitCode Entry();
-	AppFrame *m_pHandler;
-	ExecutorLogWnd *pexec;
-	LoggerWnd *plogger;
-	GCodeInterpreter *ppret;
-	wxString fname;
-};
-
-
-
-// A specialization of MyProcess for redirecting the output
-class GcmcProcess : public wxProcess
-{
-public:
-	GcmcProcess(AppFrame *parent, const wchar_t *dstfn, DoAfterConvertGcmc todo)
-		: m_parent(parent), dst_file(dstfn), what_to_do(todo), wxProcess(parent)
-	{
-		Redirect();
-	}
-	virtual void OnTerminate(int pid, int status) wxOVERRIDE;
-	virtual bool HasInput();
-	
-private:
-	AppFrame *m_parent;
-	DoAfterConvertGcmc what_to_do;
-	std::wstring dst_file;
-};
-
-void GcmcProcess::OnTerminate(int pid, int status)
-{
-	// show the rest of the output
-	while (HasInput())
-		;
-
-	m_parent->GcmcProcessTerminated(status, dst_file.c_str(), what_to_do );
-}
-
-bool GcmcProcess::HasInput()
-{
-	bool hasInput = false;
-
-	if (IsInputAvailable())
-	{
-		wxTextInputStream tis(*GetInputStream());
-		// this assumes that the output is always line buffered
-		wxString msg;
-		msg << tis.ReadLine();
-		m_parent->AppendGcmcError(msg);
-		hasInput = true;
-	}
-
-	if (IsErrorAvailable())
-	{
-		wxTextInputStream tis(*GetErrorStream());
-		// this assumes that the output is always line buffered
-		wxString msg;
-		msg << tis.ReadLine();
-		m_parent->AppendGcmcError(msg);
-		hasInput = true;
-	}
-	return hasInput;
-}
 
 class DropFileOpen : public wxFileDropTarget
 {
@@ -180,9 +85,7 @@ private:
 wxBEGIN_EVENT_TABLE (AppFrame, wxFrame)
     // common
     EVT_CLOSE (                      AppFrame::OnClose)
-	EVT_TIMER( wxID_ANY, AppFrame::OnTimer)
-    // file
-
+	    // file
 	EVT_MENU(ID_NEWNC,				 AppFrame::OnFileNew)
 	EVT_MENU(ID_NEWGCMC,			 AppFrame::OnFileNew)
     EVT_MENU (ID_OPENFILE,             AppFrame::OnFileOpen)
@@ -216,10 +119,10 @@ wxBEGIN_EVENT_TABLE (AppFrame, wxFrame)
 	EVT_MENU(ID_USERPREFS, AppFrame::OnUserPreferences)
 
 
-// help
-EVT_MENU(wxID_ABOUT, AppFrame::OnAbout)
-EVT_MENU(ID_DOWNLOADUPDATE, AppFrame::OnDownloadUpdate)
-EVT_MENU(ID_SHOWWLCOME, AppFrame::OnShowWelcome)
+	// help
+	EVT_MENU(wxID_ABOUT, AppFrame::OnAbout)
+	EVT_MENU(ID_DOWNLOADUPDATE, AppFrame::OnDownloadUpdate)
+	EVT_MENU(ID_SHOWWLCOME, AppFrame::OnShowWelcome)
 
     // help
     EVT_MENU (wxID_ABOUT,            AppFrame::OnAbout)
@@ -228,13 +131,9 @@ EVT_MENU(ID_SHOWWLCOME, AppFrame::OnShowWelcome)
 
   //  EVT_CONTEXT_MENU(                AppFrame::OnContextMenu)
 //GCode
-	//EVT_MENU(ID_GCODE_CHECK, AppFrame::OnCheck)
-	//EVT_MENU(ID_GCODE_SIMULATE, AppFrame::OnSimulate)
 	EVT_MENU(ID_GCODE_CONVERTGCMC, AppFrame::OnConvertGcmc)
 	EVT_MENU(ID_GCODE_KILLGCMCPROCESS, AppFrame::OnKillGcmcProcess)
 
-	//EVT_UPDATE_UI(ID_GCODE_CHECK, AppFrame::OnUpdateCheck)
-	//EVT_UPDATE_UI(ID_GCODE_SIMULATE, AppFrame::OnUpdateSimulate)
 	EVT_UPDATE_UI(ID_GCODE_CONVERTGCMC, AppFrame::OnUpdateConvertGcmc)
 	EVT_UPDATE_UI(ID_GCODE_KILLGCMCPROCESS, AppFrame::OnUpdateKillGcmcProcess)
 
@@ -243,29 +142,17 @@ EVT_MENU(ID_SHOWWLCOME, AppFrame::OnShowWelcome)
 	
 
 	EVT_AUINOTEBOOK_PAGE_CLOSE(wxID_ANY, AppFrame::OnNotebookPageClose)
-	EVT_COMMAND(wxID_ANY,FILE_MODIFYED_EVENT, AppFrame::OnFileChanged)
+	EVT_COMMAND(wxID_ANY,FILE_MODIFYED_EVENT, AppFrame::OnFileModified)
 	EVT_COMMAND(wxID_ANY,FILE_OPEN_EVENT, AppFrame::OnFileOpenEvent)
 	EVT_COMMAND(wxID_ANY, FILE_RENAME_EVENT, AppFrame::OnFileRenamed)
 	EVT_COMMAND(wxID_ANY, FILE_REMOVE_EVENT, AppFrame::OnFileRemoveEvent)
 	EVT_COMMAND(wxID_ANY, FILE_NEW_EVENT, AppFrame::OnFileNewEvent)
-
-// PROCESSING
-
-	EVT_THREAD(CHECK_GCODE_UPDATE, AppFrame::OnThreadUpdate)
-	EVT_THREAD(CHECK_GCODE_COMPLETE, AppFrame::OnThreadCompletion)
-
-
-	EVT_THREAD(CHECK_SIMULATE_UPDATE, AppFrame::OnSimulateUpdate)
-	EVT_THREAD(CHECK_SIMULATE_COMPLETE, AppFrame::OnSimulateCompletion)
-
-	//EVT_COMMAND(wxID_ANY, wxEVT_COMMAND_GCODETHREAD_UPDATE, AppFrame::OnThreadUpdate)
-	//EVT_COMMAND(wxID_ANY, wxEVT_COMMAND_GCODETHREAD_COMPLETED, AppFrame::OnThreadCompletion)
 	
 wxEND_EVENT_TABLE ()
 
 
 AppFrame::AppFrame (const wxString &title)
-        : m_timer(this), wxFrame ((wxFrame *)NULL, wxID_ANY, title, wxDefaultPosition, wxSize(840,650),
+        : wxFrame ((wxFrame *)NULL, wxID_ANY, title, wxDefaultPosition, wxSize(840,650),
                     wxDEFAULT_FRAME_STYLE | wxNO_FULL_REPAINT_ON_RESIZE)
 {
 	// tell wxAuiManager to manage this frame
@@ -282,8 +169,7 @@ AppFrame::AppFrame (const wxString &title)
 
 	
 	
-	gcmcProcess = NULL;
-	m_gcmc_running_in_sec = 0;
+
 	
 	// initialize important variables
 
@@ -306,35 +192,13 @@ AppFrame::AppFrame (const wxString &title)
 	m_mgr.AddPane(m_notebook, wxAuiPaneInfo().Name("notebook_content").
 		CenterPane().PaneBorder(false));
 
-	/*
-	m_mgr.AddPane(CreateGLView(), wxAuiPaneInfo().
-		Name("ViewGCode").Caption("3D View").
-		Right().Layer(1).Position(1).
-		CloseButton(true).MaximizeButton(true));
-
-		*/
-	
 	
 	m_dirtree = new DirPane(this);
 	m_mgr.AddPane(m_dirtree, wxAuiPaneInfo().
 		Name("Folders").Caption("Folders").
 		Left().Layer(1).Position(1).
 		CloseButton(false).MaximizeButton(false).CaptionVisible(false));
-	
 
-	m_logwnd = new LogWindow(this, this, wxID_ANY);
-	int iconSize = m_mgr.GetArtProvider()->GetMetric(wxAUI_DOCKART_CAPTION_SIZE);
-	// Make it even to use 16 pixel icons with default 17 caption height.
-	iconSize &= ~1;
-
-	m_mgr.AddPane(m_logwnd, wxAuiPaneInfo().
-		Name("logwnd").Caption(_("Output")).
-		Bottom().Layer(1).Position(1).
-		Icon(wxArtProvider::GetBitmap(wxART_WARNING,
-			wxART_OTHER,
-			wxSize(iconSize, iconSize))));
-	
-	// add the toolbars to the manager
 	
 	wxAuiToolBar *toolBar = CreateToolBar();
 	m_mgr.AddPane(toolBar, wxAuiPaneInfo().
@@ -464,7 +328,7 @@ void AppFrame::HideWelcome()
 	m_notebook->Thaw();
 }
 
-void AppFrame::OnFileChanged(wxCommandEvent &)
+void AppFrame::OnFileModified(wxCommandEvent &)
 {
 	UpdateTitle();
 }
@@ -490,42 +354,20 @@ void AppFrame::OnFileRenamed(wxCommandEvent &evn)
 void AppFrame::OnNotebookPageClose(wxAuiNotebookEvent& evt)
 {
 	wxAuiNotebook* ctrl = (wxAuiNotebook*)evt.GetEventObject();
-	if (ctrl->GetPage(evt.GetSelection())->IsKindOf(CLASSINFO(FilePage)))
+	wxWindow *page = ctrl->GetPage(evt.GetSelection());
+	if (page->IsKindOf(CLASSINFO(FilePage)))
 	{
-		if ( !DoFileSave(true,false) )
+		FilePage *fp = dynamic_cast<FilePage *>(page);
+		if ( !fp->DoFileSave(true,false) )
 			evt.Veto();
 	}
 }
 
 
 // common event handlers
-void AppFrame::OnTimer(wxTimerEvent &event) 
-{ 
-	static bool needToAsk = true;
-	if (m_gcmc_running_in_sec == 0)
-		needToAsk = true;
 
-	wxTimer &tm = event.GetTimer();
-	m_gcmc_running_in_sec++;
-
-	//SetTitle(wxString::Format(L"Process gcmc %d sec.", m_gcmc_running_in_sec));
-	if (gcmcProcess && needToAsk && (m_gcmc_running_in_sec%60) == 0 )
-	{
-		int rez = wxMessageBox(_("GCMC is running very long time/ Would you like to kill the process?"), wxMessageBoxCaptionStr,
-			wxYES_NO | wxICON_QUESTION);
-		if (rez == wxYES)
-			wxKill(gcmcProcess->GetPid(), wxSIGKILL, NULL, wxKILL_CHILDREN);
-	}	
-}
 void AppFrame::OnClose (wxCloseEvent &event)
 {
-
-	if ( m_timer.IsRunning() )
-		m_timer.Stop();
-	
-	View3D *view = AppFrame::GetActive3DView();
-	if ( view )
-		view->processClosing();
 
 // save all modified files
 	if (!DoSaveAllFiles() )
@@ -580,13 +422,6 @@ bool AppFrame::DoSaveAllFiles()
 	}
 	return true;
 }
-
-
-void AppFrame::FileChanged()
-{
-	if (m_logwnd) m_logwnd->Clear();	
-}
-
 
 bool AppFrame::FindPageByFileName(const wxString &new_file_name, size_t *nPage)
 {
@@ -647,7 +482,6 @@ void AppFrame::DoNewFile(int file_type, const wxString &defpath, bool closeWelco
 	if ( !contextFile.empty() )
 		pedit->GetEdit()->PasteFile(contextFile.wc_str());
 		
-	FileChanged();
 	UpdateTitle();
 
 	m_notebook->Thaw();
@@ -823,7 +657,7 @@ void AppFrame::OnMacroses(wxCommandEvent &WXUNUSED(event))
 	std::wstring src_fname = StandartPaths::Get()->GetMacrosPath( desc.gcmcfile.c_str() );
 	std::wstring dst_fname = StandartPaths::Get()->GetTemporaryPath(L"tmp.nc");
 	
-	RunGcmc(src_fname.c_str(), dst_fname.c_str(), args.c_str(), dlgparam.IsInNewWindow() ? ConvertGcmcNewFile : ConvertGcmcPasteFile);
+//	RunGcmc(src_fname.c_str(), dst_fname.c_str(), args.c_str(), dlgparam.IsInNewWindow() ? ConvertGcmcNewFile : ConvertGcmcPasteFile);
 }
 
 
@@ -1158,7 +992,6 @@ void AppFrame::FileOpen (wxString fname)
 			FilePage *pedit = new FilePage(m_notebook, FILETYPE_UNKNOW, fname, false );
 			//pedit->LoadFile(fname);
 			m_notebook->AddPage(pedit, w.GetFullName(), true);
-			FileChanged();
 			UpdateTitle();
 			ConfigData *config;
 			if ((config = dynamic_cast<ConfigData *>(wxConfigBase::Get())) != NULL)
@@ -1219,225 +1052,16 @@ wxString AppFrame::GetText()
 		return wxString();
 }
 
-void AppFrame::OnThreadCompletion(wxThreadEvent&)
-{
-	m_logwnd->Append(MSLInfo, _("Checking completed"));
-}
-
-void AppFrame::OnThreadUpdate(wxThreadEvent &ev)
-{
-	// convert from ILogerr Error Code to LogWindow error 
-	MsgStatusLevel lvl = (MsgStatusLevel)ev.GetInt();
-	int linen = static_cast<int>(ev.GetExtraLong());
-	m_logwnd->Append(lvl, ev.GetString(), linen, true );
-}
-
-void AppFrame::OnSimulateUpdate(wxThreadEvent &ev)
-{
-	m_logwnd->Append(MSLInfo, ev.GetString());
-}
-
-
-
-bool AppFrame::CheckFileExist(const wchar_t *fname)
-{
-	if ( StandartPaths::Get()->CheckFileExist(fname) )
-		return true;
-
-	wxString inf = wxString::Format("File %s not found.", fname );
-	m_logwnd->Append(MSLError, inf);
-	return false;
-
-}
-
-// Source format:
-// FILENAME:LINE:CHAR: ERRORTYPE: MSG\n
-// ERRORTYPE = { "error", "internal error", "fatal","warning"  }
-//or just
-// MSG \n
-
-void AppFrame::AppendGcmcError(wxString &src)
-{
-	bool formated = false;
-	size_t colon1 = wxString::npos, colon2 = wxString::npos, colon3 = wxString::npos, colon4 = wxString::npos;
-	if ((colon1 = src.find(':', 0)) != wxString::npos)
-	{
-		if ((colon2 = src.find(':', colon1 + 1)) != wxString::npos)
-		{
-			if ((colon3 = src.find(':', colon2 + 1)) != wxString::npos)
-			{
-				if ((colon4 = src.find(':', colon3 + 1)) != wxString::npos)
-				{
-					formated = true;
-				}
-			}
-		}
-	}
-	if (!formated)
-	{
-		m_logwnd->Append(MSLError, src);
-	}
-	else
-	{
-		std::wstring output;
-		std::wstring tmp;
-		std::filesystem::path path = src.SubString(0, colon1).wc_str();
-		if (path.has_filename())
-		{
-			output = L"File: ";
-			output += path.filename();
-			output += L" ";
-		}
-		tmp = src.SubString(colon1 + 1, colon2).wc_str();
-		int linen = _wtoi(tmp.c_str());
-		tmp = src.SubString(colon3 + 2, colon4).wc_str(); // Erro type
-		MsgStatusLevel lvl = MSLError;
-		if (tmp.compare(L"warning") == 0)
-			lvl = MSLWarning;
-
-		output += src.Mid(colon4 + 1).wc_str(); // get message
-		m_logwnd->Append(lvl, output.c_str(),linen);
-	}
-
-}
-
-
-int AppFrame::RunGcmc(const wchar_t *src_fname, const  wchar_t *dst_fname, const wchar_t *args, DoAfterConvertGcmc what_to_do)
-{
-
-	m_logwnd->Clear();
-	// cheks files
-	if (!CheckFileExist(src_fname))
-		return 1;
-	
-	wxExecuteEnv env;
-	
-	env.cwd = StandartPaths::Get()->GetDirFromFName(src_fname).c_str();
-	// get file name without path
-	std::filesystem::path src_fname_no_path = std::filesystem::path(src_fname).filename();
-	std::filesystem::path dst_fname_no_path;
-
-	if (StandartPaths::Get()->GetDirFromFName(dst_fname).compare(env.cwd) == 0)
-		dst_fname_no_path = std::filesystem::path(dst_fname).filename();
-	else
-		dst_fname_no_path = dst_fname;
-
-
-	wxString arg = StandartPaths::Get()->GetExecutablePath( L"gcmc_vc.exe" ).c_str();
-
-	if (!CheckFileExist(arg))
-		return 1;
-
-	arg += " -o ";
-	arg += dst_fname_no_path.c_str();
-	arg += " ";
-	if (args)
-		arg += args;
-	arg += " ";
-	arg += src_fname_no_path.c_str();
-
-	wxArrayString output;
-	wxArrayString errors;
-
-	
-#if 0 
-	m_logwnd->Append(MSLInfo, L"Start converting...");
-	m_logwnd->Append(MSLInfo, arg.c_str());
-	int code = wxExecute(arg, output, errors, wxEXEC_SYNC | wxEXEC_HIDE_CONSOLE, &env);
-	for (size_t i = 0; i < errors.Count(); ++i)
-	{
-		AppendGcmcError(errors[i]);
-	}
-
-	wxString inf = wxString::Format("Process terminated with exit code %d", code);
-	m_logwnd->Append(code == 0 ? MSLInfo : MSLError, inf);
-	
-	return code;
-#endif
-
-	if (gcmcProcess)
-	{
-		m_logwnd->Append(MSLInfo, _("gcmc_vc.exe already running"));
-		return 1;
-	}
-	m_logwnd->Append(MSLInfo, _("Start converting..."));
-	m_logwnd->Append(MSLInfo, arg.c_str());
-
-	if (m_timer.IsRunning())
-		m_timer.Stop();
-
-	m_gcmc_running_in_sec = 0;
-	m_timer.Start(1000);
-
-
-	gcmcProcess = new GcmcProcess(this, dst_fname, what_to_do);
-	int code = wxExecute(arg, wxEXEC_ASYNC| wxEXEC_HIDE_CONSOLE | wxEXEC_NODISABLE, gcmcProcess, &env);
-	return code;
-
-}
-
-
-
-
-void AppFrame::GcmcProcessTerminated(int status, const wchar_t *dst_fname, DoAfterConvertGcmc what_to_do)
-{
-
-	if (gcmcProcess)
-	{
-		m_gcmc_running_in_sec = 0;
-		m_timer.Stop();
-		wxString inf = wxString::Format(_("Process terminated with exit code %d"), status);
-		m_logwnd->Append(status == 0 ? MSLInfo : MSLError, inf);
-		Edit *pedit;
-		if (status == 0)
-		{
-			switch (what_to_do)
-			{
-				case ConvertGcmcOpenFile: 
-					FileOpen(dst_fname); 
-					break;
-				case ConvertGcmcPasteFile:
-					pedit = GetActiveFile();
-					if (pedit != NULL)
-						pedit->PasteFile(dst_fname);
-					break;
-				case ConvertGcmcNewFile:	
-					DoNewFile(FILETYPE_NC, wxEmptyString, true, dst_fname); 
-					break;
-				case ConvertGcmcRunSimilate:	
-					;// DoSimulate(dst_fname);
-					break;
-			}
-		}
-		delete gcmcProcess;
-		gcmcProcess = NULL;
-	}
-}
-
-int AppFrame::DoConvertGcmc(DoAfterConvertGcmc what_to_do)
-{
-	Edit *pedit = GetActiveFile();
-	if (!pedit)
-		return 1;
-
-	wxString src_fname = pedit->GetFileName();
-	if (src_fname.IsEmpty())
-		return 1;
-	wxString dst_fname = src_fname.BeforeLast('.');
-	if (dst_fname.IsEmpty())
-		dst_fname = src_fname;
-	dst_fname += wxString(".nc");
-
-	return RunGcmc(src_fname, dst_fname, 0, what_to_do);
-}
 
 
 void AppFrame::OnConvertGcmc(wxCommandEvent &event)
 {
-	if (!DoFileSave(false, false))
+	wxWindow *wnd = m_notebook->GetCurrentPage();
+	FilePage *panel = dynamic_cast<FilePage *>(wnd);
+	if (panel && !panel->DoFileSave(false, false) )
 		return;
 
-	DoConvertGcmc(ConvertGcmcOpenFile);
+//DoConvertGcmc(ConvertGcmcOpenFile);
 	
 }
 
@@ -1450,13 +1074,13 @@ void AppFrame::OnUpdateConvertGcmc(wxUpdateUIEvent& event)
 
 void AppFrame::OnKillGcmcProcess(wxCommandEvent &event)
 {
-	if (gcmcProcess)
-		wxKill(gcmcProcess->GetPid(), wxSIGKILL, NULL, wxKILL_CHILDREN);
+//	if (gcmcProcess)
+	//	wxKill(gcmcProcess->GetPid(), wxSIGKILL, NULL, wxKILL_CHILDREN);
 }
 
 void AppFrame::OnUpdateKillGcmcProcess(wxUpdateUIEvent& event)
 {
-	event.Enable(gcmcProcess ? true : false);
+//	event.Enable(gcmcProcess ? true : false);
 }
 
 

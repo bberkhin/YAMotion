@@ -1,7 +1,10 @@
 #pragma once
-#include "edit.h"    
+
+#include "workingthreads.h"
 
 class FilePage;
+class Edit;
+
 class EditorPanel : public wxPanel
 {
 	wxDECLARE_ABSTRACT_CLASS(EditorPanel);
@@ -32,9 +35,11 @@ public:
 	virtual ~View3DPanel();	
 	void UpdateThemeColor();	
 	View3D *Get3D() { return m_pview; }
+	void UpdateStatistics(const ConvertGCMCInfo &dt);
 protected:
 	wxBoxSizer *CreateHeaderPanel();
 	wxSizer *CreateFooterPanel();
+	void SetValue(int id, const double &val);
 private:
 	View3D *m_pview;
 	wxDECLARE_EVENT_TABLE();
@@ -71,7 +76,10 @@ public:
 	Edit *GetEdit() { return m_editor->GetEdit(); }
 	View3D *Get3D() { return m_view3d->Get3D(); }
 	LogWindow *GetLogWnd() { return m_logwn->GetLogWnd(); }
-	void CheckGCode();
+	void Check();
+	void Draw3D();
+	void ConvertGcmc();
+	void UpdateStatistics(const ConvertGCMCInfo &dt);
 	
 	void ShowLog(); 
 	void HideLog();

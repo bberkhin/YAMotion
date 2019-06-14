@@ -6,7 +6,7 @@
 
 using namespace std;
 
-ExecutorLog::ExecutorLog(bool needprint) : doprint(needprint)
+ExecutorLog::ExecutorLog(bool needprint) : feed_len(0), traverce_len(0), doprint(needprint)
 {
 
 }
@@ -104,7 +104,34 @@ void ExecutorLog::output(const std::string &str, const Coords &position )
  void ExecutorLog::addTrackPoint(TypeMove type, const Coords &position)
  {
 	 box.addCoords(position);
+	 double val = distance(cur_position, position);
+	 update_position(position);
+	 if (type == fast)
+	 {
+		 traverce_len += val;
+		 //traverce_time += calc_time(val);
+	 }
+	 else
+	 {
+		 feed_len += val;
+		 //feed_time += calc_time(cur_feed, val);
+	 }
  }
+
+
+ void ExecutorLog::update_position(const Coords &position)
+ {
+	 cur_position = position;
+ }
+
+ double ExecutorLog::distance(const Coords &cur_position, const Coords &position)
+ {
+	 double dx = position.x - cur_position.x;
+	 double dy = position.y - cur_position.y;
+	 double dz = position.z - cur_position.z;
+	 return sqrt(dx*dx + dy * dy + dz * dz);
+ }
+
 
  void LoggerConsole::log_string(int type, const char *s)
  {
@@ -113,3 +140,4 @@ void ExecutorLog::output(const std::string &str, const Coords &position )
 	 else
 		 cout << "ERROR " << s << "\n";
  }
+

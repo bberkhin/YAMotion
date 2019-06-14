@@ -33,6 +33,5 @@ private:
 	ILogger *logger;
 	std::vector<TrackPoint> trj;
 	CCoordMotion *pcm;
-	Coords cur_position;
 };
 
