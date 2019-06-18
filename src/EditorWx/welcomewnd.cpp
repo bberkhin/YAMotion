@@ -44,7 +44,8 @@ public:
 WelcomeWnd::WelcomeWnd(wxWindow *parent) : wxHtmlWindow()
 {
 	// tempoary create own frame
-
+	long style = GetWindowStyle();
+	SetWindowStyle(style | wxBORDER_NONE );
 	pWelcomeFrame = new wxFrame(parent, wxID_ANY, _("Welcome Wnd"));
 	Create(pWelcomeFrame);
 	SetRelatedFrame(pWelcomeFrame, _("Welcome Wnd1"));
@@ -57,6 +58,9 @@ WelcomeWnd::WelcomeWnd(wxWindow *parent) : wxHtmlWindow()
 	SetHomePage();
 }
 
+WelcomeWnd::~WelcomeWnd()
+{
+}
 void WelcomeWnd::SetHomePage()
 {
 	wxString path_name = StandartPaths::Get()->GetResourcesPath(L"welcome.htm").c_str();
@@ -85,6 +89,7 @@ void WelcomeWnd::RunCommand(const wxString &url, int baseCmd)
 	if (url.After(':').ToLong(&n))
 	{
 		wxCommandEvent *ev = new wxCommandEvent(wxEVT_MENU, baseCmd + n);
+		ev->SetClientData(this);
 		wxQueueEvent(pWelcomeFrame->GetParent(), ev);
 	}
 }

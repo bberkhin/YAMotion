@@ -26,16 +26,7 @@ MacrosesDlg::MacrosesDlg(Macroses *pm,wxWindow *parent)
 	textinfos->Add(ptext, 0, 0);
 	textinfos->Add(0, 6);
 
-	// buttons
-	//wxBoxSizer* buttonSizer = new wxBoxSizer(wxHORIZONTAL);
 
-	/*wxButton* bt;
-	wxStdDialogButtonSizer *buttonSizer = CreateStdDialogButtonSizer(wxOK | wxCANCEL);
-	bt = new wxButton(this, wxID_OK, "Ok");
-	buttonSizer->AddButton(bt);
-	bt = new wxButton(this, wxID_CANCEL, "Cancel");
-	buttonSizer->AddButton(bt);*/
-	
 	// total pane
 	wxBoxSizer *totalpane = new wxBoxSizer(wxVERTICAL);
 	totalpane->Add(textinfos, 0, wxEXPAND | wxLEFT | wxRIGHT, 10);
@@ -69,9 +60,9 @@ void MacrosesDlg::InitList()
 	wxArrayString arrays;
 
 	int pos = 0;
-	for (int i = 0; i < msc->count(); i++)
+	for (int i = 0; i < msc->Count(); i++)
 	{
-		arrays.Add(msc->get(i).name);
+		arrays.Add(msc->Get(i).name);
 	}
 	if ( arrays.Count() )
 	{
@@ -83,7 +74,7 @@ void MacrosesDlg::InitList()
 void MacrosesDlg::OnLboxSelect(wxCommandEvent& event)
 {
 	selection = list->GetSelection();
-	ptext->SetLabel( msc->get(selection).desc.c_str() );
+	ptext->SetLabel( msc->Get(selection).desc.c_str() );
 }
 
 void MacrosesDlg::OnLboxDClick(wxCommandEvent& event)

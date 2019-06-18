@@ -11,6 +11,12 @@ EVT_KEY_DOWN(LogWindow::OnKeyDown)
 
 wxEND_EVENT_TABLE()
 
+LogWindow::LogWindow(wxEvtHandler *_handler ) 
+	: handler(_handler), wxSimpleHtmlListBox()
+{
+
+}
+
 LogWindow::LogWindow(wxWindow *parent, wxEvtHandler *_handler, wxWindowID id )
 	: handler(_handler) , wxSimpleHtmlListBox(parent, id, wxDefaultPosition, wxDefaultSize,
 		0, NULL, 0)
@@ -69,7 +75,7 @@ void LogWindow::DoSinchronize()
 		return;
 
 	IntClientData *dataCmd = data;// new IntClientData(data->GetData());
-	wxCommandEvent *ev = new wxCommandEvent(wxEVT_MENU,myID_SELECTLINE);
+	wxCommandEvent *ev = new wxCommandEvent(wxEVT_MENU,ID_SELECTLINE);
 	ev->SetClientObject(dataCmd);
 	wxQueueEvent(handler, ev);
 }

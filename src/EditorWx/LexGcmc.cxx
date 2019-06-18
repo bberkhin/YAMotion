@@ -66,12 +66,12 @@ static void ColouriseGcmcDoc(Sci_PositionU startPos, Sci_Position length, int in
 	for (; sc.More(); sc.Forward())
 	{
 		// Determine if the current state should terminate.
-		if (sc.state == SCE_GCODE_COMMENT) {
+		if (sc.state == SCE_GCMC_COMMENT) {
 			if (sc.atLineEnd) {
 				sc.SetState(SCE_GCMC_DEFAULT);
 			}
 		}
-		else if (sc.state == SCE_GCODE_COMMENT_ML) 
+		else if (sc.state == SCE_GCMC_COMMENT_ML) 
 		{
 			if (sc.ch == '*' && sc.chNext == '/') 
 			{
@@ -86,19 +86,19 @@ static void ColouriseGcmcDoc(Sci_PositionU startPos, Sci_Position length, int in
 				sc.ForwardSetState(SCE_GCMC_DEFAULT);
 			}
 		}
-		else if (sc.state == SCE_GCODE_NUMBER)
+		else if (sc.state == SCE_GCMC_NUMBER)
 		{
 			if (!IsANumChar(sc.ch))
 				sc.SetState(SCE_GCMC_DEFAULT);
 		}
-		//else if (sc.state == SCE_GCODE_VAR)
+		//else if (sc.state == SCE_GCMC_VAR)
 		//{
 		//	if ( sc.ch == ']')
 		//	{
 		//		sc.SetState(SCE_GCMC_DEFAULT);
 		//	}
 		//}
-		else if ((sc.state == SCE_GCODE_IDENTIFIER)  )
+		else if ((sc.state == SCE_GCMC_IDENTIFIER)  )
 		{
 			if (!isALetter(sc.ch))
 			{
@@ -122,10 +122,10 @@ static void ColouriseGcmcDoc(Sci_PositionU startPos, Sci_Position length, int in
 		if (sc.state == SCE_GCMC_DEFAULT  ) 
 		{
 			if (sc.ch == '/' && sc.chNext == '/') {
-				sc.SetState(SCE_GCODE_COMMENT);
+				sc.SetState(SCE_GCMC_COMMENT);
 			}
 			else if (sc.ch == '/' && sc.chNext == '*') {
-				sc.SetState(SCE_GCODE_COMMENT_ML);
+				sc.SetState(SCE_GCMC_COMMENT_ML);
 			} 
 			else if (sc.ch == '"') {
 				sc.SetState(SCE_GCMC_STRING);
@@ -134,19 +134,19 @@ static void ColouriseGcmcDoc(Sci_PositionU startPos, Sci_Position length, int in
 			else if (IsASCII(sc.ch) &&
 				(IsADigit(sc.ch) || ((sc.ch == '.' || sc.ch == '-') && IsASCII(sc.chNext) && IsADigit(sc.chNext)))
 				) {
-				sc.SetState(SCE_GCODE_NUMBER);
+				sc.SetState(SCE_GCMC_NUMBER);
 			}
 			else if (sc.ch == '[' || sc.ch == ']')
 			{
-				sc.SetState(SCE_GCODE_VAR);
+				sc.SetState(SCE_GCMC_VAR);
 			}
 			else if (operators.Contains(sc.ch))
 			{
-				sc.SetState(SCE_GCODE_OPERATORS); 
+				sc.SetState(SCE_GCMC_OPERATORS);
 			}
 			else  if (isALetter(sc.ch))
 			{
-				sc.SetState(SCE_GCODE_IDENTIFIER);
+				sc.SetState(SCE_GCMC_IDENTIFIER);
 			}
 		}
 

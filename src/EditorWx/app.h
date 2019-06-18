@@ -1,7 +1,9 @@
 #pragma once
 #include "ienvironment.h"
 
+
 class AppFrame;
+class Preferences;
 
 //----------------------------------------------------------------------------
 //
@@ -9,7 +11,7 @@ class App : public wxApp
 {
 	friend class AppFrame;
 public:
-	App() : m_restart(false) { }
+	App();
 	~App();
 	
 
@@ -21,9 +23,14 @@ public:
 	void Restart();
 	bool GetUptadeInfo(wxString &out);
 	IEnvironment *GetEnvironment() { return env.get(); }
+	virtual void OnEventLoopEnter(wxEventLoopBase* WXUNUSED(loop)) wxOVERRIDE;
+	AppFrame  *GetFrame() { return m_frame; }
+
+	// create the file system watcher here, because it needs an active loop
+	
 private:
 	//! frame window
-	AppFrame* m_frame;
+	AppFrame *m_frame;
 
 protected:
 	// Lang support

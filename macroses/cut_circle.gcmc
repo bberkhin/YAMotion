@@ -9,11 +9,12 @@
 
 ccw = 1;
 
+comment("Cutting Circle");
 comment("Center point:" + to_string(xCenter) +"," + to_string(yCenter));
 comment("Radius:" + to_string(r));
 comment("Mill dianetr:" + to_string(d));
 comment("Z save:" + to_string(zSave));
-comment("Z max:" + to_string(zFull));
+comment("Z max:" + to_string(-1*zFull));
 
 xStartpos = xCenter - r; 
 if( trc == 2 ) 

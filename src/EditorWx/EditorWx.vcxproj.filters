@@ -16,6 +16,9 @@
     <Filter Include="GCode">
       <UniqueIdentifier>{8234d5a8-27d9-46a8-bd67-08ac78509e37}</UniqueIdentifier>
     </Filter>
+    <Filter Include="wxJson">
+      <UniqueIdentifier>{b8870dc6-6319-4ff6-8874-4171046c253d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="edit.cpp">
@@ -47,9 +50,6 @@
     </ClCompile>
     <ClCompile Include="..\Gcode\ilogger.cpp">
       <Filter>GCode</Filter>
-    </ClCompile>
-    <ClCompile Include="ViewGCode.cpp">
-      <Filter>Исходные файлы</Filter>
     </ClCompile>
     <ClCompile Include="executorview.cpp">
       <Filter>Исходные файлы</Filter>
@@ -123,6 +123,36 @@
     <ClCompile Include="welcomewnd.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
+    <ClCompile Include="dirtree.cpp">
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
+    <ClCompile Include="..\wxJson\jsonreader.cpp">
+      <Filter>wxJson</Filter>
+    </ClCompile>
+    <ClCompile Include="..\wxJson\jsonval.cpp">
+      <Filter>wxJson</Filter>
+    </ClCompile>
+    <ClCompile Include="..\wxJson\jsonwriter.cpp">
+      <Filter>wxJson</Filter>
+    </ClCompile>
+    <ClCompile Include="them.cpp">
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
+    <ClCompile Include="editorpanel.cpp">
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
+    <ClCompile Include="flatbuttom.cpp">
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
+    <ClCompile Include="FlatScrollBar.cpp">
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
+    <ClCompile Include="View3D.cpp">
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
+    <ClCompile Include="workingthreads.cpp">
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h">
@@ -166,9 +196,6 @@
     </ClInclude>
     <ClInclude Include="..\Gcode\ilogger.h">
       <Filter>GCode</Filter>
-    </ClInclude>
-    <ClInclude Include="ViewGCode.h">
-      <Filter>Файлы заголовков</Filter>
     </ClInclude>
     <ClInclude Include="executorview.h">
       <Filter>Файлы заголовков</Filter>
@@ -236,6 +263,30 @@
     <ClInclude Include="welcomewnd.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
+    <ClInclude Include="dirtree.h">
+      <Filter>Исходные файлы</Filter>
+    </ClInclude>
+    <ClInclude Include="them.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="editorpanel.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="flatbuttom.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="FlatScrollBar.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="View3D.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="Header.h">
+      <Filter>Исходные файлы</Filter>
+    </ClInclude>
+    <ClInclude Include="workingthreads.h">
+      <Filter>Исходные файлы</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="EditorWx.rc">
@@ -244,5 +295,11 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\resources\intro_gocde.htm" />
+    <None Include="..\..\resources\welcome.htm" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="bitmap1.bmp">
+      <Filter>Файлы ресурсов</Filter>
+    </Image>
   </ItemGroup>
 </Project>

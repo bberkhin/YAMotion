@@ -1,0 +1,35 @@
+{
+  "syntax": true,
+  "fold": true,
+  "indent": true,
+  "wrapMode": false,
+  "displayEOL": false,
+  "indentGuide": false,
+  "lineNumber": true,
+  "longLineOn": false,
+  "whiteSpace": false,
+  "tabWidth": 4,
+  "visibleHSB": true,
+  "enableLogExecution": false,
+  "theme_syntax": "them_black.json",
+  "files": [
+    {
+      "name": "GCODE",
+      "syntax": "nc_syntax_white.json",
+      "extensions": "*.ngc;*.nc;*.cnc"
+    },
+    {
+      "name": "GCMC",
+      "syntax": "gcmc_syntax_white.json",
+      "extensions": "*.gcmc;"
+    },
+    {
+      "name": "JSON",
+      "extensions": "*.json;"
+    },
+    {
+      "name": "ALL",
+      "extensions": "*.*;"
+    }
+  ]
+}

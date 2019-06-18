@@ -6,23 +6,23 @@
 //#include <fstream>
 #include <stdio.h>
 #include "defsext.h"     // Additional definitions
-#include "CoordMotion.h" 
+//#include "CoordMotion.h" 
 
 using namespace std;
 using namespace Interpreter;
 
 ExecutorView::ExecutorView(ILogger *_logger ) : 
-	ExecutorLog(false),  logger(_logger), pcm(0)
+	ExecutorLog(false),  logger(_logger)//, pcm(0)
 {
-	pcm = new CCoordMotion( logger, 0 );
-	pcm->m_DisableSoftLimits = true;
-	pcm->m_Simulate = true;
+	//pcm = new CCoordMotion( logger, 0 );
+	//pcm->m_DisableSoftLimits = true;
+	//pcm->m_Simulate = true;
 }
 
 ExecutorView::~ExecutorView()
 {
-	if (pcm)
-		delete pcm;
+	//if (pcm)
+		//delete pcm;
 }
 
 void ExecutorView::output(const std::string &str)
@@ -30,8 +30,8 @@ void ExecutorView::output(const std::string &str)
 	if (!logger)
 		return;
 
-	wxString label = wxString::Format("LINE: %d <font color=#FF00FF>"
-		"%s</font>", nline, str.c_str());
+	//wxString label = wxString::Format("LINE: %d <font color=#FF00FF>"
+		//"%s</font>", nline, str.c_str());
 
 //	wxThreadEvent *ev = new wxThreadEvent(wxEVT_THREAD, CHECK_SIMULATE_UPDATE);
 //	ev->SetString(label);
@@ -50,8 +50,7 @@ void ExecutorView::output(const std::string &str, const Coords &position)
 	 point.type = type;
 	 point.pt = position;
 	 point.line = nline;
-	 trj.push_back(point);
-	 cur_position = position;
+	 trj.push_back(point);	 
  }
 
 

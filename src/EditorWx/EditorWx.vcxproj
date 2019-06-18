@@ -32,14 +32,21 @@
     <ClCompile Include="..\Gcode\macrob.cpp" />
     <ClCompile Include="..\Gcode\straight.cpp" />
     <ClCompile Include="..\Gcode\TrajectoryPlanner.cpp" />
+    <ClCompile Include="..\wxJson\jsonreader.cpp" />
+    <ClCompile Include="..\wxJson\jsonval.cpp" />
+    <ClCompile Include="..\wxJson\jsonwriter.cpp" />
     <ClCompile Include="about.cpp" />
     <ClCompile Include="app.cpp" />
     <ClCompile Include="codedescription.cpp" />
     <ClCompile Include="configdata.cpp" />
+    <ClCompile Include="dirtree.cpp" />
     <ClCompile Include="domath.cpp" />
     <ClCompile Include="edit.cpp" />
+    <ClCompile Include="editorpanel.cpp" />
     <ClCompile Include="executorlog.cpp" />
     <ClCompile Include="executorview.cpp" />
+    <ClCompile Include="flatbuttom.cpp" />
+    <ClCompile Include="FlatScrollBar.cpp" />
     <ClCompile Include="LexGcmc.cxx" />
     <ClCompile Include="LexGCode.cxx" />
     <ClCompile Include="logwindow.cpp" />
@@ -54,8 +61,10 @@
     <ClCompile Include="propertiesdlg.cpp" />
     <ClCompile Include="appframe.cpp" />
     <ClCompile Include="standartpaths.cpp" />
-    <ClCompile Include="ViewGCode.cpp" />
+    <ClCompile Include="them.cpp" />
+    <ClCompile Include="View3D.cpp" />
     <ClCompile Include="welcomewnd.cpp" />
+    <ClCompile Include="workingthreads.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Gcode\cmdparser.h" />
@@ -78,10 +87,15 @@
     <ClInclude Include="codedescription.h" />
     <ClInclude Include="configdata.h" />
     <ClInclude Include="defsext.h" />
+    <ClInclude Include="dirtree.h" />
     <ClInclude Include="domath.h" />
     <ClInclude Include="edit.h" />
+    <ClInclude Include="editorpanel.h" />
     <ClInclude Include="executorlog.h" />
     <ClInclude Include="executorview.h" />
+    <ClInclude Include="flatbuttom.h" />
+    <ClInclude Include="FlatScrollBar.h" />
+    <ClInclude Include="Header.h" />
     <ClInclude Include="LexGCode.h" />
     <ClInclude Include="logwindow.h" />
     <ClInclude Include="macroses.h" />
@@ -93,8 +107,10 @@
     <ClInclude Include="propertiesdlg.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="standartpaths.h" />
-    <ClInclude Include="ViewGCode.h" />
+    <ClInclude Include="them.h" />
+    <ClInclude Include="View3D.h" />
     <ClInclude Include="welcomewnd.h" />
+    <ClInclude Include="workingthreads.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="EditorWx.rc" />
@@ -103,6 +119,12 @@
     <None Include="..\..\resources\intro_gocde.htm">
       <DeploymentContent>true</DeploymentContent>
     </None>
+    <None Include="..\..\resources\welcome.htm">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="bitmap1.bmp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>
@@ -175,7 +197,7 @@
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
       <PreprocessorDefinitions>_UNICODE;MUPARSER_STATIC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(SolutionDir)GCode;C:\WxWidgets\include;C:\WxWidgets\include\msvc;$(SolutionDir)rapidxml;$(SolutionDir)..\..\glm;$(SolutionDir)..\..\;$(SolutionDir)..\..\muparser\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)GCode;C:\WxWidgets\include;C:\WxWidgets\include\msvc;$(SolutionDir)include;$(SolutionDir)rapidxml;$(SolutionDir)..\..\glm;$(SolutionDir)..\..\;$(SolutionDir)..\..\muparser\include</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
@@ -189,7 +211,7 @@
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
-      <AdditionalIncludeDirectories>$(SolutionDir)GCode;C:\WxWidgets\include;C:\WxWidgets\include\msvc;$(SolutionDir)rapidxml;$(SolutionDir)..\..\glm;$(SolutionDir)..\..\;$(SolutionDir)..\..\muparser\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)GCode;C:\WxWidgets\include;C:\WxWidgets\include\msvc;$(SolutionDir)include;$(SolutionDir)rapidxml;$(SolutionDir)..\..\glm;$(SolutionDir)..\..\;$(SolutionDir)..\..\muparser\include</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_UNICODE;MUPARSER_STATIC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
@@ -204,7 +226,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)/GCode;C:\WxWidgets\include;C:\WxWidgets\include\msvc;$(SolutionDir)rapidxml;$(SolutionDir)..\..\glm;$(SolutionDir)..\..\;%(AdditionalIncludeDirectories);$(SolutionDir)..\..\muparser\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)/GCode;C:\WxWidgets\include;C:\WxWidgets\include\msvc;$(SolutionDir)include;$(SolutionDir)rapidxml;$(SolutionDir)..\..\glm;$(SolutionDir)..\..\;%(AdditionalIncludeDirectories);$(SolutionDir)..\..\muparser\include</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <PreprocessorDefinitions>_UNICODE;MUPARSER_STATIC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
@@ -222,7 +244,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)/GCode;C:\WxWidgets\include;C:\WxWidgets\include\msvc;$(SolutionDir)rapidxml;$(SolutionDir)..\..\glm;$(SolutionDir)..\..\;%(AdditionalIncludeDirectories);$(SolutionDir)..\..\muparser\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)/GCode;C:\WxWidgets\include;C:\WxWidgets\include\msvc;$(SolutionDir)include;$(SolutionDir)rapidxml;$(SolutionDir)..\..\glm;$(SolutionDir)..\..\;%(AdditionalIncludeDirectories);$(SolutionDir)..\..\muparser\include</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <PreprocessorDefinitions>_UNICODE;MUPARSER_STATIC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>

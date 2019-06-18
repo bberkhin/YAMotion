@@ -1,27 +1,21 @@
 #include "wx/wx.h"
 #include "wx/filename.h" // filename support
-#include "wx/splitter.h"
 #include "wx/event.h"
-#include <wx/thread.h>
-#include "wx/process.h"
-#include "wx/txtstrm.h"
+#include "wx/artprov.h"
 
 
 //! application headers
+#include "appframe.h"       // Prefs
 #include "app.h"
-#include "appdefs.h"       // Prefs
-#include "defsext.h"     // Additional definitions
-#include "edit.h"        // Edit module
-#include "edit.h"        // Edit module
-#include "ViewGCode.h"
+#include "appdefs.h"      
+#include "defsext.h"     
+#include "prefs.h"
+#include "editorpanel.h"
+#include "edit.h"
+#include "View3D.h"
 
 #include "about.h"
 #include "propertiesdlg.h"
-#include "appframe.h"       // Prefs
-#include "environmentsimple.h"
-#include "executorlog.h"
-#include "ExecutorView.h"
-#include "GCodeInterpreter.h"
 #include "macrosesdlg.h"
 #include "macrosparamdlg.h"
 #include "standartpaths.h"
@@ -30,6 +24,8 @@
 #include "mathsimpledlg.h"
 #include "mathexpressiondlg.h"
 #include "welcomewnd.h"
+#include "dirtree.h"
+#include "them.h"
 
 
 //Bitmaps
@@ -49,129 +45,37 @@
 #include "bitmaps/stop.xpm"
 
 
-#define YA_WRONG_N _("Wrong N value")
 
+#include "environmentsimple.h"
+#include "executorlog.h"
+#include "ExecutorView.h"
+#include "GCodeInterpreter.h"
 
 
 using namespace Interpreter;
 
-//----------------------------------------------------------------------------
-// resources
-//----------------------------------------------------------------------------
 
-// the application icon (under Windows it is in resources)
-#ifndef wxHAS_IMAGES_IN_RESOURCES
-//    #include "../sample.xpm"
-#endif
-
-
-class IntGCodeThread : public wxThread
+class DropFileOpen : public wxFileDropTarget
 {
 public:
-	IntGCodeThread(AppFrame *handler, wxString &fname_)
-		: fname(fname_), wxThread(wxTHREAD_DETACHED)
+	DropFileOpen(AppFrame *pOwner) : m_pOwner(pOwner) {  }
+
+	virtual bool OnDropFiles(wxCoord x, wxCoord y,const wxArrayString& filenames) wxOVERRIDE
 	{
-
-		m_pHandler = handler;
-		pexec = new ExecutorLogWnd(m_pHandler, true);
-		plogger = new LoggerWnd(m_pHandler);
-		ppret = new GCodeInterpreter(wxGetApp().GetEnvironment(), pexec, plogger);
-
+		size_t nFiles = filenames.GetCount();
+		wxString str;
+		if (m_pOwner != NULL)
+		{
+			for (size_t n = 0; n < nFiles; n++)
+				m_pOwner->FileOpen(filenames[n]);
+		}
+		return true;
 	}
-	~IntGCodeThread();
+
 private:
-
-
-protected:
-	virtual wxThread::ExitCode Entry();
-	AppFrame *m_pHandler;
-	ExecutorLogWnd *pexec;
-	LoggerWnd *plogger;
-	GCodeInterpreter *ppret;
-	wxString fname;
+	AppFrame *m_pOwner;
 };
 
-
-class SimulateGCodeThread : public wxThread
-{
-public:
-	SimulateGCodeThread(AppFrame *handler, const wchar_t *fname_)
-		: fname(fname_), wxThread(wxTHREAD_DETACHED)
-	{
-
-		m_pHandler = handler;
-		pexec = new ExecutorView(plogger);
-		plogger = new LoggerWnd(m_pHandler);
-		ppret = new GCodeInterpreter(wxGetApp().GetEnvironment(), pexec, plogger);
-
-	}
-	~SimulateGCodeThread();
-
-	std::vector<TrackPoint> *getTack() { return pexec->getTrack(); }
-	CoordsBox getBox() { return pexec->getBox(); }
-
-protected:
-	virtual wxThread::ExitCode Entry();
-	AppFrame *m_pHandler;	
-	ExecutorView *pexec;
-	LoggerWnd *plogger;
-	GCodeInterpreter *ppret;
-	wxString fname;
-};
-
-
-// A specialization of MyProcess for redirecting the output
-class GcmcProcess : public wxProcess
-{
-public:
-	GcmcProcess(AppFrame *parent, const wchar_t *dstfn, DoAfterConvertGcmc todo)
-		: m_parent(parent), dst_file(dstfn), what_to_do(todo), wxProcess(parent)
-	{
-		Redirect();
-	}
-	virtual void OnTerminate(int pid, int status) wxOVERRIDE;
-	virtual bool HasInput();
-	
-private:
-	AppFrame *m_parent;
-	DoAfterConvertGcmc what_to_do;
-	std::wstring dst_file;
-};
-
-void GcmcProcess::OnTerminate(int pid, int status)
-{
-	// show the rest of the output
-	while (HasInput())
-		;
-
-	m_parent->GcmcProcessTerminated(status, dst_file.c_str(), what_to_do );
-}
-
-bool GcmcProcess::HasInput()
-{
-	bool hasInput = false;
-
-	if (IsInputAvailable())
-	{
-		wxTextInputStream tis(*GetInputStream());
-		// this assumes that the output is always line buffered
-		wxString msg;
-		msg << tis.ReadLine();
-		m_parent->AppendGcmcError(msg);
-		hasInput = true;
-	}
-
-	if (IsErrorAvailable())
-	{
-		wxTextInputStream tis(*GetErrorStream());
-		// this assumes that the output is always line buffered
-		wxString msg;
-		msg << tis.ReadLine();
-		m_parent->AppendGcmcError(msg);
-		hasInput = true;
-	}
-	return hasInput;
-}
 
 //----------------------------------------------------------------------------
 // AppFrame
@@ -181,18 +85,15 @@ bool GcmcProcess::HasInput()
 wxBEGIN_EVENT_TABLE (AppFrame, wxFrame)
     // common
     EVT_CLOSE (                      AppFrame::OnClose)
-	EVT_TIMER( wxID_ANY, AppFrame::OnTimer)
-    // file
-
-	EVT_MENU(wxID_NEW,				 AppFrame::OnFileNew)
+	    // file
+	EVT_MENU(ID_NEWNC,				 AppFrame::OnFileNew)
 	EVT_MENU(ID_NEWGCMC,			 AppFrame::OnFileNew)
-    EVT_MENU (wxID_OPEN,             AppFrame::OnFileOpen)
+    EVT_MENU (ID_OPENFILE,             AppFrame::OnFileOpen)
     EVT_MENU (wxID_SAVE,             AppFrame::OnFileSave)
     EVT_MENU (wxID_SAVEAS,           AppFrame::OnFileSaveAs)
     EVT_MENU (wxID_CLOSE,            AppFrame::OnFileClose)
-	EVT_MENU_RANGE(wxID_FILE, wxID_FILE9, AppFrame::OnOpenLastFile)
-    // properties
-    EVT_MENU (myID_PROPERTIES,       AppFrame::OnProperties)
+	EVT_MENU_RANGE(wxID_FILE, wxID_FILE9, AppFrame::OnOpenLastFile)	
+	EVT_MENU_RANGE(ID_MACROSFIRST, ID_MACROSLAST, AppFrame::OnMacros)
 	EVT_MENU (ID_MACROSES,			 AppFrame::OnMacroses)
 	EVT_MENU(ID_MATHCALC,			 AppFrame::OnMathCalc)
 	EVT_MENU(ID_MATHEXPRESSION, AppFrame::OnMathExpression)
@@ -208,13 +109,21 @@ wxBEGIN_EVENT_TABLE (AppFrame, wxFrame)
 	EVT_MENU(wxID_REDO, AppFrame::OnEdit)
 	EVT_MENU(wxID_UNDO, AppFrame::OnEdit)
 	EVT_MENU(wxID_FIND, AppFrame::OnEdit)
-	//EVT_MENU(myID_INDENTINC, AppFrame::OnEdit)
+	//EVT_MENU(ID_INDENTINC, AppFrame::OnEdit)
 	// And all our edit-related menu commands.
-	EVT_MENU_RANGE(myID_EDIT_FIRST, myID_EDIT_LAST, AppFrame::OnEdit)
+	EVT_MENU_RANGE(ID_EDIT_FIRST, ID_EDIT_LAST, AppFrame::OnEdit)
+	EVT_MENU_RANGE(ID_DIRTREE_FIRST, ID_DIRTREE_LAST, AppFrame::OnDirTree)
 
-	//menuEdit->Append(myID_INDENTINC, _("&Indent increase\tTab"));
-//menuEdit->Append(myID_INDENTRED, _("I&ndent reduce\tShift+Tab"));
+	// Preferences
+	EVT_MENU(ID_PROPERTIES, AppFrame::OnProperties)
+	EVT_MENU(ID_GLOBALPREFS, AppFrame::OnDefaultPreferences)
+	EVT_MENU(ID_USERPREFS, AppFrame::OnUserPreferences)
 
+
+	// help
+	EVT_MENU(wxID_ABOUT, AppFrame::OnAbout)
+	EVT_MENU(ID_DOWNLOADUPDATE, AppFrame::OnDownloadUpdate)
+	EVT_MENU(ID_SHOWWLCOME, AppFrame::OnShowWelcome)
 
     // help
     EVT_MENU (wxID_ABOUT,            AppFrame::OnAbout)
@@ -223,176 +132,228 @@ wxBEGIN_EVENT_TABLE (AppFrame, wxFrame)
 
   //  EVT_CONTEXT_MENU(                AppFrame::OnContextMenu)
 //GCode
-	EVT_MENU(ID_GCODE_CHECK, AppFrame::OnCheck)
-	EVT_MENU(ID_GCODE_SIMULATE, AppFrame::OnSimulate)
 	EVT_MENU(ID_GCODE_CONVERTGCMC, AppFrame::OnConvertGcmc)
 	EVT_MENU(ID_GCODE_KILLGCMCPROCESS, AppFrame::OnKillGcmcProcess)
 
-	EVT_UPDATE_UI(ID_GCODE_CHECK, AppFrame::OnUpdateCheck)
-	EVT_UPDATE_UI(ID_GCODE_SIMULATE, AppFrame::OnUpdateSimulate)
 	EVT_UPDATE_UI(ID_GCODE_CONVERTGCMC, AppFrame::OnUpdateConvertGcmc)
 	EVT_UPDATE_UI(ID_GCODE_KILLGCMCPROCESS, AppFrame::OnUpdateKillGcmcProcess)
 
-	EVT_MENU_RANGE(myID_3D_FIRST, myID_3D_LAST, AppFrame::On3DView)
-	EVT_UPDATE_UI_RANGE(myID_3D_FIRST, myID_3D_LAST, AppFrame::On3DViewUpdate)
+	EVT_MENU_RANGE(ID_3D_FIRST, ID_3D_LAST, AppFrame::On3DView)
+	EVT_UPDATE_UI_RANGE(ID_3D_FIRST, ID_3D_LAST, AppFrame::On3DViewUpdate)
 	
 
-	EVT_THREAD(CHECK_GCODE_UPDATE, AppFrame::OnThreadUpdate)
-	EVT_THREAD(CHECK_GCODE_COMPLETE, AppFrame::OnThreadCompletion)
-
-
-	EVT_THREAD(CHECK_SIMULATE_UPDATE, AppFrame::OnSimulateUpdate)
-	EVT_THREAD(CHECK_SIMULATE_COMPLETE, AppFrame::OnSimulateCompletion)
-
-	//EVT_COMMAND(wxID_ANY, wxEVT_COMMAND_GCODETHREAD_UPDATE, AppFrame::OnThreadUpdate)
-	//EVT_COMMAND(wxID_ANY, wxEVT_COMMAND_GCODETHREAD_COMPLETED, AppFrame::OnThreadCompletion)
+	EVT_AUINOTEBOOK_PAGE_CLOSE(wxID_ANY, AppFrame::OnNotebookPageClose)
+	EVT_COMMAND(wxID_ANY,FILE_MODIFYED_EVENT, AppFrame::OnFileModified)
+	EVT_COMMAND(wxID_ANY,FILE_OPEN_EVENT, AppFrame::OnFileOpenEvent)
+	EVT_COMMAND(wxID_ANY, FILE_RENAME_EVENT, AppFrame::OnFileRenamed)
+	EVT_COMMAND(wxID_ANY, FILE_REMOVE_EVENT, AppFrame::OnFileRemoveEvent)
+	EVT_COMMAND(wxID_ANY, FILE_NEW_EVENT, AppFrame::OnFileNewEvent)
 	
 wxEND_EVENT_TABLE ()
 
 
 AppFrame::AppFrame (const wxString &title)
-        : m_timer(this), wxFrame ((wxFrame *)NULL, wxID_ANY, title, wxDefaultPosition, wxSize(750,550),
+        : wxFrame ((wxFrame *)NULL, wxID_ANY, title, wxDefaultPosition, wxSize(840,650),
                     wxDEFAULT_FRAME_STYLE | wxNO_FULL_REPAINT_ON_RESIZE)
 {
+	// tell wxAuiManager to manage this frame
+	m_mgr.SetManagedWindow(this);
+	m_mgr.SetArtProvider( Preferences::Get()->GetArtProvider(true) );
+
+
+	m_notebook_style = wxAUI_NB_DEFAULT_STYLE | wxAUI_NB_TAB_EXTERNAL_MOVE | wxNO_BORDER;
+	m_notebook_theme = 0;
+	m_dirtree = 0;
+	m_watcher = 0;
+	m_macroses = new Macroses();
+
     SetIcon(wxICON(sample));
-	checkThread = NULL;
-	simulateThread = NULL;
-	gcmcProcess = NULL;
-	gcmc_running_in_sec = 0;
-	
-	// initialize important variables
-    m_edit = NULL;
-	
-    // set icon and background
     SetTitle (APP_NAME);
-    SetBackgroundColour ("WHITE");
-
-
+    //SetBackgroundColour ("GREEN");
 	ConfigData *config;
 	if ((config = dynamic_cast<ConfigData *>(wxConfigBase::Get())) != NULL)
 		config->ReadFileNames();
 
     // create menu
-    m_menuBar = new wxMenuBar;
-    CreateMenu ();
-
-  	wxBoxSizer* sizer = new wxBoxSizer(wxVERTICAL);
-	SetSizer(sizer);
-	wxToolBar *toolBar= CreateToolBar();
-	sizer->Add(toolBar, 0, wxEXPAND);
-	toolBar->Realize();
-
-	wxSplitterWindow* splitter = new wxSplitterWindow(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxSP_LIVE_UPDATE);
-	sizer->Add(splitter, 1, wxEXPAND);
-	splitter->SetSashGravity(1.0);
-
-	wxSplitterWindow* splitterV = new wxSplitterWindow(splitter, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxSP_LIVE_UPDATE);
-	splitterV->SetSashGravity(1.0);
-
-
-	// open first page
-	m_edit = new Edit(splitterV, wxID_ANY);
-
-	//int gl_attrib[20] =	{ WX_GL_RGBA, WX_GL_MIN_RED, 1, WX_GL_MIN_GREEN, 1,
-		//				WX_GL_MIN_BLUE, 1, WX_GL_DEPTH_SIZE, 1, WX_GL_DOUBLEBUFFER, GL_NONE };
-
-	m_view = new ViewGCode(this, splitterV, wxID_ANY/*, gl_attrib*/ );
-	
-	logwnd = new LogWindow(splitter, this, wxID_ANY);
-	
-	splitter->SplitHorizontally(splitterV, logwnd,  -100);
-	splitterV->SplitVertically(m_edit, m_view, -300 );
-
-	Layout();
-	splitter->UpdateSize();
-	splitterV->UpdateSize();
-
-	m_edit->SetFocus();
-	m_view->initializeGL();
-	m_view->setSimulationSpeed(20);
-	//m_view->SetFocus();
-
+	wxMenuBar *m_menuBar = CreateMenu();
+	SetMenuBar(m_menuBar);
 
 	
+	m_notebook = CreateNotebook();
 
+	m_mgr.AddPane(m_notebook, wxAuiPaneInfo().Name("notebook_content").
+		CenterPane().PaneBorder(false));
+
+	
+	m_dirtree = new DirPane(this);
+	m_mgr.AddPane(m_dirtree, wxAuiPaneInfo().
+		Name("Folders").Caption("Folders").
+		Left().Layer(1).Position(1).
+		CloseButton(false).MaximizeButton(false).CaptionVisible(false));
+
+	/*
+	wxAuiToolBar *toolBar = CreateToolBar();
+	m_mgr.AddPane(toolBar, wxAuiPaneInfo().
+		Name("tb").Caption("Standart commands").
+		ToolbarPane().Top().Row(1));
+	*/
+
+	m_mgr.Update();
+	
+	ShowWelcome();
+
+	SetDropTarget(new DropFileOpen(this));
 
 #ifdef DOWX_LOGGING
 		//Open a log window, don't show it though
 	wxLogWindow *m_LogWin = new wxLogWindow(this, "YAMotion Gcode Editor", true, false);
 	wxLog::SetActiveTarget(m_LogWin);
 #endif
-	
-	ShowWelcome();
-	
 }
 
 AppFrame::~AppFrame () 
 {
+	m_mgr.UnInit();
 
+	if (m_watcher)
+		delete m_watcher;
+	
+	if (m_macroses)
+		delete m_macroses;
 }
+
+class StubNotebook : public wxAuiNotebook
+{
+public:
+	StubNotebook() { }
+	~StubNotebook() {}
+
+	void SetAuiArtProvider()
+	{
+		m_mgr.SetArtProvider(Preferences::Get()->GetArtProvider(true));
+	}
+};
+
+
+
+wxAuiNotebook* AppFrame::CreateNotebook()
+{
+	// create the notebook off-window to avoid flicker
+	wxSize client_size = GetClientSize();
+
+	StubNotebook* ctrl = new StubNotebook();
+	ctrl->SetAuiArtProvider();
+	ctrl->Create(this, wxID_ANY,
+		wxPoint(client_size.x, client_size.y),
+		FromDIP(wxSize(330, 200)),
+		m_notebook_style);
+	ctrl->SetArtProvider(Preferences::Get()->GetTabArtProvider());
+	ctrl->SetBackgroundColour(Preferences::Get()->GetStdColor(ColourScheme::WINDOW));
+	return ctrl;
+}
+
 
 void AppFrame::ShowWelcome()
 {
-	WelcomeWnd *welcome = new WelcomeWnd(this);
-	welcome->ShowWelcome(true);
+	m_notebook->Freeze();
+	// check is welcome window exist
+	size_t welcome_page = wxNOT_FOUND;
+	size_t n = m_notebook->GetPageCount();
+	for (size_t i = 0; i < n; ++i)
+	{
+		//WelcomeWnd *welcome = dynamic_cast<WelcomeWnd *>(m_notebook->GetPage(i));
+		if (m_notebook->GetPage(i)->IsKindOf(CLASSINFO(WelcomeWnd)))
+		//if (welcome)
+		{
+			welcome_page = i;
+			break;
+		}
+			
+	}
+	if (welcome_page == wxNOT_FOUND)
+	{
+		m_notebook->InsertPage(0, new WelcomeWnd(this), _("Welcome"), true);
+		m_notebook->SetPageToolTip(0, _("Welcome screen"));
+	}
+	else
+	{
+		m_notebook->SetSelection(welcome_page);
+	}	
+	m_notebook->Thaw();
 }
+
+
+void AppFrame::HideWelcome()
+{
+	m_notebook->Freeze();
+	// check is welcome window exist
+	size_t welcome_page = wxNOT_FOUND;
+	size_t n = m_notebook->GetPageCount();
+	for (size_t i = 0; i < n; ++i)
+	{
+		//WelcomeWnd *welcome = dynamic_cast<WelcomeWnd *>(m_notebook->GetPage(i));		
+		if (m_notebook->GetPage(i)->IsKindOf(CLASSINFO(WelcomeWnd)))
+		{
+			welcome_page = i;
+			break;
+		}
+
+	}
+	if (welcome_page != wxNOT_FOUND)
+	{
+		m_notebook->DeletePage(welcome_page);
+	}
+	m_notebook->Thaw();
+}
+
+void AppFrame::OnFileModified(wxCommandEvent &)
+{
+	UpdateTitle();
+}
+
+void AppFrame::OnFileRenamed(wxCommandEvent &evn)
+{
+	wxString oldPath = evn.GetString();
+	size_t nPage = wxNOT_FOUND;
+	if (!FindPageByFileName(oldPath, &nPage))
+		return;
+	wxStringClientData *pstring_data = dynamic_cast<wxStringClientData *>(evn.GetClientObject());
+	if (!pstring_data)
+		return;
+
+	FilePage *pedit = dynamic_cast<FilePage *>(m_notebook->GetPage(nPage));
+	if (!pedit)
+		return;
+	pedit->GetEdit()->SetFileName( pstring_data->GetData() );
+	UpdateTitle(nPage);	
+}
+
+
+void AppFrame::OnNotebookPageClose(wxAuiNotebookEvent& evt)
+{
+	wxAuiNotebook* ctrl = (wxAuiNotebook*)evt.GetEventObject();
+	wxWindow *page = ctrl->GetPage(evt.GetSelection());
+	if (page->IsKindOf(CLASSINFO(FilePage)))
+	{
+		FilePage *fp = dynamic_cast<FilePage *>(page);
+		if ( !fp->DoFileSave(true,false) )
+			evt.Veto();
+	}
+}
+
 
 // common event handlers
-void AppFrame::OnTimer(wxTimerEvent &event) 
-{ 
-	static bool needToAsk = true;
-	if (gcmc_running_in_sec == 0)
-		needToAsk = true;
 
-	wxTimer &tm = event.GetTimer();
-	gcmc_running_in_sec++;
-
-	SetTitle(wxString::Format(L"Process gcmc %d sec.", gcmc_running_in_sec));
-	if (gcmcProcess && needToAsk && (gcmc_running_in_sec%60) == 0 )
-	{
-		int rez = wxMessageBox(_("GCMC is running very long time/ Would you like to kill the process?"), wxMessageBoxCaptionStr,
-			wxYES_NO | wxICON_QUESTION);
-		if (rez == wxYES)
-			wxKill(gcmcProcess->GetPid(), wxSIGKILL, NULL, wxKILL_CHILDREN);
-	}	
-}
 void AppFrame::OnClose (wxCloseEvent &event)
 {
-	if ( m_timer.IsRunning() )
-		m_timer.Stop();
-		
-	m_view->processClosing();
+
+// save all modified files
+	if (!DoSaveAllFiles() )
 	{
-		wxCriticalSectionLocker enter(critsect);
-		if (checkThread)         // does the thread still exist?
-		{
-			checkThread->Delete();
-		}
-		if (simulateThread)
-		{
-			simulateThread->Delete();
-		}
-	}       // exit from the critical section to give the thread
-			// the possibility to enter its destructor
-			// (which is guarded with m_pThreadCS critical section!)
-	while (1)
-	{
-		{ // was the ~MyThread() function executed?
-			wxCriticalSectionLocker enter(critsect);
-			if (!checkThread && !simulateThread ) break;
-		}
-		// wait for thread completion
-		wxThread::This()->Sleep(1);
+		event.Veto();
+		return;
 	}
-
-   
-	DoFileSave( true, false );
- //   if (m_edit && m_edit->Modified()) 
-	//{
- //       if (event.CanVeto()) event.Veto (true);
- //       return;
- //   }
-
+	
 
 	ConfigData *config;
 	if ((config = dynamic_cast<ConfigData *>(wxConfigBase::Get())) != NULL)
@@ -420,92 +381,171 @@ void AppFrame::OnExit (wxCommandEvent &WXUNUSED(event)) {
     Close (true);
 }
 
-bool AppFrame::DoFileSave(bool askToSave, bool bSaveAs )
+bool AppFrame::DoSaveAllFiles()
 {
-	if (!m_edit) return false;
-	if ( !m_edit->Modified() && !bSaveAs )
+	if (!m_notebook)
 		return true;
 
-	// Ask need to save
-	if (askToSave)
+	size_t n = m_notebook->GetPageCount();
+	for (size_t i = 0; i < n; ++i)
 	{
-		int rez = wxMessageBox(_("Text is not saved, save before closing?"), _("Save file"),
-			wxYES_NO | wxCANCEL | wxICON_QUESTION);
-		if (rez == wxCANCEL)
-			return false;
-		else if (rez == wxNO)
-			return true;
-	}
-	// Need save
-	wxString fname = m_edit->GetFilename();
-	if (bSaveAs || fname.empty())
-	{
-		wxString filename = fname.empty() ? _("unnamed") : fname;
-		wxString wildCard;
-		if (m_edit->GetFileType() == FILETYPE_GCMC)
-			wildCard = _("GCMC Files (*.gcmc)|*.gcmc");
-		else
-			wildCard = _("GCode Files (*.ngc)|*.ngc");
-
-		wxFileDialog dlg(this, _("Save file As"), wxEmptyString, filename, wildCard, wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
-		if (dlg.ShowModal() != wxID_OK)
-			return false;
-		filename = dlg.GetPath();
-		m_edit->SaveFile(filename);
-		ConfigData *config;
-		if ((config = dynamic_cast<ConfigData *>(wxConfigBase::Get())) != NULL)
-			config->AddFileNameToSaveList(filename);
-	}
-	else //  fname exist && not save as  - just save
-	{
-		m_edit->SaveFile();
-		if (m_edit->Modified())
+		if (m_notebook->GetPage(i)->IsKindOf(CLASSINFO(FilePage)))
 		{
-			wxMessageBox(_("Text could not be saved!"), _("Close abort"),
-				wxOK | wxICON_EXCLAMATION);
-			return false;
+			FilePage *pEdit = dynamic_cast<FilePage *>(m_notebook->GetPage(i));
+			if (pEdit && !pEdit->DoFileSave(true, false))
+			{
+				return false;
+			}
 		}
 	}
 	return true;
 }
 
-
-void AppFrame::FileChanged()
+bool AppFrame::FindPageByFileName(const wxString &new_file_name, size_t *nPage)
 {
-	UpdateTitle();
-	logwnd->Clear();
-	m_view->clear();
+	size_t n = m_notebook->GetPageCount();
+	for (size_t i = 0; i < n; ++i)
+	{
+		if (m_notebook->GetPage(i)->IsKindOf(CLASSINFO(FilePage)))
+		{
+			FilePage *pEdit = dynamic_cast<FilePage *>(m_notebook->GetPage(i));
+			if (pEdit->GetEdit()->GetFileName() == new_file_name)
+			{
+				if (nPage)
+					*nPage = i;
+				return true;
+			}
+		}
+	}
+	return false;
+
 }
 
-void AppFrame::OnFileNew(wxCommandEvent &event )
+void AppFrame::OnFileNewEvent(wxCommandEvent &event)
 {
-	if (DoFileSave(true, false))
+	int file_type = (event.GetInt() == ID_NEWGCMC) ? FILETYPE_GCMC : FILETYPE_NC;
+	DoNewFile(file_type, event.GetString(), false );
+}
+
+void AppFrame::OnFileNew(wxCommandEvent &event)
+{
+	int file_type = (event.GetId() == ID_NEWGCMC) ? FILETYPE_GCMC : FILETYPE_NC;
+	DoNewFile(file_type, wxEmptyString, event.GetClientData() != NULL );
+}
+
+FilePage *AppFrame::DoNewFile(int file_type, const wxString &defpath, bool closeWelcome, const wxString &contextFile)
+{
+	wxFileName defPath;
+	defPath.AssignDir(defpath);
+	
+	
+	wxString new_file_name = wxString::Format(_("unnamed.%s"), (file_type == FILETYPE_GCMC) ? "gcmc" : "nc");
+	defPath.SetFullName(new_file_name);
+	int n = 0;
+	do
 	{
-		m_edit->NewFile((event.GetId() == ID_NEWGCMC) ? FILETYPE_GCMC : FILETYPE_NC);
-		FileChanged();
-	}
+		if ( !FindPageByFileName(defPath.GetFullPath()) )
+			break;
+		new_file_name = wxString::Format(_("unnamed%d.%s"),++n, (file_type == FILETYPE_GCMC) ? "gcmc" : "nc");
+		defPath.SetFullName(new_file_name);
+	} while (true);
+
+	m_notebook->Freeze();
+	
+	FilePage * pedit = new FilePage(m_notebook, file_type, defPath.GetFullPath(),true );
+	//Edit *pedit = new Edit(m_notebook, wxID_ANY);
+	m_notebook->AddPage(pedit, new_file_name , true);
+	//pedit->NewFile(file_type, defPath.GetFullPath());
+
+	if ( !contextFile.empty() )
+		pedit->GetEdit()->PasteFile(contextFile.wc_str());
+		
+	UpdateTitle();
+
+	m_notebook->Thaw();
+
+	if (closeWelcome)
+		HideWelcome();
+
+	return pedit;
 }
 
 // file event handlers
-void AppFrame::OnFileOpen (wxCommandEvent &WXUNUSED(event)) 
+void AppFrame::OnFileOpen (wxCommandEvent &event ) 
 {
-
-	if ( !DoFileSave(true, false))
-		return;
-    
+  
 	wxString fname;
-    wxFileDialog dlg (this, _("Open file"), wxEmptyString, wxEmptyString, _("Any file (*)|*"),
-                      wxFD_OPEN | wxFD_FILE_MUST_EXIST | wxFD_CHANGE_DIR);
+    wxFileDialog dlg (this, _("Open file"), wxEmptyString, wxEmptyString, 
+		_("GCMC and NC files (*.gcmc;*.nc;*.ngc)|*.gcmc;*.nc;*.ngc|GCMC files (*.gcmc)|*.gcmc|NC files (*.nc;*.ngc)|*.nc;*.ngc|Any file(*.*) |*"),
+        wxFD_OPEN | wxFD_FILE_MUST_EXIST | wxFD_CHANGE_DIR);
+
     if (dlg.ShowModal() != wxID_OK) return;
-    fname = dlg.GetPath ();
+    fname = dlg.GetPath();
     FileOpen (fname);
+
+	if (event.GetClientData() != NULL)
+		HideWelcome();
 }
+
+void AppFrame::OnFileOpenEvent(wxCommandEvent &event)
+{
+	
+	// we should check all possible files dir
+
+	wxFileName fname( event.GetString() );
+	if (!fname.IsAbsolute())
+	{
+		wxPathList paths; 
+		Edit *pedit = dynamic_cast<Edit *>(event.GetEventObject());
+		// try to add path from parent sender
+		if (pedit)
+		{
+			wxFileName fn = pedit->GetFileName();
+			paths.Add( fn.GetPath() );
+			fn.AppendDir(L"library");
+			paths.Add( fn.GetPath() );
+		}
+		
+		paths.Add(StandartPaths::Get()->GetRootPath().c_str());
+		paths.Add(StandartPaths::Get()->GetMacrosPath().c_str());
+
+		wxString abs_fname  = paths.FindAbsoluteValidPath(fname.GetFullPath());
+		if (abs_fname.empty())
+		{
+			wxString msg = wxString::Format(_("Can not open file %s in catalogs:\n"), fname.GetFullPath());
+			//for (int i = 0; i auto p = paths.begin() p != paths.end(); ++p)
+			for (auto p = paths.begin(); p != paths.end(); ++p)
+			{
+				msg += *p;
+				msg += L"\n";
+			}
+			wxMessageBox(msg,_("Error opening file"));
+			return;
+		}
+		else
+			fname = abs_fname;
+	}
+	
+	FileOpen( fname.GetFullPath() );	
+	HideWelcome();
+}
+
+
+void AppFrame::OnFileRemoveEvent(wxCommandEvent &event)
+{
+	size_t nPage;
+	if ( FindPageByFileName(event.GetString(), &nPage) )
+	{
+		m_notebook->Freeze();
+		m_notebook->DeletePage(nPage);
+		m_notebook->Thaw();
+	}
+	
+}
+
 
 void AppFrame::OnOpenLastFile(wxCommandEvent &event)
 {
-	if (!DoFileSave(true, false))
-		return;
-
 	ConfigData *config = dynamic_cast<ConfigData *>(wxConfigBase::Get());
 	if (config)
 	{
@@ -516,6 +556,8 @@ void AppFrame::OnOpenLastFile(wxCommandEvent &event)
 			auto it = files.begin();
 			for (int i = 0; i < n; i++, it++) ;
 			FileOpen( *it );
+			if (event.GetClientData() != NULL)
+				HideWelcome();
 			return;
 		}
 
@@ -526,14 +568,20 @@ void AppFrame::OnOpenLastFile(wxCommandEvent &event)
 
 void AppFrame::OnFileSave (wxCommandEvent &WXUNUSED(event)) 
 {
-	DoFileSave( false, false );
-    UpdateTitle();
+	wxWindow *wnd = m_notebook->GetCurrentPage();
+	FilePage *panel = dynamic_cast<FilePage *>(wnd);
+	if (panel)
+		panel->DoFileSave( false, false );
+    //UpdateTitle();
 }
 
 void AppFrame::OnFileSaveAs(wxCommandEvent &WXUNUSED(event))
 {
-	DoFileSave(false, true);
-	UpdateTitle();
+	wxWindow *wnd = m_notebook->GetCurrentPage();
+	FilePage *panel = dynamic_cast<FilePage *>(wnd);
+	if (panel)
+		panel->DoFileSave(false, true);
+	//UpdateTitle();
 }
 
 void AppFrame::OnFileClose (wxCommandEvent &event) 
@@ -547,40 +595,80 @@ void AppFrame::OnProperties(wxCommandEvent &WXUNUSED(event))
 	PropertiesDlg dlg(this);
 	if (dlg.NeedRestart())
 	{
-		if ( DoFileSave(true, false) )
+		if ( DoSaveAllFiles() )
 			wxGetApp().Restart();
 	}
 }
 
+void AppFrame::OnDefaultPreferences(wxCommandEvent &WXUNUSED(event))
+{
+	std::filesystem::path dirpath = StandartPaths::Get()->GetPreferencesPath(L"Default Preferences.json");	
+	FileOpen(dirpath.c_str());
+}
+
+void AppFrame::OnUserPreferences(wxCommandEvent &WXUNUSED(event))
+{
+	std::filesystem::path dirpath = StandartPaths::Get()->GetPreferencesPath(L"User Preferences.json");
+	FileOpen(dirpath.c_str());
+}
+
 void AppFrame::OnMacroses(wxCommandEvent &WXUNUSED(event))
 {
-    if (!m_edit) return;
-    //EditProperties dlg(m_edit, 0);
-	Macroses msc;
-	MacrosesDlg dlg(&msc, this);	
-	int indx = dlg.GetSelected();
-	if (indx < 0 || indx >= msc.count() )
-		return;
 	
-	MacrosDesc &desc = msc.get(indx);
+	MacrosesDlg dlg(m_macroses, this);
+	DoRunMacros( dlg.GetSelected() );
+}
 
+void AppFrame::OnMacros(wxCommandEvent &event)
+{
+	DoRunMacros(event.GetId() - ID_MACROSFIRST);
+}
+
+void AppFrame::DoRunMacros(int indx)
+{
+
+	if (indx < 0 || indx >= m_macroses->Count())
+		return;
+
+	MacrosDesc &desc = m_macroses->Get(indx);
 	MacrosParamDlg dlgparam(&desc, this);
 	if (dlgparam.ShowModal() != wxID_OK)
 		return;
 
-
-
-	wxString  args = msc.build_commad_line(indx);
-
-	std::wstring src_fname = StandartPaths::Get()->GetMacrosPath( desc.gcmcfile.c_str() );
+	wxString  args = m_macroses->BuildCommandLine(indx);
+	std::wstring src_fname = StandartPaths::Get()->GetMacrosPath(desc.gcmcfile.c_str());
 	std::wstring dst_fname = StandartPaths::Get()->GetTemporaryPath(L"tmp.nc");
+
+	FilePage *panel = 0;
+	if (!dlgparam.IsInNewWindow())
+	{
+		wxWindow *wnd = m_notebook->GetCurrentPage();
+		panel = dynamic_cast<FilePage *>(wnd);		
+	}
+	else
+	{
+		panel = DoNewFile(FILETYPE_NC, wxEmptyString, true);
+	}
+
+	if (!panel)
+		return;
+
+	panel->ConvertGcmc(src_fname.c_str(), dst_fname.c_str(), args.c_str());
 	
-	RunGcmc(src_fname.c_str(), dst_fname.c_str(), args.c_str(), ConvertGcmcPasteFile);
 }
 
 
 void AppFrame::DoMathCalc( DoMathBase &mth )
 {
+	Edit *pedit = 0;
+	wxWindow *wnd = m_notebook->GetCurrentPage();
+	FilePage *panel = dynamic_cast<FilePage *>(wnd);
+	if (panel)
+		pedit = panel->GetEdit();
+
+	if (!pedit)
+		return;
+
 	char strOut[MAX_GCODE_LINELEN];
 	int line_start;
 	int line_end;
@@ -589,35 +677,35 @@ void AppFrame::DoMathCalc( DoMathBase &mth )
 
 	if (mth.InSelected())
 	{
-		m_edit->GetSelection(&from, &to);
+		pedit->GetSelection(&from, &to);
 		if (from == to)
 		{
 			wxMessageBox(_("Uups there is no any selection"));
 			return;
 		}
-		line_start = m_edit->LineFromPosition(from);
-		line_end = m_edit->LineFromPosition(to);
+		line_start = pedit->LineFromPosition(from);
+		line_end = pedit->LineFromPosition(to);
 	}
 	else
 	{
 		line_start = 0;
-		line_end = m_edit->GetLineCount() - 1;
+		line_end = pedit->GetLineCount() - 1;
 	}
 
 	for (int i = line_start; i <= line_end; i++)
 	{
-		wxString str = m_edit->GetLine(i);
+		wxString str = pedit->GetLine(i);
 		if (mth.Process(str.c_str(), strOut))
 		{
-			long from = m_edit->PositionFromLine(i);
+			long from = pedit->PositionFromLine(i);
 			long to = from + str.length();
-			m_edit->Replace(from, to, strOut);
+			pedit->Replace(from, to, strOut);
 		}
 	}
 	if (mth.InSelected())
 	{
-		to = m_edit->PositionFromLine(line_end + 1);
-		m_edit->SetSelection(from, m_edit->PositionBefore(to));
+		to = pedit->PositionFromLine(line_end + 1);
+		pedit->SetSelection(from, pedit->PositionBefore(to));
 	}
 
 }
@@ -625,10 +713,15 @@ void AppFrame::DoMathCalc( DoMathBase &mth )
 // properties event handlers
 void AppFrame::OnMathCalc(wxCommandEvent &WXUNUSED(event))
 {
-	if (!m_edit) return;
-	//EditProperties dlg(m_edit, 0);
+
+	Edit *pedit = 0;
+	FilePage *panel = dynamic_cast<FilePage *>(m_notebook->GetCurrentPage());
+	if (panel)
+		pedit = panel->GetEdit();
+
+
 	DoMathSimple mth;
-	MathSimpleDlg dlg(&mth, this, m_edit->HasSelection() );
+	MathSimpleDlg dlg(&mth, this, pedit->HasSelection() );
 	if (dlg.ShowModal() != wxID_OK)
 		return;
 	DoMathCalc(mth);
@@ -637,12 +730,18 @@ void AppFrame::OnMathCalc(wxCommandEvent &WXUNUSED(event))
 // properties event handlers
 void AppFrame::OnMathExpression(wxCommandEvent &WXUNUSED(event))
 {
-	if (!m_edit) return;
+
+
+	Edit *pedit = 0;
+	FilePage *panel = dynamic_cast<FilePage *>(m_notebook->GetCurrentPage());
+	if (panel)
+		pedit = panel->GetEdit();
+
 
 	try
 	{
 		DoMathExpression mth;
-		MathExpressionDlg dlg(&mth, this, m_edit->HasSelection());
+		MathExpressionDlg dlg(&mth, this, pedit->HasSelection());
 		if (dlg.ShowModal() != wxID_OK)
 			return;
 		DoMathCalc(mth);
@@ -651,7 +750,7 @@ void AppFrame::OnMathExpression(wxCommandEvent &WXUNUSED(event))
 	{
 		wxString errMsg;
 		errMsg += wxString::Format(_("Error%s pos: %d"), e.GetMsg().c_str(), (int)e.GetPos());
-		wxMessageBox(errMsg);
+		wxMessageBox(errMsg, _("Expression error") );
 	}
 	catch (...)
 	{
@@ -664,18 +763,47 @@ void AppFrame::OnMathExpression(wxCommandEvent &WXUNUSED(event))
 // edit events
 void AppFrame::OnEdit (wxCommandEvent &event) 
 {
-    if (m_edit) m_edit->GetEventHandler()->ProcessEvent (event);
+	Edit *pedit = 0;
+	FilePage *panel = dynamic_cast<FilePage *>(m_notebook->GetCurrentPage());
+	if (panel)
+		pedit = panel->GetEdit();
+
+    if (pedit) 
+		pedit->GetEventHandler()->ProcessEvent (event);
 }
 
 
-void AppFrame::On3DView(wxCommandEvent &event) {
-	if (m_view) m_view->GetEventHandler()->ProcessEvent(event);
+void AppFrame::On3DView(wxCommandEvent &event)
+{
+	View3D *view = 0;
+	wxWindow *wnd = m_notebook->GetCurrentPage();
+	FilePage *panel = dynamic_cast<FilePage *>(wnd);
+	if (panel)
+		view = panel->Get3D();
+
+	if (view)
+		view->GetEventHandler()->ProcessEvent(event);
 }
 
 
-void AppFrame::On3DViewUpdate(wxUpdateUIEvent& event) {
-	if (m_view) m_view->GetEventHandler()->ProcessEvent(event);
+void AppFrame::On3DViewUpdate(wxUpdateUIEvent& event)
+{
+	View3D *view = 0;
+	wxWindow *wnd = m_notebook->GetCurrentPage();
+	FilePage *panel = dynamic_cast<FilePage *>(wnd);
+	if (panel)
+		view = panel->Get3D();
+
+
+	if (view)
+		view->GetEventHandler()->ProcessEvent(event);
 }
+
+void AppFrame::OnDirTree(wxCommandEvent &event)
+{
+	if (m_dirtree) m_dirtree->GetEventHandler()->ProcessEvent(event);
+}
+
 
 void AppFrame::OnContextMenu(wxContextMenuEvent& evt)
 {
@@ -699,27 +827,13 @@ void AppFrame::OnContextMenu(wxContextMenuEvent& evt)
 }
 
 // private functions
-void AppFrame::CreateMenu ()
+wxMenuBar *AppFrame::CreateMenu ()
 {
     // File menu
+	wxMenuBar *m_menuBar = new wxMenuBar;
     wxMenu *menuFile = new wxMenu;
-	wxMenu *menuNewFiles = new wxMenu;
-	menuNewFiles->Append(wxID_NEW, _("&GCode File .."));
-	menuNewFiles->Append(ID_NEWGCMC, _("G&CMC File .."));
-	menuFile->Append(myID_HIGHLIGHTLANG, _("&New"), menuNewFiles);
-
-    menuFile->Append (wxID_OPEN, _("&Open ..\tCtrl+O"));
-    menuFile->Append (wxID_SAVE, _("&Save\tCtrl+S"));
-    menuFile->Append (wxID_SAVEAS, _("Save &as ..\tCtrl+Shift+S"));
-    menuFile->Append (wxID_CLOSE, _("&Close\tCtrl+W"));
-    menuFile->AppendSeparator();
-    menuFile->Append (myID_PROPERTIES, _("Proper&ties ..\tCtrl+I"));
-	menuFile->AppendSeparator();
-    menuFile->Append (wxID_PRINT_SETUP, _("Print Set&up .."));
-    menuFile->Append (wxID_PREVIEW, _("Print Pre&view\tCtrl+Shift+P"));
-    menuFile->Append (wxID_PRINT, _("&Print ..\tCtrl+P"));
-	menuFile->AppendSeparator();
-
+	//Open
+	menuFile->Append(ID_OPENFILE, _("Open ..\tCtrl+O")); 
 	wxMenu *menuLastFiles = new wxMenu;
 	ConfigData *config = dynamic_cast<ConfigData *>(wxConfigBase::Get());
 	if (config)
@@ -730,25 +844,30 @@ void AppFrame::CreateMenu ()
 			[menuLastFiles,&n](const wxString &p) {
 			if (n < 10) { menuLastFiles->Append(wxID_FILE + n, p); n++; } });
 	}
-	menuFile->Append(myID_HIGHLIGHTLANG, _("&Last Files"), menuLastFiles);
-
+	menuFile->Append(ID_OPENRECENT, _("Open recent"), menuLastFiles);
 	menuFile->AppendSeparator();
+	//New
+	menuFile->Append(ID_NEWNC, _("New GCODE"));
+	menuFile->Append(ID_NEWGCMC, _("New GCMC"));
+	menuFile->Append(ID_SHOWWLCOME, _("Welcome"));
+	menuFile->AppendSeparator();
+	//Save	
+	menuFile->Append(wxID_SAVE, _("Save\tCtrl+S"));
+	menuFile->Append(wxID_SAVEAS, _("Save  as ..\tCtrl+Shift+S"));
+	menuFile->Append(wxID_CLOSE, _("Close\tCtrl+W"));
+	menuFile->AppendSeparator();
+	
+	menuFile->AppendSeparator();
+
     menuFile->Append (wxID_EXIT, _("&Quit\tCtrl+Q"));
-
-
-
+	
+	// Edit menu
+	   	
 	// change case submenu
 	wxMenu *menuChangeCase = new wxMenu;
-	menuChangeCase->Append(myID_CHANGEUPPER, _("&Upper case"));
-	menuChangeCase->Append(myID_CHANGELOWER, _("&Lower case"));
+	menuChangeCase->Append(ID_CHANGEUPPER, _("&Upper case"));
+	menuChangeCase->Append(ID_CHANGELOWER, _("&Lower case"));
 
-	// convert EOL submenu
-	wxMenu *menuConvertEOL = new wxMenu;
-	menuConvertEOL->Append(myID_CONVERTCR, _("CR (&Linux)"));
-	menuConvertEOL->Append(myID_CONVERTCRLF, _("CR+LF (&Windows)"));
-	menuConvertEOL->Append(myID_CONVERTLF, _("LF (&Macintosh)"));
-
-    // Edit menu
     wxMenu *menuEdit = new wxMenu;
     menuEdit->Append (wxID_UNDO, _("&Undo\tCtrl+Z"));
     menuEdit->Append (wxID_REDO, _("&Redo\tCtrl+Shift+Z"));
@@ -758,50 +877,35 @@ void AppFrame::CreateMenu ()
     menuEdit->Append (wxID_PASTE, _("&Paste\tCtrl+V"));
     menuEdit->Append (wxID_CLEAR, _("&Delete\tDel"));
     menuEdit->AppendSeparator();
-    menuEdit->Append (wxID_FIND, _("&Find\tCtrl+F"));    
-    menuEdit->Append (myID_FINDNEXT, _("Find &next\tF3"));
-    menuEdit->Append (myID_REPLACE, _("&Replace\tCtrl+H"));
-    menuEdit->Append (myID_REPLACENEXT, _("Replace &again\tShift+F4"));
+    menuEdit->Append (wxID_FIND, _("&Find\tCtrl+F"));
+    menuEdit->Append (ID_FINDNEXT, _("Find &next\tF3"));
+    menuEdit->Append (ID_REPLACE, _("&Replace\tCtrl+H"));
+    menuEdit->Append (ID_REPLACENEXT, _("Replace &again\tShift+F4"));
     menuEdit->AppendSeparator();
-    menuEdit->Append (wxID_SELECTALL, _("&Select all\tCtrl+A"));
-    menuEdit->Append (myID_SELECTLINE, _("Select &line\tCtrl+L"));
+	menuEdit->Append(ID_MATHCALC, _("Transform..."));
 	menuEdit->AppendSeparator();
-	menuEdit->Append(myID_INDENTINC, _("&Indent increase\tTab"));
-	menuEdit->Append(myID_INDENTRED, _("I&ndent reduce\tShift+Tab"));
+	menuEdit->Append(ID_INDENTINC, _("&Indent increase\tTab"));
+	menuEdit->Append(ID_INDENTRED, _("I&ndent reduce\tShift+Tab"));
 	menuEdit->AppendSeparator();
-	menuEdit->Append(myID_CHANGECASE, _("Change &case to .."), menuChangeCase);
-	menuEdit->Append(myID_CONVERTEOL, _("Convert line &endings to .."), menuConvertEOL);
-	menuEdit->AppendSeparator();
-	menuEdit->AppendCheckItem(myID_READONLY, _("&Readonly mode"));
-	   	
-
-    // highlight submenu
-    wxMenu *menuHighlight = new wxMenu;
-    int Nr;
-    for (Nr = 0; Nr < g_LanguagePrefsSize; Nr++) {
-        menuHighlight->Append (myID_HIGHLIGHTFIRST + Nr,
-                             g_LanguagePrefs [Nr].name);
-    }
-
-    // charset submenu
-    wxMenu *menuCharset = new wxMenu;
-    menuCharset->Append (myID_CHARSETANSI, _("&ANSI (Windows)"));
-    menuCharset->Append (myID_CHARSETMAC, _("&MAC (Macintosh)"));
-
-    // View menu
+	menuEdit->Append(ID_CHANGECASE, _("Change &case to .."), menuChangeCase);
+  	
+	// Macrosos
+	wxMenu *insertMenu = new wxMenu;
+	CreateMacrosesMenu(insertMenu);
+	
+/*
+	// View menu
     wxMenu *menuView = new wxMenu;
-    menuView->Append (myID_HIGHLIGHTLANG, _("&Highlight language .."), menuHighlight);
+    //menuView->Append (ID_HIGHLIGHTLANG, _("&Highlight language .."), menuHighlight);
     menuView->AppendSeparator();
-    menuView->AppendCheckItem (myID_DISPLAYEOL, _("Show line &endings"));
-    menuView->AppendCheckItem (myID_INDENTGUIDE, _("Show &indent guides"));
-    menuView->AppendCheckItem (myID_LINENUMBER, _("Show line &numbers"));
-    menuView->AppendCheckItem (myID_WHITESPACE, _("Show white&space"));
+    menuView->AppendCheckItem (ID_DISPLAYEOL, _("Show line &endings"));
+    menuView->AppendCheckItem (ID_INDENTGUIDE, _("Show &indent guides"));
+    menuView->AppendCheckItem (ID_LINENUMBER, _("Show line &numbers"));
+    menuView->AppendCheckItem (ID_WHITESPACE, _("Show white&space"));
     menuView->AppendSeparator();
-    menuView->Append (myID_USECHARSET, _("Use &code page of .."), menuCharset);
+	menuView->FindChildItem(ID_LINENUMBER)->Check(true);
 
-	menuView->FindChildItem(myID_LINENUMBER)->Check(true);
-
-	// Edit menu
+	// GCode menu
 	wxMenu *menuGCode = new wxMenu;
 	menuGCode->Append(ID_GCODE_CHECK, _("&Check"));
 	menuGCode->Append(ID_GCODE_SIMULATE, _("&Simulate"));
@@ -809,18 +913,18 @@ void AppFrame::CreateMenu ()
 	menuGCode->Append(ID_GCODE_KILLGCMCPROCESS, _("&Kill Gcmc process"));
 	
 	menuGCode->Append(ID_MACROSES, _("Run Macros"));
-	menuGCode->Append(ID_MATHCALC, _("Calculator"));
+	
 	menuGCode->Append(ID_MATHEXPRESSION, _("Calc by Expression"));
 
 	// 3dView menu
 	wxMenu *menu3D = new wxMenu;
-	menu3D->Append(myID_SETVIEWFIRST + 6, _("&Isometric"));
-	menu3D->Append(myID_SETVIEWFIRST,	  _("&Top"));
-	menu3D->Append(myID_SETVIEWFIRST+1,   _("&Bottom"));
-	menu3D->Append(myID_SETVIEWFIRST+2,   _("&Left"));
-	menu3D->Append(myID_SETVIEWFIRST+3,   _("&Right"));
-	menu3D->Append(myID_SETVIEWFIRST+4,   _("&Front"));
-	menu3D->Append(myID_SETVIEWFIRST+5,   _("&Back"));
+	menu3D->Append(ID_SETVIEWFIRST + 6, _("&Isometric"));
+	menu3D->Append(ID_SETVIEWFIRST,	  _("&Top"));
+	menu3D->Append(ID_SETVIEWFIRST+1,   _("&Bottom"));
+	menu3D->Append(ID_SETVIEWFIRST+2,   _("&Left"));
+	menu3D->Append(ID_SETVIEWFIRST+3,   _("&Right"));
+	menu3D->Append(ID_SETVIEWFIRST+4,   _("&Front"));
+	menu3D->Append(ID_SETVIEWFIRST+5,   _("&Back"));
 	menu3D->AppendSeparator();	
 	menu3D->AppendCheckItem(ID_SHOW2DGRID, _("Show/Hide 2d grid"));
 	menu3D->AppendCheckItem(ID_SHOWBOUNDS, _("Show/Hide bounds"));
@@ -828,39 +932,61 @@ void AppFrame::CreateMenu ()
 	menu3D->AppendCheckItem(ID_SHOWTOOL, _("Show/Hide tool"));
 	menu3D->AppendCheckItem(ID_SHOWAXIS, _("Show/Hide Axis"));
 	menu3D->AppendSeparator();
-	menu3D->Append(myID_SEMULATE_START, _("&Start Simulate"));
-	menu3D->Append(myID_SEMULATE_PAUSE,_("Sto&p Simulate"));
-	menu3D->Append(myID_SEMULATE_STOP, _("Pause"));
-		 
+	menu3D->Append(ID_SEMULATE_START, _("&Start Simulate"));
+	menu3D->Append(ID_SEMULATE_PAUSE,_("Sto&p Simulate"));
+	menu3D->Append(ID_SEMULATE_STOP, _("Pause"));
+*/	
+	// Pregerences menu
+	wxMenu *menuPref = new wxMenu;
+	menuPref->Append(ID_PROPERTIES, _("Proper&ties ..\tCtrl+I"));
+	menuPref->Append(ID_GLOBALPREFS, _("Defauult Preferences"));
+	menuPref->Append(ID_USERPREFS, _("User Preferences"));
+
      // Help menu
     wxMenu *menuHelp = new wxMenu;
 	menuHelp->Append(ID_DOWNLOADUPDATE, _("&Download ..\tCtrl+D"));
     menuHelp->Append (wxID_ABOUT, _("&About ..\tCtrl+D"));
-	menuHelp->Append(ID_SHOWWLCOME, _("Show Welcome Screen"));
+		
 
     // construct menu
     m_menuBar->Append (menuFile, _("&File"));
     m_menuBar->Append (menuEdit, _("&Edit"));
-    m_menuBar->Append (menuView, _("&View"));
-	m_menuBar->Append(menuGCode, _("&GCode"));
-	m_menuBar->Append(menu3D, _("&3DView"));
-    m_menuBar->Append (menuHelp, _("&Help"));
-    SetMenuBar (m_menuBar);
+	m_menuBar->Append(insertMenu, _("&Insert"));
+  //  m_menuBar->Append (menuView, _("&View"));
+//	m_menuBar->Append(menuGCode, _("&GCode"));
+//	m_menuBar->Append(menu3D, _("&3DView"));
+	m_menuBar->Append(menuPref, _("Preferences"));
+    m_menuBar->Append (menuHelp, _("&Help"));    
+	return m_menuBar;
+
 }
 
-wxToolBar *AppFrame::CreateToolBar()
+void AppFrame::CreateMacrosesMenu(wxMenu *menuInsert)
 {
-	wxToolBar* toolBar = new wxToolBar(this, wxID_ANY, wxDefaultPosition, wxDefaultSize,
-		wxNO_BORDER | wxTB_FLAT | wxTB_NODIVIDER | wxTB_NOALIGN);
+	int nmsc = m_macroses->Count();
+	for (int i = 0; i < nmsc && i < NUM_MENU_MACROS; ++i)
+	{
+		MacrosDesc &md = m_macroses->Get(i);
+		menuInsert->Append(ID_MACROSFIRST + i, md.name.c_str());
+	}
+	menuInsert->AppendSeparator();
+	menuInsert->Append(ID_MACROSES, _("All Macroses..."));
+}
 
-	toolBar->AddTool(wxID_NEW, wxEmptyString, wxBitmap(new_xpm), _("New"));
-	toolBar->AddTool(wxID_OPEN, wxEmptyString, wxBitmap(open_xpm), _("Open"));
+
+wxAuiToolBar *AppFrame::CreateToolBar()
+{
+	wxAuiToolBar* toolBar = new wxAuiToolBar(this, wxID_ANY, wxDefaultPosition, wxDefaultSize,
+		wxAUI_TB_DEFAULT_STYLE | wxAUI_TB_OVERFLOW | wxAUI_TB_HORIZONTAL);
+
+	toolBar->AddTool(ID_NEWNC, wxEmptyString, wxBitmap(new_xpm), _("New"));
+	toolBar->AddTool(ID_OPENFILE, wxEmptyString, wxBitmap(open_xpm), _("Open"));
 	toolBar->AddTool(wxID_SAVE, wxEmptyString, wxBitmap(save_xpm), _("Save"));
 	toolBar->AddSeparator();
 	toolBar->AddTool(wxID_UNDO, wxEmptyString, wxBitmap(undo_xpm), _("Cut"));
 	toolBar->AddTool(wxID_REDO, wxEmptyString, wxBitmap(redo_xpm), _("Cut"));
 	toolBar->AddSeparator();
-	toolBar->AddTool(myID_PROPERTIES, wxEmptyString, wxBitmap(cut_xpm), _("Macroses"));
+	toolBar->AddTool(ID_PROPERTIES, wxEmptyString, wxBitmap(cut_xpm), _("Properies"));
 	toolBar->AddTool(wxID_COPY, wxEmptyString, wxBitmap(copy_xpm), _("Copy"));
 	toolBar->AddTool(wxID_PASTE, wxEmptyString, wxBitmap(paste_xpm), _("Paste"));
 	toolBar->AddSeparator();
@@ -868,11 +994,11 @@ wxToolBar *AppFrame::CreateToolBar()
 	toolBar->AddTool(ID_GCODE_SIMULATE, wxEmptyString, wxBitmap(find_xpm), _("Simulate"));
 	toolBar->AddTool(ID_GCODE_CONVERTGCMC, wxEmptyString, wxBitmap(new_xpm), _("Convert"));
 	toolBar->AddSeparator();
-	toolBar->AddTool(myID_SEMULATE_START, wxEmptyString, wxBitmap(simulate_xpm), _("simulate"));
-	toolBar->AddTool(myID_SEMULATE_PAUSE, wxEmptyString, wxBitmap(pause_xpm), _("pause"));
-	toolBar->AddTool(myID_SEMULATE_STOP, wxEmptyString, wxBitmap(stop_xpm), _("stop"));
+	toolBar->AddTool(ID_SEMULATE_START, wxEmptyString, wxBitmap(simulate_xpm), _("simulate"));
+	toolBar->AddTool(ID_SEMULATE_PAUSE, wxEmptyString, wxBitmap(pause_xpm), _("pause"));
+	toolBar->AddTool(ID_SEMULATE_STOP, wxEmptyString, wxBitmap(stop_xpm), _("stop"));
 	
-//	toolBar->Realize();
+	toolBar->Realize();
 	return toolBar;
 }
 
@@ -881,7 +1007,15 @@ void AppFrame::FileOpen (wxString fname)
     wxFileName w(fname); 
 	w.Normalize(); 
 	fname = w.GetFullPath();
+	// first try  to find the file in the opened tabs
+	size_t nPage = 0;
+	if (FindPageByFileName(fname, &nPage) )
+	{
+		m_notebook->SetSelection(nPage);
+		return;
+	}
 
+	m_notebook->Freeze();
 	try
 	{
 		std::uintmax_t fsize = std::filesystem::file_size(fname.wc_str());
@@ -890,45 +1024,65 @@ void AppFrame::FileOpen (wxString fname)
 			wxMessageBox(wxString::Format(_("File %s is very lage for the editor"), fname));
 		}
 		else
-		{
-			m_edit->LoadFile(fname);
-			m_edit->SelectNone();
-			FileChanged();
+		{						
+			
+			FilePage *pedit = new FilePage(m_notebook, FILETYPE_UNKNOW, fname, false );
+			//pedit->LoadFile(fname);
+			m_notebook->AddPage(pedit, w.GetFullName(), true);
+			UpdateTitle();
 			ConfigData *config;
 			if ((config = dynamic_cast<ConfigData *>(wxConfigBase::Get())) != NULL)
 				config->AddFileNameToSaveList(fname);
+
 		}
 	}
 	catch (...)
 	{
-		wxMessageBox(wxString::Format(_("Can not open file %s!"), fname ));
+		wxMessageBox(wxString::Format(_("Can not open file %s!"), fname ), _("Error opening file") );
 	}
+	m_notebook->Thaw();
 }
 
 
-void AppFrame::UpdateTitle()
+void AppFrame::UpdateTitle(FilePage *page)
 {
-	wxString title;
-	if (m_edit)
+	size_t n = m_notebook->GetPageCount();
+	for (size_t i = 0; i < n; ++i)
 	{
-		wxFileName w(m_edit->GetFilename());
-		title = w.GetFullName();
-		if (m_edit->Modified())
-			title += "*";
+		if (m_notebook->GetPage(i)->IsKindOf(CLASSINFO(FilePage)))
+		{
+			if (page == dynamic_cast<FilePage *>(m_notebook->GetPage(i)))
+			{
+				UpdateTitle(i);
+				return;
+			}
+		}
 	}
-
-	if (!title.IsEmpty())
-	{
-		title += " - ";
-		title += APP_NAME;
-	}
-	else
-		title = APP_NAME;
-	SetTitle(title);
-
 }
 
-wxRect AppFrame::DeterminePrintSize () {
+
+
+void AppFrame::UpdateTitle(size_t nPage )
+{
+	if (nPage == wxNOT_FOUND)
+		nPage = m_notebook->GetSelection();
+	if (nPage == wxNOT_FOUND)
+		return;
+
+	FilePage *pedit = dynamic_cast<FilePage *>(m_notebook->GetPage(nPage));
+	if (!pedit)
+		return;
+	wxFileName w = pedit->GetEdit()->GetFileName();
+	wxString title = w.GetFullName();
+	if (pedit->GetEdit()->Modified())
+		title += "*";
+
+	m_notebook->SetPageText(nPage, title);
+	m_notebook->SetPageToolTip(nPage, w.GetFullPath());
+}
+
+wxRect AppFrame::DeterminePrintSize () 
+{
 
     wxSize scr = wxGetDisplaySize();
 
@@ -942,395 +1096,110 @@ wxRect AppFrame::DeterminePrintSize () {
     return rect;
 }
 
-
-
-void AppFrame::OnUpdateCheck(wxUpdateUIEvent& event)
-{
-	if (checkThread && checkThread->IsRunning() )
-		event.Enable(false);
-	else
-		event.Enable(true);
-}
-
-void AppFrame::OnUpdateSimulate(wxUpdateUIEvent& event)
-{
-	if (simulateThread && simulateThread->IsRunning())
-		event.Enable(false);
-	else
-		event.Enable(true);
-}
-
-
-IntGCodeThread::~IntGCodeThread()
-{
-	wxCriticalSectionLocker enter(m_pHandler->critsect);
-	// the thread is being destroyed; make sure not to leave dangling pointers around
-	m_pHandler->checkThread = NULL;
-	if(pexec) delete pexec;
-	if(plogger) delete plogger;
-	if(ppret) delete ppret;
-}
-
-
-wxThread::ExitCode IntGCodeThread::Entry()
-{
-	if (ppret)
-	{
-		if (!ppret->open_nc_file(fname.c_str()))
-		{
-			plogger->log(LOG_ERROR, _("Can not open file: %s"), fname.c_str() );
-			return NULL;
-		}
-		ppret->execute_file();
-	}
-	plogger->log(LOG_INFORMATIONSUM, _("Feed Lenght: %f"), pexec->get_feed_len());
-	plogger->log(LOG_INFORMATIONSUM, _("Traverce Lenght: %f"), pexec->get_traverce_len());
-	plogger->log(LOG_INFORMATIONSUM, _("X Min: %f X Max %f"), pexec->getBox().Min.x, pexec->getBox().Max.x);
-	plogger->log(LOG_INFORMATIONSUM, _("Y Min: %f Y Max %f"), pexec->getBox().Min.y, pexec->getBox().Max.y);
-	plogger->log(LOG_INFORMATIONSUM, _("Z Min: %f Z Max %f"), pexec->getBox().Min.z, pexec->getBox().Max.z);
-
-	wxQueueEvent(m_pHandler, new wxThreadEvent(wxEVT_THREAD, CHECK_GCODE_COMPLETE));
-	return NULL;
-}
-
-
-SimulateGCodeThread::~SimulateGCodeThread()
-{
-	wxCriticalSectionLocker enter(m_pHandler->critsect);
-	// the thread is being destroyed; make sure not to leave dangling pointers around
-	
-	m_pHandler->m_view->setTrack( getTack() );
-	m_pHandler->m_view->setBox(getBox());
-
-	m_pHandler->simulateThread = NULL;
-	if (pexec) delete pexec;
-	if (plogger) delete plogger;
-	if (ppret) delete ppret;
-}
-
-
-wxThread::ExitCode SimulateGCodeThread::Entry()
-{
-	if (ppret)
-	{
-		if (!ppret->open_nc_file(fname.c_str()))
-		{
-			plogger->log(LOG_ERROR, _("Can not open file: %s"), fname.c_str());
-			return NULL;
-		}
-		ppret->execute_file();
-	}
-	//output stat
-
-	wxQueueEvent(m_pHandler, new wxThreadEvent(wxEVT_THREAD, CHECK_SIMULATE_COMPLETE));
-	return NULL;
-}
-
-
-
-wxString AppFrame::GetText()
-{
-	if (m_edit)
-		return m_edit->GetText();
-	else
-		return wxString();
-}
-
-void AppFrame::OnThreadCompletion(wxThreadEvent&)
-{
-	logwnd->Append(MSLInfo, _("Checking completed"));
-}
-
-void AppFrame::OnThreadUpdate(wxThreadEvent &ev)
-{
-	// convert from ILogerr Error Code to LogWindow error 
-	MsgStatusLevel lvl = (MsgStatusLevel)ev.GetInt();
-	int linen = static_cast<int>(ev.GetExtraLong());
-	logwnd->Append(lvl, ev.GetString(), linen, true );
-}
-
-void AppFrame::OnSimulateUpdate(wxThreadEvent &ev)
-{
-	logwnd->Append(MSLInfo, ev.GetString());
-}
-
-void AppFrame::OnSimulateCompletion(wxThreadEvent&)
-{
-	//drea
-	wxCriticalSectionLocker enter(critsect);
-	if (simulateThread && m_view )
-	{
-		m_view->setTrack(simulateThread->getTack());
-		m_view->setBox(simulateThread->getBox());
-	}
-}
-
-wxString AppFrame::GetSavedFileName()
-{
-	if ( !DoFileSave(false, false) )
-		return wxString();
-	return m_edit->GetFilename();
-}
-
-void  AppFrame::OnCheck(wxCommandEvent &event)
-{
-	wxString fname = GetSavedFileName();
-	if (fname.empty())
-		return;	
-	logwnd->Clear();
-	if (m_edit->GetFileType() == FILETYPE_NC)
-	{
-		checkThread = new IntGCodeThread(this, fname);
-		if (checkThread->Run() != wxTHREAD_NO_ERROR)
-		{
-			wxLogError("Can't create the thread!");
-			delete checkThread;
-			checkThread = NULL;
-		}
-	}
-	else if (m_edit->GetFileType() == FILETYPE_GCMC)
-	{
-		DoConvertGcmc(ConvertGcmcNothing);
-	}
-}
-
-void  AppFrame::OnSimulate(wxCommandEvent &event)
-{
-	wxString fname = GetSavedFileName();
-	if (fname.empty())
-		return;
-	logwnd->Clear();
-
-	if (m_edit->GetFileType() == FILETYPE_NC)
-	{
-		DoSimulate( fname.c_str() );
-	}
-	else if (m_edit->GetFileType() == FILETYPE_GCMC)
-	{
-		DoConvertGcmc( ConvertGcmcRunSimilate );
-	}
-}
-
-
-bool AppFrame::CheckFileExist(const wchar_t *fname)
-{
-	if ( StandartPaths::Get()->CheckFileExist(fname) )
-		return true;
-
-	wxString inf = wxString::Format("File %s not found.", fname );
-	logwnd->Append(MSLError, inf);
-	return false;
-
-}
-
-// Source format:
-// FILENAME:LINE:CHAR: ERRORTYPE: MSG\n
-// ERRORTYPE = { "error", "internal error", "fatal","warning"  }
-//or just
-// MSG \n
-
-void AppFrame::AppendGcmcError(wxString &src)
-{
-	bool formated = false;
-	size_t colon1 = wxString::npos, colon2 = wxString::npos, colon3 = wxString::npos, colon4 = wxString::npos;
-	if ((colon1 = src.find(':', 0)) != wxString::npos)
-	{
-		if ((colon2 = src.find(':', colon1 + 1)) != wxString::npos)
-		{
-			if ((colon3 = src.find(':', colon2 + 1)) != wxString::npos)
-			{
-				if ((colon4 = src.find(':', colon3 + 1)) != wxString::npos)
-				{
-					formated = true;
-				}
-			}
-		}
-	}
-	if (!formated)
-	{
-		logwnd->Append(MSLError, src);
-	}
-	else
-	{
-		std::wstring output;
-		std::wstring tmp;
-		std::filesystem::path path = src.SubString(0, colon1).wc_str();
-		if (path.has_filename())
-		{
-			output = L"File: ";
-			output += path.filename();
-			output += L" ";
-		}
-		tmp = src.SubString(colon1 + 1, colon2).wc_str();
-		int linen = _wtoi(tmp.c_str());
-		tmp = src.SubString(colon3 + 2, colon4).wc_str(); // Erro type
-		MsgStatusLevel lvl = MSLError;
-		if (tmp.compare(L"warning") == 0)
-			lvl = MSLWarning;
-
-		output += src.Mid(colon4 + 1).wc_str(); // get message
-		logwnd->Append(lvl, output.c_str(),linen);
-	}
-
-}
-
-
-int AppFrame::RunGcmc(const wchar_t *src_fname, const  wchar_t *dst_fname, const wchar_t *args, DoAfterConvertGcmc what_to_do)
-{
-
-	logwnd->Clear();
-	// cheks files
-	if (!CheckFileExist(src_fname))
-		return 1;
-	
-	wxExecuteEnv env;
-	
-	env.cwd = StandartPaths::Get()->GetDirFromFName(src_fname).c_str();
-	// get file name without path
-	std::filesystem::path src_fname_no_path = std::filesystem::path(src_fname).filename();
-	std::filesystem::path dst_fname_no_path;
-
-	if (StandartPaths::Get()->GetDirFromFName(dst_fname).compare(env.cwd) == 0)
-		dst_fname_no_path = std::filesystem::path(dst_fname).filename();
-	else
-		dst_fname_no_path = dst_fname;
-
-
-	wxString arg = StandartPaths::Get()->GetExecutablePath( L"gcmc_vc.exe" ).c_str();
-
-	if (!CheckFileExist(arg))
-		return 1;
-
-	arg += " -o ";
-	arg += dst_fname_no_path.c_str();
-	arg += " ";
-	if (args)
-		arg += args;
-	arg += " ";
-	arg += src_fname_no_path.c_str();
-
-	wxArrayString output;
-	wxArrayString errors;
-
-	
-#if 0 
-	logwnd->Append(MSLInfo, L"Start converting...");
-	logwnd->Append(MSLInfo, arg.c_str());
-	int code = wxExecute(arg, output, errors, wxEXEC_SYNC | wxEXEC_HIDE_CONSOLE, &env);
-	for (size_t i = 0; i < errors.Count(); ++i)
-	{
-		AppendGcmcError(errors[i]);
-	}
-
-	wxString inf = wxString::Format("Process terminated with exit code %d", code);
-	logwnd->Append(code == 0 ? MSLInfo : MSLError, inf);
-	
-	return code;
-#endif
-
-	if (gcmcProcess)
-	{
-		logwnd->Append(MSLInfo, _("gcmc_vc.exe already running"));
-		return 1;
-	}
-	logwnd->Append(MSLInfo, _("Start converting..."));
-	logwnd->Append(MSLInfo, arg.c_str());
-
-	if (m_timer.IsRunning())
-		m_timer.Stop();
-
-	gcmc_running_in_sec = 0;
-	m_timer.Start(1000);
-
-
-	gcmcProcess = new GcmcProcess(this, dst_fname, what_to_do);
-	int code = wxExecute(arg, wxEXEC_ASYNC| wxEXEC_HIDE_CONSOLE | wxEXEC_NODISABLE, gcmcProcess, &env);
-	return code;
-
-}
-
-
-
-
-void AppFrame::GcmcProcessTerminated(int status, const wchar_t *dst_fname, DoAfterConvertGcmc what_to_do)
-{
-
-	if (gcmcProcess)
-	{
-		gcmc_running_in_sec = 0;
-		m_timer.Stop();
-		wxString inf = wxString::Format(_("Process terminated with exit code %d"), status);
-		logwnd->Append(status == 0 ? MSLInfo : MSLError, inf);
-		if (status == 0)
-		{
-			if (what_to_do == ConvertGcmcOpenFile)
-				FileOpen(dst_fname);
-			else if (what_to_do == ConvertGcmcPasteFile)
-				m_edit->PasteFile(dst_fname) ;
-			else if (what_to_do == ConvertGcmcRunSimilate)
-				DoSimulate(dst_fname);
-		}
-		delete gcmcProcess;
-		gcmcProcess = NULL;
-	}
-}
-
-int AppFrame::DoConvertGcmc(DoAfterConvertGcmc what_to_do)
-{
-	wxString src_fname = m_edit->GetFilename();
-	if (src_fname.IsEmpty())
-		return 1;
-	wxString dst_fname = src_fname.BeforeLast('.');
-	if (dst_fname.IsEmpty())
-		dst_fname = src_fname;
-	dst_fname += wxString(".nc");
-
-	return RunGcmc(src_fname, dst_fname, 0, what_to_do);
-}
-
-
 void AppFrame::OnConvertGcmc(wxCommandEvent &event)
 {
-	if (!DoFileSave(false, false))
+	wxWindow *wnd = m_notebook->GetCurrentPage();
+	FilePage *panel = dynamic_cast<FilePage *>(wnd);
+	if (panel && !panel->DoFileSave(false, false) )
 		return;
 
-	DoConvertGcmc(ConvertGcmcOpenFile);
+//DoConvertGcmc(ConvertGcmcOpenFile);
 	
 }
 
 
 void AppFrame::OnUpdateConvertGcmc(wxUpdateUIEvent& event)
 {
-	//event.Enable(m_edit->GetFileType() == FILETYPE_GCMC);
+	//event.Enable(pedit->GetFileType() == FILETYPE_GCMC);
 	event.Enable(true);
 }
 
 void AppFrame::OnKillGcmcProcess(wxCommandEvent &event)
 {
-	if (gcmcProcess)
-		wxKill(gcmcProcess->GetPid(), wxSIGKILL, NULL, wxKILL_CHILDREN);
+//	if (gcmcProcess)
+	//	wxKill(gcmcProcess->GetPid(), wxSIGKILL, NULL, wxKILL_CHILDREN);
 }
 
 void AppFrame::OnUpdateKillGcmcProcess(wxUpdateUIEvent& event)
 {
-	event.Enable(gcmcProcess ? true : false);
+//	event.Enable(gcmcProcess ? true : false);
 }
 
 
-void AppFrame::DoSimulate(const wchar_t *fname)
+
+
+
+void AppFrame::CreateWatcher()
 {
+	if (m_watcher)
+		return;
 
-	if (simulateThread == NULL)
+	m_watcher = new wxFileSystemWatcher();
+	m_watcher->SetOwner(this);
+	// Add Preferences catalog	
+	std::filesystem::path prefpath = StandartPaths::Get()->GetPreferencesPath();
+	wxFileName fn = wxFileName::DirName(prefpath.c_str());
+	m_watcher->AddTree(fn);
+	// Add macros catalog
+	fn = wxFileName::DirName(StandartPaths::Get()->GetMacrosPath().c_str());
+	m_watcher->AddTree(fn);
+
+
+	Bind(wxEVT_FSWATCHER, &AppFrame::OnFileSystemEvent, this);
+	if (m_dirtree)
+		m_dirtree->SetWatcher(m_watcher);
+
+}
+
+void AppFrame::UpdatePreferences()
+{
+	Preferences::Get()->Read();
+
+	size_t n = m_notebook->GetPageCount();
+	for (size_t i = 0; i < n; ++i)
 	{
-		simulateThread = new SimulateGCodeThread(this, fname);
-		if (simulateThread->Run() != wxTHREAD_NO_ERROR)
+		if (m_notebook->GetPage(i)->IsKindOf(CLASSINFO(FilePage)))
 		{
-			logwnd->Append(MSLError, _("Can't create the thread to run simulate"));
-			delete simulateThread;
-			simulateThread = NULL;
-
+			FilePage *pEdit = dynamic_cast<FilePage *>(m_notebook->GetPage(i));
+			pEdit->GetEdit()->UpdatePreferences();	
+			if ( m_notebook->GetSelection() == i )
+				pEdit->Refresh(false);
 		}
 	}
+	return;
+}
+void AppFrame::UpdateMacroses()
+{	
+	m_macroses->Init();
+	// TODO update MenuBar
+	wxMenuBar *m_menuBar = GetMenuBar();
+	int n = m_menuBar->FindMenu(_("Insert"));
+	if (n == wxNOT_FOUND)
+		return;
+	wxMenu *insertMenu = m_menuBar->GetMenu(n);
+	while (insertMenu->GetMenuItemCount() )
+	{
+		insertMenu->Delete(insertMenu->FindItemByPosition(0));
+	}
+	CreateMacrosesMenu(insertMenu);
 }
 
 
+void AppFrame::OnFileSystemEvent(wxFileSystemWatcherEvent& event)
+{
+	
+	wxFileName prefpath = wxFileName::DirName(StandartPaths::Get()->GetPreferencesPath().c_str());
+	wxFileName macrospath = wxFileName::DirName(StandartPaths::Get()->GetMacrosPath().c_str());
+	wxString s = event.GetPath().GetPath();
+	if (s == prefpath.GetPath())
+	{
+		UpdatePreferences();
+	}
+	else if (s == macrospath.GetPath())
+	{
+		UpdateMacroses();
+	}
+
+	if (m_dirtree) 
+		m_dirtree->GetEventHandler()->ProcessEvent(event);
+}

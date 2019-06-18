@@ -16,6 +16,7 @@ enum MsgStatusLevel
 class LogWindow : public wxSimpleHtmlListBox
 {
 public:
+	LogWindow(wxEvtHandler *_handler);
 	LogWindow(wxWindow *parent, wxEvtHandler *_handler, wxWindowID id);
 	~LogWindow();
 	void Append(MsgStatusLevel lvl, const wchar_t *str, int linen = 0, bool update = false);

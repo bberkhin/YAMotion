@@ -7,6 +7,8 @@
 #include "configdata.h"
 #include "standartpaths.h"
 #include "environmentsimple.h"
+#include "prefs.h"
+#include "them.h"
 
 /// RUNCH
 
@@ -17,6 +19,9 @@
 
 #include "..\..\src\stc\scintilla\lexlib\LexerModule.h"
 #include "..\..\src\stc\scintilla\src\Catalogue.h"
+
+
+#include "wx/univ/theme.h"
 
 //============================================================================
 // implementation
@@ -37,10 +42,10 @@ wxEND_EVENT_TABLE()
 
 
 // language data
-const wxLanguage g_langIds[] =
-{
-	wxLANGUAGE_DEFAULT,
-	wxLANGUAGE_RUSSIAN,
+const wxLanguage g_langIds[] =  
+{	
+	wxLANGUAGE_DEFAULT,	
+	wxLANGUAGE_RUSSIAN,	
 	wxLANGUAGE_FRENCH,
 /*
 	wxLANGUAGE_ITALIAN,
@@ -65,10 +70,10 @@ const wxLanguage g_langIds[] =
 
 // note that it makes no sense to translate these strings, they are
 // shown before we set the locale anyhow
-const wxString g_langNames[] =
-{
-	"English",
-	"Russian",
+const wxString g_langNames[] = 
+{	
+	"English",	
+	"Russian",	
 	"French",
 /*
 	"Italian",
@@ -96,8 +101,14 @@ wxCOMPILE_TIME_ASSERT(WXSIZEOF(g_langNames) == WXSIZEOF(g_langIds),
 
 const int g_lang_count = WXSIZEOF(g_langNames);
 
+App::App() 
+	: m_restart(false), m_frame(NULL)
+{ 
+}
+
 App::~App()
 {
+
 	if (m_restart)
 	{
 		// argv[0] contains the full path to the executable
@@ -183,6 +194,10 @@ bool App::OnInit()
 		}
 	}
 	
+	Preferences::Get()->Read();
+
+	//delete wxTheme::Get();
+	//wxTheme::Set(new YATheme());
 
 	m_frame = new AppFrame(APP_NAME);
 	// open application frame
@@ -217,4 +232,9 @@ bool App::GetUptadeInfo(wxString &out)
 const char *gcode_gettext(const char *s)
 {	
 	return wxGetTranslation(s);
+}
+
+void  App::OnEventLoopEnter(wxEventLoopBase* WXUNUSED(loop))
+{
+	m_frame->CreateWatcher();
 }
