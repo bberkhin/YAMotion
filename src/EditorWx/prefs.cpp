@@ -42,6 +42,7 @@ Preferences::Preferences() : m_artprovider(0), m_tabartprovider(0)
 		false, // longLineOnEnable
 		false, // whiteSpaceEnable
 		false, // visibleHSB
+		false, // enableLogExecution
 		4,//tabWidth
 		"", // gcmc_sybatx;
 		"", //nc_syntax
@@ -101,6 +102,7 @@ LanguageInfo  *Preferences::FindByName(const wxString &name, bool init)
 	{  return p.GetName() == name; });
 
 	LanguageInfo &ln = (it == m_languages.end()) ? m_languages[0] : (*it);
+	
 	if (init)
 		ln.Init();
 	return  &ln;
@@ -170,6 +172,7 @@ bool Preferences::DoRead(const wxString& fileName, bool errifnoexist )
 	root["longLineOn"].AsBool(m_common.longLineOnEnable);
 	root["whiteSpace"].AsBool(m_common.whiteSpaceEnable);
 	root["visibleHSB"].AsBool(m_common.visibleHSB);
+	root["enableLogExecution"].AsBool(m_common.enableLogExecution);
 
 	root["tabWidth"].AsInt(m_common.tabWidth);
 	
@@ -304,8 +307,8 @@ void LanguageInfo::InitDef()
 			AddStyle(SCE_GCMC_STRING, "GREEN", "", "", 10, true, 0);
 		break;
 		case FILETYPE_JSON:
-			AddStyle(SCE_JSON_DEFAULT, "BLACK", "", "", 10, 0, 0);
-			AddStyle(SCE_JSON_NUMBER, "BLACK", "", "", 10, true, 0);
+			AddStyle(SCE_JSON_DEFAULT, "WHITE", "", "", 10, 0, 0);
+			AddStyle(SCE_JSON_NUMBER, "WHITE", "", "", 10, true, 0);
 			AddStyle(SCE_JSON_STRING, "GREEN", "", "", 10, true, 0); 
 			AddStyle(SCE_JSON_STRINGEOL, "GRAY", "", "", 10, true, 0);
 			AddStyle(SCE_JSON_PROPERTYNAME, "BROWN", "", "", 10, true, 0);
@@ -407,10 +410,14 @@ bool  LanguageInfo::Match(const wxString &fname)
 	wxString filepattern = m_filepattern;
 	while (!filepattern.empty())
 	{
+		
 		wxString cur = filepattern.BeforeFirst(';');
+		cur.Trim(true);
+		cur.Trim(false);
 		if ((cur == fname) ||
 			(cur == (fname.BeforeLast('.') + ".*")) ||
-			(cur == ("*." + fname.AfterLast('.')))) {
+			(cur == ("*." + fname.AfterLast('.')))) 
+		{
 			return true;
 		}
 		filepattern = filepattern.AfterFirst(';');

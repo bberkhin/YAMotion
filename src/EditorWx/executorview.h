@@ -2,7 +2,7 @@
 
 #include "logconsole.h"
 #include <vector>
-#include "CoordMotion.h"
+//#include "CoordMotion.h"
 
 
 struct TrackPoint
@@ -32,6 +32,6 @@ protected:
 private:
 	ILogger *logger;
 	std::vector<TrackPoint> trj;
-	CCoordMotion *pcm;
+	//CCoordMotion *pcm;
 };
 

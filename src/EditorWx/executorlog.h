@@ -25,7 +25,6 @@ public:
 	void log_string(int type, int linen, const char *s);
 private:
 	wxEvtHandler *handler;
-
 };
 
 

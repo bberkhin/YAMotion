@@ -74,17 +74,20 @@ public:
 	virtual ~FilePage();
 	void UpdateThemeColor();
 	Edit *GetEdit() { return m_editor->GetEdit(); }
-	View3D *Get3D() { return m_view3d->Get3D(); }
-	LogWindow *GetLogWnd() { return m_logwn->GetLogWnd(); }
+	View3D *Get3D() { return m_view3d ? m_view3d->Get3D() : NULL; }
+	LogWindow *GetLogWnd() { return m_logwn ? m_logwn->GetLogWnd() : NULL; }
+	Worker * GetWorker() { return m_worker; }
 	void Check();
 	void Draw3D();
 	void ConvertGcmc();
+	void ConvertGcmc(const wchar_t *src_fname, const  wchar_t *dst_fname, const wchar_t *args);
 	void UpdateStatistics(const ConvertGCMCInfo &dt);
+	wxString GetSavedFileName();
+	bool DoFileSave(bool askToSave, bool bSaveAs);
 	
 	void ShowLog(); 
 	void HideLog();
-	bool DoFileSave(bool askToSave, bool bSaveAs);
-private:
+private:	
 	EditorPanel *m_editor;
 	View3DPanel *m_view3d;
 	LogPane *m_logwn;

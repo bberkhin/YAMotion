@@ -12,6 +12,8 @@
 #include "edit.h"    
 #include "logwindow.h"
 #include "configdata.h"
+#include "app.h"          //for upadte title :(
+#include "appframe.h"     //for upadte title :(
 
 
 
@@ -88,11 +90,12 @@ wxBoxSizer *EditorPanel::CreateHeaderPanel()
 	
 	wxString label;
 	int ftype = m_pedit->GetFileType();
+	
 	switch (ftype)
 	{
-	case FILETYPE_NC:	label = _("GCODE"); break;
-	case FILETYPE_GCMC:	label = _("GCMC"); break;
-	case FILETYPE_JSON: label = _("JSON"); break;
+		case FILETYPE_NC:	label = _("GCODE"); break;
+		case FILETYPE_GCMC:	label = _("GCMC"); break;
+		case FILETYPE_JSON: label = _("JSON"); break;
 	}
 	if ( !label.empty() )
 	{
@@ -384,15 +387,17 @@ FilePage::FilePage(wxWindow *parent, int filetype, const wxString &filename, boo
 	m_view3d = 0;
 
 	m_worker = new Worker(this);
-	m_splitter = new wxSplitterWindow(this);
+
+		
+	m_splitter = new wxSplitterWindow( this,-1, wxDefaultPosition,wxDefaultSize, wxSP_LIVE_UPDATE);
+	
 
 	m_splitter->SetSize(GetClientSize());
 	m_splitter->SetSashGravity(1.0);
-
-	m_editor = new EditorPanel(m_splitter,this, filetype, filename, isnew);	
-	//m_editor->SetEventHandler(this);
+	m_editor = new EditorPanel(m_splitter,this, filetype, filename, isnew);		
 	m_logwn = new LogPane(m_splitter,this );
-	//m_logwn->SetEventHandler(this);
+	
+	
 	
 	m_logwn->Show(false);
 	m_splitter->Initialize(m_editor);
@@ -402,8 +407,14 @@ FilePage::FilePage(wxWindow *parent, int filetype, const wxString &filename, boo
 	int ftype = m_editor->GetEdit()->GetFileType();
 	if ((ftype == FILETYPE_NC) || (ftype == FILETYPE_GCMC))
 	{
+//		wxSplitterWindow *splitMain = new wxSplitterWindow(this, -1, wxDefaultPosition, wxDefaultSize, 0);
+	//	splitMain->SetSize(GetClientSize());
+		//splitMain->SetSashGravity(1.0);
+		//m_splitter->Reparent(splitMain);
+		//m_view3d = new View3DPanel(splitMain);
+		//splitMain->SplitVertically(m_splitter, m_view3d);
+
 		totalpane = new wxGridSizer(2);
-		//totalpane->Add(m_editor, 0, wxEXPAND);
 		totalpane->Add(m_splitter, 0, wxEXPAND);
 		m_view3d = new View3DPanel(this);
 		totalpane->Add(m_view3d, 1, wxEXPAND);
@@ -411,7 +422,7 @@ FilePage::FilePage(wxWindow *parent, int filetype, const wxString &filename, boo
 	else
 	{
 		totalpane = new wxGridSizer(1);
-		totalpane->Add(m_editor, wxEXPAND, wxEXPAND);
+		totalpane->Add(m_splitter, 0, wxEXPAND);
 	}
 
 	UpdateThemeColor();
@@ -426,24 +437,60 @@ FilePage::~FilePage()
 
 void FilePage::Draw3D()
 {
-	ShowLog();
+	if (m_worker->IsRunning())
+		return;
+
+	if (!DoFileSave(false, false))
+		return;
+	// we don't show log here it will be shown automatically if error occure
 	m_worker->Draw3D();
 }
 
 
 void FilePage::Check()
 {
+	if (m_worker->IsRunning())
+		return;
+
+	if (!DoFileSave(false, false))
+		return;
+
 	ShowLog();
 	m_worker->Check();
 }
 
-
+void FilePage::ConvertGcmc(const wchar_t *src_fname, const  wchar_t *dst_fname, const wchar_t *args)
+{
+	if (m_worker->IsRunning())
+		return;
+	ShowLog();
+	m_worker->RunGcmc(src_fname, dst_fname, args, ConvertGcmcPasteFile);
+}
 
 void FilePage::ConvertGcmc()
 {
+	if (m_worker->IsRunning())
+		return;
+
+	if (!DoFileSave(false, false))
+		return;
+
 	ShowLog();
 	m_worker->DoConvertGcmc(ConvertGcmcOpenFile);
 }
+
+
+wxString FilePage::GetSavedFileName()
+{
+	if (!DoFileSave(false, false))
+		return wxString();
+
+	Edit *pedit = GetEdit();
+	return  pedit ? pedit->GetFileName() : wxString();
+}
+
+
+
 
 void FilePage::UpdateThemeColor()
 {
@@ -522,5 +569,8 @@ bool FilePage::DoFileSave(bool askToSave, bool bSaveAs)
 			return false;
 		}
 	}
+	
+	wxGetApp().GetFrame()->UpdateTitle(this);
+
 	return true;
 }

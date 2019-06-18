@@ -92,7 +92,8 @@ wxBEGIN_EVENT_TABLE (AppFrame, wxFrame)
     EVT_MENU (wxID_SAVE,             AppFrame::OnFileSave)
     EVT_MENU (wxID_SAVEAS,           AppFrame::OnFileSaveAs)
     EVT_MENU (wxID_CLOSE,            AppFrame::OnFileClose)
-	EVT_MENU_RANGE(wxID_FILE, wxID_FILE9, AppFrame::OnOpenLastFile)
+	EVT_MENU_RANGE(wxID_FILE, wxID_FILE9, AppFrame::OnOpenLastFile)	
+	EVT_MENU_RANGE(ID_MACROSFIRST, ID_MACROSLAST, AppFrame::OnMacros)
 	EVT_MENU (ID_MACROSES,			 AppFrame::OnMacroses)
 	EVT_MENU(ID_MATHCALC,			 AppFrame::OnMathCalc)
 	EVT_MENU(ID_MATHEXPRESSION, AppFrame::OnMathExpression)
@@ -164,20 +165,11 @@ AppFrame::AppFrame (const wxString &title)
 	m_notebook_theme = 0;
 	m_dirtree = 0;
 	m_watcher = 0;
+	m_macroses = new Macroses();
 
     SetIcon(wxICON(sample));
-
-	
-	
-
-	
-	// initialize important variables
-
-    // set icon and background
     SetTitle (APP_NAME);
     //SetBackgroundColour ("GREEN");
-
-
 	ConfigData *config;
 	if ((config = dynamic_cast<ConfigData *>(wxConfigBase::Get())) != NULL)
 		config->ReadFileNames();
@@ -199,11 +191,12 @@ AppFrame::AppFrame (const wxString &title)
 		Left().Layer(1).Position(1).
 		CloseButton(false).MaximizeButton(false).CaptionVisible(false));
 
-	
+	/*
 	wxAuiToolBar *toolBar = CreateToolBar();
 	m_mgr.AddPane(toolBar, wxAuiPaneInfo().
 		Name("tb").Caption("Standart commands").
 		ToolbarPane().Top().Row(1));
+	*/
 
 	m_mgr.Update();
 	
@@ -224,6 +217,9 @@ AppFrame::~AppFrame ()
 
 	if (m_watcher)
 		delete m_watcher;
+	
+	if (m_macroses)
+		delete m_macroses;
 }
 
 class StubNotebook : public wxAuiNotebook
@@ -254,24 +250,6 @@ wxAuiNotebook* AppFrame::CreateNotebook()
 	ctrl->SetArtProvider(Preferences::Get()->GetTabArtProvider());
 	ctrl->SetBackgroundColour(Preferences::Get()->GetStdColor(ColourScheme::WINDOW));
 	return ctrl;
-}
-
-Edit *AppFrame::GetActiveFile()
-{
-	wxWindow *wnd = m_notebook->GetCurrentPage();
-	FilePage *panel = dynamic_cast<FilePage *>(wnd);
-	if (panel)
-		return panel->GetEdit();
-	return 0;
-}
-
-View3D *AppFrame::GetActive3DView()
-{
-	wxWindow *wnd = m_notebook->GetCurrentPage();
-	FilePage *panel = dynamic_cast<FilePage *>(wnd);
-	if (panel)
-		return panel->Get3D();
-	return 0;
 }
 
 
@@ -455,7 +433,7 @@ void AppFrame::OnFileNew(wxCommandEvent &event)
 	DoNewFile(file_type, wxEmptyString, event.GetClientData() != NULL );
 }
 
-void AppFrame::DoNewFile(int file_type, const wxString &defpath, bool closeWelcome, const wxString &contextFile)
+FilePage *AppFrame::DoNewFile(int file_type, const wxString &defpath, bool closeWelcome, const wxString &contextFile)
 {
 	wxFileName defPath;
 	defPath.AssignDir(defpath);
@@ -488,6 +466,8 @@ void AppFrame::DoNewFile(int file_type, const wxString &defpath, bool closeWelco
 
 	if (closeWelcome)
 		HideWelcome();
+
+	return pedit;
 }
 
 // file event handlers
@@ -592,7 +572,7 @@ void AppFrame::OnFileSave (wxCommandEvent &WXUNUSED(event))
 	FilePage *panel = dynamic_cast<FilePage *>(wnd);
 	if (panel)
 		panel->DoFileSave( false, false );
-    UpdateTitle();
+    //UpdateTitle();
 }
 
 void AppFrame::OnFileSaveAs(wxCommandEvent &WXUNUSED(event))
@@ -601,7 +581,7 @@ void AppFrame::OnFileSaveAs(wxCommandEvent &WXUNUSED(event))
 	FilePage *panel = dynamic_cast<FilePage *>(wnd);
 	if (panel)
 		panel->DoFileSave(false, true);
-	UpdateTitle();
+	//UpdateTitle();
 }
 
 void AppFrame::OnFileClose (wxCommandEvent &event) 
@@ -634,37 +614,58 @@ void AppFrame::OnUserPreferences(wxCommandEvent &WXUNUSED(event))
 
 void AppFrame::OnMacroses(wxCommandEvent &WXUNUSED(event))
 {
-	Edit *pedit = GetActiveFile();
-    if (!pedit) return;
 	
-    //EditProperties dlg(pedit, 0);
-	Macroses msc;
-	MacrosesDlg dlg(&msc, this);	
-	int indx = dlg.GetSelected();
-	if (indx < 0 || indx >= msc.count() )
-		return;
-	
-	MacrosDesc &desc = msc.get(indx);
+	MacrosesDlg dlg(m_macroses, this);
+	DoRunMacros( dlg.GetSelected() );
+}
 
+void AppFrame::OnMacros(wxCommandEvent &event)
+{
+	DoRunMacros(event.GetId() - ID_MACROSFIRST);
+}
+
+void AppFrame::DoRunMacros(int indx)
+{
+
+	if (indx < 0 || indx >= m_macroses->Count())
+		return;
+
+	MacrosDesc &desc = m_macroses->Get(indx);
 	MacrosParamDlg dlgparam(&desc, this);
 	if (dlgparam.ShowModal() != wxID_OK)
 		return;
 
-
-
-	wxString  args = msc.build_commad_line(indx);
-
-	std::wstring src_fname = StandartPaths::Get()->GetMacrosPath( desc.gcmcfile.c_str() );
+	wxString  args = m_macroses->BuildCommandLine(indx);
+	std::wstring src_fname = StandartPaths::Get()->GetMacrosPath(desc.gcmcfile.c_str());
 	std::wstring dst_fname = StandartPaths::Get()->GetTemporaryPath(L"tmp.nc");
+
+	FilePage *panel = 0;
+	if (!dlgparam.IsInNewWindow())
+	{
+		wxWindow *wnd = m_notebook->GetCurrentPage();
+		panel = dynamic_cast<FilePage *>(wnd);		
+	}
+	else
+	{
+		panel = DoNewFile(FILETYPE_NC, wxEmptyString, true);
+	}
+
+	if (!panel)
+		return;
+
+	panel->ConvertGcmc(src_fname.c_str(), dst_fname.c_str(), args.c_str());
 	
-//	RunGcmc(src_fname.c_str(), dst_fname.c_str(), args.c_str(), dlgparam.IsInNewWindow() ? ConvertGcmcNewFile : ConvertGcmcPasteFile);
 }
 
 
 void AppFrame::DoMathCalc( DoMathBase &mth )
 {
+	Edit *pedit = 0;
+	wxWindow *wnd = m_notebook->GetCurrentPage();
+	FilePage *panel = dynamic_cast<FilePage *>(wnd);
+	if (panel)
+		pedit = panel->GetEdit();
 
-	Edit *pedit = GetActiveFile();
 	if (!pedit)
 		return;
 
@@ -712,11 +713,13 @@ void AppFrame::DoMathCalc( DoMathBase &mth )
 // properties event handlers
 void AppFrame::OnMathCalc(wxCommandEvent &WXUNUSED(event))
 {
-	Edit *pedit = GetActiveFile();
-	if (!pedit)
-		return;
 
-	//EditProperties dlg(pedit, 0);
+	Edit *pedit = 0;
+	FilePage *panel = dynamic_cast<FilePage *>(m_notebook->GetCurrentPage());
+	if (panel)
+		pedit = panel->GetEdit();
+
+
 	DoMathSimple mth;
 	MathSimpleDlg dlg(&mth, this, pedit->HasSelection() );
 	if (dlg.ShowModal() != wxID_OK)
@@ -727,9 +730,14 @@ void AppFrame::OnMathCalc(wxCommandEvent &WXUNUSED(event))
 // properties event handlers
 void AppFrame::OnMathExpression(wxCommandEvent &WXUNUSED(event))
 {
-	Edit *pedit = GetActiveFile();
-	if (!pedit)
-		return;
+
+
+	Edit *pedit = 0;
+	FilePage *panel = dynamic_cast<FilePage *>(m_notebook->GetCurrentPage());
+	if (panel)
+		pedit = panel->GetEdit();
+
+
 	try
 	{
 		DoMathExpression mth;
@@ -755,7 +763,11 @@ void AppFrame::OnMathExpression(wxCommandEvent &WXUNUSED(event))
 // edit events
 void AppFrame::OnEdit (wxCommandEvent &event) 
 {
-	Edit *pedit = GetActiveFile();
+	Edit *pedit = 0;
+	FilePage *panel = dynamic_cast<FilePage *>(m_notebook->GetCurrentPage());
+	if (panel)
+		pedit = panel->GetEdit();
+
     if (pedit) 
 		pedit->GetEventHandler()->ProcessEvent (event);
 }
@@ -763,7 +775,12 @@ void AppFrame::OnEdit (wxCommandEvent &event)
 
 void AppFrame::On3DView(wxCommandEvent &event)
 {
-	View3D *view = AppFrame::GetActive3DView();
+	View3D *view = 0;
+	wxWindow *wnd = m_notebook->GetCurrentPage();
+	FilePage *panel = dynamic_cast<FilePage *>(wnd);
+	if (panel)
+		view = panel->Get3D();
+
 	if (view)
 		view->GetEventHandler()->ProcessEvent(event);
 }
@@ -771,7 +788,13 @@ void AppFrame::On3DView(wxCommandEvent &event)
 
 void AppFrame::On3DViewUpdate(wxUpdateUIEvent& event)
 {
-	View3D *view = AppFrame::GetActive3DView();
+	View3D *view = 0;
+	wxWindow *wnd = m_notebook->GetCurrentPage();
+	FilePage *panel = dynamic_cast<FilePage *>(wnd);
+	if (panel)
+		view = panel->Get3D();
+
+
 	if (view)
 		view->GetEventHandler()->ProcessEvent(event);
 }
@@ -839,9 +862,7 @@ wxMenuBar *AppFrame::CreateMenu ()
     menuFile->Append (wxID_EXIT, _("&Quit\tCtrl+Q"));
 	
 	// Edit menu
-
-
-	
+	   	
 	// change case submenu
 	wxMenu *menuChangeCase = new wxMenu;
 	menuChangeCase->Append(ID_CHANGEUPPER, _("&Upper case"));
@@ -868,6 +889,11 @@ wxMenuBar *AppFrame::CreateMenu ()
 	menuEdit->AppendSeparator();
 	menuEdit->Append(ID_CHANGECASE, _("Change &case to .."), menuChangeCase);
   	
+	// Macrosos
+	wxMenu *insertMenu = new wxMenu;
+	CreateMacrosesMenu(insertMenu);
+	
+/*
 	// View menu
     wxMenu *menuView = new wxMenu;
     //menuView->Append (ID_HIGHLIGHTLANG, _("&Highlight language .."), menuHighlight);
@@ -879,7 +905,7 @@ wxMenuBar *AppFrame::CreateMenu ()
     menuView->AppendSeparator();
 	menuView->FindChildItem(ID_LINENUMBER)->Check(true);
 
-	// Edit menu
+	// GCode menu
 	wxMenu *menuGCode = new wxMenu;
 	menuGCode->Append(ID_GCODE_CHECK, _("&Check"));
 	menuGCode->Append(ID_GCODE_SIMULATE, _("&Simulate"));
@@ -909,7 +935,7 @@ wxMenuBar *AppFrame::CreateMenu ()
 	menu3D->Append(ID_SEMULATE_START, _("&Start Simulate"));
 	menu3D->Append(ID_SEMULATE_PAUSE,_("Sto&p Simulate"));
 	menu3D->Append(ID_SEMULATE_STOP, _("Pause"));
-	
+*/	
 	// Pregerences menu
 	wxMenu *menuPref = new wxMenu;
 	menuPref->Append(ID_PROPERTIES, _("Proper&ties ..\tCtrl+I"));
@@ -920,20 +946,31 @@ wxMenuBar *AppFrame::CreateMenu ()
     wxMenu *menuHelp = new wxMenu;
 	menuHelp->Append(ID_DOWNLOADUPDATE, _("&Download ..\tCtrl+D"));
     menuHelp->Append (wxID_ABOUT, _("&About ..\tCtrl+D"));
-	
-	
-	
+		
 
     // construct menu
     m_menuBar->Append (menuFile, _("&File"));
     m_menuBar->Append (menuEdit, _("&Edit"));
-    m_menuBar->Append (menuView, _("&View"));
-	m_menuBar->Append(menuGCode, _("&GCode"));
-	m_menuBar->Append(menu3D, _("&3DView"));
+	m_menuBar->Append(insertMenu, _("&Insert"));
+  //  m_menuBar->Append (menuView, _("&View"));
+//	m_menuBar->Append(menuGCode, _("&GCode"));
+//	m_menuBar->Append(menu3D, _("&3DView"));
 	m_menuBar->Append(menuPref, _("Preferences"));
     m_menuBar->Append (menuHelp, _("&Help"));    
 	return m_menuBar;
 
+}
+
+void AppFrame::CreateMacrosesMenu(wxMenu *menuInsert)
+{
+	int nmsc = m_macroses->Count();
+	for (int i = 0; i < nmsc && i < NUM_MENU_MACROS; ++i)
+	{
+		MacrosDesc &md = m_macroses->Get(i);
+		menuInsert->Append(ID_MACROSFIRST + i, md.name.c_str());
+	}
+	menuInsert->AppendSeparator();
+	menuInsert->Append(ID_MACROSES, _("All Macroses..."));
 }
 
 
@@ -949,7 +986,7 @@ wxAuiToolBar *AppFrame::CreateToolBar()
 	toolBar->AddTool(wxID_UNDO, wxEmptyString, wxBitmap(undo_xpm), _("Cut"));
 	toolBar->AddTool(wxID_REDO, wxEmptyString, wxBitmap(redo_xpm), _("Cut"));
 	toolBar->AddSeparator();
-	toolBar->AddTool(ID_PROPERTIES, wxEmptyString, wxBitmap(cut_xpm), _("Macroses"));
+	toolBar->AddTool(ID_PROPERTIES, wxEmptyString, wxBitmap(cut_xpm), _("Properies"));
 	toolBar->AddTool(wxID_COPY, wxEmptyString, wxBitmap(copy_xpm), _("Copy"));
 	toolBar->AddTool(wxID_PASTE, wxEmptyString, wxBitmap(paste_xpm), _("Paste"));
 	toolBar->AddSeparator();
@@ -1007,12 +1044,31 @@ void AppFrame::FileOpen (wxString fname)
 }
 
 
+void AppFrame::UpdateTitle(FilePage *page)
+{
+	size_t n = m_notebook->GetPageCount();
+	for (size_t i = 0; i < n; ++i)
+	{
+		if (m_notebook->GetPage(i)->IsKindOf(CLASSINFO(FilePage)))
+		{
+			if (page == dynamic_cast<FilePage *>(m_notebook->GetPage(i)))
+			{
+				UpdateTitle(i);
+				return;
+			}
+		}
+	}
+}
+
+
+
 void AppFrame::UpdateTitle(size_t nPage )
 {
 	if (nPage == wxNOT_FOUND)
 		nPage = m_notebook->GetSelection();
 	if (nPage == wxNOT_FOUND)
 		return;
+
 	FilePage *pedit = dynamic_cast<FilePage *>(m_notebook->GetPage(nPage));
 	if (!pedit)
 		return;
@@ -1039,20 +1095,6 @@ wxRect AppFrame::DeterminePrintSize ()
 
     return rect;
 }
-
-
-
-
-wxString AppFrame::GetText()
-{
-	Edit *pedit = GetActiveFile();
-	if (pedit)
-		return pedit->GetText();
-	else
-		return wxString();
-}
-
-
 
 void AppFrame::OnConvertGcmc(wxCommandEvent &event)
 {
@@ -1094,11 +1136,14 @@ void AppFrame::CreateWatcher()
 
 	m_watcher = new wxFileSystemWatcher();
 	m_watcher->SetOwner(this);
-	// Add Preferences catalog
-	
+	// Add Preferences catalog	
 	std::filesystem::path prefpath = StandartPaths::Get()->GetPreferencesPath();
 	wxFileName fn = wxFileName::DirName(prefpath.c_str());
 	m_watcher->AddTree(fn);
+	// Add macros catalog
+	fn = wxFileName::DirName(StandartPaths::Get()->GetMacrosPath().c_str());
+	m_watcher->AddTree(fn);
+
 
 	Bind(wxEVT_FSWATCHER, &AppFrame::OnFileSystemEvent, this);
 	if (m_dirtree)
@@ -1116,23 +1161,43 @@ void AppFrame::UpdatePreferences()
 		if (m_notebook->GetPage(i)->IsKindOf(CLASSINFO(FilePage)))
 		{
 			FilePage *pEdit = dynamic_cast<FilePage *>(m_notebook->GetPage(i));
-			pEdit->GetEdit()->UpdatePreferences();			
+			pEdit->GetEdit()->UpdatePreferences();	
+			if ( m_notebook->GetSelection() == i )
+				pEdit->Refresh(false);
 		}
 	}
-	if (GetActiveFile())
-		GetActiveFile()->Refresh(false);
-	return ;
+	return;
 }
+void AppFrame::UpdateMacroses()
+{	
+	m_macroses->Init();
+	// TODO update MenuBar
+	wxMenuBar *m_menuBar = GetMenuBar();
+	int n = m_menuBar->FindMenu(_("Insert"));
+	if (n == wxNOT_FOUND)
+		return;
+	wxMenu *insertMenu = m_menuBar->GetMenu(n);
+	while (insertMenu->GetMenuItemCount() )
+	{
+		insertMenu->Delete(insertMenu->FindItemByPosition(0));
+	}
+	CreateMacrosesMenu(insertMenu);
+}
+
 
 void AppFrame::OnFileSystemEvent(wxFileSystemWatcherEvent& event)
 {
 	
 	wxFileName prefpath = wxFileName::DirName(StandartPaths::Get()->GetPreferencesPath().c_str());
-	wxString s1 = event.GetPath().GetPath();
-	wxString s2 = prefpath.GetPath();
-	if ( event.GetPath().GetPath() == prefpath.GetPath() )
+	wxFileName macrospath = wxFileName::DirName(StandartPaths::Get()->GetMacrosPath().c_str());
+	wxString s = event.GetPath().GetPath();
+	if (s == prefpath.GetPath())
 	{
 		UpdatePreferences();
+	}
+	else if (s == macrospath.GetPath())
+	{
+		UpdateMacroses();
 	}
 
 	if (m_dirtree) 

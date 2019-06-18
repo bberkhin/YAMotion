@@ -541,6 +541,7 @@ bool Edit::InitializePrefs (const LanguageInfo * language)
 	StyleSetBackground(wxSTC_STYLE_DEFAULT, clrs->Get(ColourScheme::WINDOW));
 	StyleSetBackground(wxSTC_STYLE_INDENTGUIDE, clrs->Get(ColourScheme::WINDOW));
 
+#if 1
     // initialize settings
     if (common_prefs.syntaxEnable) 
 	{
@@ -575,6 +576,7 @@ bool Edit::InitializePrefs (const LanguageInfo * language)
         }
     }
 
+#endif
     // set margin as unused
     SetMarginType (m_DividerID, wxSTC_MARGIN_SYMBOL);
     SetMarginWidth (m_DividerID, 0);

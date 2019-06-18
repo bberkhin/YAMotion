@@ -83,7 +83,6 @@ enum DoAfterConvertGcmc
 	ConvertGcmcNothing,
 	ConvertGcmcOpenFile,
 	ConvertGcmcPasteFile,
-	ConvertGcmcNewFile,
 	ConvertGcmc3DDraw
 };
 
@@ -119,6 +118,7 @@ public:
 	void  Draw3D();
 	int DoConvertGcmc(DoAfterConvertGcmc what_to_do);
 	LogWindow *GetLogWnd();
+	int RunGcmc(const wchar_t *src_fname, const  wchar_t *dst_fname, const wchar_t *args, DoAfterConvertGcmc what_to_do);
 
 protected:
 	//proccessing messages
@@ -129,11 +129,9 @@ protected:
 	void OnTimer(wxTimerEvent &event);
 private:
 	void Do3DDraw(const wchar_t *fname);
-	wxString GetSavedFileName();
 	void AppendGcmcError(wxString &src);
 	void GcmcProcessTerminated(int status, const wchar_t *dst_fname, DoAfterConvertGcmc what_to_do);
 	bool CheckFileExist(const wchar_t *fname);
-	int RunGcmc(const wchar_t *src_fname, const  wchar_t *dst_fname, const wchar_t *args, DoAfterConvertGcmc what_to_do);
 	void SendEvnToFrame(wxEventType commandType, const wchar_t *str,int i = - 1);
 private:
 

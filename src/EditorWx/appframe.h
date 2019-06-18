@@ -8,9 +8,8 @@
 class DoMathBase;
 class DirPane;
 class DropFileOpen;
-class View3D;
-class Edit;
-
+class Macroses;
+class FilePage;
 //----------------------------------------------------------------------------
 //! frame of the application APP_VENDOR-APP_NAME.
 class AppFrame : public wxFrame 
@@ -49,6 +48,8 @@ public:
 	void OnUserPreferences(wxCommandEvent &event);
 	//! dialogs
 	void OnMacroses(wxCommandEvent &event);
+	void OnMacros(wxCommandEvent &event);
+	
 	void OnMathCalc(wxCommandEvent &event);
 	void OnMathExpression(wxCommandEvent &event);
 	//! edit events
@@ -76,9 +77,9 @@ public:
 	void OnFileSystemEvent(wxFileSystemWatcherEvent& event);
 	void CreateWatcher();
 
-	wxString GetText();
+	void UpdateTitle(FilePage *page);
 	void UpdateTitle(size_t npage = wxNOT_FOUND);
-	void DoNewFile(int file_type, const wxString &defpath, bool closeWelcome, const wxString &contextFile = wxEmptyString);
+	FilePage *DoNewFile(int file_type, const wxString &defpath, bool closeWelcome, const wxString &contextFile = wxEmptyString);
 	void FileOpen(wxString fname);
 
 private:
@@ -89,11 +90,12 @@ private:
 	void HideWelcome();
 	wxAuiNotebook* CreateNotebook();
 	wxAuiToolBar *CreateToolBar();
-	Edit *GetActiveFile();
-	View3D *GetActive3DView();
+	void CreateMacrosesMenu(wxMenu *menuInsert);
 	void UpdatePreferences();
+	void UpdateMacroses();
 	wxMenuBar *CreateMenu();
 	wxRect DeterminePrintSize();
+	void DoRunMacros(int idx);
 	
 private:
 	// edit object
@@ -103,6 +105,7 @@ private:
 	wxAuiNotebook *m_notebook;
 	long m_notebook_style;
 	long m_notebook_theme;
+	Macroses *m_macroses;
 	
 	wxDECLARE_EVENT_TABLE();
 };

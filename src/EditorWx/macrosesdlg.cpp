@@ -60,9 +60,9 @@ void MacrosesDlg::InitList()
 	wxArrayString arrays;
 
 	int pos = 0;
-	for (int i = 0; i < msc->count(); i++)
+	for (int i = 0; i < msc->Count(); i++)
 	{
-		arrays.Add(msc->get(i).name);
+		arrays.Add(msc->Get(i).name);
 	}
 	if ( arrays.Count() )
 	{
@@ -74,7 +74,7 @@ void MacrosesDlg::InitList()
 void MacrosesDlg::OnLboxSelect(wxCommandEvent& event)
 {
 	selection = list->GetSelection();
-	ptext->SetLabel( msc->get(selection).desc.c_str() );
+	ptext->SetLabel( msc->Get(selection).desc.c_str() );
 }
 
 void MacrosesDlg::OnLboxDClick(wxCommandEvent& event)

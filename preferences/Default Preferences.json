@@ -10,6 +10,7 @@
   "whiteSpace": false,
   "tabWidth": 4,
   "visibleHSB": true,
+  "enableLogExecution": false,
   "theme_syntax": "them_black.json",
   "files": [
     {

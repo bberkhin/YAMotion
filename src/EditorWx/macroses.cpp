@@ -33,7 +33,7 @@ static bool toMBstring(const wchar_t *s, std::string & out)
 
 Macroses::Macroses()
 {
-	init();
+	Init();
 }
 
 
@@ -56,11 +56,11 @@ static void scan_xml_files(const std::filesystem::path &dirpath, std::map<std::w
 	}
 }
 
-void Macroses::init()
+void Macroses::Init()
 {
 	std::map<std::wstring, std::filesystem::path> namesList;
 	std::string errmsg;
-	mcrs.clear();
+	m_mcrs.clear();
 	try
 	{
 		std::filesystem::path dirpath = StandartPaths::Get()->GetMacrosPath();
@@ -156,7 +156,7 @@ void Macroses::parse_file(const wchar_t *path)
 					read_arguments(cn, mdesc);
 				}
 			}
-			mcrs.push_back(mdesc);
+			m_mcrs.push_back(mdesc);
 		}
 	}
 
@@ -215,11 +215,11 @@ void Macroses::read_arguments(xml_nodew *node, MacrosDesc &mdesc)
 		
 }
 
-std::wstring Macroses::build_commad_line(int indx)
+std::wstring Macroses::BuildCommandLine(int indx)
 {
 	std::wstring arg;
 	std::wstring tmp;
-	MacrosDesc &mdesc = get(indx);
+	MacrosDesc &mdesc = Get(indx);
 	//std::pair<std::string, ArgumntDesc> itt;
 	//itt.first
 	arg = L"-q"; // do not use prologue\epilogue

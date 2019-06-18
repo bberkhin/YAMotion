@@ -30,7 +30,8 @@ CheckGCodeThread::CheckGCodeThread(Worker *woker, const wxString &fname_)
 {
 
 	m_woker = woker;
-	pexec = new ExecutorLogWnd(m_woker, true);
+	Preferences *pref = Preferences::Get();	
+	pexec = new ExecutorLogWnd(m_woker, pref->Common().enableLogExecution);
 	plogger = new LoggerWnd(m_woker);
 	ppret = new GCodeInterpreter(wxGetApp().GetEnvironment(), pexec, plogger);
 
@@ -237,15 +238,11 @@ void  Worker::Check()
 	if (IsRunning())
 		return;
 
-	Edit *pedit = m_fp->GetEdit();
-	if (!pedit)
-		return;
-
-	wxString fname = GetSavedFileName();
-	
+	wxString fname = m_fp->GetSavedFileName();	
 	if (fname.empty())
 		return;
-	
+
+	Edit *pedit = m_fp->GetEdit();	
 	m_fp->GetLogWnd()->Clear();
 
 	if (pedit->GetFileType() == FILETYPE_NC)
@@ -267,18 +264,13 @@ void  Worker::Check()
 
 void  Worker::Draw3D()
 {
-	if (IsRunning() )
+	if (IsRunning())
 		return;
-
-	Edit *pedit = m_fp->GetEdit();
-	if (!pedit)
-		return;
-
-
-	wxString fname = GetSavedFileName();
+	wxString fname = m_fp->GetSavedFileName();
 	if (fname.empty())
 		return;
-
+	
+	Edit *pedit = m_fp->GetEdit();
 	m_fp->GetLogWnd()->Clear();
 
 	if (pedit->GetFileType() == FILETYPE_NC)
@@ -313,15 +305,6 @@ LogWindow *Worker::GetLogWnd()
 	return m_fp->GetLogWnd(); 
 }
 
-wxString Worker::GetSavedFileName()
-{
-	if (!m_fp->DoFileSave(false, false))
-		return wxString();
-
-	Edit *pedit = m_fp->GetEdit();
-	return  pedit ? pedit->GetFileName() : wxString();
-}
-
 
 void Worker::OnCheckGCodeCompletion(GCMCConversionEvent &ev)
 {
@@ -336,6 +319,8 @@ void Worker::OnCheckGCodeUpdate(wxThreadEvent &ev)
 	MsgStatusLevel lvl = (MsgStatusLevel)ev.GetInt();
 	int linen = static_cast<int>(ev.GetExtraLong());
 	GetLogWnd()->Append(lvl, ev.GetString(), linen, true);
+	if (lvl == LOG_ERROR)
+		m_fp->ShowLog(); // it can be hide for 3d draw
 }
 
 void Worker::OnDraw3DUpdate(wxThreadEvent &ev)
@@ -523,10 +508,10 @@ void Worker::GcmcProcessTerminated(int status, const wchar_t *dst_fname, DoAfter
 					if (pedit != NULL)
 						pedit->PasteFile(dst_fname);
 					break;
-				case ConvertGcmcNewFile:	
-					//SendEvnToFrame(FILE_NEW_EVENT, dst_fname, FILETYPE_NC);
-					wxGetApp().GetFrame()->DoNewFile(FILETYPE_NC, wxEmptyString, true, dst_fname);
-					break;
+				//case ConvertGcmcNewFile:	
+				//	//SendEvnToFrame(FILE_NEW_EVENT, dst_fname, FILETYPE_NC);
+				//	wxGetApp().GetFrame()->DoNewFile(FILETYPE_NC, wxEmptyString, true, dst_fname);
+				//	break;
 				case ConvertGcmc3DDraw:
 					Do3DDraw(dst_fname);
 					break;
