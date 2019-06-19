@@ -1,6 +1,7 @@
 #pragma once
 
 #include "workingthreads.h"
+#include <wx/sashwin.h>
 
 class FilePage;
 class Edit;
@@ -25,13 +26,14 @@ private:
 	wxDECLARE_EVENT_TABLE();
 };
 
+#define View3DPanelBase wxSashWindow//wxPanel
 
 class View3D;
-class View3DPanel : public wxPanel
+class View3DPanel : public View3DPanelBase//wxSashWindow//wxPanel
 {
 	wxDECLARE_ABSTRACT_CLASS(View3DPanel);
 public:
-	View3DPanel(wxWindow *parent);
+	View3DPanel(wxWindow *parent, FilePage *fb);
 	virtual ~View3DPanel();	
 	void UpdateThemeColor();	
 	View3D *Get3D() { return m_pview; }
@@ -40,8 +42,11 @@ protected:
 	wxBoxSizer *CreateHeaderPanel();
 	wxSizer *CreateFooterPanel();
 	void SetValue(int id, const double &val);
+	void OnClose(wxCommandEvent& ev);
+
 private:
 	View3D *m_pview;
+	FilePage *m_fp;
 	wxDECLARE_EVENT_TABLE();
 };
 
@@ -87,12 +92,20 @@ public:
 	
 	void ShowLog(); 
 	void HideLog();
+	void Hide3D();
+	void Show3D();
+
+	void DoLayout(const wxSize &sz = wxDefaultSize);
+
+	void OnSize(wxSizeEvent& event);
+	void OnSashDrag(wxSashEvent& event);
 private:	
 	EditorPanel *m_editor;
 	View3DPanel *m_view3d;
 	LogPane *m_logwn;
 	wxSplitterWindow *m_splitter;
 	Worker *m_worker;
+	int m_view3dsize;
 
 private:
 	wxDECLARE_EVENT_TABLE();
