@@ -348,13 +348,28 @@ LogPane::LogPane(wxWindow *parent, FilePage *fb)
 	header->Add(padd, 0, wxRIGHT);
 
 
-	wxBoxSizer *totalpane = new wxBoxSizer(wxVERTICAL);
+
 	m_plog = new LogWindow(this, m_fb, wxID_ANY);
 	m_plog->SetWindowStyle(m_plog->GetWindowStyle() | wxNO_BORDER);
-	
+	FlatScrollBar *barv = new FlatScrollBar(this, m_plog, wxID_ANY);
+	FlatScrollBar *barh = 0;
+	//if (common_prefs.visibleHSB)
+		//barh = new FlatScrollBar(this, m_pedit, wxID_ANY, FlatScrollBar::typeHorisontal);
 
+	m_plog->SetVScrollBar(barv);
+
+	wxFlexGridSizer  *gd = new wxFlexGridSizer(2);// 2, 0, 0);
+	gd->AddGrowableCol(0);
+	gd->AddGrowableRow(0);
+	gd->Add(m_plog, wxEXPAND, wxEXPAND);
+	gd->Add(barv, 0, wxEXPAND);
+	if (barh)
+		gd->Add(barh, 0, wxEXPAND);
+
+		
+	wxBoxSizer *totalpane = new wxBoxSizer(wxVERTICAL);
 	totalpane->Add(header, 0, wxEXPAND);
-	totalpane->Add(m_plog, wxEXPAND, wxEXPAND); //wxEXPAND
+	totalpane->Add(gd, wxEXPAND, wxEXPAND); //wxEXPAND
 	
 	SetSizerAndFit(totalpane);
 	UpdateThemeColor();

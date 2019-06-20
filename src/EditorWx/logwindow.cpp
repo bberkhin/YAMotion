@@ -21,13 +21,26 @@ LogWindow::LogWindow(wxWindow *parent, wxEvtHandler *_handler, wxWindowID id )
 	: handler(_handler) , wxSimpleHtmlListBox(parent, id, wxDefaultPosition, wxDefaultSize,
 		0, NULL, 0)
 {
+	m_vScrollBar = 0;
 	SetClientDataType(wxClientData_Object);
+	SetWindowStyle( GetWindowStyle() & (~(wxVSCROLL | wxHSCROLL)));
 }
 
 
 LogWindow::~LogWindow()
 {
 }
+
+void LogWindow::SetVScrollBar(wxScrollBar *barv)
+{
+	m_vScrollBar = barv;
+}
+
+void LogWindow::SetHScrollBar(wxScrollBar *bar)
+{
+	m_hScrollBar = bar;
+}
+
 
 void LogWindow::Append(MsgStatusLevel lvl, const wchar_t *str, int linen, bool update )
 {
@@ -51,6 +64,61 @@ void LogWindow::Append(MsgStatusLevel lvl, const wchar_t *str, int linen, bool u
 	if (update)
 		Update();
 }
+
+
+
+void LogWindow::SetScrollbar(int orient, int pos, int thumbvisible, int range, bool refresh)
+{
+	if (m_vScrollBar && orient != wxHORIZONTAL)
+		m_vScrollBar->SetScrollbar(pos, thumbvisible, range, thumbvisible, refresh);
+	else if (m_hScrollBar && orient == wxHORIZONTAL)
+		m_hScrollBar->SetScrollbar(pos, thumbvisible, range, thumbvisible, refresh);
+	else
+		wxSimpleHtmlListBox::SetScrollbar(orient, pos, thumbvisible, range, refresh);
+}
+void LogWindow::SetScrollPos(int orient, int pos, bool refresh)
+{
+	if (m_vScrollBar && orient != wxHORIZONTAL)
+		m_vScrollBar->SetThumbPosition(pos);
+	else if (m_hScrollBar && orient == wxHORIZONTAL)
+		m_hScrollBar->SetThumbPosition(pos);
+	else
+		wxSimpleHtmlListBox::SetScrollPos(orient, pos,refresh);
+}
+int LogWindow::GetScrollPos(int orient) const
+{
+	if (m_vScrollBar && orient != wxHORIZONTAL)
+		return m_vScrollBar->GetThumbPosition();
+	else if (m_hScrollBar && orient == wxHORIZONTAL)
+		return m_hScrollBar->GetThumbPosition();
+	else
+		return wxSimpleHtmlListBox::GetScrollPos(orient);
+}
+int LogWindow::GetScrollThumb(int orient) const
+{
+	if (m_vScrollBar && orient != wxHORIZONTAL)
+		return m_vScrollBar->GetThumbSize();
+	else if (m_hScrollBar && orient == wxHORIZONTAL)
+		return m_hScrollBar->GetThumbSize();
+	else
+		return wxSimpleHtmlListBox::GetScrollThumb(orient);
+}
+int LogWindow::GetScrollRange(int orient) const
+{
+	if (m_vScrollBar && orient != wxHORIZONTAL)
+		return m_vScrollBar->GetRange();
+	else if (m_hScrollBar && orient == wxHORIZONTAL)
+		return m_hScrollBar->GetRange();
+	else
+		return wxSimpleHtmlListBox::GetScrollRange(orient);
+}
+// scroll window to the specified position
+void LogWindow::ScrollWindow(int dx, int dy, const wxRect* rect)
+{
+	wxSimpleHtmlListBox::ScrollWindow(dx, dy, rect);
+}
+
+
 
 
 
