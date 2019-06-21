@@ -457,7 +457,6 @@ void Edit::UpdatePreferences()
 	// margin
 	m_LineNrMargin = TextWidth(wxSTC_STYLE_LINENUMBER, "_99999");
 	m_FoldingMargin = 16;
-	//InitializePrefs (g_LanguagePrefs[0].name);
 
 	// set visibility
 	SetVisiblePolicy(wxSTC_VISIBLE_STRICT | wxSTC_VISIBLE_SLOP, 1);
@@ -482,6 +481,8 @@ void Edit::UpdatePreferences()
 
 	CallTipSetBackground(clrs->Get(ColourScheme::CALLTIP));
 	CallTipSetForeground(clrs->Get(ColourScheme::CALLTIP_TEXT));
+	SetCaretForeground(clrs->Get(ColourScheme::WINDOW_TEXT));
+
 	SetMouseDwellTime(2000);
 
 	SetUseHorizontalScrollBar(common_prefs.visibleHSB);

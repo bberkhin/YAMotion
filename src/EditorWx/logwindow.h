@@ -27,6 +27,7 @@ public:
 	void OnLboxSelect(wxCommandEvent& event);
 	void OnLboxDClick(wxCommandEvent& event);
 	void OnKeyDown(wxKeyEvent &event);
+	void OnScroll(wxScrollEvent& evt);
 	void Clear();
 
 	virtual bool CanScroll(int orient) const { return true; }

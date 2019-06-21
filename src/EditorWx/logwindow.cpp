@@ -7,6 +7,7 @@ wxBEGIN_EVENT_TABLE(LogWindow, wxSimpleHtmlListBox)
 
 EVT_LISTBOX(wxID_ANY, LogWindow::OnLboxSelect)
 EVT_LISTBOX_DCLICK(wxID_ANY, LogWindow::OnLboxDClick)
+EVT_SCROLL(LogWindow::OnScroll)
 EVT_KEY_DOWN(LogWindow::OnKeyDown)
 
 wxEND_EVENT_TABLE()
@@ -41,6 +42,16 @@ void LogWindow::SetHScrollBar(wxScrollBar *bar)
 	m_hScrollBar = bar;
 }
 
+void LogWindow::OnScroll(wxScrollEvent& evt) 
+{
+	wxScrollBar* sb = wxDynamicCast(evt.GetEventObject(), wxScrollBar);
+	if (sb) {
+		if (sb->IsVertical())
+			this->DoScrollToUnit(evt.GetPosition());
+		//else
+			//m_swx->DoHScroll(evt.GetEventType(), evt.GetPosition());
+	}
+}
 
 void LogWindow::Append(MsgStatusLevel lvl, const wchar_t *str, int linen, bool update )
 {
