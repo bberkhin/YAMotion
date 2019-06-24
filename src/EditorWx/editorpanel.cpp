@@ -15,13 +15,24 @@
 #include "app.h"          //for upadte title :(
 #include "appframe.h"     //for upadte title :(
 
+#define MAX_BTN_PRIORITY 1101
+enum
+{
+	ID_TO3DBUTTON = 100,
+	ID_TOGCODEBUTTON,
+	ID_CHECKBUTTON,
+	ID_CLOSEOUTPUT,
+	ID_CLOSE3DVIEW,
+	ID_BTN_TOP,
+	ID_BTN_ISOMETRIC,
+	ID_BTN_BOTTOM,
+	ID_BTN_LEFT,
+	ID_BTN_RIGHT,
+	ID_BTN_FRONT,
+	ID_BTN_BACK,
+	ID_BTN_OTHER
+};
 
-
-#define ID_TO3DBUTTON 100
-#define ID_TOGCODEBUTTON 101
-#define ID_CHECKBUTTON 102
-#define ID_CLOSEOUTPUT 103
-#define ID_CLOSE3DVIEW 104
 enum
 {
 	ID_CTRL_MINX = 150,
@@ -182,8 +193,15 @@ void EditorPanel::OnCheckButton(wxCommandEvent& WXUNUSED(ev))
 				
 }
 
+#define EVT_BUTTON_RANGE(id1, id2, func) wx__DECLARE_EVT2(wxEVT_BUTTON, id1, id2,wxCommandEventHandler(func))
+
+
 wxBEGIN_EVENT_TABLE(View3DPanel, View3DPanelBase)
 	EVT_BUTTON(ID_CLOSE3DVIEW, View3DPanel::OnClose)
+	EVT_BUTTON_RANGE(ID_BTN_TOP, ID_BTN_BACK, View3DPanel::OnStandartView)
+	EVT_MENU_RANGE(ID_BTN_TOP, ID_BTN_BACK,  View3DPanel::OnStandartView)
+	EVT_BUTTON(ID_BTN_OTHER, View3DPanel::OnMenuView)
+
 wxEND_EVENT_TABLE()
 
 wxIMPLEMENT_ABSTRACT_CLASS(View3DPanel, wxSashWindow);
@@ -239,35 +257,130 @@ void View3DPanel::UpdateThemeColor()
 }
 
 
+class PriorityData : public wxObject
+{
+public:
+	PriorityData(int pr) : m_priority(pr), wxObject() { }
+	int GetPriority() {return m_priority; }
+private:
+	int m_priority;
+
+};
+class PriorityBoxSizer : public wxBoxSizer
+{
+public:
+	PriorityBoxSizer() : wxBoxSizer(wxHORIZONTAL) { }
+	void AddButton(wxWindow *win, int priorirty, bool right = false)
+	{
+		Add(win, 0, wxALIGN_CENTRE_VERTICAL | (right ? wxRight : wxLEFT), 0, new PriorityData(priorirty) );
+	}
+	void AddButtonSpacer(int size, int priorirty)
+	{
+		Add(size, size, 0,0,0, new PriorityData(priorirty));
+	}
+
+	protected:
+		void RecalcSizes();
+
+};
+
+void PriorityBoxSizer::RecalcSizes()
+{
+	if (m_children.empty())
+		return;
+	const wxCoord totalMajorSize = GetSizeInMajorDir(m_size);
+
+	// declare loop variables used below:
+	wxSizerItemList::const_reverse_iterator i;  // iterator in m_children list
+
+	// First, inform item about the available size in minor direction as this
+	// can change their size in the major direction. Also compute the number of
+	// visible items and sum of their min sizes in major direction.
+
+	int minMajorSize = 0;
+	for (i = m_children.rbegin(); i != m_children.rend(); ++i)
+	{		
+		wxSizerItem * const item = *i;
+		item->Show(true);
+		minMajorSize += GetSizeInMajorDir(item->GetMinSizeWithBorder());
+	}
+	
+	if (totalMajorSize < minMajorSize)
+	{
+		std::multimap<int, wxSizerItem *> prioroty_map;
+		for (i = m_children.rbegin(); i != m_children.rend(); ++i)
+		{
+			wxSizerItem * const item = *i;
+			PriorityData *p = dynamic_cast<PriorityData *>(item->GetUserData());
+			if (p)
+				prioroty_map.insert(std::make_pair(p->GetPriority(), item));
+		}
+		int cur_priority = -1;
+		for (auto it  = prioroty_map.begin(); it != prioroty_map.end(); ++it)
+		{
+			if (cur_priority != -1 && cur_priority != it->first)
+				break;
+			wxSizerItem * const item = it->second;
+			minMajorSize -= GetSizeInMajorDir(item->GetMinSizeWithBorder());
+			item->Show(false);
+			if (totalMajorSize > minMajorSize)
+			{
+				if (cur_priority == -1)
+					cur_priority = it->first;				
+			}
+				
+		}
+	}
+	else
+	{
+		//everithing in the bar remove ... button
+		for (i = m_children.rbegin(); i != m_children.rend(); ++i)
+		{
+			wxSizerItem * const item = *i;
+			PriorityData *p = dynamic_cast<PriorityData *>(item->GetUserData());
+			if (p && p->GetPriority() == MAX_BTN_PRIORITY)
+				item->Show(false);
+		}
+
+	}
+	wxBoxSizer::RecalcSizes();
+}
+
+
+#define APPEND_BUTTOM(id,label,pr,sh)  pbtn = new FlatButton(this, id, label); \
+								 header->AddButtonSpacer(5,pr); \
+								 pbtn->Show(sh);\
+								 header->AddButton(pbtn, pr)
+
+								
 wxBoxSizer *View3DPanel::CreateHeaderPanel()
 {
-	//wxPanel *pHeader = new wxPanel(this);
-	wxBoxSizer *totalpane = new wxBoxSizer(wxHORIZONTAL);
-	//totalpane->AddSpacer(10);
-	wxStaticText *txt = new wxStaticText(this, wxID_ANY, _("3D View"));
-	totalpane->Add(txt, 1, wxALIGN_CENTRE_VERTICAL);// wxEXPAND);
+	PriorityBoxSizer *header = new PriorityBoxSizer();
+	wxStaticText *txt = new wxStaticText(this, wxID_ANY, _("3D View:"));
+	header->Add(txt, 0, wxALIGN_CENTRE_VERTICAL| wxLEFT);// wxEXPAND);
+	
+	FlatButton *pbtn;
+	APPEND_BUTTOM(ID_BTN_TOP, _("TOP"),9,true);
+	APPEND_BUTTOM(ID_BTN_ISOMETRIC, _("ISOMETRIC"),8, true);
+	APPEND_BUTTOM(ID_BTN_FRONT, _("FRONT"),5, false);
+	APPEND_BUTTOM(ID_BTN_LEFT, _("LEFT"),4, false);
+	APPEND_BUTTOM(ID_BTN_BOTTOM, _("BOTTOM"),3, false);
+	APPEND_BUTTOM(ID_BTN_RIGHT, _("RIGHT"),2, false);
+	APPEND_BUTTOM(ID_BTN_BACK, _("BACK"),1, false);
+	APPEND_BUTTOM(ID_BTN_OTHER, _("..."), MAX_BTN_PRIORITY, true);
 
-	FlatButton *p3dViewBt = new FlatButton(this, ID_TO3DBUTTON, _("Start"), ID_GCODE_SIMULATE, true);
+	//pbtn = new FlatButton(this, ID_BTN_OTHER, _("..."));//| wxBORDER_NONE); 
+	//header->AddSpacer(5);
+	//header->Add(pbtn, 0, wxALIGN_CENTRE_VERTICAL | wxLEFT);
 
-	wxBitmap bmp = wxArtProvider::GetBitmap(wxART_GOTO_LAST, wxART_OTHER, FromDIP(wxSize(16, 16)));
-	//padd->SetWindowStyle(wxBORDER_NONE);
-	p3dViewBt->SetBitmap(bmp);
-	totalpane->Add(p3dViewBt, 0, wxRIGHT);
-	totalpane->AddSpacer(10);
-
-	FlatButton *pCheckBt = new FlatButton(this, ID_CHECKBUTTON, _("Stop"), ID_GCODE_CHECK, true);
-	wxBitmap bmp1 = wxArtProvider::GetBitmap(wxART_ADD_BOOKMARK, wxART_OTHER, FromDIP(wxSize(16, 16)));
-	pCheckBt->SetBitmap(bmp1);
-	totalpane->Add(pCheckBt, 0, wxRIGHT);
-
+	header->AddStretchSpacer();
 
 	FlatButton *pClose = new FlatButton(this, ID_CLOSE3DVIEW, _("Close"));//| wxBORDER_NONE); 
 	wxBitmap bmp2 = wxArtProvider::GetBitmap(wxART_GOTO_LAST, wxART_OTHER, FromDIP(wxSize(16, 16)));
 	pClose->SetBitmap(bmp2);
-	totalpane->Add(pClose, 0, wxRIGHT);
-
-	totalpane->AddSpacer(10);
-	return totalpane;
+	header->Add(pClose, 0, wxRIGHT);
+	header->AddSpacer(10);
+	return header;
 }
 
 wxSizer *View3DPanel::CreateFooterPanel()
@@ -316,6 +429,50 @@ void View3DPanel::UpdateStatistics(const ConvertGCMCInfo &dt)
 	SetValue(ID_CTRL_TRAVERCE, dt.traverce_len);
 	
 	Layout();
+}
+
+void View3DPanel::OnStandartView(wxCommandEvent& ev)
+{
+	if (!m_pview)
+		return;
+
+	switch (ev.GetId())
+	{
+		case ID_BTN_TOP: m_pview->DoSetView(View::TOP); break;
+		case ID_BTN_ISOMETRIC: m_pview->DoSetView(View::ISOMETR); break;
+		case ID_BTN_FRONT: m_pview->DoSetView(View::FRONT); break;
+		case ID_BTN_LEFT: m_pview->DoSetView(View::LEFT); break;
+		case ID_BTN_BOTTOM: m_pview->DoSetView(View::BOTTOM); break;		
+		case ID_BTN_RIGHT: m_pview->DoSetView(View::RIGHT); break;		
+		case ID_BTN_BACK: m_pview->DoSetView(View::BACK); break;
+	};
+}
+
+#define APPEND_VIEW_MENU(id)  winBt = dynamic_cast<FlatButton *>(FindWindowById(id, this)); \
+							  if ( winBt && !winBt->IsShown() )\
+								  menu.Append(id,  winBt->GetLabel() )
+
+void View3DPanel::OnMenuView( wxCommandEvent& WXUNUSED(ev))
+{
+	wxPoint pt(0, 0);
+	wxWindow *winBt = FindWindowById(ID_BTN_OTHER, this);
+	if (winBt)
+	{
+		wxRect btnRc = winBt->GetClientRect();
+		pt = winBt->GetPosition() + btnRc.GetBottomLeft();
+	}
+	
+	
+	wxMenu menu;
+	APPEND_VIEW_MENU(ID_BTN_TOP);
+	APPEND_VIEW_MENU(ID_BTN_ISOMETRIC);
+	APPEND_VIEW_MENU(ID_BTN_FRONT);
+	APPEND_VIEW_MENU(ID_BTN_LEFT);
+	APPEND_VIEW_MENU(ID_BTN_BOTTOM);
+	APPEND_VIEW_MENU(ID_BTN_RIGHT);
+	APPEND_VIEW_MENU(ID_BTN_BACK);
+	if (menu.GetMenuItemCount() > 0 )
+		PopupMenu(&menu, pt);// ScreenToClient(event.GetPosition()));
 }
 
 void View3DPanel::OnClose(wxCommandEvent& WXUNUSED(ev))

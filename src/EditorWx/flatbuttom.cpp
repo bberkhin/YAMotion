@@ -18,7 +18,7 @@ FlatButton::FlatButton(wxWindow *parent, int id, wxString text, int cmd, bool se
 		SetCustomColor(ColourScheme::CONTROL_HOVER, ColourScheme::FRAME);
 		SetCustomColor(ColourScheme::CONTROL_PRESSED, ColourScheme::FRAME);
 	}
-
+	SetLabel(m_text);
 	SetBestClientSize();
 }
 
@@ -209,10 +209,16 @@ void FlatButton::keyReleased(wxKeyEvent& event) {}
 
 void FlatButton::SetBestClientSize() 
 {
+
 	wxClientDC dc(wxConstCast(this, FlatButton));
 	wxCoord width, height;
-	dc.GetMultiLineTextExtent(m_text, &width, &height);
+	wxFont font(GetFont());
+	if (!font.IsOk())
+		font = wxSystemSettings::GetFont(wxSYS_DEFAULT_GUI_FONT);
 
+	dc.SetFont(font);
+
+	dc.GetMultiLineTextExtent(m_text, &width, &height);
 	if (m_bitmap.IsOk())
 	{
 		// allocate extra space for the bitmap
@@ -220,8 +226,10 @@ void FlatButton::SetBestClientSize()
 		if (height < heightBmp)
 			height = heightBmp;
 
-		width += m_bitmap.GetWidth() + 3 * m_marginBmpX;
+		width += m_bitmap.GetWidth() + m_marginBmpX;
 	}
+	
+	width += 2* m_marginBmpX;
 
 	SetMinSize(wxSize(width, height));
 }

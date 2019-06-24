@@ -129,7 +129,7 @@ public:
 	void OnMouseEvent(wxMouseEvent& event);
 	void initializeGL();
 //command
-	void OnSetView(wxCommandEvent &event);
+	void DoSetView(View stdview);
 	void OnSetShow(wxCommandEvent &event);
 	void OnSemulateStart(wxCommandEvent &event);
 	void OnSemulatePause(wxCommandEvent &event);

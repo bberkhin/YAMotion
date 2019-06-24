@@ -92,13 +92,11 @@ wxBEGIN_EVENT_TABLE(View3D, wxGLCanvas)
 	EVT_PAINT(View3D::OnPaint)
 	EVT_CHAR(View3D::OnChar)
 	EVT_MOUSE_EVENTS(View3D::OnMouseEvent)
-	EVT_MENU_RANGE(ID_SETVIEWFIRST, ID_SETVIEWLAST, View3D::OnSetView)
 	EVT_MENU_RANGE(ID_SETSHOWFIRST, ID_SETSHOWLAST, View3D::OnSetShow)
 	EVT_MENU(ID_SEMULATE_START, View3D::OnSemulateStart)
 	EVT_MENU(ID_SEMULATE_PAUSE, View3D::OnSemulatePause)
 	EVT_MENU(ID_SEMULATE_STOP, View3D::OnSemulateStop)
 
-	EVT_UPDATE_UI_RANGE(ID_SETVIEWFIRST, ID_SETVIEWLAST, View3D::OnSetViewUpdate)
 	EVT_UPDATE_UI_RANGE(ID_SETSHOWFIRST, ID_SETSHOWLAST, View3D::OnSetShowUpdate)
 	EVT_UPDATE_UI(ID_SEMULATE_START, View3D::OnCmdUpdateSimulateStart)
 	EVT_UPDATE_UI(ID_SEMULATE_PAUSE, View3D::OnCmdUpdateSimulatePause)
@@ -866,13 +864,11 @@ void View3D::update_tool_coords(float x, float y, float z)
 // view
 
 
-void View3D::OnSetView(wxCommandEvent &event)
+void View3D::DoSetView(View stdview)
 {
-	camera.set_view(View(event.GetId() - ID_SETVIEWFIRST) );
+	camera.set_view(stdview);
 	Refresh(false);
 }
-
-
 
 void View3D::OnSetViewUpdate(wxUpdateUIEvent& event)
 {
