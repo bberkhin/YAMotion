@@ -15,6 +15,11 @@
 #include "app.h"          //for upadte title :(
 #include "appframe.h"     //for upadte title :(
 
+#include "bitmaps/simulate.xpm"
+#include "bitmaps/pause.xpm"
+#include "bitmaps/stop.xpm"
+
+
 #define MAX_BTN_PRIORITY 1101
 enum
 {
@@ -30,7 +35,11 @@ enum
 	ID_BTN_RIGHT,
 	ID_BTN_FRONT,
 	ID_BTN_BACK,
-	ID_BTN_OTHER
+	ID_BTN_OTHER,
+	ID_BTN_PAUSE,
+	ID_BTN_SIMULATE,
+	ID_BTN_STOP,
+	ID_SETSIMULATIONSPEED
 };
 
 enum
@@ -119,24 +128,20 @@ wxBoxSizer *EditorPanel::CreateHeaderPanel()
 	if ((ftype == FILETYPE_NC) || (ftype == FILETYPE_GCMC) )
 	{
 	
-		FlatButton *p3dViewBt = new FlatButton(this, ID_TO3DBUTTON, _("3D view"), true);
 		wxBitmap bmp = wxArtProvider::GetBitmap(wxART_GOTO_LAST, wxART_OTHER, FromDIP(wxSize(16, 16)));
-		//padd->SetWindowStyle(wxBORDER_NONE);
-		p3dViewBt->SetBitmap(bmp);
+		FlatButton *p3dViewBt = new FlatButton(this, ID_TO3DBUTTON, _("3D view"), bmp, true);
 		totalpane->Add(p3dViewBt, 0, wxRIGHT);
 		totalpane->AddSpacer(10);
 
-		FlatButton *pCheckBt = new FlatButton(this, ID_CHECKBUTTON, _("Check"), true);
 		wxBitmap bmp1 = wxArtProvider::GetBitmap(wxART_ADD_BOOKMARK, wxART_OTHER, FromDIP(wxSize(16, 16)));
-		pCheckBt->SetBitmap(bmp1);
+		FlatButton *pCheckBt = new FlatButton(this, ID_CHECKBUTTON, _("Check"), bmp1, true);
 
 		totalpane->Add(pCheckBt, 0,  wxRIGHT);
 		totalpane->AddSpacer(10);
 		if (ftype == FILETYPE_GCMC)
 		{
-			FlatButton *pConvertBt = new FlatButton(this, ID_TOGCODEBUTTON, _("Convert"), true);
-			wxBitmap bmp1 = wxArtProvider::GetBitmap(wxART_HELP_BOOK, wxART_OTHER, FromDIP(wxSize(16, 16)));
-			pConvertBt->SetBitmap(bmp1);
+			bmp1 = wxArtProvider::GetBitmap(wxART_HELP_BOOK, wxART_OTHER, FromDIP(wxSize(16, 16)));
+			FlatButton *pConvertBt = new FlatButton(this, ID_TOGCODEBUTTON, _("Convert"), bmp1, true);
 			totalpane->Add(pConvertBt, 0, wxRIGHT);
 			totalpane->AddSpacer(10);
 		}
@@ -219,8 +224,11 @@ View3DPanel::View3DPanel(wxWindow *parent, FilePage *fp) :
 	totalpane->Add(pHeader, 0, wxEXPAND);
 	totalpane->Add(m_pview, wxEXPAND, wxEXPAND);
 
+	wxSizer *pSimulate = CreateSimulationPanel();
 	wxSizer *pFooter = CreateFooterPanel();
-	totalpane->AddSpacer( FromDIP(10) );
+	//totalpane->AddSpacer( FromDIP(10) );
+	totalpane->Add(pSimulate, 0, wxEXPAND);
+	//totalpane->AddSpacer(FromDIP(10));
 	totalpane->Add(pFooter, 0, wxEXPAND);
 	
 // move all content left for sizer
@@ -272,7 +280,7 @@ public:
 	PriorityBoxSizer() : wxBoxSizer(wxHORIZONTAL) { }
 	void AddButton(wxWindow *win, int priorirty, bool right = false)
 	{
-		Add(win, 0, wxALIGN_CENTRE_VERTICAL | (right ? wxRight : wxLEFT), 0, new PriorityData(priorirty) );
+		Add(win, 0, wxALIGN_CENTRE_VERTICAL | (right ? wxRIGHT : wxLEFT), 0, new PriorityData(priorirty) );
 	}
 	void AddButtonSpacer(int size, int priorirty)
 	{
@@ -346,6 +354,35 @@ void PriorityBoxSizer::RecalcSizes()
 	wxBoxSizer::RecalcSizes();
 }
 
+wxBitmap wxAuiBitmapFromBits(const unsigned char bits[], int w, int h, const wxColour& color);
+static const unsigned char close_bits[] = {
+	 0xFF, 0xFF, 0xFF, 0xFF, 0x0F, 0xFE, 0x03, 0xF8, 0x01, 0xF0, 0x19, 0xF3,
+	 0xB8, 0xE3, 0xF0, 0xE1, 0xE0, 0xE0, 0xF0, 0xE1, 0xB8, 0xE3, 0x19, 0xF3,
+	 0x01, 0xF0, 0x03, 0xF8, 0x0F, 0xFE, 0xFF, 0xFF };
+
+
+wxBitmapButton *NewCloseButton(wxWindow *parent, int winid)
+{
+	//wxBitmapButton::NewCloseButton
+	wxCHECK_MSG(parent, NULL, wxS("Must have a valid parent"));
+	ColourScheme *clrs = Preferences::Get()->GetColorScheme();
+	
+	wxBitmap bmp  = wxAuiBitmapFromBits(close_bits, 16, 16, clrs->Get(ColourScheme::FRAME));
+	wxBitmap bmppressed = wxAuiBitmapFromBits(close_bits, 16, 16, clrs->Get(ColourScheme::WINDOW_TEXT));
+	wxBitmap bmpcurrent = wxAuiBitmapFromBits(close_bits, 16, 16, clrs->Get(ColourScheme::WINDOW_TEXT));
+
+	wxBitmapButton* const button = new wxBitmapButton(parent, winid, bmp, wxDefaultPosition, wxDefaultSize, wxBORDER_NONE);
+
+	wxSize sizeBmp = bmp.GetSize();
+	
+	button->SetBitmapPressed(bmppressed);
+	button->SetBitmapCurrent(bmpcurrent);
+
+	// The button should blend with its parent background.
+	button->SetBackgroundColour(wxColor(*wxRED));// clrs->Get(ColourScheme::WINDOW));
+	return button;
+}
+
 
 #define APPEND_BUTTOM(id,label,pr,sh)  pbtn = new FlatButton(this, id, label); \
 								 header->AddButtonSpacer(5,pr); \
@@ -368,20 +405,55 @@ wxBoxSizer *View3DPanel::CreateHeaderPanel()
 	APPEND_BUTTOM(ID_BTN_RIGHT, _("RIGHT"),2, false);
 	APPEND_BUTTOM(ID_BTN_BACK, _("BACK"),1, false);
 	APPEND_BUTTOM(ID_BTN_OTHER, _("..."), MAX_BTN_PRIORITY, true);
-
-	//pbtn = new FlatButton(this, ID_BTN_OTHER, _("..."));//| wxBORDER_NONE); 
-	//header->AddSpacer(5);
-	//header->Add(pbtn, 0, wxALIGN_CENTRE_VERTICAL | wxLEFT);
-
 	header->AddStretchSpacer();
 
-	FlatButton *pClose = new FlatButton(this, ID_CLOSE3DVIEW, _("Close"));//| wxBORDER_NONE); 
-	wxBitmap bmp2 = wxArtProvider::GetBitmap(wxART_GOTO_LAST, wxART_OTHER, FromDIP(wxSize(16, 16)));
-	pClose->SetBitmap(bmp2);
+
+
+	wxBitmapButton *pClose = NewCloseButton(this, ID_CLOSE3DVIEW);
+	//FlatButton *pClose = new FlatButton(this, ID_CLOSE3DVIEW, _("Close"));//| wxBORDER_NONE); 
+	//wxBitmap bmp2 = wxArtProvider::GetBitmap(wxART_CLOSE, wxART_OTHER, FromDIP(wxSize(16, 16)));
+	//pClose->SetBitmap(bmp2);
 	header->Add(pClose, 0, wxRIGHT);
 	header->AddSpacer(10);
 	return header;
 }
+
+//toolBar->AddTool(ID_SEMULATE_START, wxEmptyString, wxBitmap(simulate_xpm), _("simulate"));
+	//toolBar->AddTool(ID_SEMULATE_PAUSE, wxEmptyString, , _("pause"));
+	//toolBar->AddTool(ID_SEMULATE_STOP, wxEmptyString, wxBitmap(stop_xpm), _("stop"));
+
+
+wxSizer *View3DPanel::CreateSimulationPanel()
+{
+
+	wxBoxSizer *panel = new wxBoxSizer(wxVERTICAL);
+	wxBoxSizer *btns = new wxBoxSizer(wxHORIZONTAL);
+	btns->AddStretchSpacer();
+	wxBitmapButton *bbt = new wxBitmapButton(this, ID_BTN_PAUSE, wxBitmap(pause_xpm));
+	
+	//wxBitmapButton *bbt  = wxBitmapButton::NewCloseButton(this, ID_BTN_PAUSE);
+	FlatButton *bt;// = new FlatButton(this, ID_BTN_PAUSE, wxEmptyString, wxBitmap(pause_xpm));
+	btns->Add(bbt, 0, wxALIGN_CENTRE_VERTICAL);
+	bt = new FlatButton(this, ID_BTN_SIMULATE, wxEmptyString, wxBitmap(simulate_xpm));
+	btns->Add(bt, 0, wxALIGN_CENTRE_VERTICAL);
+	bt = new FlatButton(this, ID_BTN_STOP, wxEmptyString, wxBitmap(stop_xpm));
+	btns->Add(bt, 0, wxALIGN_CENTRE_VERTICAL);
+
+	btns->AddStretchSpacer();
+
+	bt = new FlatButton(this, ID_SETSIMULATIONSPEED, _("Speed: x1"));
+	wxSizerItem *szi = btns->Add(bt, 0, wxALIGN_CENTRE_VERTICAL | wxRIGHT);
+	btns->Insert(0, bt->GetMinWidth(),1 );
+	//Insert(index, size, size);
+	panel->Add(btns, 0, wxEXPAND);
+
+	wxSlider *pguage = new wxSlider(this, -1, 50, 1,100);
+	//pguage->SetValue(50);
+	panel->Add(pguage, 0, wxEXPAND);
+
+	return panel;
+}
+
 
 wxSizer *View3DPanel::CreateFooterPanel()
 {
@@ -499,9 +571,8 @@ LogPane::LogPane(wxWindow *parent, FilePage *fb)
 	header->Add(10,0);
 	header->Add(txt, 1, wxALIGN_CENTRE_VERTICAL);
 	
-	FlatButton *padd = new FlatButton(this, ID_CLOSEOUTPUT, _("Close"));//| wxBORDER_NONE); 
 	wxBitmap bmp = wxArtProvider::GetBitmap(wxART_GOTO_LAST, wxART_OTHER, FromDIP(wxSize(16, 16)));
-	padd->SetBitmap(bmp);
+	FlatButton *padd = new FlatButton(this, ID_CLOSEOUTPUT, _("Close"), bmp);//| wxBORDER_NONE); 
 	header->Add(padd, 0, wxRIGHT);
 
 

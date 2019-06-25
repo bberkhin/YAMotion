@@ -41,6 +41,7 @@ public:
 protected:
 	wxBoxSizer *CreateHeaderPanel();
 	wxSizer *CreateFooterPanel();
+	wxSizer *CreateSimulationPanel();
 	void SetValue(int id, const double &val);
 	void OnClose(wxCommandEvent& ev);
 	void OnStandartView(wxCommandEvent& ev);

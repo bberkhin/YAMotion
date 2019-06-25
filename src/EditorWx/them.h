@@ -4,8 +4,19 @@
 #include "wx/aui/dockart.h"
 #include "wx/univ/theme.h"
 #include "wx/aui/tabart.h"
+#include "wx/artprov.h"
 
 
+
+class ExArtProvider : public wxArtProvider
+{
+public:
+	ExArtProvider() : wxArtProvider() { }
+	~ExArtProvider() { }
+protected:
+	virtual wxBitmap CreateBitmap(const wxArtID& id, const wxArtClient& client, const wxSize& size) wxOVERRIDE;
+
+};
 
 
 class ThemArtProvider : public wxAuiDefaultDockArt

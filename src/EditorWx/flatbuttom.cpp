@@ -6,9 +6,31 @@
 
 
 
-FlatButton::FlatButton(wxWindow *parent, int id, wxString text, int cmd, bool setwndcolor)
-	:  m_text(text),m_cmd(cmd), m_marginBmpX(6), m_marginBmpY(4),  wxWindow(parent, id)
+FlatButton::FlatButton(wxWindow *parent, int id, const wxString &text, const wxBitmap &bmp, bool setwndcolor)
+	:  m_text(text), wxWindow(parent, id)
 {
+
+	SetLabel(m_text);
+	if (bmp.IsOk())
+		SetBitmap(bmp);
+	Init(setwndcolor);
+	
+}
+
+/*
+FlatButton::FlatButton(wxWindow *parent, int id, const wxBitmap &bmp, bool setwndcolor) 
+	: wxWindow(parent, id)
+{
+	SetBitmap(bmp);
+	Init(setwndcolor);
+}
+*/
+
+void FlatButton::Init(bool setwndcolor)
+{
+	m_cmd = -1;
+	m_marginBmpX = 6;
+	m_marginBmpY = 4;
 	m_status = statusNone;
 	m_captured = false;
 
@@ -18,7 +40,6 @@ FlatButton::FlatButton(wxWindow *parent, int id, wxString text, int cmd, bool se
 		SetCustomColor(ColourScheme::CONTROL_HOVER, ColourScheme::FRAME);
 		SetCustomColor(ColourScheme::CONTROL_PRESSED, ColourScheme::FRAME);
 	}
-	SetLabel(m_text);
 	SetBestClientSize();
 }
 

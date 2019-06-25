@@ -33,6 +33,19 @@ static const unsigned char list_bits[] = {
 wxBitmap wxAuiBitmapFromBits(const unsigned char bits[], int w, int h,	const wxColour& color);
 
 
+wxBitmap ExArtProvider::CreateBitmap(const wxArtID& id, const wxArtClient& client, const wxSize& size)
+{
+
+	ColourScheme *clrs = Preferences::Get()->GetColorScheme();	
+	wxColor clrBtn(clrs->Get(ColourScheme::WINDOW_TEXT));
+	if (id == wxART_CLOSE)
+		return wxAuiBitmapFromBits(list_bits, 16, 16,wxColor(*wxRED));
+	else
+		return wxArtProvider::CreateBitmap(id, client, size);
+}
+
+
+
 ThemArtProvider::ThemArtProvider() : wxAuiDefaultDockArt() 
 { 
 	UpdateColoursFromSystem();
@@ -182,6 +195,8 @@ void EditorTabArt::UpdateColoursFromSystem()
 	wxColor clrBtn(clrs->Get(ColourScheme::WINDOW_TEXT));
 
 	m_activeCloseBmp = wxAuiBitmapFromBits(close_bits, 16, 16, clrBtn);
+	m_disabledCloseBmp = wxAuiBitmapFromBits(close_bits, 16, 16, wxColour(128, 128, 128));
+
 	m_activeLeftBmp = wxAuiBitmapFromBits(left_bits, 16, 16, clrBtn);
 	m_activeRightBmp = wxAuiBitmapFromBits(right_bits, 16, 16, clrBtn);
 	m_activeWindowListBmp = wxAuiBitmapFromBits(list_bits, 16, 16, clrBtn);

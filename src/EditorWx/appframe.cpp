@@ -40,12 +40,6 @@
 #include "bitmaps/undo.xpm"
 #include "bitmaps/redo.xpm"
 
-#include "bitmaps/simulate.xpm"
-#include "bitmaps/pause.xpm"
-#include "bitmaps/stop.xpm"
-
-
-
 #include "environmentsimple.h"
 #include "executorlog.h"
 #include "ExecutorView.h"
@@ -160,6 +154,7 @@ AppFrame::AppFrame (const wxString &title)
 	m_mgr.SetManagedWindow(this);
 	m_mgr.SetArtProvider( Preferences::Get()->GetArtProvider(true) );
 
+	wxArtProvider::Push(new ExArtProvider());
 
 	m_notebook_style = wxAUI_NB_DEFAULT_STYLE | wxAUI_NB_TAB_EXTERNAL_MOVE | wxNO_BORDER;
 	m_notebook_theme = 0;
@@ -994,9 +989,9 @@ wxAuiToolBar *AppFrame::CreateToolBar()
 	toolBar->AddTool(ID_GCODE_SIMULATE, wxEmptyString, wxBitmap(find_xpm), _("Simulate"));
 	toolBar->AddTool(ID_GCODE_CONVERTGCMC, wxEmptyString, wxBitmap(new_xpm), _("Convert"));
 	toolBar->AddSeparator();
-	toolBar->AddTool(ID_SEMULATE_START, wxEmptyString, wxBitmap(simulate_xpm), _("simulate"));
-	toolBar->AddTool(ID_SEMULATE_PAUSE, wxEmptyString, wxBitmap(pause_xpm), _("pause"));
-	toolBar->AddTool(ID_SEMULATE_STOP, wxEmptyString, wxBitmap(stop_xpm), _("stop"));
+	//toolBar->AddTool(ID_SEMULATE_START, wxEmptyString, wxBitmap(simulate_xpm), _("simulate"));
+	//toolBar->AddTool(ID_SEMULATE_PAUSE, wxEmptyString, wxBitmap(pause_xpm), _("pause"));
+	//toolBar->AddTool(ID_SEMULATE_STOP, wxEmptyString, wxBitmap(stop_xpm), _("stop"));
 	
 	toolBar->Realize();
 	return toolBar;
