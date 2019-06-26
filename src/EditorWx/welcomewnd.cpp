@@ -17,19 +17,24 @@ public:
 		// set version info
 		r.Replace("<verinfo>", APP_VERSION);
 		wxString updateString;
-		if ( wxGetApp().GetUptadeInfo(updateString) )
+		if (wxGetApp().GetUptadeInfo(updateString))
+		{
 			r.Replace("<updateinfo>", updateString);
+			r.Replace("<download>", _("<a href = \"cmd:6005\">Download update</a>"));
+		}
+
 		ConfigData *config = dynamic_cast<ConfigData *>(wxConfigBase::Get());
 		if (config)
 		{
 			const FileNamesList &files = config->GetFiles();
 			if (!files.empty())
 			{
-				wxString table(_("<table><tr><td>File Name</td><td>Date</td></tr>"));
+				wxString table(_("<table>")); //<tr><td>File Name</td><td>Date</td></tr>
 				int n = 0;
 				std::for_each(files.begin(), files.end(),
-					[&table, &n](const wxString &p) {
-					table += wxString::Format("<tr><td><a href=\"gcode:%d\">%s</a></td><td>%s</td></tr>", n, p, _("Today")); n++; });
+					[&table, &n](const wxFileName &p) {
+					//table += wxString::Format("<tr><td><a href=\"gcode:%d\">%s</a></td><td>%s</td></tr>", n, p, _("Today")); n++; });
+					table += wxString::Format("<tr><td><a href=\"gcode:%d\">%s</a></td></tr>", n, p.GetFullName()); n++; });
 
 				table += ("</table>");
 				r.Replace("<lastfiles>", table);

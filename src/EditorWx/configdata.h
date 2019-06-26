@@ -4,7 +4,7 @@
 #include <list>
 
 class wxFindReplaceData;
-typedef std::list<wxString> FileNamesList;
+typedef std::list<wxFileName> FileNamesList;
 
 
 class ConfigData :	public wxFileConfig
@@ -14,7 +14,7 @@ public:
 	~ConfigData();
 	void WriteFindAndReplase(wxFindReplaceData *find_data);
 	void ReadFindAndReplase(wxFindReplaceData *find_data);
-	void AddFileNameToSaveList(const wxString &fname);
+	void AddFileNameToSaveList(const wxFileName &fname);
 	void ReadFileNames();
 	void WriteFileNames();
 	const FileNamesList &GetFiles() { return files; }

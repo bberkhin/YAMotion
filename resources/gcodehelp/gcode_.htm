@@ -1,0 +1,112 @@
+﻿<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>GCode Help</title>
+</head>
+<body bgcolor="#8DEAFF">
+    <p>  <a href="../welcome.htm">К оглавлению</a> </p>
+    <h1 style="text-align:center">What is G-Code?</h1>
+    G-code is a programming language for CNC that instructs machines where and how to move.
+    Most machines speak a different “dialect” of g-code, so the codes vary depending on type, make, and model.
+
+    <h3>Contens:</h3>
+    <ul>
+        <li><a href="./gcode-intro.htm">Introduction</a></li>
+        <li><a href="#g_code">G codes</a></li>
+        <li><a href="#m_code">M codes</a></li>
+    </ul>
+
+
+<a name="g_code"/>
+<p style="text-align:center">
+    <strong>G codes</strong>
+</p>
+<p align="left">
+
+    <a href="./gcode-g00.htm">G00</a> - Positioning at rapid speed; Mill and Lathe<br>
+    <a href="./gcode-g01.htm">G01</a>- Linear interpolation (machining a straight line); Mill and Lathe<br>
+    <a href="./gcode-g02-g03.htm">G02</a> - Circular interpolation clockwise (machining arcs); Mill and Lathe<br>
+    <a href="./gcode-g02-g03.htm">G03</a>- Circular interpolation, counter clockwise; Mill and Lathe<br>
+    G04 - Mill and Lathe, Dwell<br>
+    G09 - Mill and Lathe, Exact stop<br>
+    G10 - Setting offsets in the program; Mill and Lathe<br>
+    G12 - Circular pocket milling, clockwise; Mill<br>
+    G13 - Circular pocket milling, counterclockwise; Mill<br>
+    G17 - X-Y plane for arc machining; Mill and Lathe with live tooling<br>
+    G18 - Z-X plane for arc machining; Mill and Lathe with live tooling<br>
+    G19 - Z-Y plane for arc machining; Mill and Lathe with live tooling<br>
+    G20 - Inch units; Mill and Lathe<br>
+    G21 - Metric units; Mill and Lathe<br>
+    G27 - Reference return check; Mill and Lathe<br>
+    G28 - Automatic return through reference point; Mill and Lathe<br>
+    G29 - Move to location through reference point; Mill and Lathe (slightly different for each machine)<br>
+    G31 - Skip function; Mill and Lathe<br>
+    G32 - Thread cutting; Lathe<br>
+    G33 - Thread cutting; Mill<br>
+    G40 - Cancel diameter offset; Mill. Cancel tool nose offset; Lathe<br>
+    G41 - Cutter compensation left; Mill. Tool nose radius compensation left; Lathe<br>
+    G42 - Cutter compensation right; Mill. Tool nose radius compensation right; Lathe<br>
+    G43 - Tool length compensation; Mill<br>
+    G44 - Tool length compensation cancel; Mill (sometimes G49)<br>
+    G50 - Set coordinate system and maximum RPM; Lathe<br>
+    G52 - Local coordinate system setting; Mill and Lathe<br>
+    G53 - Machine coordinate system setting; Mill and Lathe<br>
+    G54~G59 - Workpiece coordinate system settings #1 t0 #6; Mill and Lathe<br>
+    G61 - Exact stop check; Mill and Lathe<br>
+    G65 - Custom macro call; Mill and Lathe<br>
+    G70 - Finish cycle; Lathe<br>
+    G71 - Rough turning cycle; Lathe<br>
+    G72 - Rough facing cycle; Lathe<br>
+    G73 - Irregular rough turning cycle; Lathe<br>
+    G73 - Chip break drilling cycle; Mill<br>
+    G74 - Left hand tapping; Mill<br>
+    G74 - Face grooving or chip break drilling; Lathe<br>
+    G75 - OD groove pecking; Lathe<br>
+    G76 - Fine boring cycle; Mill<br>
+    G76 - Threading cycle; Lathe<br>
+    G80 - Cancel cycles; Mill and Lathe<br>
+    G81 - Drill cycle; Mill and Lathe<br>
+    G82 - Drill cycle with dwell; Mill<br>
+    G83 - Peck drilling cycle; Mill<br>
+    G84 - Tapping cycle; Mill and Lathe<br>
+    G85 - Bore in, bore out; Mill and Lathe<br>
+    G86 - Bore in, rapid out; Mill and Lathe<br>
+    G87 - Back boring cycle; Mill<br>
+    G90 - Absolute programming<br>
+    G91 - Incremental programming<br>
+    G92 - Reposition origin point; Mill<br>
+    G92 - Thread cutting cycle; Lathe<br>
+    G94 - Per minute feed; Mill<br>
+    G95 - Per revolution feed; Mill<br>
+    G96 - Constant surface speed control; Lathe<br>
+    G97 - Constant surface speed cancel<br>
+    G98 - Per minute feed; Lathe<br>
+    G99 - Per revolution feed; Lathe<br>
+</p>
+
+<a name="m_code"/>
+<p align="center">
+    <strong>M Codes</strong>
+</p>
+<p align="left">
+    M00 - Program stop; Mill and Lathe<br>
+    M01 - Optional program stop; Lathe and Mill<br>
+    M02 - Program end; Lathe and Mill<br>
+    M03 - Spindle on clockwise; Lathe and Mill<br>
+    M04 - Spindle on counterclockwise; Lathe and Mill<br>
+    M05 - Spindle off; Lathe and Mill<br>
+    M06 - Toolchange; Mill<br>
+    M08 - Coolant on; Lathe and Mill<br>
+    M09 - Coolant off; Lathe and Mill<br>
+    M10 - Chuck or rotary table clamp; Lathe and Mill<br>
+    M11 - Chuck or rotary table clamp off; Lathe and Mill<br>
+    M19 - Orient spindle; Lathe and Mill<br>
+    M30 - Program end, return to start; Lathe and Mill<br>
+    M97 - Local sub-routine call; Lathe and Mill<br>
+    M98 - Sub-program call; Lathe and Mill<br>
+    M99 - End of sub program; Lathe and Mill
+</p>
+
+
+</body>
+</html>
