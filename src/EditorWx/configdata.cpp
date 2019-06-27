@@ -53,7 +53,7 @@ void ConfigData::ReadFindAndReplase(wxFindReplaceData *find_data)
 }
 
 
-void ConfigData::AddFileNameToSaveList(const wxString &fname)
+void ConfigData::AddFileNameToSaveList(const wxFileName &fname)
 {
 	auto it = std::find(files.begin(), files.end(), fname);
 	if (it != files.end())
@@ -69,7 +69,7 @@ void ConfigData::WriteFileNames()
 	int n = 1;
 	for (auto it = files.begin(); it != files.end() && n <= 9; ++it, n++)
 	{
-		Write(wxString::Format("File%d",n), *it );
+		Write(wxString::Format("File%d",n), it->GetFullPath() );
 	}
 	SetPath(strOldPath);
 }

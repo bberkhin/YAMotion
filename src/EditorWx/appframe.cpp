@@ -550,7 +550,7 @@ void AppFrame::OnOpenLastFile(wxCommandEvent &event)
 		{
 			auto it = files.begin();
 			for (int i = 0; i < n; i++, it++) ;
-			FileOpen( *it );
+			FileOpen( it->GetFullPath() );
 			if (event.GetClientData() != NULL)
 				HideWelcome();
 			return;
@@ -836,8 +836,8 @@ wxMenuBar *AppFrame::CreateMenu ()
 		const FileNamesList &files = config->GetFiles();
 		int n = 0;
 		std::for_each( files.begin(), files.end(), 
-			[menuLastFiles,&n](const wxString &p) {
-			if (n < 10) { menuLastFiles->Append(wxID_FILE + n, p); n++; } });
+			[menuLastFiles,&n](const wxFileName &p) {
+			if (n < 10) { menuLastFiles->Append(wxID_FILE + n, p.GetFullPath() ); n++; } });
 	}
 	menuFile->Append(ID_OPENRECENT, _("Open recent"), menuLastFiles);
 	menuFile->AppendSeparator();
@@ -1027,7 +1027,7 @@ void AppFrame::FileOpen (wxString fname)
 			UpdateTitle();
 			ConfigData *config;
 			if ((config = dynamic_cast<ConfigData *>(wxConfigBase::Get())) != NULL)
-				config->AddFileNameToSaveList(fname);
+				config->AddFileNameToSaveList(w);
 
 		}
 	}
