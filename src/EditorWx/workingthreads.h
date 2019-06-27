@@ -84,12 +84,13 @@ protected:
 class SimulateThreadEvent : public wxThreadEvent
 {
 public:
-	SimulateThreadEvent(wxEventType command_type = -1) : wxThreadEvent(command_type) {	}
-	SimulateThreadEvent(int tillIndex_, TrackPointGL &end_point_, wxEventType command_type = -1) :
-		tillindex(tillIndex_), end_point(end_point_), wxThreadEvent(command_type)	{	}
+	SimulateThreadEvent(wxEventType command_type = -1) : tilldistance(-1), tillindex(-1), wxThreadEvent(command_type) {	}
+	SimulateThreadEvent(int tillindex_, int tilldistance_, TrackPointGL &end_point_, wxEventType command_type = -1) :
+		tillindex(tillindex_),tilldistance(tilldistance_), end_point(end_point_), wxThreadEvent(command_type)	{	}
 	SimulateThreadEvent(const SimulateThreadEvent &e) : wxThreadEvent(e)
 	{
 		tillindex = e.get_index();
+		tilldistance = e.get_distance();
 		end_point = e.get_end_point();
 	}
 	~SimulateThreadEvent()
@@ -97,9 +98,11 @@ public:
 	}
 	wxThreadEvent *Clone() { return new SimulateThreadEvent(*this); }
 	int get_index() const { return tillindex; }
+	int get_distance() const { return tilldistance; }
 	const TrackPointGL &get_end_point() const { return end_point; }
 private:
 	int tillindex;
+	int tilldistance;
 	TrackPointGL end_point;
 private:
 	wxDECLARE_DYNAMIC_CLASS_NO_ASSIGN(GCMCConversionEvent);

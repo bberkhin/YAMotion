@@ -5,6 +5,8 @@
 #include "wx/aui/framemanager.h"
 #include "wx/aui/dockart.h"
 #include "wx/splitter.h"
+#include <wx/popupwin.h>
+
 #include "flatbuttom.h"
 #include "FlatScrollBar.h"
 #include "defsext.h"
@@ -21,6 +23,9 @@
 
 
 #define MAX_BTN_PRIORITY 1101
+#define SPEED_WND_WIDTH 150
+#define SPEED_WND_HEIGHT 30
+
 enum
 {
 	ID_TO3DBUTTON = 100,
@@ -52,7 +57,8 @@ enum
 	ID_CTRL_MAXZ,
 	ID_CTRL_PATH,
 	ID_CTRL_TRAVERCE,
-	ID_SIMULATED_SLIDER
+	ID_SIMULATED_SLIDER,
+	ID_SIMULATEDSPEED_SLIDER
 };
 
 
@@ -210,6 +216,7 @@ EVT_BUTTON(ID_BTN_OTHER, View3DPanel::OnMenuView)
 EVT_BUTTON(ID_BTN_PAUSE, View3DPanel::OnPauseSimulate)
 EVT_BUTTON(ID_BTN_SIMULATE, View3DPanel::OnRunSimulate)
 EVT_BUTTON(ID_BTN_STOP, View3DPanel::OnStopSimulate)
+EVT_BUTTON(ID_SETSIMULATIONSPEED, View3DPanel::OnSetSimulateSpeed)
 EVT_COMMAND_SCROLL(ID_SIMULATED_SLIDER, View3DPanel::OnSimulateProgress)
 //EVT_IDLE(View3DPanel::OnIdle)
 
@@ -452,8 +459,7 @@ wxSizer *View3DPanel::CreateSimulationPanel()
 	//Insert(index, size, size);
 	panel->Add(btns, 0, wxEXPAND);
 
-	wxSlider *pguage = new wxSlider(this, ID_SIMULATED_SLIDER, 50, 1,100);
-	//pguage->SetValue(50);
+	wxSlider *pguage = new wxSlider(this, ID_SIMULATED_SLIDER, 0, 0,1000);
 	panel->Add(pguage, 0, wxEXPAND);
 
 	return panel;
@@ -505,8 +511,29 @@ void View3DPanel::UpdateStatistics(const ConvertGCMCInfo &dt)
 	SetValue(ID_CTRL_MAXZ, dt.box.Max.z);
 	SetValue(ID_CTRL_PATH, dt.feed_len);
 	SetValue(ID_CTRL_TRAVERCE, dt.traverce_len);
-	
+
+	wxSlider *slider = dynamic_cast<wxSlider *>(FindWindowById(ID_SIMULATED_SLIDER, this));
+	if (slider)
+	{
+		int m_full_path = int(dt.feed_len + dt.traverce_len);
+		slider->SetRange(0, m_full_path);
+	}
+
 	Layout();
+}
+
+void View3DPanel::UpdateSimulationPos(int index, int dist, const TrackPointGL &pt)
+{
+	if (!m_pview || m_pview->IsEmpty() )
+		return;
+	
+	wxSlider *slider = dynamic_cast<wxSlider *>(FindWindowById( ID_SIMULATED_SLIDER, this));
+	if (dist < 0)
+		dist = 0;
+	slider->SetValue(dist);
+
+	m_pview->setSimulationPos(index, pt);
+	
 }
 
 void View3DPanel::OnStandartView(wxCommandEvent& ev)
@@ -575,6 +602,43 @@ void View3DPanel::OnStopSimulate(wxCommandEvent& WXUNUSED(ev))
 }
 
 
+
+class SpeedWindow : public wxWindow//wxPopupWindow
+{
+public:
+	SpeedWindow(wxWindow *parent, const wxPoint &pos);
+};
+
+
+SpeedWindow::SpeedWindow(wxWindow *parent, const wxPoint &pos)
+	: ///wxPopupWindow(parent)// wxPopupWindow(parent, -1, wxEmptyString, pos, wxSize(SPEED_WND_WIDTH, SPEED_WND_HEIGHT), wxFRAME_NO_TASKBAR|wxFRAME_FLOAT_ON_PARENT|wxBORDER_NONE)
+	 wxWindow(parent, -1, pos, wxSize(SPEED_WND_WIDTH, SPEED_WND_HEIGHT), wxPOPUP_WINDOW | wxBORDER_NONE)
+{
+	SetWindowStyle(GetWindowStyle() &(~wxTAB_TRAVERSAL));
+	wxBoxSizer *box = new wxBoxSizer(wxVERTICAL);
+	int flags = wxSL_MIN_MAX_LABELS |  wxSL_AUTOTICKS;	
+	wxSlider *sz = new wxSlider(this, ID_SIMULATEDSPEED_SLIDER, 0, 0, 10, wxDefaultPosition, wxSize(SPEED_WND_WIDTH, -1),flags);
+	sz->SetTickFreq(10);
+	//sz->SetBackgroundColour(wxColor("BLACK"));
+	box->Add(sz, wxEXPAND, wxEXPAND);	
+	SetSizerAndFit(box);
+	int h = SPEED_WND_HEIGHT;
+	SetSize(pos.x, pos.y - h - 5, SPEED_WND_WIDTH, h);
+}
+
+void View3DPanel::OnSetSimulateSpeed(wxCommandEvent& WXUNUSED(ev))
+{
+	wxWindow *bt = FindWindowById(ID_SETSIMULATIONSPEED, this);
+	if (!bt) return;
+	wxPoint pt = bt->GetScreenPosition();
+	pt.x -= (SPEED_WND_WIDTH - bt->GetSize().x);
+	//pt.y -= 50;
+
+	SpeedWindow *sp = new SpeedWindow(this, pt);//, wxPOPUP_WINDOW);
+	sp->Show(true);
+}
+
+
 void View3DPanel::OnIdle(wxIdleEvent& event)
 {
 	wxWindow *win = FindWindowById(ID_BTN_SIMULATE, this);
@@ -594,8 +658,14 @@ void View3DPanel::OnIdle(wxIdleEvent& event)
 void View3DPanel::OnSimulateProgress(wxScrollEvent& event)
 {
 	wxEventType eventType = event.GetEventType();
-	if (eventType != wxEVT_SCROLL_CHANGED)
+	if (eventType != wxEVT_SCROLL_CHANGED && eventType != wxEVT_SCROLL_THUMBTRACK)
 		return;
+	
+	int position = event.GetPosition();
+	int value = event.GetInt();
+	m_fp->GetWorker()->SetSimulationPos(value);
+
+
 	/*
 		case wxEVT_SCROLL_TOP:
 		case wxEVT_SCROLL_BOTTOM:
@@ -607,9 +677,7 @@ void View3DPanel::OnSimulateProgress(wxScrollEvent& event)
 		case wxEVT_SCROLL_THUMBRELEASE:
 		case wxEVT_SCROLL_CHANGED:\
 		*/
-	int position = event.GetPosition();
-	int value = event.GetInt();
-	m_fp->GetWorker()->SetSimulationPos(value);
+	
 }
 
 
@@ -888,6 +956,19 @@ void FilePage::UpdateStatistics(const ConvertGCMCInfo &dt)
 {
 	if (m_view3d)
 		m_view3d->UpdateStatistics(dt);
+}
+
+
+void FilePage::UpdateSimulationPos(int index, int dist, const TrackPointGL &pt)
+{
+	if (m_view3d)
+		m_view3d->UpdateSimulationPos(index, dist, pt);
+
+	Edit *edit = GetEdit();
+	if (edit && edit->GetFileType() == FILETYPE_NC )
+	{
+		edit->DoSelectLine(pt.line);
+	}
 }
 
 

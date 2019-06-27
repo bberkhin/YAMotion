@@ -123,6 +123,7 @@ public:
 	void clear();
 	void setSimulationSpeed(double mm_per_sec);
 	void setSimulationPos(int index, const TrackPointGL &endpt = TrackPointGL());
+	std::vector<TrackPointGL> &getTrack() { return track; }
 	
 	void OnPaint(wxPaintEvent& event);
 	void OnSize(wxSizeEvent& event);
@@ -149,7 +150,6 @@ private:
 	void draw_axis_letters();
 	void update_tool_coords(float x, float y, float z);
 	void print_string(const glm::vec4 &color, int x, int y, char *s, int len);
-	std::vector<TrackPointGL> &getTrack() { return track; }
 	int get_tick_delay() { return tickdelay; }
 	double get_tick_distance() { return distancefortick; }
 	

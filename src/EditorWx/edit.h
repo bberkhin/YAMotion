@@ -113,6 +113,8 @@ public:
 	void DoReplace(wxEventType type, int flag, const wxString &strfind, const wxString &strReplace);
 	void UpdatePreferences();
 
+	void DoSelectLine(int line);
+
 private:
 	bool InitializePrefs(const LanguageInfo * language);	
 	wxString GetGcmcIncludeFileName();

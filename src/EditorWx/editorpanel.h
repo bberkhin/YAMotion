@@ -38,6 +38,7 @@ public:
 	void UpdateThemeColor();	
 	View3D *Get3D() { return m_pview; }
 	void UpdateStatistics(const ConvertGCMCInfo &dt);
+	void UpdateSimulationPos(int index, int dist, const TrackPointGL &pt);
 protected:
 	wxBoxSizer *CreateHeaderPanel();
 	wxSizer *CreateFooterPanel();
@@ -50,6 +51,7 @@ protected:
 	void OnPauseSimulate(wxCommandEvent& event);
 	void OnRunSimulate(wxCommandEvent& event);
 	void OnStopSimulate(wxCommandEvent& event);
+	void OnSetSimulateSpeed(wxCommandEvent& event);
 	void OnIdle(wxIdleEvent& event);
 
 
@@ -96,16 +98,17 @@ public:
 	void ConvertGcmc();
 	void ConvertGcmc(const wchar_t *src_fname, const  wchar_t *dst_fname, const wchar_t *args);
 	void UpdateStatistics(const ConvertGCMCInfo &dt);
+	void UpdateSimulationPos(int index, int dist, const TrackPointGL &pt);
+
 	wxString GetSavedFileName();
-	bool DoFileSave(bool askToSave, bool bSaveAs);
-	
+	bool DoFileSave(bool askToSave, bool bSaveAs);		
+
 	void ShowLog(); 
 	void HideLog();
 	void Hide3D();
 	void Show3D();
 
 	void DoLayout(const wxSize &sz = wxDefaultSize);
-
 	void OnSize(wxSizeEvent& event);
 	void OnSashDrag(wxSashEvent& event);
 private:	

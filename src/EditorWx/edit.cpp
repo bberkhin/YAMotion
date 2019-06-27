@@ -198,21 +198,25 @@ void Edit::OnEditSelectAll (wxCommandEvent &WXUNUSED(event)) {
     SetSelection (0, GetTextLength ());
 }
 
+
 void Edit::OnEditSelectLine (wxCommandEvent &event ) 
 {
 	IntClientData *data = dynamic_cast<IntClientData *>(event.GetClientObject());
-	
 	if (data && data->GetData() >= 0)
 	{
-		int n = data->GetData() - 1 ;
-		int lineStart = PositionFromLine(n);
-		int lineEnd = PositionFromLine(n + 1);
-		EnsureVisibleEnforcePolicy(n);
+		DoSelectLine(data->GetData() - 1);
 		SetFocus();
-		//SetCurrentPos(lineStart);
-		SetSelection(lineStart, lineEnd);
-		
 	}
+}
+
+void Edit::DoSelectLine(int line)
+{
+	int n = line - 1;
+	if (n <= 0) n = 0;
+	int lineStart = PositionFromLine(n);
+	int lineEnd = PositionFromLine(n + 1);
+	EnsureVisibleEnforcePolicy(n);	
+	SetSelection(lineStart, lineEnd);
 }
 
 void Edit::OnDisplayEOL (wxCommandEvent &WXUNUSED(event)) {

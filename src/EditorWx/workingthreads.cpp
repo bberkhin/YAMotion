@@ -148,15 +148,30 @@ wxThread::ExitCode SimulateCutting::Entry()
 		wxQueueEvent(view, new SimulateThreadEvent(EVT_SIMULATE_COMPLETE));
 		return 0;
 	}
-	end_point = track[0];
-
 	int tickdelay = view->get_tick_delay();
 	double distancefortick = view->get_tick_distance();
 	double segmentdist = 0;
 	double currentdistoftick = 0;
+	double fulldistance = 0;
 	TrackPointGL second;
 
+	// check may be we are srtarting not from the starting point
+	end_point = track[0];
 	size_t i = 1;
+
+	if (view->simulateLastIndex != wxNOT_FOUND)
+	{
+		i = view->simulateLastIndex + 1;
+		end_point = track[i-1];
+		//calc full distance for good updates
+		for (size_t j = 1; j < i; j++)
+		{
+			fulldistance += glm::distance(track[j - 1].position, track[j].position);
+		}
+
+	}
+
+	
 	while (i < tracksize)
 	{
 		{
@@ -179,7 +194,7 @@ wxThread::ExitCode SimulateCutting::Entry()
 			//	wxMilliSleep(segmentdelay);
 			//++i;
 
-
+			fulldistance += segmentdist;
 			currentdistoftick += segmentdist;
 			end_point = second;
 			++i;
@@ -188,6 +203,7 @@ wxThread::ExitCode SimulateCutting::Entry()
 		{
 			double needdistanse = (currentdistoftick + segmentdist) - distancefortick;
 			float k = 1.f - float(needdistanse / segmentdist);
+			fulldistance += needdistanse;
 
 			glm::vec3 move = k * (second.position - end_point.position);
 			end_point.position = end_point.position + move;
@@ -195,12 +211,12 @@ wxThread::ExitCode SimulateCutting::Entry()
 			end_point.isFast = second.isFast;
 			currentdistoftick = 0;
 			wxMilliSleep(tickdelay);
-
-			SimulateThreadEvent event(i - 1, end_point, EVT_SIMULATE_UPDATE);
+			
+			SimulateThreadEvent event(i-1, int(fulldistance), end_point, EVT_SIMULATE_UPDATE);
 			wxQueueEvent(m_worker, event.Clone());
 		}
 	}
-	SimulateThreadEvent event(i - 1, second, EVT_SIMULATE_UPDATE);
+	SimulateThreadEvent event(-1, -1, second, EVT_SIMULATE_UPDATE);
 	wxQueueEvent(m_worker, event.Clone());
 
 	wxQueueEvent(m_worker, new SimulateThreadEvent(EVT_SIMULATE_COMPLETE));
@@ -387,6 +403,7 @@ void Worker::Do3DDraw(const wchar_t *fname, bool runsimulation)
 {
 	if (m_drawThread == NULL)
 	{
+		SemulateStop();
 		m_drawThread = new Draw3DThread(this, fname, runsimulation);
 		if (m_drawThread->Run() != wxTHREAD_NO_ERROR)
 		{
@@ -599,6 +616,9 @@ void Worker::GcmcProcessTerminated(int status, const wchar_t *dst_fname, DoAfter
 	{
 		m_gcmc_running_in_sec = 0;
 		m_timer.Stop();
+		delete m_gcmcProcess;
+		m_gcmcProcess = NULL;
+
 		wxString inf = wxString::Format(_("Process terminated with exit code %d"), status);
 		GetLogWnd()->Append(status == 0 ? MSLInfo : MSLError, inf);
 		Edit *pedit;
@@ -626,8 +646,6 @@ void Worker::GcmcProcessTerminated(int status, const wchar_t *dst_fname, DoAfter
 					break;
 			}
 		}
-		delete m_gcmcProcess;
-		m_gcmcProcess = NULL;
 	}
 }
 
@@ -706,7 +724,7 @@ void Worker::SemulateStart()
 	}
 
 
-	view->setSimulationPos( 0 );
+	//view->setSimulationPos( 0 );
 	//cur_gcode_line = 0;	
 	m_simulateThread = new SimulateCutting(this);
 
@@ -728,29 +746,18 @@ void Worker::SemulatePause()
 
 void Worker::SemulateStop()
 {
-	if (m_simulateThread)
-		m_simulateThread->Delete();
+	//if (m_simulateThread)
+		//m_simulateThread->Delete();
+	StopAll();
+	TrackPointGL pt;
+	pt.line = 0;
+	m_fp->UpdateSimulationPos(wxNOT_FOUND, wxNOT_FOUND, pt);
 }
 
 
 void Worker::OnSimulateUpdate(SimulateThreadEvent& evs)
 {
-	static IntClientData dataCmd;
-	View3D *view = m_fp->Get3D();
-	if (!view)
-		return;
-
-	TrackPointGL pt  = evs.get_end_point();
-	view->setSimulationPos(evs.get_index(), pt);
-
-	if (dataCmd.GetData() != pt.line )
-	{
-		dataCmd.SetData(pt.line);
-		wxCommandEvent *ev = new wxCommandEvent(wxEVT_MENU, ID_SELECTLINE);
-		ev->SetClientObject(&dataCmd);
-		wxQueueEvent(wxGetApp().GetFrame(), ev);
-	}
-	view->Refresh(false);
+	m_fp->UpdateSimulationPos(evs.get_index(), evs.get_distance(), evs.get_end_point() );
 }
 
 void Worker::OnSimulateCompletion(SimulateThreadEvent&)
@@ -762,16 +769,50 @@ void Worker::OnSimulateCompletion(SimulateThreadEvent&)
 	view->setSimulationPos(wxNOT_FOUND);
 }
 
-int  Worker::SetSimulationPos(int percent)
+int  Worker::SetSimulationPos(int idistance)
 {
 	View3D *view = m_fp->Get3D();
 	if (!view)
 		return -1;
+	StopAll();
+	//calculate distance
+	size_t tracksize;
+	TrackPointGL end_point;
 
-	//TrackPointGL pt;
-	//view->setSimulationPos(percent);
+	std::vector<TrackPointGL> &track = view->getTrack();
+	tracksize = track.size();
+	if (tracksize < 2)
+		return-1;
 
-	return percent;
+	end_point = track[0];
+	double distance = idistance;
+	double segmentdist = 0;
+	double fulldistance = 0;
+	TrackPointGL second;
+	size_t i = 1;
+	while (i < tracksize)
+	{
+		second = track[i];
+		segmentdist = glm::distance(end_point.position, second.position);
+		if (fulldistance + segmentdist < distance) // add point to the step
+		{			
+			fulldistance += segmentdist;
+			end_point = second;
+			++i;
+		}
+		else // we should find next end_point on the same segment
+		{
+			double needdistanse = (fulldistance + segmentdist) - distance;
+			float k = 1.f - float(needdistanse / segmentdist);
+			glm::vec3 move = k * (second.position - end_point.position);
+			end_point.position = end_point.position + move;
+			end_point.line = second.line;
+			end_point.isFast = second.isFast;
+			break;
+		}
+	}
+	m_fp->UpdateSimulationPos(i-1, idistance, end_point);
+	return 0;
 }
 
 int  Worker::SetSimulationSpeed(int percent)

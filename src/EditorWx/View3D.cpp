@@ -876,6 +876,7 @@ void View3D::setSimulationPos(int index, const TrackPointGL &endpt )
 {
 	simulateLastIndex = index;
 	end_simulate_point = endpt;
+	Refresh(false);
 }
 
 
