@@ -17,12 +17,12 @@
 
 
 wxIMPLEMENT_DYNAMIC_CLASS(GCMCConversionEvent, wxThreadEvent);
+wxIMPLEMENT_DYNAMIC_CLASS(SimulateThreadEvent, wxThreadEvent);
 
-//wxDEFINE_EVENT(EVT_CHECK_GCODE_UPDATE, GCMCConversionEvent);
 wxDEFINE_EVENT(EVT_CHECK_GCODE_COMPLETE, GCMCConversionEvent);
-//wxDEFINE_EVENT(EVT_CHECK_SIMULATE_UPDATE, GCMCConversionEvent);
-wxDEFINE_EVENT(EVT_CHECK_SIMULATE_COMPLETE, GCMCConversionEvent);
-
+wxDEFINE_EVENT(EVT_DRAW_GCODE_COMPLETE, GCMCConversionEvent);
+wxDEFINE_EVENT(EVT_SIMULATE_UPDATE, SimulateThreadEvent);
+wxDEFINE_EVENT(EVT_SIMULATE_COMPLETE, SimulateThreadEvent);
 
 
 CheckGCodeThread::CheckGCodeThread(Worker *woker, const wxString &fname_)
@@ -65,7 +65,7 @@ wxThread::ExitCode CheckGCodeThread::Entry()
 	dt.feed_len = pexec->get_feed_len();
 	dt.traverce_len = pexec->get_traverce_len();
 	dt.box = pexec->getBox();
-
+	dt.runsimulaion = false;
 	GCMCConversionEvent *ev = new GCMCConversionEvent(EVT_CHECK_GCODE_COMPLETE);
 	ev->SetCIData(dt);
 	wxQueueEvent(m_woker, ev);
@@ -74,8 +74,8 @@ wxThread::ExitCode CheckGCodeThread::Entry()
 
 
 
-Draw3DThread::Draw3DThread(Worker *worker, const wchar_t *fname_)
-	: fname(fname_), wxThread(wxTHREAD_DETACHED)
+Draw3DThread::Draw3DThread(Worker *worker, const wchar_t *fname_, bool runsimulation)
+	: fname(fname_), m_runsimulation(runsimulation), wxThread(wxTHREAD_DETACHED)
 {
 
 	m_worker = worker;
@@ -100,7 +100,7 @@ Draw3DThread::~Draw3DThread()
 	wxCriticalSectionLocker enter(m_worker->m_critsect);
 	// the thread is being destroyed; make sure not to leave dangling pointers around	
 	Update3DView();
-	m_worker->m_simulateThread = NULL;
+	m_worker->m_drawThread = NULL;
 	if (pexec) delete pexec;
 	if (plogger) delete plogger;
 	if (ppret) delete ppret;
@@ -123,11 +123,98 @@ wxThread::ExitCode Draw3DThread::Entry()
 	dt.feed_len = pexec->get_feed_len();
 	dt.traverce_len = pexec->get_traverce_len();
 	dt.box = pexec->getBox();
-	GCMCConversionEvent *ev = new GCMCConversionEvent(EVT_CHECK_SIMULATE_COMPLETE);
+	dt.runsimulaion = m_runsimulation;
+	GCMCConversionEvent *ev = new GCMCConversionEvent(EVT_DRAW_GCODE_COMPLETE);
 	ev->SetCIData(dt);
 	wxQueueEvent(m_worker, ev);
 	return NULL;
 }
+
+
+wxThread::ExitCode SimulateCutting::Entry()
+{
+
+	size_t tracksize;
+	TrackPointGL end_point;
+	View3D *view = m_worker->m_fp->Get3D();
+	if (!view)
+		return 0;
+
+
+	std::vector<TrackPointGL> &track = view->getTrack();
+	tracksize = track.size();
+	if (tracksize < 2) // nothing to do
+	{
+		wxQueueEvent(view, new SimulateThreadEvent(EVT_SIMULATE_COMPLETE));
+		return 0;
+	}
+	end_point = track[0];
+
+	int tickdelay = view->get_tick_delay();
+	double distancefortick = view->get_tick_distance();
+	double segmentdist = 0;
+	double currentdistoftick = 0;
+	TrackPointGL second;
+
+	size_t i = 1;
+	while (i < tracksize)
+	{
+		{
+			wxCriticalSectionLocker enter(m_worker->m_critsect);
+			second = track[i];
+		}
+
+		if (TestDestroy())
+			break;
+
+		segmentdist = glm::distance(end_point.position, second.position);
+		if (currentdistoftick + segmentdist < distancefortick) // add point to the step
+		{
+			//int segmentdelay = static_cast<int>(tickdelay * (segmentdist / distancefortick));
+			//currentdistoftick = 0;	
+			//end_point = second;
+			//SimulateThreadEvent event(i - 1, end_point);
+			//wxQueueEvent(view, event.Clone());
+			//if (segmentdelay > 1 )
+			//	wxMilliSleep(segmentdelay);
+			//++i;
+
+
+			currentdistoftick += segmentdist;
+			end_point = second;
+			++i;
+		}
+		else // we should fine next end_point on the same segment
+		{
+			double needdistanse = (currentdistoftick + segmentdist) - distancefortick;
+			float k = 1.f - float(needdistanse / segmentdist);
+
+			glm::vec3 move = k * (second.position - end_point.position);
+			end_point.position = end_point.position + move;
+			end_point.line = second.line;
+			end_point.isFast = second.isFast;
+			currentdistoftick = 0;
+			wxMilliSleep(tickdelay);
+
+			SimulateThreadEvent event(i - 1, end_point, EVT_SIMULATE_UPDATE);
+			wxQueueEvent(m_worker, event.Clone());
+		}
+	}
+	SimulateThreadEvent event(i - 1, second, EVT_SIMULATE_UPDATE);
+	wxQueueEvent(m_worker, event.Clone());
+
+	wxQueueEvent(m_worker, new SimulateThreadEvent(EVT_SIMULATE_COMPLETE));
+	return 0;
+}
+
+SimulateCutting::~SimulateCutting()
+{
+	wxCriticalSectionLocker enter(m_worker->m_critsect);
+	m_worker->m_simulateThread = NULL;
+}
+
+
+
 
 
 GcmcProcess::GcmcProcess(Worker *worker, const wchar_t *dstfn, DoAfterConvertGcmc todo)
@@ -175,21 +262,28 @@ bool GcmcProcess::HasInput()
 
 
 
+
+
+
 wxBEGIN_EVENT_TABLE(Worker, wxEvtHandler)
 	// PROCESSING
 	EVT_THREAD(CHECK_GCODE_UPDATE, Worker::OnCheckGCodeUpdate)
 	EVT_GCMC_CONVERSION(EVT_CHECK_GCODE_COMPLETE, Worker::OnCheckGCodeCompletion)
-	EVT_THREAD(CHECK_SIMULATE_UPDATE, Worker::OnDraw3DUpdate)
-	EVT_GCMC_CONVERSION(EVT_CHECK_SIMULATE_COMPLETE, Worker::OnDraw3DCompletion)
+	EVT_THREAD(DRAW_GCODE_UPDATE, Worker::OnDraw3DUpdate)
+	EVT_GCMC_CONVERSION(EVT_DRAW_GCODE_COMPLETE, Worker::OnDraw3DCompletion)
 	EVT_TIMER(wxID_ANY, Worker::OnTimer)
+
+	EVT_SIMULATION(EVT_SIMULATE_UPDATE, Worker::OnSimulateUpdate)
+	EVT_SIMULATION(EVT_SIMULATE_COMPLETE, Worker::OnSimulateCompletion)
 wxEND_EVENT_TABLE()
 
 
 Worker::Worker(FilePage *fp) : m_timer(this), m_fp(fp)
 {
 	m_checkThread = NULL;
-	m_simulateThread = NULL;
+	m_drawThread = NULL;
 	m_gcmcProcess = NULL;
+	m_simulateThread = NULL;
 	m_gcmc_running_in_sec = 0;
 }
 Worker::~Worker()
@@ -202,32 +296,37 @@ void Worker::StopAll()
 	if (m_timer.IsRunning())
 		m_timer.Stop();
 
-	View3D *view = m_fp->Get3D();
-	if (view)
-		view->processClosing();
-
-	wxCriticalSectionLocker enter(m_critsect);
-	if (m_checkThread)         // does the thread still exist?
 	{
-		m_checkThread->Delete();
-	}
+		wxCriticalSectionLocker enter(m_critsect);
+		if (m_checkThread)         // does the thread still exist?
+		{
+			m_checkThread->Kill();
+		}
 
-	if (m_simulateThread)
-	{
-		m_simulateThread->Delete();
+		if (m_drawThread)
+		{
+			m_drawThread->Kill();
+		}
+		if (m_simulateThread)
+		{
+			if (!m_simulateThread->IsRunning())
+				m_simulateThread->Resume();
+			m_simulateThread->Kill();
+		}
 	}
 
 	while (1)
 	{
 		{ // was the ~MyThread() function executed?
 			wxCriticalSectionLocker enter(m_critsect);
-			if (!m_checkThread && !m_simulateThread)
+			if (!m_checkThread && !m_drawThread && !m_simulateThread )
 				break;
 		}
 		// wait for thread completion
 		wxThread::This()->Sleep(1);
 	}
 	m_checkThread = NULL;
+	m_drawThread = NULL;
 	m_simulateThread = NULL;
 }
 
@@ -262,7 +361,7 @@ void  Worker::Check()
 }
 
 
-void  Worker::Draw3D()
+void  Worker::Draw3D(bool runsimulation)
 {
 	if (IsRunning())
 		return;
@@ -275,25 +374,25 @@ void  Worker::Draw3D()
 
 	if (pedit->GetFileType() == FILETYPE_NC)
 	{
-		Do3DDraw(fname.c_str());
+		Do3DDraw( fname.c_str(), runsimulation);
 	}
 	else if (pedit->GetFileType() == FILETYPE_GCMC)
 	{
-		 DoConvertGcmc(ConvertGcmc3DDraw);
+		 DoConvertGcmc(runsimulation ? ConvertGcmc3DDrawAndSimulate : ConvertGcmc3DDraw );
 	}
 }
 
 
-void Worker::Do3DDraw(const wchar_t *fname)
+void Worker::Do3DDraw(const wchar_t *fname, bool runsimulation)
 {
-	if (m_simulateThread == NULL)
+	if (m_drawThread == NULL)
 	{
-		m_simulateThread = new Draw3DThread(this, fname);
-		if (m_simulateThread->Run() != wxTHREAD_NO_ERROR)
+		m_drawThread = new Draw3DThread(this, fname, runsimulation);
+		if (m_drawThread->Run() != wxTHREAD_NO_ERROR)
 		{
 			m_fp->GetLogWnd()->Append(MSLError, _("Can't create the thread to run simulate"));
-			delete m_simulateThread;
-			m_simulateThread = NULL;
+			delete m_drawThread;
+			m_drawThread = NULL;
 
 		}
 	}
@@ -332,6 +431,13 @@ void Worker::OnDraw3DCompletion(GCMCConversionEvent &ev)
 {
 	GetLogWnd()->Append(MSLInfo, _("Drawing completed"));
 	m_fp->UpdateStatistics( ev.GetCIData() );
+	if (ev.GetCIData().runsimulaion)
+	{
+		// we need check that there is exist to simulate
+		View3D *view = m_fp->Get3D();
+		if (view && !view->IsEmpty())
+			SemulateStart();
+	}
 }
 
 
@@ -513,7 +619,10 @@ void Worker::GcmcProcessTerminated(int status, const wchar_t *dst_fname, DoAfter
 				//	wxGetApp().GetFrame()->DoNewFile(FILETYPE_NC, wxEmptyString, true, dst_fname);
 				//	break;
 				case ConvertGcmc3DDraw:
-					Do3DDraw(dst_fname);
+					Do3DDraw(dst_fname,false);
+					break;
+				case ConvertGcmc3DDrawAndSimulate:
+					Do3DDraw(dst_fname, true);
 					break;
 			}
 		}
@@ -556,4 +665,116 @@ void Worker::OnTimer(wxTimerEvent &event)
 		if (rez == wxYES)
 			wxKill(m_gcmcProcess->GetPid(), wxSIGKILL, NULL, wxKILL_CHILDREN);
 	}
+}
+
+bool  Worker::CanSimulateStart()
+{
+	View3D *view = m_fp->Get3D();
+	if (!view) return false;
+
+	return  !(view->IsEmpty() || (m_simulateThread && m_simulateThread->IsRunning()));
+}
+
+bool Worker::CanSimulateStop()
+{
+	return (m_simulateThread != NULL);
+}
+
+bool Worker::CanSimulatePaused()
+{
+	return (m_simulateThread && m_simulateThread->IsRunning());
+}
+
+void Worker::SemulateStart()
+{
+	View3D *view = m_fp->Get3D();
+	if (!view)
+		return;
+
+	if (m_simulateThread)
+	{
+		if (!m_simulateThread->IsRunning())
+			m_simulateThread->Resume();
+		return;
+	}
+
+	// Run view 3d autatically one time
+	if ( view->IsEmpty() )
+	{
+		Draw3D( true );
+		return;
+	}
+
+
+	view->setSimulationPos( 0 );
+	//cur_gcode_line = 0;	
+	m_simulateThread = new SimulateCutting(this);
+
+	if (m_simulateThread->Run() != wxTHREAD_NO_ERROR)
+	{
+		delete m_simulateThread;
+		m_simulateThread = NULL;
+	}
+	view->Refresh(false);
+
+}
+
+
+void Worker::SemulatePause()
+{
+	if (m_simulateThread && m_simulateThread->IsRunning())
+		m_simulateThread->Pause();
+}
+
+void Worker::SemulateStop()
+{
+	if (m_simulateThread)
+		m_simulateThread->Delete();
+}
+
+
+void Worker::OnSimulateUpdate(SimulateThreadEvent& evs)
+{
+	static IntClientData dataCmd;
+	View3D *view = m_fp->Get3D();
+	if (!view)
+		return;
+
+	TrackPointGL pt  = evs.get_end_point();
+	view->setSimulationPos(evs.get_index(), pt);
+
+	if (dataCmd.GetData() != pt.line )
+	{
+		dataCmd.SetData(pt.line);
+		wxCommandEvent *ev = new wxCommandEvent(wxEVT_MENU, ID_SELECTLINE);
+		ev->SetClientObject(&dataCmd);
+		wxQueueEvent(wxGetApp().GetFrame(), ev);
+	}
+	view->Refresh(false);
+}
+
+void Worker::OnSimulateCompletion(SimulateThreadEvent&)
+{
+	View3D *view = m_fp->Get3D();
+	if (!view)
+		return;
+
+	view->setSimulationPos(wxNOT_FOUND);
+}
+
+int  Worker::SetSimulationPos(int percent)
+{
+	View3D *view = m_fp->Get3D();
+	if (!view)
+		return -1;
+
+	//TrackPointGL pt;
+	//view->setSimulationPos(percent);
+
+	return percent;
+}
+
+int  Worker::SetSimulationSpeed(int percent)
+{
+	return percent;
 }

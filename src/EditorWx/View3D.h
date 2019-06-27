@@ -119,29 +119,21 @@ public:
 	//void setTrack(std::vector<TrackPointGL> *ptr) { track.assign( ptr->begin(), ptr->end() ); }
 	void setTrack(std::vector<TrackPoint> *ptr);	
 	void setBox(const CoordsBox &bx);
+	bool IsEmpty() { return track.empty(); }
 	void clear();
-	void processClosing();
 	void setSimulationSpeed(double mm_per_sec);
+	void setSimulationPos(int index, const TrackPointGL &endpt = TrackPointGL());
 	
 	void OnPaint(wxPaintEvent& event);
 	void OnSize(wxSizeEvent& event);
 	void OnChar(wxKeyEvent& event);
 	void OnMouseEvent(wxMouseEvent& event);
 	void initializeGL();
+
 //command
 	void DoSetView(View stdview);
 	void OnSetShow(wxCommandEvent &event);
-	void OnSemulateStart(wxCommandEvent &event);
-	void OnSemulatePause(wxCommandEvent &event);
-	void OnSemulateStop(wxCommandEvent &event);
-	void OnSimulateUpdate(wxThreadEvent&);
-	void OnSimulateCompletion(wxThreadEvent&);
-	void OnSetViewUpdate(wxUpdateUIEvent& event);
 	void OnSetShowUpdate(wxUpdateUIEvent& event);
-	void OnCmdUpdateSimulateStart(wxUpdateUIEvent& event);
-	void OnCmdUpdateSimulateStop(wxUpdateUIEvent& event);
-	void OnCmdUpdateSimulatePause(wxUpdateUIEvent& event);
-
 
 
 private:
@@ -185,11 +177,8 @@ private:
 	Object3d axisZ;
 
 	// sinulation stuff
-	SimulateCutting *simulateCut;
 	size_t simulateLastIndex;
-	int cur_gcode_line;
 	TrackPointGL end_simulate_point;
-	wxCriticalSection critsect;
 	int tickdelay;
 	double distancefortick;
 	GLuint fontOffset;

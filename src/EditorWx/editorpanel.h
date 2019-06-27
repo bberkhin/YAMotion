@@ -46,6 +46,12 @@ protected:
 	void OnClose(wxCommandEvent& ev);
 	void OnStandartView(wxCommandEvent& ev);
 	void OnMenuView(wxCommandEvent& ev);
+	void OnSimulateProgress(wxScrollEvent& event);
+	void OnPauseSimulate(wxCommandEvent& event);
+	void OnRunSimulate(wxCommandEvent& event);
+	void OnStopSimulate(wxCommandEvent& event);
+	void OnIdle(wxIdleEvent& event);
+
 
 private:
 	View3D *m_pview;

@@ -70,21 +70,6 @@ static const GLubyte digits[][13] = {
 {0x0,0x0, 0x7E,0xFF,0xC3,0xC3,0xC3,0x7E,0xC3,0xC3,0xC3,0xC3,0x7E},
 {0x0,0x0, 0x7E,0xFF,0xC3,0x3,0x3,0x7F,0xC3,0xC3,0xC3,0xC3,0x7E} };
 
-class SimulateCutting : public wxThread
-{
-public:
-	SimulateCutting(View3D *handler)
-		: view(handler), wxThread(wxTHREAD_DETACHED)
-	{
-
-	}
-	~SimulateCutting();
-
-protected:
-	virtual wxThread::ExitCode Entry();
-	View3D *view;
-};
-
 
 
 wxBEGIN_EVENT_TABLE(View3D, wxGLCanvas)
@@ -92,32 +77,18 @@ wxBEGIN_EVENT_TABLE(View3D, wxGLCanvas)
 	EVT_PAINT(View3D::OnPaint)
 	EVT_CHAR(View3D::OnChar)
 	EVT_MOUSE_EVENTS(View3D::OnMouseEvent)
-	EVT_MENU_RANGE(ID_SETSHOWFIRST, ID_SETSHOWLAST, View3D::OnSetShow)
-	EVT_MENU(ID_SEMULATE_START, View3D::OnSemulateStart)
-	EVT_MENU(ID_SEMULATE_PAUSE, View3D::OnSemulatePause)
-	EVT_MENU(ID_SEMULATE_STOP, View3D::OnSemulateStop)
-
-	EVT_UPDATE_UI_RANGE(ID_SETSHOWFIRST, ID_SETSHOWLAST, View3D::OnSetShowUpdate)
-	EVT_UPDATE_UI(ID_SEMULATE_START, View3D::OnCmdUpdateSimulateStart)
-	EVT_UPDATE_UI(ID_SEMULATE_PAUSE, View3D::OnCmdUpdateSimulatePause)
-	EVT_UPDATE_UI(ID_SEMULATE_STOP, View3D::OnCmdUpdateSimulateStop)
-	EVT_UPDATE_UI(ID_SEMULATE_GOTOBEGIN, View3D::OnCmdUpdateSimulateStop)
-	EVT_UPDATE_UI(ID_SEMULATE_GOTOEND, View3D::OnCmdUpdateSimulateStop)
 	
-	//EVT_KEY_DOWN(View3D::OnKeyDown)
-
-	EVT_THREAD(CUTTING_SIMULATE_UPDATE, View3D::OnSimulateUpdate)
-	EVT_THREAD(CUTTING_SIMULATE_COMPLETE, View3D::OnSimulateCompletion)
+	EVT_MENU_RANGE(ID_SETSHOWFIRST, ID_SETSHOWLAST, View3D::OnSetShow)
+	EVT_UPDATE_UI_RANGE(ID_SETSHOWFIRST, ID_SETSHOWLAST, View3D::OnSetShowUpdate)
 
 wxEND_EVENT_TABLE()
 
 View3D::View3D( wxWindow *parent,wxWindowID id, int* gl_attrib)
 	:  wxGLCanvas(parent, id, gl_attrib, wxDefaultPosition, wxDefaultSize, wxWANTS_CHARS | wxFULL_REPAINT_ON_RESIZE)	
 {	
-	simulateCut = NULL;
 	tickdelay = 50;
 	distancefortick = 5.;
-
+	simulateLastIndex = wxNOT_FOUND;
 	// Explicitly create a new rendering context instance for this canvas.
 	m_glRC = new wxGLContext(this);	
 
@@ -369,7 +340,6 @@ void View3D::OnMouseEvent(wxMouseEvent& event)
 
 void View3D::clear()
 {
-	wxCriticalSectionLocker enter(critsect);
 	track.clear();
 	camera.set_box(CoordsBox(Coords(0, 0, 0), Coords(1000, 1000, 300)));
 	camera.set_view(TOP);
@@ -389,14 +359,14 @@ void View3D::setBox(const CoordsBox &bx)
 
 void View3D::setTrack(std::vector<TrackPoint> *ptr)
 {	
-	
+	/*
 	if (simulateCut)
 	{
 		wxCriticalSectionLocker enter(critsect);
-		simulateCut->Delete();
+		simulateCut->Kill();
 		simulateCut = NULL;
 	}
-		
+	*/
 
 	std::vector<TrackPointGL> &tr = track;
 	int i = 0;
@@ -415,11 +385,11 @@ void View3D::setTrack(std::vector<TrackPoint> *ptr)
 //--------------------------------------------------------------------
 void View3D::draw_track()
 {
-	wxCriticalSectionLocker enter(critsect);
+	//wxCriticalSectionLocker enter(critsect);
 	glBegin(GL_LINES);
 	for (size_t i = 1; i < track.size(); ++i)
 	{
-		if ( simulateCut && i > simulateLastIndex)
+		if (simulateLastIndex != wxNOT_FOUND && i > simulateLastIndex)
 		{
 			// end last
 			if ( end_simulate_point.isFast )
@@ -870,10 +840,6 @@ void View3D::DoSetView(View stdview)
 	Refresh(false);
 }
 
-void View3D::OnSetViewUpdate(wxUpdateUIEvent& event)
-{
-	event.Enable(true);
-}
 
 void View3D::OnSetShow(wxCommandEvent &event)
 {
@@ -901,215 +867,18 @@ void View3D::OnSetShowUpdate(wxUpdateUIEvent& event)
 	}
 }
 
-class SimulateThreadEvent : public wxThreadEvent
-{
-public:
-	SimulateThreadEvent(int tillIndex_, TrackPointGL &end_point_) :
-		tillindex(tillIndex_), end_point(end_point_), wxThreadEvent(wxEVT_THREAD, CUTTING_SIMULATE_UPDATE)
-	{
-	}
-	~SimulateThreadEvent() 
-	{ 
-	}
-	wxThreadEvent *Clone() { return new SimulateThreadEvent(tillindex, end_point); }
-	int get_index() { return tillindex; }
-	TrackPointGL &get_end_point() { return end_point;  }
-private:
-	int tillindex;
-	TrackPointGL end_point;
-};
-
-wxThread::ExitCode SimulateCutting::Entry()
-{
-
-	size_t tracksize;
-	TrackPointGL end_point;
-	std::vector<TrackPointGL> &track = view->getTrack();
-	tracksize = track.size();
-	if (tracksize < 2) // nothing to do
-	{
-		wxQueueEvent(view, new wxThreadEvent(wxEVT_THREAD, CUTTING_SIMULATE_COMPLETE));
-		return 0;
-	}
-	end_point = track[0];
-	
-	int tickdelay = view->get_tick_delay();
-	double distancefortick = view->get_tick_distance();
-	double segmentdist = 0;
-	double currentdistoftick = 0;
-	TrackPointGL second;
-	
-	size_t i = 1;
-	while( i < tracksize )
-	{
-		{
-			wxCriticalSectionLocker enter(view->critsect);
-			second = track[i];
-		}
-
-		if (TestDestroy())
-			break;
-		
-		segmentdist = glm::distance(end_point.position, second.position);
-		if (currentdistoftick + segmentdist < distancefortick) // add point to the step
-		{
-			//int segmentdelay = static_cast<int>(tickdelay * (segmentdist / distancefortick));
-			//currentdistoftick = 0;	
-			//end_point = second;
-			//SimulateThreadEvent event(i - 1, end_point);
-			//wxQueueEvent(view, event.Clone());
-			//if (segmentdelay > 1 )
-			//	wxMilliSleep(segmentdelay);
-			//++i;
-
-
-			currentdistoftick += segmentdist;
-			end_point = second;
-			++i;
-		}
-		else // we should fine next end_point on the same segment
-		{
-			double needdistanse = (currentdistoftick + segmentdist) - distancefortick;
-			float k = 1.f - float(needdistanse / segmentdist);
-
-			glm::vec3 move = k*(second.position - end_point.position);
-			end_point.position = end_point.position + move;
-			end_point.line = second.line;
-			end_point.isFast = second.isFast;
-			currentdistoftick = 0;
-			wxMilliSleep(tickdelay);
-
-			SimulateThreadEvent event(i-1, end_point);
-			wxQueueEvent(view, event.Clone());
-		}
-	}
-	SimulateThreadEvent event(i - 1, second);
-	wxQueueEvent(view, event.Clone());
-
-	wxQueueEvent(view, new wxThreadEvent(wxEVT_THREAD, CUTTING_SIMULATE_COMPLETE));
-	return 0;
-}
-
-SimulateCutting::~SimulateCutting()
-{
-	wxCriticalSectionLocker enter(view->critsect);
-	view->simulateCut = NULL;
-}
-
 void View3D::setSimulationSpeed(double mm_per_sec)
 {
 	// tickdelay will safe th coonstsnt 
 	distancefortick = mm_per_sec * (tickdelay / 1000.f);
 }
-
-void View3D::processClosing()
+void View3D::setSimulationPos(int index, const TrackPointGL &endpt )
 {
-
-	save_config();
-
-	{
-		wxCriticalSectionLocker enter(critsect);
-		if (simulateCut)         // does the thread still exist?
-		{
-			simulateCut->Delete();
-		}
-	}       // exit from the critical section to give the thread
-			// the possibility to enter its destructor
-			// (which is guarded with m_pThreadCS critical section!)
-	while (1)
-	{
-		{ // was the ~MyThread() function executed?
-			wxCriticalSectionLocker enter(critsect);
-			if (!simulateCut ) break;
-		}
-		// wait for thread completion
-		wxThread::This()->Sleep(1);
-	}
-}
-
-void View3D::OnSemulateStart(wxCommandEvent &event)
-{
-	if (simulateCut)
-	{
-		if ( !simulateCut->IsRunning() )
-			simulateCut->Resume();
-		return;
-	}
-
-	simulateLastIndex = 0;
-	cur_gcode_line = 0;
-	simulateCut = new SimulateCutting(this);
-	
-	if (simulateCut->Run() != wxTHREAD_NO_ERROR)
-	{
-		delete simulateCut;
-		simulateCut = NULL;
-	}
-
-	Refresh(false);
-
-}
-
-void View3D::OnSimulateUpdate(wxThreadEvent& ev)
-{
-	static IntClientData dataCmd;
-	SimulateThreadEvent &evs = dynamic_cast<SimulateThreadEvent &>(ev);
-	simulateLastIndex = evs.get_index();
-	end_simulate_point = evs.get_end_point();
-
-	if (cur_gcode_line != end_simulate_point.line)
-	{
-		cur_gcode_line = end_simulate_point.line;
-		dataCmd.SetData(cur_gcode_line);
-		wxCommandEvent *ev = new wxCommandEvent(wxEVT_MENU, ID_SELECTLINE);
-		ev->SetClientObject(&dataCmd);
-		wxQueueEvent(wxGetApp().GetFrame(), ev);
-	}
-	Refresh(false);
-}
-
-void View3D::OnSimulateCompletion(wxThreadEvent&)
-{
-
-}
-
-void View3D::OnCmdUpdateSimulateStart(wxUpdateUIEvent& event)
-{
-	if (track.empty() || (simulateCut && simulateCut->IsRunning()) )
-		event.Enable(false);
-	else
-		event.Enable(true);
-}
-
-void View3D::OnCmdUpdateSimulateStop(wxUpdateUIEvent& event)
-{
-	if (simulateCut )
-		event.Enable(true);
-	else
-		event.Enable(false);
+	simulateLastIndex = index;
+	end_simulate_point = endpt;
 }
 
 
-void View3D::OnCmdUpdateSimulatePause(wxUpdateUIEvent& event)
-{
-	if (simulateCut && simulateCut->IsRunning())
-		event.Enable(true);
-	else
-		event.Enable(false);
-}
-
-
-void View3D::OnSemulatePause(wxCommandEvent &event)
-{
-	if (simulateCut && simulateCut->IsRunning())
-		simulateCut->Pause();
-}
-
-void View3D::OnSemulateStop(wxCommandEvent &event)
-{
-	if ( simulateCut )
-		simulateCut->Delete();
-}
 
 //--------------------------------------------------------------------
 void Object3d::draw()

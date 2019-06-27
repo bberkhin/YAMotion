@@ -33,7 +33,7 @@ void ExecutorView::output(const std::string &str)
 	//wxString label = wxString::Format("LINE: %d <font color=#FF00FF>"
 		//"%s</font>", nline, str.c_str());
 
-//	wxThreadEvent *ev = new wxThreadEvent(wxEVT_THREAD, CHECK_SIMULATE_UPDATE);
+//	wxThreadEvent *ev = new wxThreadEvent(wxEVT_THREAD, DRAW_GCODE_UPDATE);
 //	ev->SetString(label);
 	//wxQueueEvent(logger, ev);
 }

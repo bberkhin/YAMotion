@@ -51,7 +51,8 @@ enum
 	ID_CTRL_MAXY,
 	ID_CTRL_MAXZ,
 	ID_CTRL_PATH,
-	ID_CTRL_TRAVERCE
+	ID_CTRL_TRAVERCE,
+	ID_SIMULATED_SLIDER
 };
 
 
@@ -202,10 +203,15 @@ void EditorPanel::OnCheckButton(wxCommandEvent& WXUNUSED(ev))
 
 
 wxBEGIN_EVENT_TABLE(View3DPanel, View3DPanelBase)
-	EVT_BUTTON(ID_CLOSE3DVIEW, View3DPanel::OnClose)
-	EVT_BUTTON_RANGE(ID_BTN_TOP, ID_BTN_BACK, View3DPanel::OnStandartView)
-	EVT_MENU_RANGE(ID_BTN_TOP, ID_BTN_BACK,  View3DPanel::OnStandartView)
-	EVT_BUTTON(ID_BTN_OTHER, View3DPanel::OnMenuView)
+EVT_BUTTON(ID_CLOSE3DVIEW, View3DPanel::OnClose)
+EVT_BUTTON_RANGE(ID_BTN_TOP, ID_BTN_BACK, View3DPanel::OnStandartView)
+EVT_MENU_RANGE(ID_BTN_TOP, ID_BTN_BACK, View3DPanel::OnStandartView)
+EVT_BUTTON(ID_BTN_OTHER, View3DPanel::OnMenuView)
+EVT_BUTTON(ID_BTN_PAUSE, View3DPanel::OnPauseSimulate)
+EVT_BUTTON(ID_BTN_SIMULATE, View3DPanel::OnRunSimulate)
+EVT_BUTTON(ID_BTN_STOP, View3DPanel::OnStopSimulate)
+EVT_COMMAND_SCROLL(ID_SIMULATED_SLIDER, View3DPanel::OnSimulateProgress)
+//EVT_IDLE(View3DPanel::OnIdle)
 
 wxEND_EVENT_TABLE()
 
@@ -429,11 +435,10 @@ wxSizer *View3DPanel::CreateSimulationPanel()
 	wxBoxSizer *panel = new wxBoxSizer(wxVERTICAL);
 	wxBoxSizer *btns = new wxBoxSizer(wxHORIZONTAL);
 	btns->AddStretchSpacer();
-	wxBitmapButton *bbt = new wxBitmapButton(this, ID_BTN_PAUSE, wxBitmap(pause_xpm));
-	
+	//wxBitmapButton *bbt = new wxBitmapButton(this, ID_BTN_PAUSE, wxBitmap(pause_xpm));	
 	//wxBitmapButton *bbt  = wxBitmapButton::NewCloseButton(this, ID_BTN_PAUSE);
-	FlatButton *bt;// = new FlatButton(this, ID_BTN_PAUSE, wxEmptyString, wxBitmap(pause_xpm));
-	btns->Add(bbt, 0, wxALIGN_CENTRE_VERTICAL);
+	FlatButton *bt = new FlatButton(this, ID_BTN_PAUSE, wxEmptyString, wxBitmap(pause_xpm));
+	btns->Add(bt, 0, wxALIGN_CENTRE_VERTICAL);
 	bt = new FlatButton(this, ID_BTN_SIMULATE, wxEmptyString, wxBitmap(simulate_xpm));
 	btns->Add(bt, 0, wxALIGN_CENTRE_VERTICAL);
 	bt = new FlatButton(this, ID_BTN_STOP, wxEmptyString, wxBitmap(stop_xpm));
@@ -447,12 +452,13 @@ wxSizer *View3DPanel::CreateSimulationPanel()
 	//Insert(index, size, size);
 	panel->Add(btns, 0, wxEXPAND);
 
-	wxSlider *pguage = new wxSlider(this, -1, 50, 1,100);
+	wxSlider *pguage = new wxSlider(this, ID_SIMULATED_SLIDER, 50, 1,100);
 	//pguage->SetValue(50);
 	panel->Add(pguage, 0, wxEXPAND);
 
 	return panel;
 }
+
 
 
 wxSizer *View3DPanel::CreateFooterPanel()
@@ -553,6 +559,57 @@ void View3DPanel::OnClose(wxCommandEvent& WXUNUSED(ev))
 	{
 		m_fp->Hide3D();
 	}
+}
+
+void View3DPanel::OnPauseSimulate(wxCommandEvent& WXUNUSED(ev))
+{
+	m_fp->GetWorker()->SemulatePause();
+}
+void View3DPanel::OnRunSimulate(wxCommandEvent& WXUNUSED(ev))
+{
+	m_fp->GetWorker()->SemulateStart();
+}
+void View3DPanel::OnStopSimulate(wxCommandEvent& WXUNUSED(ev))
+{
+	m_fp->GetWorker()->SemulateStop();
+}
+
+
+void View3DPanel::OnIdle(wxIdleEvent& event)
+{
+	wxWindow *win = FindWindowById(ID_BTN_SIMULATE, this);
+	if (win)
+		win->Enable(m_fp->GetWorker()->CanSimulateStart());
+	
+	win = FindWindowById(ID_BTN_STOP, this);
+	if (win)
+		win->Enable(m_fp->GetWorker()->CanSimulateStop());
+
+	win = FindWindowById(ID_BTN_PAUSE, this);
+	if (win)
+		win->Enable(m_fp->GetWorker()->CanSimulatePaused());
+		
+}
+
+void View3DPanel::OnSimulateProgress(wxScrollEvent& event)
+{
+	wxEventType eventType = event.GetEventType();
+	if (eventType != wxEVT_SCROLL_CHANGED)
+		return;
+	/*
+		case wxEVT_SCROLL_TOP:
+		case wxEVT_SCROLL_BOTTOM:
+		case wxEVT_SCROLL_LINEUP:
+		case wxEVT_SCROLL_LINEDOWN:
+		case wxEVT_SCROLL_PAGEUP:
+		case wxEVT_SCROLL_PAGEDOWN:
+		case wxEVT_SCROLL_THUMBTRACK:
+		case wxEVT_SCROLL_THUMBRELEASE:
+		case wxEVT_SCROLL_CHANGED:\
+		*/
+	int position = event.GetPosition();
+	int value = event.GetInt();
+	m_fp->GetWorker()->SetSimulationPos(value);
 }
 
 
@@ -757,7 +814,7 @@ void FilePage::Draw3D()
 	if (!DoFileSave(false, false))
 		return;
 	// we don't show log here it will be shown automatically if error occure
-	m_worker->Draw3D();
+	m_worker->Draw3D(false);
 	Show3D();
 }
 
