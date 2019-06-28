@@ -22,13 +22,6 @@
 #include "ExecutorView.h"
 
 
-struct TrackPointGL
-{
-	bool isFast;
-	int line;
-	glm::vec3 position;
-};
-
 enum View
 {
 	TOP = 0,
@@ -116,14 +109,13 @@ public:
 
 	virtual ~View3D();
 
-	//void setTrack(std::vector<TrackPointGL> *ptr) { track.assign( ptr->begin(), ptr->end() ); }
-	void setTrack(std::vector<TrackPoint> *ptr);	
+	void setTrack(TrackPoints &tr);
 	void setBox(const CoordsBox &bx);
 	bool IsEmpty() { return track.empty(); }
 	void clear();
 	void setSimulationSpeed(double mm_per_sec);
 	void setSimulationPos(int index, const TrackPointGL &endpt = TrackPointGL());
-	std::vector<TrackPointGL> &getTrack() { return track; }
+	TrackPoints &getTrack() { return track; }
 	
 	void OnPaint(wxPaintEvent& event);
 	void OnSize(wxSizeEvent& event);
@@ -150,16 +142,11 @@ private:
 	void draw_axis_letters();
 	void update_tool_coords(float x, float y, float z);
 	void print_string(const glm::vec4 &color, int x, int y, char *s, int len);
-	int get_tick_delay() { return tickdelay; }
-	double get_tick_distance() { return distancefortick; }
-	
-	//int tickdelay = 50;
-	//double distancefortick = 5.f;
 	
 private:
 	wxWindow *appframe;
 	wxGLContext* m_glRC;
-	std::vector<TrackPointGL> track;
+	TrackPoints track;
 	std::vector<glm::vec3> realTrack; //пройденна¤ фрезой траектори¤
 
 	bool   show2dGrid;
@@ -179,8 +166,6 @@ private:
 	// sinulation stuff
 	size_t simulateLastIndex;
 	TrackPointGL end_simulate_point;
-	int tickdelay;
-	double distancefortick;
 	GLuint fontOffset;
 	
 

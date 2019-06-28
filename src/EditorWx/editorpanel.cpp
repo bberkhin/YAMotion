@@ -218,6 +218,8 @@ EVT_BUTTON(ID_BTN_SIMULATE, View3DPanel::OnRunSimulate)
 EVT_BUTTON(ID_BTN_STOP, View3DPanel::OnStopSimulate)
 EVT_BUTTON(ID_SETSIMULATIONSPEED, View3DPanel::OnSetSimulateSpeed)
 EVT_COMMAND_SCROLL(ID_SIMULATED_SLIDER, View3DPanel::OnSimulateProgress)
+EVT_COMMAND_SCROLL(ID_SIMULATEDSPEED_SLIDER, View3DPanel::OnSpeedChanged)
+
 //EVT_IDLE(View3DPanel::OnIdle)
 
 wxEND_EVENT_TABLE()
@@ -436,6 +438,12 @@ wxBoxSizer *View3DPanel::CreateHeaderPanel()
 	//toolBar->AddTool(ID_SEMULATE_STOP, wxEmptyString, wxBitmap(stop_xpm), _("stop"));
 
 
+wxString View3DPanel::GetSpeedBtLabel()
+{
+	int speedK = m_fp->GetWorker()->GetSimulationSpeed();
+	return wxString::Format(_("Speed: x%d"), speedK);
+}
+
 wxSizer *View3DPanel::CreateSimulationPanel()
 {
 
@@ -452,8 +460,7 @@ wxSizer *View3DPanel::CreateSimulationPanel()
 	btns->Add(bt, 0, wxALIGN_CENTRE_VERTICAL);
 
 	btns->AddStretchSpacer();
-
-	bt = new FlatButton(this, ID_SETSIMULATIONSPEED, _("Speed: x1"));
+	bt = new FlatButton(this, ID_SETSIMULATIONSPEED, GetSpeedBtLabel() );
 	wxSizerItem *szi = btns->Add(bt, 0, wxALIGN_CENTRE_VERTICAL | wxRIGHT);
 	btns->Insert(0, bt->GetMinWidth(),1 );
 	//Insert(index, size, size);
@@ -490,27 +497,28 @@ wxSizer *View3DPanel::CreateFooterPanel()
 	return gd;
 }
 
-void View3DPanel::SetValue(int id, const double &val)
+void View3DPanel::SetValue(int id, const double &val, bool clear)
 {
 
 	wxStaticText *ptxt = dynamic_cast<wxStaticText *>(FindWindowById(id,this));
 	if (ptxt)
 	{
-		wxString txt = wxString::Format("%g mm.", val);
+		wxString txt = clear ? wxString(" ") : wxString::Format("%g mm.", val);
 		ptxt->SetLabelText(txt);
 	}
 }
 
 void View3DPanel::UpdateStatistics(const ConvertGCMCInfo &dt)
 {
-	SetValue(ID_CTRL_MINX, dt.box.Min.x);
-	SetValue(ID_CTRL_MINY, dt.box.Min.y);
-	SetValue(ID_CTRL_MINZ, dt.box.Min.z);
-	SetValue(ID_CTRL_MAXX, dt.box.Max.x);
-	SetValue(ID_CTRL_MAXY, dt.box.Max.y);
-	SetValue(ID_CTRL_MAXZ, dt.box.Max.z);
-	SetValue(ID_CTRL_PATH, dt.feed_len);
-	SetValue(ID_CTRL_TRAVERCE, dt.traverce_len);
+	bool clear = dt.num_errors != 0;
+	SetValue(ID_CTRL_MINX, dt.box.Min.x, clear);
+	SetValue(ID_CTRL_MINY, dt.box.Min.y, clear);
+	SetValue(ID_CTRL_MINZ, dt.box.Min.z, clear);
+	SetValue(ID_CTRL_MAXX, dt.box.Max.x, clear);
+	SetValue(ID_CTRL_MAXY, dt.box.Max.y, clear);
+	SetValue(ID_CTRL_MAXZ, dt.box.Max.z, clear);
+	SetValue(ID_CTRL_PATH, dt.feed_len, clear);
+	SetValue(ID_CTRL_TRAVERCE, dt.traverce_len, clear);
 
 	wxSlider *slider = dynamic_cast<wxSlider *>(FindWindowById(ID_SIMULATED_SLIDER, this));
 	if (slider)
@@ -603,28 +611,61 @@ void View3DPanel::OnStopSimulate(wxCommandEvent& WXUNUSED(ev))
 
 
 
-class SpeedWindow : public wxWindow//wxPopupWindow
+class SpeedWindow : public wxPopupWindow
 {
 public:
-	SpeedWindow(wxWindow *parent, const wxPoint &pos);
+	SpeedWindow(wxWindow *parent, int speedK, const wxPoint &pos);
+	void OnMouseEvent(wxMouseEvent& event);
+	void OnKillFocus(wxFocusEvent& event);
 };
 
 
-SpeedWindow::SpeedWindow(wxWindow *parent, const wxPoint &pos)
-	: ///wxPopupWindow(parent)// wxPopupWindow(parent, -1, wxEmptyString, pos, wxSize(SPEED_WND_WIDTH, SPEED_WND_HEIGHT), wxFRAME_NO_TASKBAR|wxFRAME_FLOAT_ON_PARENT|wxBORDER_NONE)
-	 wxWindow(parent, -1, pos, wxSize(SPEED_WND_WIDTH, SPEED_WND_HEIGHT), wxPOPUP_WINDOW | wxBORDER_NONE)
+SpeedWindow::SpeedWindow(wxWindow *parent, int speedK, const wxPoint &pos)
+	: wxPopupWindow(parent)// wxPopupWindow(parent, -1, wxEmptyString, pos, wxSize(SPEED_WND_WIDTH, SPEED_WND_HEIGHT), wxFRAME_NO_TASKBAR|wxFRAME_FLOAT_ON_PARENT|wxBORDER_NONE)
+	 //wxWindow(parent, -1, pos, wxSize(SPEED_WND_WIDTH, SPEED_WND_HEIGHT), wxPOPUP_WINDOW | wxBORDER_NONE)
 {
 	SetWindowStyle(GetWindowStyle() &(~wxTAB_TRAVERSAL));
 	wxBoxSizer *box = new wxBoxSizer(wxVERTICAL);
 	int flags = wxSL_MIN_MAX_LABELS |  wxSL_AUTOTICKS;	
-	wxSlider *sz = new wxSlider(this, ID_SIMULATEDSPEED_SLIDER, 0, 0, 10, wxDefaultPosition, wxSize(SPEED_WND_WIDTH, -1),flags);
+	
+	wxSlider *sz = new wxSlider(this, ID_SIMULATEDSPEED_SLIDER, speedK, 1, 50, wxDefaultPosition, wxSize(SPEED_WND_WIDTH, -1),flags);
 	sz->SetTickFreq(10);
-	//sz->SetBackgroundColour(wxColor("BLACK"));
 	box->Add(sz, wxEXPAND, wxEXPAND);	
 	SetSizerAndFit(box);
 	int h = SPEED_WND_HEIGHT;
 	SetSize(pos.x, pos.y - h - 5, SPEED_WND_WIDTH, h);
+	View3DPanel *panel = dynamic_cast<View3DPanel *>(parent);
+	sz->Bind(wxEVT_SCROLL_CHANGED, &View3DPanel::OnSpeedChanged, panel);
+	sz->Bind(wxEVT_SCROLL_THUMBTRACK, &View3DPanel::OnSpeedChanged, panel);
+	
+	sz->Bind(wxEVT_KILL_FOCUS, &SpeedWindow::OnKillFocus, this);
+	//sz->Bind(wxEVT_RIGHT_DOWN, &SpeedWindow::OnMouseEvent, this);
+	//sz->Bind(wxEVT_LEFT_DOWN, &SpeedWindow::OnMouseEvent, this);
+	//sz->Bind(wxEVT_MIDDLE_DOWN, &SpeedWindow::OnMouseEvent, this);
+	Show(true);
+	sz->SetFocus();
+	//CaptureMouse();
 }
+
+void SpeedWindow::OnKillFocus(wxFocusEvent& event)
+{
+	Destroy();
+}
+
+void SpeedWindow::OnMouseEvent(wxMouseEvent& event)
+{
+	wxPoint pt = event.GetPosition();
+	wxRect rc = GetClientRect();
+	if ( rc.Contains(pt) )
+		return;
+	else
+	{
+		//ReleaseMouse();
+		//Destroy();
+		event.Skip();
+	}
+}
+
 
 void View3DPanel::OnSetSimulateSpeed(wxCommandEvent& WXUNUSED(ev))
 {
@@ -633,26 +674,26 @@ void View3DPanel::OnSetSimulateSpeed(wxCommandEvent& WXUNUSED(ev))
 	wxPoint pt = bt->GetScreenPosition();
 	pt.x -= (SPEED_WND_WIDTH - bt->GetSize().x);
 	//pt.y -= 50;
-
-	SpeedWindow *sp = new SpeedWindow(this, pt);//, wxPOPUP_WINDOW);
-	sp->Show(true);
+	
+	int speedK = m_fp->GetWorker()->GetSimulationSpeed();
+	SpeedWindow *sp = new SpeedWindow(this, speedK, pt);//, wxPOPUP_WINDOW);
+	
 }
 
 
-void View3DPanel::OnIdle(wxIdleEvent& event)
+void View3DPanel::OnSpeedChanged(wxScrollEvent& event)
 {
-	wxWindow *win = FindWindowById(ID_BTN_SIMULATE, this);
-	if (win)
-		win->Enable(m_fp->GetWorker()->CanSimulateStart());
+	int position = event.GetPosition();
+	int value = event.GetInt();
+	m_fp->GetWorker()->SetSimulationSpeed(value);
 	
-	win = FindWindowById(ID_BTN_STOP, this);
-	if (win)
-		win->Enable(m_fp->GetWorker()->CanSimulateStop());
+	wxWindow *bt = FindWindowById(ID_SETSIMULATIONSPEED, this);
+	if (bt)
+	{
+		bt->SetLabel(GetSpeedBtLabel());
+		bt->Refresh();
+	}
 
-	win = FindWindowById(ID_BTN_PAUSE, this);
-	if (win)
-		win->Enable(m_fp->GetWorker()->CanSimulatePaused());
-		
 }
 
 void View3DPanel::OnSimulateProgress(wxScrollEvent& event)
@@ -680,6 +721,22 @@ void View3DPanel::OnSimulateProgress(wxScrollEvent& event)
 	
 }
 
+
+void View3DPanel::OnIdle(wxIdleEvent& event)
+{
+	wxWindow *win = FindWindowById(ID_BTN_SIMULATE, this);
+	if (win)
+		win->Enable(m_fp->GetWorker()->CanSimulateStart());
+
+	win = FindWindowById(ID_BTN_STOP, this);
+	if (win)
+		win->Enable(m_fp->GetWorker()->CanSimulateStop());
+
+	win = FindWindowById(ID_BTN_PAUSE, this);
+	if (win)
+		win->Enable(m_fp->GetWorker()->CanSimulatePaused());
+
+}
 
 
 wxBEGIN_EVENT_TABLE(LogPane, wxPanel)

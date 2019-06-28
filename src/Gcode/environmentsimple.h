@@ -17,6 +17,8 @@ public:
 	double GetVariable(int index);
 	ToolDesc& getToolById(int id);
 	double GetCenterArcRadiusTolerance();
+	double GetDefaultFeedRate();
+	double GetDefaultMoveSpeed();
 private:
 	varsmap vars;
 	std::vector<ToolDesc> tools;

@@ -56,13 +56,16 @@ void ExecutorLogWnd::output(const std::string &str, const Coords &position)
 
 void LoggerWnd::log_string(int type, int linen, const char *s)
 {
-	if (!handler)
-		return;
+	if (type == LOG_ERROR)
+		++errors;
 
-	wxString label(s);
-	wxThreadEvent *ev = new wxThreadEvent(wxEVT_THREAD, CHECK_GCODE_UPDATE);
-	ev->SetInt(type);
-	ev->SetExtraLong(linen);
-	ev->SetString(label);
-	wxQueueEvent(handler, ev);
+	if (handler)
+	{
+		wxString label(s);
+		wxThreadEvent *ev = new wxThreadEvent(wxEVT_THREAD, CHECK_GCODE_UPDATE);
+		ev->SetInt(type);
+		ev->SetExtraLong(linen);
+		ev->SetString(label);
+		wxQueueEvent(handler, ev);
+	}
 }

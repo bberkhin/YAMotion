@@ -86,8 +86,7 @@ wxEND_EVENT_TABLE()
 View3D::View3D( wxWindow *parent,wxWindowID id, int* gl_attrib)
 	:  wxGLCanvas(parent, id, gl_attrib, wxDefaultPosition, wxDefaultSize, wxWANTS_CHARS | wxFULL_REPAINT_ON_RESIZE)	
 {	
-	tickdelay = 50;
-	distancefortick = 5.;
+	
 	simulateLastIndex = wxNOT_FOUND;
 	// Explicitly create a new rendering context instance for this canvas.
 	m_glRC = new wxGLContext(this);	
@@ -357,28 +356,9 @@ void View3D::setBox(const CoordsBox &bx)
 	Refresh(false);
 }
 
-void View3D::setTrack(std::vector<TrackPoint> *ptr)
+void View3D::setTrack(TrackPoints &ptr)
 {	
-	/*
-	if (simulateCut)
-	{
-		wxCriticalSectionLocker enter(critsect);
-		simulateCut->Kill();
-		simulateCut = NULL;
-	}
-	*/
-
-	std::vector<TrackPointGL> &tr = track;
-	int i = 0;
-	tr.resize(ptr->size());
-	std::for_each(ptr->begin(), ptr->end(), // lambda
-		[&tr,&i](TrackPoint &p) {  
-		tr[i].isFast = p.type == fast ? true : false;
-		tr[i].line = p.line;
-		tr[i].position.x = p.pt.x;
-		tr[i].position.y = p.pt.y;
-		tr[i].position.z = p.pt.z;
-		++i; } );
+	track.swap(ptr);	
 }
 
 
@@ -867,11 +847,6 @@ void View3D::OnSetShowUpdate(wxUpdateUIEvent& event)
 	}
 }
 
-void View3D::setSimulationSpeed(double mm_per_sec)
-{
-	// tickdelay will safe th coonstsnt 
-	distancefortick = mm_per_sec * (tickdelay / 1000.f);
-}
 void View3D::setSimulationPos(int index, const TrackPointGL &endpt )
 {
 	simulateLastIndex = index;

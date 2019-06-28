@@ -21,10 +21,13 @@ private:
 class LoggerWnd : public ILogger
 {
 public:
-	LoggerWnd(wxEvtHandler *lbox) : handler(lbox) { }
+	LoggerWnd(wxEvtHandler *lbox) : errors(0), handler(lbox) { }
 	void log_string(int type, int linen, const char *s);
+	int errors_count() { return errors; }
 private:
 	wxEvtHandler *handler;
+	int errors;
+	
 };
 
 

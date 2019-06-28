@@ -11,12 +11,14 @@
 using namespace std;
 using namespace Interpreter;
 
-ExecutorView::ExecutorView(ILogger *_logger ) : 
+ExecutorView::ExecutorView(ILogger *_logger, IEnvironment *penv ) :
 	ExecutorLog(false),  logger(_logger)//, pcm(0)
 {
 	//pcm = new CCoordMotion( logger, 0 );
 	//pcm->m_DisableSoftLimits = true;
 	//pcm->m_Simulate = true;
+	m_current_feed = penv->GetDefaultFeedRate();
+	m_fast_speed = penv->GetDefaultMoveSpeed();
 }
 
 ExecutorView::~ExecutorView()
@@ -46,11 +48,24 @@ void ExecutorView::output(const std::string &str, const Coords &position)
  void ExecutorView::addTrackPoint(TypeMove type, const Coords &position)
  {
 	 ExecutorLog::addTrackPoint(type, position);
-	 TrackPoint point;
-	 point.type = type;
-	 point.pt = position;
+	 TrackPointGL point;
+
+	 point.isFast = type == fast ? true : false;
 	 point.line = nline;
-	 trj.push_back(point);	 
+	 point.position.x = position.x;
+	 point.position.y = position.y;
+	 point.position.z = position.z;
+	 point.speed = (type == fast) ? m_fast_speed : m_current_feed;
+	 m_points.push_back(point);	 
+
+ }
+
+ void ExecutorView::set_feed_rate(double feed)
+ {
+	 if (feed <= 1 || feed > MAX_FEED_RATE)
+		 logger->log(LOG_ERROR, _("Line %d: Error feedrate value %g"), nline, feed );
+	else
+		m_current_feed = feed;
  }
 
 

@@ -55,3 +55,14 @@ double EnvironmentSimple::GetCenterArcRadiusTolerance()
 {
 	return CENTER_ARC_RADIUS_TOLERANCE_MM;
 }
+
+double EnvironmentSimple::GetDefaultFeedRate()
+{
+	return DEFAULT_FEED_RATE;
+}
+double EnvironmentSimple::GetDefaultMoveSpeed()
+{
+	//return DEFAULT_MOVE_SPEED;
+	return DEFAULT_FEED_RATE*2;
+}
+

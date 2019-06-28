@@ -20,6 +20,8 @@ class IEnvironment
 	 virtual double GetVariable(int index ) = 0;
 	 virtual ToolDesc& getToolById(int id) = 0;
 	 virtual double GetCenterArcRadiusTolerance() = 0;
+	 virtual double GetDefaultFeedRate() = 0;
+	 virtual double GetDefaultMoveSpeed() = 0;
 };
 
 #endif // IENVIRONMENT_H

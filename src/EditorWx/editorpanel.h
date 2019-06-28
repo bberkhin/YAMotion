@@ -39,11 +39,13 @@ public:
 	View3D *Get3D() { return m_pview; }
 	void UpdateStatistics(const ConvertGCMCInfo &dt);
 	void UpdateSimulationPos(int index, int dist, const TrackPointGL &pt);
+	void OnSpeedChanged(wxScrollEvent& event);
 protected:
 	wxBoxSizer *CreateHeaderPanel();
 	wxSizer *CreateFooterPanel();
 	wxSizer *CreateSimulationPanel();
-	void SetValue(int id, const double &val);
+	wxString GetSpeedBtLabel();
+	void SetValue(int id, const double &val, bool clear);
 	void OnClose(wxCommandEvent& ev);
 	void OnStandartView(wxCommandEvent& ev);
 	void OnMenuView(wxCommandEvent& ev);
@@ -52,6 +54,7 @@ protected:
 	void OnRunSimulate(wxCommandEvent& event);
 	void OnStopSimulate(wxCommandEvent& event);
 	void OnSetSimulateSpeed(wxCommandEvent& event);
+	
 	void OnIdle(wxIdleEvent& event);
 
 

@@ -26,12 +26,13 @@
 #define G83_RAPID_DELTAMM 0.254
 #define TOLERANCE_CONCAVE_CORNER 0.05   /* radians, testing corners */
 #define RADIUS_TOLERANCE_MM 0.00127
+#define DEFAULT_FEED_RATE 200
+#define DEFAULT_MOVE_SPEED 2000
 
 
 /* Equivalent metric constants */
 #define CENTER_ARC_RADIUS_TOLERANCE_MM (2 * 0.01 * M_SQRT2)
 //#define MIN_CENTER_ARC_RADIUS_TOLERANCE_MM 0.001
-
 
 #define N_CHANNELS 8                  // number of channels/board
 

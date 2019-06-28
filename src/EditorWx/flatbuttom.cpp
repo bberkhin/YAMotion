@@ -7,10 +7,10 @@
 
 
 FlatButton::FlatButton(wxWindow *parent, int id, const wxString &text, const wxBitmap &bmp, bool setwndcolor)
-	:  m_text(text), wxWindow(parent, id)
+	:  wxWindow(parent, id)
 {
 
-	SetLabel(m_text);
+	SetLabel(text);
 	if (bmp.IsOk())
 		SetBitmap(bmp);
 	Init(setwndcolor);
@@ -159,7 +159,7 @@ void FlatButton::DrawLabel(wxDC&  dc, const wxRect &rc)
 	dc.SetTextForeground(clr);
 	wxRect rcLabel(rc);
 	rcLabel.Deflate(m_marginBmpX, m_marginBmpY);
-	dc.DrawLabel(m_text, rcLabel, wxALIGN_LEFT| wxALIGN_CENTER_VERTICAL);
+	dc.DrawLabel(GetLabel(), rcLabel, wxALIGN_LEFT| wxALIGN_CENTER_VERTICAL);
 };
 
 void FlatButton::DrawBitmap(wxDC&  dc, const wxRect &rc)
@@ -239,7 +239,7 @@ void FlatButton::SetBestClientSize()
 
 	dc.SetFont(font);
 
-	dc.GetMultiLineTextExtent(m_text, &width, &height);
+	dc.GetMultiLineTextExtent(GetLabel(), &width, &height);
 	if (m_bitmap.IsOk())
 	{
 		// allocate extra space for the bitmap

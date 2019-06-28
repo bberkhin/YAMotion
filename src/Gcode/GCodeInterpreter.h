@@ -63,6 +63,7 @@ namespace Interpreter
 		InterError execute_frame(const char *frame);    //выполнение строки
 		bool check_frame(const CmdParser &parser);
 		bool enhance_frame(const CmdParser &parser);
+		InterError get_state() { return state; }
 
 		InterError is_subrotin_start(const char *str);    //выполнение строки при поиске
 		bool execute_subrotinue(const  CmdParser parser);
@@ -100,7 +101,6 @@ namespace Interpreter
 		inline bool is_a_cycle(int motion);
 		void setcoordinates(Coords &newpos, const CmdParser &parser, bool doofesett) const;
 		bool get_new_coordinate(const CmdParser &parser, Coords &pos );
-		InterError get_state() { return state; }
 		
 		// cutter compensation
 		bool run_cutter_comp(const CmdParser &parser);

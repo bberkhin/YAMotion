@@ -15,6 +15,7 @@ struct ConvertGCMCInfo
 	double traverce_len;
 	CoordsBox box;
 	bool runsimulaion;
+	int num_errors;
 };
 
 class GCMCConversionEvent : public wxThreadEvent
@@ -65,7 +66,7 @@ public:
 	Draw3DThread(Worker *handler, const wchar_t *fname_, bool runsimulation);
 	~Draw3DThread();
 
-	std::vector<TrackPoint> *getTack() { return pexec->getTrack(); }
+	TrackPoints &getTack() { return pexec->getTrack(); }
 	CoordsBox getBox() { return pexec->getBox(); }
 
 	void Update3DView();
@@ -78,6 +79,7 @@ protected:
 	GCodeInterpreter *ppret;
 	wxString fname;
 	bool m_runsimulation;
+	bool isOk;
 	//View3D *m_3Dview;
 };
 
@@ -112,15 +114,18 @@ private:
 class SimulateCutting : public wxThread
 {
 public:
-	SimulateCutting(Worker *handler)
-		: m_worker(handler), wxThread(wxTHREAD_DETACHED)
+	SimulateCutting(Worker *handler, int speed)
+		: m_worker(handler), m_speedk(speed), wxThread(wxTHREAD_DETACHED)
 	{
 
 	}
-	~SimulateCutting();
+	~SimulateCutting();	
+	void SetSeedK(int speed) { m_speedk = speed; }
 protected:
 	virtual wxThread::ExitCode Entry();
+	int m_speedk;
 	Worker *m_worker;
+
 };
 
 
@@ -175,9 +180,9 @@ public:
 	bool CanSimulateStart();
 	bool CanSimulateStop();
 	bool CanSimulatePaused();
-	int  SetSimulationPos(int percent);
-	int  SetSimulationSpeed(int percent);
-
+	void SetSimulationPos(int percent);
+	void SetSimulationSpeed(int times );
+	int GetSimulationSpeed() {	return m_speedk;}
 
 protected:
 	//proccessing messages
@@ -207,6 +212,7 @@ private:
 	wxTimer m_timer;
 	GcmcProcess *m_gcmcProcess;
 	unsigned int m_gcmc_running_in_sec;
+	int m_speedk; // simuleation speed koefficient
 
 	wxDECLARE_EVENT_TABLE();
 };

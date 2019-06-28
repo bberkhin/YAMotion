@@ -62,6 +62,7 @@ wxThread::ExitCode CheckGCodeThread::Entry()
 	}
 
 	ConvertGCMCInfo dt;
+	dt.num_errors = plogger->errors_count();
 	dt.feed_len = pexec->get_feed_len();
 	dt.traverce_len = pexec->get_traverce_len();
 	dt.box = pexec->getBox();
@@ -69,6 +70,7 @@ wxThread::ExitCode CheckGCodeThread::Entry()
 	GCMCConversionEvent *ev = new GCMCConversionEvent(EVT_CHECK_GCODE_COMPLETE);
 	ev->SetCIData(dt);
 	wxQueueEvent(m_woker, ev);
+	
 	return NULL;
 }
 
@@ -80,25 +82,28 @@ Draw3DThread::Draw3DThread(Worker *worker, const wchar_t *fname_, bool runsimula
 
 	m_worker = worker;
 	plogger = new LoggerWnd(m_worker);
-	pexec = new ExecutorView(plogger);
+	pexec = new ExecutorView(plogger, wxGetApp().GetEnvironment() );
 	ppret = new GCodeInterpreter(wxGetApp().GetEnvironment(), pexec, plogger);
 }
 
 void Draw3DThread::Update3DView()
-{
-	
+{	
 	View3D *p3Dview = m_worker->m_fp->Get3D();
 	if (p3Dview)
 	{
-		p3Dview->setTrack(getTack());
-		p3Dview->setBox(getBox());
+		if ( plogger->errors_count() == 0)
+		{
+			p3Dview->setTrack(getTack());
+			p3Dview->setBox(getBox());
+		}
+		else
+			p3Dview->clear();
 	}
 }
 
 Draw3DThread::~Draw3DThread()
 {
 	wxCriticalSectionLocker enter(m_worker->m_critsect);
-	// the thread is being destroyed; make sure not to leave dangling pointers around	
 	Update3DView();
 	m_worker->m_drawThread = NULL;
 	if (pexec) delete pexec;
@@ -109,17 +114,17 @@ Draw3DThread::~Draw3DThread()
 
 wxThread::ExitCode Draw3DThread::Entry()
 {
-	if (ppret)
+	if (!ppret->open_nc_file(fname.c_str()))
 	{
-		if (!ppret->open_nc_file(fname.c_str()))
-		{
-			plogger->log(LOG_ERROR, _("Can not open file: %s"), fname.c_str());
-			return NULL;
-		}
-		ppret->execute_file();
+		plogger->log(LOG_ERROR, _("Can not open file: %s"), fname.c_str());
+		return NULL;
 	}
+	ppret->execute_file();
+
+		
 	//output stat
 	ConvertGCMCInfo dt;
+	dt.num_errors = plogger->errors_count();
 	dt.feed_len = pexec->get_feed_len();
 	dt.traverce_len = pexec->get_traverce_len();
 	dt.box = pexec->getBox();
@@ -141,15 +146,15 @@ wxThread::ExitCode SimulateCutting::Entry()
 		return 0;
 
 
-	std::vector<TrackPointGL> &track = view->getTrack();
+	TrackPoints &track = view->getTrack();
 	tracksize = track.size();
 	if (tracksize < 2) // nothing to do
 	{
 		wxQueueEvent(view, new SimulateThreadEvent(EVT_SIMULATE_COMPLETE));
 		return 0;
 	}
-	int tickdelay = view->get_tick_delay();
-	double distancefortick = view->get_tick_distance();
+	int tickdelay = 50; // fix
+	double distancefortick;
 	double segmentdist = 0;
 	double currentdistoftick = 0;
 	double fulldistance = 0;
@@ -157,6 +162,7 @@ wxThread::ExitCode SimulateCutting::Entry()
 
 	// check may be we are srtarting not from the starting point
 	end_point = track[0];
+	
 	size_t i = 1;
 
 	if (view->simulateLastIndex != wxNOT_FOUND)
@@ -170,30 +176,47 @@ wxThread::ExitCode SimulateCutting::Entry()
 		}
 
 	}
-
-	
+	int lastspeed = end_point.speed * m_speedk;
+	int newspeed;
+	bool first = true;
 	while (i < tracksize)
 	{
-		{
-			wxCriticalSectionLocker enter(m_worker->m_critsect);
-			second = track[i];
-		}
 
 		if (TestDestroy())
 			break;
 
-		segmentdist = glm::distance(end_point.position, second.position);
-		if (currentdistoftick + segmentdist < distancefortick) // add point to the step
 		{
-			//int segmentdelay = static_cast<int>(tickdelay * (segmentdist / distancefortick));
-			//currentdistoftick = 0;	
-			//end_point = second;
-			//SimulateThreadEvent event(i - 1, end_point);
-			//wxQueueEvent(view, event.Clone());
-			//if (segmentdelay > 1 )
-			//	wxMilliSleep(segmentdelay);
-			//++i;
+			wxCriticalSectionLocker enter(m_worker->m_critsect);
+			second = track[i];
+			newspeed = second.speed * m_speedk;
+		}
+		//calculate tick distance 	
+		
+		if (first)
+		{
+			lastspeed = newspeed;
+			first = false;
+		}
 
+		else if (newspeed != lastspeed) // we move from point
+		{
+			lastspeed = newspeed;
+			glm::vec3 move =  (second.position - end_point.position);
+			end_point = second;
+			fulldistance += move.length();
+			currentdistoftick = 0;
+			wxMilliSleep(tickdelay);
+			SimulateThreadEvent event(i - 1, int(fulldistance), end_point, EVT_SIMULATE_UPDATE);
+			wxQueueEvent(m_worker, event.Clone());
+			i++;
+			continue;
+		}
+		
+		segmentdist = glm::distance(end_point.position, second.position);
+		distancefortick = (newspeed / 60.f) * (tickdelay / 1000.f); //(to mm_in_sek)/sec			
+
+	    if (currentdistoftick + segmentdist < distancefortick) // add point to the step
+		{
 			fulldistance += segmentdist;
 			currentdistoftick += segmentdist;
 			end_point = second;
@@ -201,15 +224,16 @@ wxThread::ExitCode SimulateCutting::Entry()
 		}
 		else // we should fine next end_point on the same segment
 		{
-			double needdistanse = (currentdistoftick + segmentdist) - distancefortick;
-			float k = 1.f - float(needdistanse / segmentdist);
+			double needdistanse = distancefortick - currentdistoftick;
+			float k = float(needdistanse / segmentdist);
 			fulldistance += needdistanse;
-
+			
 			glm::vec3 move = k * (second.position - end_point.position);
 			end_point.position = end_point.position + move;
 			end_point.line = second.line;
 			end_point.isFast = second.isFast;
 			currentdistoftick = 0;
+			
 			wxMilliSleep(tickdelay);
 			
 			SimulateThreadEvent event(i-1, int(fulldistance), end_point, EVT_SIMULATE_UPDATE);
@@ -301,7 +325,9 @@ Worker::Worker(FilePage *fp) : m_timer(this), m_fp(fp)
 	m_gcmcProcess = NULL;
 	m_simulateThread = NULL;
 	m_gcmc_running_in_sec = 0;
+	m_speedk = 1;
 }
+
 Worker::~Worker()
 {
 	StopAll();
@@ -424,7 +450,10 @@ LogWindow *Worker::GetLogWnd()
 
 void Worker::OnCheckGCodeCompletion(GCMCConversionEvent &ev)
 {
-	GetLogWnd()->Append(MSLInfo, _("Checking completed"));
+	if ( ev.GetCIData().num_errors == 0)
+		GetLogWnd()->Append(MSLInfo, _("Checking completed with no error"));
+	else
+		GetLogWnd()->Append(MSLError, wxString::Format(_("Checking completed with %d error(s)"), ev.GetCIData().num_errors));
 	m_fp->UpdateStatistics(ev.GetCIData());
 
 }
@@ -446,14 +475,21 @@ void Worker::OnDraw3DUpdate(wxThreadEvent &ev)
 
 void Worker::OnDraw3DCompletion(GCMCConversionEvent &ev)
 {
-	GetLogWnd()->Append(MSLInfo, _("Drawing completed"));
-	m_fp->UpdateStatistics( ev.GetCIData() );
-	if (ev.GetCIData().runsimulaion)
+	if (ev.GetCIData().num_errors == 0)
 	{
-		// we need check that there is exist to simulate
-		View3D *view = m_fp->Get3D();
-		if (view && !view->IsEmpty())
-			SemulateStart();
+		GetLogWnd()->Append(MSLInfo, _("Drawing completed"));
+		m_fp->UpdateStatistics(ev.GetCIData());
+		if (ev.GetCIData().runsimulaion)
+		{
+			// we need check that there is exist to simulate
+			View3D *view = m_fp->Get3D();
+			if (view && !view->IsEmpty())
+				SemulateStart();
+		}
+	}
+	else
+	{
+		GetLogWnd()->Append(MSLError, wxString::Format(_("There are %d error(s). Can not draw the path"), ev.GetCIData().num_errors));
 	}
 }
 
@@ -726,7 +762,7 @@ void Worker::SemulateStart()
 
 	//view->setSimulationPos( 0 );
 	//cur_gcode_line = 0;	
-	m_simulateThread = new SimulateCutting(this);
+	m_simulateThread = new SimulateCutting(this, m_speedk);
 
 	if (m_simulateThread->Run() != wxTHREAD_NO_ERROR)
 	{
@@ -769,20 +805,20 @@ void Worker::OnSimulateCompletion(SimulateThreadEvent&)
 	view->setSimulationPos(wxNOT_FOUND);
 }
 
-int  Worker::SetSimulationPos(int idistance)
+void  Worker::SetSimulationPos(int idistance)
 {
 	View3D *view = m_fp->Get3D();
 	if (!view)
-		return -1;
+		return;
 	StopAll();
 	//calculate distance
 	size_t tracksize;
 	TrackPointGL end_point;
 
-	std::vector<TrackPointGL> &track = view->getTrack();
+	TrackPoints &track = view->getTrack();
 	tracksize = track.size();
 	if (tracksize < 2)
-		return-1;
+		return;
 
 	end_point = track[0];
 	double distance = idistance;
@@ -812,10 +848,24 @@ int  Worker::SetSimulationPos(int idistance)
 		}
 	}
 	m_fp->UpdateSimulationPos(i-1, idistance, end_point);
-	return 0;
 }
 
-int  Worker::SetSimulationSpeed(int percent)
+void  Worker::SetSimulationSpeed( int times )
 {
-	return percent;
+	m_speedk = times;
+
+	View3D *view = m_fp->Get3D();
+	if (!view)
+		return;		
+	if (m_simulateThread)
+	{
+		wxCriticalSectionLocker enter(m_critsect);
+		m_simulateThread->SetSeedK(m_speedk);
+	}
+
+
+	//tickdelay = view->get_tick_delay(); // tick delay may be changed
+	//int mm_in_sec = mm_in_min / 60;
+//	view->setSimulationSpeed(mm_in_sec);	
+	
 }

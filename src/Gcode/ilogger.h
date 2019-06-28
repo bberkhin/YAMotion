@@ -11,5 +11,6 @@ public:
     void log(int type, int linen, const char *format, ...);
 	void log(int type, const char *format, ...);
 	virtual void log_string(int type, int linen, const char *s) = 0;
+	virtual int errors_count() = 0;
 };
 
