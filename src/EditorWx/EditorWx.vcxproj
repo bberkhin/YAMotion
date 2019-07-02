@@ -47,6 +47,7 @@
     <ClCompile Include="executorview.cpp" />
     <ClCompile Include="flatbuttom.cpp" />
     <ClCompile Include="FlatScrollBar.cpp" />
+    <ClCompile Include="flatslider.cpp" />
     <ClCompile Include="LexGcmc.cxx" />
     <ClCompile Include="LexGCode.cxx" />
     <ClCompile Include="logwindow.cpp" />
@@ -95,6 +96,7 @@
     <ClInclude Include="executorview.h" />
     <ClInclude Include="flatbuttom.h" />
     <ClInclude Include="FlatScrollBar.h" />
+    <ClInclude Include="flatslider.h" />
     <ClInclude Include="Header.h" />
     <ClInclude Include="LexGCode.h" />
     <ClInclude Include="logwindow.h" />

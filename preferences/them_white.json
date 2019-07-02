@@ -1,5 +1,5 @@
 {
- "name": "White theme",
+  "name": "White theme",
   "frame": "#FFFFFF",
   "window": "#FFFFFF",
   "window_txt": "#000000",
@@ -24,5 +24,8 @@
   "titlebar_active": "#0000FF",
   "titlebar_txt": "#FFFFFF",
   "titlebar_txt_active": "#FFFFFF",
-  "border": "#3C3C3C"
+  "border": "#3C3C3C",
+  "slider_shaft": "#dddddd",
+  "slider_shaft_colored": "#CC8830"
+
 }

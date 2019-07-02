@@ -9,6 +9,7 @@
 
 #include "flatbuttom.h"
 #include "FlatScrollBar.h"
+#include "FlatSlider.h"
 #include "defsext.h"
 #include "View3D.h"
 #include "edit.h"    
@@ -466,7 +467,9 @@ wxSizer *View3DPanel::CreateSimulationPanel()
 	//Insert(index, size, size);
 	panel->Add(btns, 0, wxEXPAND);
 
-	wxSlider *pguage = new wxSlider(this, ID_SIMULATED_SLIDER, 0, 0,1000);
+	
+	FlatSlider *pguage = new FlatSlider(this, ID_SIMULATED_SLIDER, 500, 0, 1000);
+	
 	panel->Add(pguage, 0, wxEXPAND);
 
 	return panel;
@@ -520,11 +523,13 @@ void View3DPanel::UpdateStatistics(const ConvertGCMCInfo &dt)
 	SetValue(ID_CTRL_PATH, dt.feed_len, clear);
 	SetValue(ID_CTRL_TRAVERCE, dt.traverce_len, clear);
 
-	wxSlider *slider = dynamic_cast<wxSlider *>(FindWindowById(ID_SIMULATED_SLIDER, this));
+	FlatSlider *slider = dynamic_cast<FlatSlider *>(FindWindowById(ID_SIMULATED_SLIDER, this));
 	if (slider)
 	{
 		int m_full_path = int(dt.feed_len + dt.traverce_len);
-		slider->SetRange(0, m_full_path);
+		slider->SetRange(0, m_full_path);		
+		slider->SetTickFreq( m_full_path/10 );
+		
 	}
 
 	Layout();
@@ -535,11 +540,11 @@ void View3DPanel::UpdateSimulationPos(int index, int dist, const TrackPointGL &p
 	if (!m_pview || m_pview->IsEmpty() )
 		return;
 	
-	wxSlider *slider = dynamic_cast<wxSlider *>(FindWindowById( ID_SIMULATED_SLIDER, this));
+	
+	FlatSlider *slider = dynamic_cast<FlatSlider *>(FindWindowById(ID_SIMULATED_SLIDER, this));
 	if (dist < 0)
 		dist = 0;
 	slider->SetValue(dist);
-
 	m_pview->setSimulationPos(index, pt);
 	
 }
@@ -626,9 +631,11 @@ SpeedWindow::SpeedWindow(wxWindow *parent, int speedK, const wxPoint &pos)
 {
 	SetWindowStyle(GetWindowStyle() &(~wxTAB_TRAVERSAL));
 	wxBoxSizer *box = new wxBoxSizer(wxVERTICAL);
-	int flags = wxSL_MIN_MAX_LABELS |  wxSL_AUTOTICKS;	
 	
-	wxSlider *sz = new wxSlider(this, ID_SIMULATEDSPEED_SLIDER, speedK, 1, 50, wxDefaultPosition, wxSize(SPEED_WND_WIDTH, -1),flags);
+	int flags = wxSL_LABELS | wxSL_BOTTOM | wxSL_MIN_MAX_LABELS;
+	
+	//wxSlider *sz = new wxSlider(this, ID_SIMULATEDSPEED_SLIDER, speedK, 1, 50, wxDefaultPosition, wxSize(SPEED_WND_WIDTH, -1),flags);
+	FlatSlider *sz = new FlatSlider(this, ID_SIMULATEDSPEED_SLIDER, speedK, 1, 50, wxDefaultPosition, wxSize(SPEED_WND_WIDTH, -1), flags);
 	sz->SetTickFreq(10);
 	box->Add(sz, wxEXPAND, wxEXPAND);	
 	SetSizerAndFit(box);
@@ -838,6 +845,7 @@ FilePage::FilePage(wxWindow *parent, int filetype, const wxString &filename, boo
 		
 		
 	m_splitter = new wxSplitterWindow( this,-1, wxDefaultPosition,wxDefaultSize, wxSP_LIVE_UPDATE);
+	m_splashpos = -250;
 	
 
 	m_splitter->SetSize(GetClientSize());
@@ -1000,13 +1008,17 @@ void FilePage::ShowLog( )
 		
 	m_editor->Show(true);
 	m_logwn->Show(true);
-	m_splitter->SplitHorizontally(m_editor, m_logwn,-250);
+	
+	m_splitter->SplitHorizontally(m_editor, m_logwn, m_splashpos );
 }
 
 void FilePage::HideLog()
 {
 	if (m_splitter->IsSplit())
-		m_splitter->Unsplit();
+	{
+		m_splashpos = m_splitter->GetSashPosition();
+		m_splitter->Unsplit();		
+	}
 }
 
 void FilePage::UpdateStatistics(const ConvertGCMCInfo &dt)

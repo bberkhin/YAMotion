@@ -295,6 +295,8 @@ void ColourScheme::Read()
 	ReadColor(root["titlebar_active"],m_colors[TITLEBAR_ACTIVE]);
 	ReadColor(root["titlebar_txt"],m_colors[TITLEBAR_TEXT]);
 	ReadColor(root["titlebar_txt_active"],m_colors[TITLEBAR_ACTIVE_TEXT]);
+	ReadColor(root["slider_shaft"], m_colors[SLIDER_SHAFT]);
+	ReadColor(root["slider_shaft_colored"],m_colors[SLIDER_SHAFT_COLORED]);
 	ReadColor(root["border"],m_colors[BORDER]);
 }
 
@@ -331,6 +333,10 @@ void ColourScheme::InitDef()
 		// the titlebar text colours
 	m_colors[TITLEBAR_TEXT] = m_colors[CONTROL_TEXT];
 	m_colors[TITLEBAR_ACTIVE_TEXT] = m_colors[CONTROL_TEXT];
+
+	m_colors[SLIDER_SHAFT] = wxColour(0xdddddd);
+	m_colors[SLIDER_SHAFT_COLORED] = wxColour(0xcc8830);
+
 		// border
 	m_colors[BORDER] = wxColour(0xFF0000);
 }

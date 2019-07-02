@@ -153,6 +153,9 @@
     <ClCompile Include="workingthreads.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
+    <ClCompile Include="flatslider.cpp">
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h">
@@ -286,6 +289,9 @@
     </ClInclude>
     <ClInclude Include="workingthreads.h">
       <Filter>Исходные файлы</Filter>
+    </ClInclude>
+    <ClInclude Include="flatslider.h">
+      <Filter>Файлы заголовков</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

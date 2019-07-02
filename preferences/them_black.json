@@ -24,5 +24,7 @@
   "titlebar_active": "#0000FF",
   "titlebar_txt": "#FFFFFF",
   "titlebar_txt_active": "#FFFFFF",
+  "slider_shaft":"#dddddd",
+  "slider_shaft_colored":"#CC8830",
   "border": "#3C3C3C"
 }

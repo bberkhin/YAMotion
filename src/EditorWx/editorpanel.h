@@ -121,6 +121,7 @@ private:
 	wxSplitterWindow *m_splitter;
 	Worker *m_worker;
 	int m_view3dsize;
+	int m_splashpos;
 
 private:
 	wxDECLARE_EVENT_TABLE();
