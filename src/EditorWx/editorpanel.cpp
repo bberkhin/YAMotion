@@ -25,7 +25,7 @@
 
 #define MAX_BTN_PRIORITY 1101
 #define SPEED_WND_WIDTH 150
-#define SPEED_WND_HEIGHT 30
+#define SPEED_WND_HEIGHT 100
 
 enum
 {
@@ -632,14 +632,16 @@ SpeedWindow::SpeedWindow(wxWindow *parent, int speedK, const wxPoint &pos)
 	SetWindowStyle(GetWindowStyle() &(~wxTAB_TRAVERSAL));
 	wxBoxSizer *box = new wxBoxSizer(wxVERTICAL);
 	
-	int flags = wxSL_LABELS | wxSL_BOTTOM | wxSL_MIN_MAX_LABELS;
+	int flags = wxSL_LABELS | wxSL_BOTTOM | wxSL_MIN_MAX_LABELS | wxSL_AUTOTICKS;
 	
-	//wxSlider *sz = new wxSlider(this, ID_SIMULATEDSPEED_SLIDER, speedK, 1, 50, wxDefaultPosition, wxSize(SPEED_WND_WIDTH, -1),flags);
-	FlatSlider *sz = new FlatSlider(this, ID_SIMULATEDSPEED_SLIDER, speedK, 1, 50, wxDefaultPosition, wxSize(SPEED_WND_WIDTH, -1), flags);
+	
+	//FlatSlider *sz = new FlatSlider(this, ID_SIMULATEDSPEED_SLIDER, speedK, 1, 50, wxDefaultPosition, wxSize(SPEED_WND_WIDTH, -1), flags);
+	FlatSlider *sz = new FlatSlider(this, ID_SIMULATEDSPEED_SLIDER, speedK, 1, 50, wxDefaultPosition, wxDefaultSize, flags);
 	sz->SetTickFreq(10);
-	box->Add(sz, wxEXPAND, wxEXPAND);	
+	box->Add(sz, 0, wxEXPAND);	
 	SetSizerAndFit(box);
-	int h = SPEED_WND_HEIGHT;
+	wxSize bestsz = sz->GetBestSize();
+	int h = bestsz.y; SPEED_WND_HEIGHT;
 	SetSize(pos.x, pos.y - h - 5, SPEED_WND_WIDTH, h);
 	View3DPanel *panel = dynamic_cast<View3DPanel *>(parent);
 	sz->Bind(wxEVT_SCROLL_CHANGED, &View3DPanel::OnSpeedChanged, panel);

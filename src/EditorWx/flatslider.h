@@ -35,12 +35,10 @@ public:
     virtual void SetValue(int value);
 
     virtual void SetRange(int minValue, int maxValue) ;
-    virtual int GetMin() const ;
-    virtual int GetMax() const ;
+    virtual int GetMin() const { return m_min; }
+    virtual int GetMax() const { return m_max; }
 
-    virtual void SetLineSize(int lineSize) ;
     virtual void SetPageSize(int pageSize) ;
-    virtual int GetLineSize() const ;
     virtual int GetPageSize() const ;
     virtual int GetTickFreq() const { return m_tickFreq; }
 	virtual void SetTickFreq(int freq);
@@ -52,7 +50,8 @@ public:
     bool HasLabels() const
         { return ((m_sliderstyle & wxSL_LABELS) != 0) &&
                  ((m_sliderstyle& (wxSL_TOP|wxSL_BOTTOM|wxSL_LEFT|wxSL_RIGHT)) != 0); }
-
+	bool HasMinMaxLabels() const { return ((m_sliderstyle&wxSL_MIN_MAX_LABELS)!=0); }
+	
     // do we have ticks?
     bool HasTicks() const
         { return ((m_sliderstyle & wxSL_TICKS) != 0) &&
@@ -155,7 +154,6 @@ protected:
 private:
 	wxRect GetSliderShaftRect(const wxRect& rectOrig, int lenThumb ) const;
     // get the default thumb size (without using m_thumbSize)
-    wxSize GetDefaultThumbSize() const;
 	wxCoord GetMouseCoord(const wxMouseEvent& event) const;
 	void GetSliderLabelsSides(bool *left, bool *right) const;
 
@@ -170,10 +168,8 @@ private:
 
     // the tick frequence (default is 1)
     int m_tickFreq;
-
-    // the line and page increments (logical units)
-    int m_lineSize,
-        m_pageSize;
+    // the page increments (logical units)
+    int   m_pageSize;
 
     // the size of the thumb (in pixels)
 	int m_type;

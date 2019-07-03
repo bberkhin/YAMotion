@@ -3,11 +3,16 @@
 #include "wx/renderer.h"
 #include "prefs.h"
 #include "FlatSlider.h"
+
 // the margin between the slider and the label (FIXME: hardcoded)
 static const wxCoord SLIDER_LABEL_MARGIN = 2;
+static const wxCoord SLIDER_WIDTH = 40;
 
-static const int TUMB_SIZE = 10;
+static const int TUMB_SIZE_ROUND = 10;
+static const wxSize TUMB_SIZE_L = { 8, 24 };
+
 static const int BORDER_THICKNESS = 2;
+
 //static const size_t NUM_STATUSBAR_GRIP_BANDS = 3;
 //static const size_t WIDTH_STATUSBAR_GRIP_BAND = 4;
 //static const size_t STATUSBAR_GRIP_SIZE = WIDTH_STATUSBAR_GRIP_BAND * NUM_STATUSBAR_GRIP_BANDS;
@@ -18,9 +23,7 @@ static const wxCoord SLIDER_TICK_LENGTH = 6;
 
 #define wxACTION_SLIDER_START       wxT("start")     // to the beginning
 #define wxACTION_SLIDER_END         wxT("end")       // to the end
-#define wxACTION_SLIDER_LINE_UP     wxT("lineup")    // one line up/left
 #define wxACTION_SLIDER_PAGE_UP     wxT("pageup")    // one page up/left
-#define wxACTION_SLIDER_LINE_DOWN   wxT("linedown")  // one line down/right
 #define wxACTION_SLIDER_PAGE_DOWN   wxT("pagedown")  // one page down/right
 #define wxACTION_SLIDER_PAGE_CHANGE wxT("pagechange")// change page by numArg
 
@@ -81,7 +84,6 @@ void FlatSlider::Init()
 
     m_tickFreq = 1;
 
-    m_lineSize =
     m_pageSize = 0;
 	m_status = 0;
 
@@ -107,13 +109,7 @@ bool FlatSlider::Create(wxWindow *parent,
 
     SetRange(minValue, maxValue);
     SetValue(value);
-
-    // call this after setting the range as the best size depends (at least if
-    // we have wxSL_LABELS style) on the range
     SetInitialSize(size);
-
-   // CreateInputHandler(wxINP_HANDLER_SLIDER);
-
     return true;
 }
 
@@ -205,26 +201,10 @@ void FlatSlider::SetRange(int minValue, int maxValue)
     //else: nothing changed
 }
 
-int FlatSlider::GetMin() const
-{
-    return m_min;
-}
-
-int FlatSlider::GetMax() const
-{
-    return m_max;
-}
 
 // ----------------------------------------------------------------------------
 // FlatSlider line/page/thumb size
 // ----------------------------------------------------------------------------
-
-void FlatSlider::SetLineSize(int lineSize)
-{
-    wxCHECK_RET( lineSize >= 0, wxT("invalid slider line size") );
-
-    m_lineSize = lineSize;
-}
 
 void FlatSlider::SetPageSize(int pageSize)
 {
@@ -233,16 +213,6 @@ void FlatSlider::SetPageSize(int pageSize)
     m_pageSize = pageSize;
 }
 
-int FlatSlider::GetLineSize() const
-{
-    if ( !m_lineSize )
-    {
-        // the default line increment is 1
-        wxConstCast(this, FlatSlider)->m_lineSize = 1;
-    }
-
-    return m_lineSize;
-}
 
 int FlatSlider::GetPageSize() const
 {
@@ -251,7 +221,6 @@ int FlatSlider::GetPageSize() const
         // the default page increment is m_tickFreq
         wxConstCast(this, FlatSlider)->m_pageSize = m_tickFreq;
     }
-
     return m_pageSize;
 }
 
@@ -297,12 +266,12 @@ wxSize FlatSlider::CalcLabelSize() const
 wxSize FlatSlider::DoGetBestClientSize() const
 {
     // this dimension is completely arbitrary
-    static const wxCoord SLIDER_WIDTH = 40;
+    
 
     
     // first calculate the size of the slider itself: i.e. the shaft and the
     // thumb
-    wxCoord height = 20;// GetRenderer()->GetSliderDim();
+	 wxCoord height = TUMB_SIZE_L.y;// GetRenderer()->GetSliderDim();
 
     wxSize size;
     if ( IsVertical() )
@@ -330,29 +299,34 @@ wxSize FlatSlider::DoGetBestClientSize() const
         else
             size.y += lenTick;
     }
+	if ( HasLabels() || HasMinMaxLabels() )
+	{
+		wxSize sizeLabels = CalcLabelSize();
+		// if we have the label, reserve enough space for it
+		if (m_sliderstyle & (wxSL_LEFT | wxSL_RIGHT))
+		{
+			size.x += sizeLabels.x + SLIDER_LABEL_MARGIN;
+		}
+		else if (m_sliderstyle & (wxSL_TOP | wxSL_BOTTOM))
+		{
+			size.y += sizeLabels.y + SLIDER_LABEL_MARGIN;
+		}
+		if (HasMinMaxLabels() )
+		{
+			if ( IsVertical() )
+				size.y += 2*(sizeLabels.y + SLIDER_LABEL_MARGIN);
+			else
+				size.x += 2 * (sizeLabels.x + SLIDER_LABEL_MARGIN);
 
-    // if we have the label, reserve enough space for it
-    if ( HasLabels() )
-    {
-        wxSize sizeLabels = CalcLabelSize();
+		}
 
-        if (m_sliderstyle & (wxSL_LEFT|wxSL_RIGHT))
-        {
-            size.x += sizeLabels.x + SLIDER_LABEL_MARGIN;
-        }
-        else if (m_sliderstyle & (wxSL_TOP|wxSL_BOTTOM))
-        {
-            size.y += sizeLabels.y + SLIDER_LABEL_MARGIN;
-        }
-    }
-
+	}
     return size;
 }
 
 void FlatSlider::OnSize(wxSizeEvent& event)
 {
     CalcGeometry();
-
     event.Skip();
 }
 
@@ -362,140 +336,134 @@ const wxRect& FlatSlider::GetSliderRect() const
     {
         wxConstCast(this, FlatSlider)->CalcGeometry();
     }
-
     return m_rectSlider;
 }
 
 void FlatSlider::CalcGeometry()
 {
-    /*
-       recalc the label and slider positions, this looks like this for
-       wxSL_HORIZONTAL | wxSL_TOP slider:
+	/*
+	   recalc the label and slider positions, this looks like this for
+	   wxSL_HORIZONTAL | wxSL_TOP slider:
 
-       LLL             lll
-       -------------------------
-       |                T      |  <-- this is the slider rect
-       | HHHHHHHHHHHHHHHTHHHHH |
-       |                T      |
-       | *  *  *  *  *  *  *  *|
-       -------------------------
+	   LLL             lll
+	   -------------------------
+	   |                T      |  <-- this is the slider rect
+	   | HHHHHHHHHHHHHHHTHHHHH |
+	   |                T      |
+	   | *  *  *  *  *  *  *  *|
+	   -------------------------
 
-       LLL is m_rectLabel as calculated here and lll is the real rect used for
-       label drawing in OnDraw() (TTT indicated the thumb position and *s are
-       the ticks)
+	   LLL is m_rectLabel as calculated here and lll is the real rect used for
+	   label drawing in OnDraw() (TTT indicated the thumb position and *s are
+	   the ticks)
 
-       in the wxSL_VERTICAL | wxSL_RIGHT case the picture is like this:
+	   in the wxSL_VERTICAL | wxSL_RIGHT case the picture is like this:
 
-       ------ LLL
-       | H  |
-       | H *|
-       | H  |
-       | H *|
-       | H  |
-       | H *|
-       | H  |
-       |TTT*| lll
-       | H  |
-       | H *|
-       ------
-    */
-    
-    // initialize to the full client rect
-    wxRect rectTotal = GetClientRect();
-    m_rectSlider = rectTotal;
-    wxSize sizeThumb = GetThumbSize();
+	   ------ LLL
+	   | H  |
+	   | H *|
+	   | H  |
+	   | H *|
+	   | H  |
+	   | H *|
+	   | H  |
+	   |TTT*| lll
+	   | H  |
+	   | H *|
+	   ------
+	*/
 
-    // Labels reduce the size of the slider rect
-    if ( HasLabels() )
-    {
-       wxSize sizeLabels = CalcLabelSize();
+	// initialize to the full client rect
+	wxRect rectTotal = GetClientRect();
+	m_rectSlider = rectTotal;
+	wxSize sizeThumb = GetThumbSize();
 
-        m_rectLabel = wxRect(rectTotal.GetPosition(), sizeLabels);
+	// Labels reduce the size of the slider rect
+	if ( HasLabels() || HasMinMaxLabels() )
+	{
+		wxSize sizeLabels = CalcLabelSize();
 
-        if (m_sliderstyle & wxSL_TOP)
-        {
-            // shrink and offset the slider to the bottom
-            m_rectSlider.y += sizeLabels.y + SLIDER_LABEL_MARGIN;
-            m_rectSlider.height -= sizeLabels.y + SLIDER_LABEL_MARGIN;
-        }
-        else if (m_sliderstyle & wxSL_BOTTOM)
-        {
-            // shrink the slider and move the label to the bottom
-            m_rectSlider.height -= sizeLabels.y + SLIDER_LABEL_MARGIN;
-            m_rectLabel.y += m_rectSlider.height + SLIDER_LABEL_MARGIN;
-        }
-        else if (m_sliderstyle & wxSL_LEFT)
-        {
-            // shrink and offset the slider to the right
-            m_rectSlider.x += sizeLabels.x + SLIDER_LABEL_MARGIN;
-            m_rectSlider.width -= sizeLabels.x + SLIDER_LABEL_MARGIN;
-        }
-        else if (m_sliderstyle & wxSL_RIGHT)
-        {
-            // shrink the slider and move the label to the right
-            m_rectSlider.width -= sizeLabels.x + SLIDER_LABEL_MARGIN;
-            m_rectLabel.x += m_rectSlider.width + SLIDER_LABEL_MARGIN;
-        }
-    }
+		m_rectLabel = wxRect(rectTotal.GetPosition(), sizeLabels);
 
-    // calculate ticks too
-    if ( HasTicks() )
-    {
-        wxCoord lenTick = SLIDER_TICK_LENGTH; // GetRenderer()->GetSliderTickLen();
+		if (m_sliderstyle & wxSL_TOP)
+		{
+			// shrink and offset the slider to the bottom
+			m_rectSlider.y += sizeLabels.y + SLIDER_LABEL_MARGIN;
+			m_rectSlider.height -= sizeLabels.y + SLIDER_LABEL_MARGIN;
+		}
+		else if (m_sliderstyle & wxSL_BOTTOM)
+		{
+			// shrink the slider and move the label to the bottom
+			m_rectSlider.height -= sizeLabels.y + SLIDER_LABEL_MARGIN;
+			m_rectLabel.y += m_rectSlider.height + SLIDER_LABEL_MARGIN;
+		}
+		else if (m_sliderstyle & wxSL_LEFT)
+		{
+			// shrink and offset the slider to the right
+			m_rectSlider.x += sizeLabels.x + SLIDER_LABEL_MARGIN;
+			m_rectSlider.width -= sizeLabels.x + SLIDER_LABEL_MARGIN;
+		}
+		else if (m_sliderstyle & wxSL_RIGHT)
+		{
+			// shrink the slider and move the label to the right
+			m_rectSlider.width -= sizeLabels.x + SLIDER_LABEL_MARGIN;
+			m_rectLabel.x += m_rectSlider.width + SLIDER_LABEL_MARGIN;
+		}
+	}
 
-        // it
-        m_rectTicks = GetShaftRect();
+	// calculate ticks too
+	if (HasTicks())
+	{
+		wxCoord lenTick = SLIDER_TICK_LENGTH; // GetRenderer()->GetSliderTickLen();
 
-        if ( IsVertical() )
-        {
-            if (m_sliderstyle & (wxSL_LEFT|wxSL_BOTH))
-            {
-                m_rectTicks.x = m_rectSlider.x;
-            }
-            else
-            { // wxSL_RIGHT
-                m_rectTicks.x = m_rectSlider.x + m_rectSlider.width - lenTick;
-            }
-            m_rectTicks.width = lenTick;
-        }
-        else // horizontal
-        {
-            if (m_sliderstyle & (wxSL_TOP|wxSL_BOTH))
-            {
-                m_rectTicks.y = m_rectSlider.y;
-            }
-            else
-            { // wxSL_BOTTOM
-                m_rectTicks.y = m_rectSlider.y + m_rectSlider.height - lenTick;
-            }
-            m_rectTicks.height = lenTick;
-        }
-    }
+		// it
+		m_rectTicks = GetShaftRect();
 
-    // slider is never smaller than thumb size unless rectTotal
-    if ( IsVertical() )
-    {
-        wxCoord width = wxMin ( rectTotal.width, sizeThumb.x );
-        m_rectSlider.width = wxMax ( m_rectSlider.width, width );
-    }
-    else
-    {
-        wxCoord height = wxMin ( rectTotal.height, sizeThumb.y );
-        m_rectSlider.height = wxMax ( m_rectSlider.height, height );
-    }
-}
+		if (IsVertical())
+		{
+			if (m_sliderstyle & (wxSL_LEFT | wxSL_BOTH))
+			{
+				m_rectTicks.x = m_rectSlider.x;
+			}
+			else
+			{ // wxSL_RIGHT
+				m_rectTicks.x = m_rectSlider.x + m_rectSlider.width - lenTick;
+			}
+			m_rectTicks.width = lenTick;
+		}
+		else // horizontal
+		{
+			if (m_sliderstyle & (wxSL_TOP | wxSL_BOTH))
+			{
+				m_rectTicks.y = m_rectSlider.y;
+			}
+			else
+			{ // wxSL_BOTTOM
+				m_rectTicks.y = m_rectSlider.y + m_rectSlider.height - lenTick;
+			}
+			m_rectTicks.height = lenTick;
+		}
+	}
 
-wxSize FlatSlider::GetDefaultThumbSize() const
-{
-    // Default size has no styles (arrows)
-   // return GetRenderer()->GetSliderThumbSize(GetSliderRect(), 0, GetOrientation());
-    return wxSize(TUMB_SIZE, TUMB_SIZE);
+	// slider is never smaller than thumb size unless rectTotal
+	if (IsVertical())
+	{
+		wxCoord width = wxMin(rectTotal.width, sizeThumb.x);
+		m_rectSlider.width = wxMax(m_rectSlider.width, width);
+	}
+	else
+	{
+		wxCoord height = wxMin(rectTotal.height, sizeThumb.y);
+		m_rectSlider.height = wxMax(m_rectSlider.height, height);
+	}
 }
 
 wxSize FlatSlider::GetThumbSize() const
 {
-    return  GetDefaultThumbSize();
-        //GetRenderer()->GetSliderThumbSize(GetSliderRect(), m_thumbSize, GetOrientation());
+	if (HasMinMaxLabels())
+		return TUMB_SIZE_L;
+	else
+		return wxSize(TUMB_SIZE_ROUND, TUMB_SIZE_ROUND);
 }
 
 // ----------------------------------------------------------------------------
@@ -505,7 +473,7 @@ wxSize FlatSlider::GetThumbSize() const
 wxRect FlatSlider::GetShaftRect() const
 {
     
-	return GetSliderShaftRect( m_rectSlider, TUMB_SIZE );
+	return GetSliderShaftRect( m_rectSlider, TUMB_SIZE_ROUND);
 }
 
 void FlatSlider::CalcThumbRect(const wxRect *rectShaftIn,
@@ -733,20 +701,21 @@ void FlatSlider::render(wxDC& dc)
 		dc.SetPen(*wxTRANSPARENT_PEN);
 		dc.DrawRoundedRectangle(rectShaft, 2);
 		
-
+		wxRect rectColoredShaft = rectShaft;
 		if (IsVertical())
-			rectShaft.height = rectThumb.y;
+			rectColoredShaft.height = rectThumb.GetPosition().y;
 		else
-			rectShaft.width = rectThumb.x;
+			rectColoredShaft.width = rectThumb.GetPosition().x ;
 
 		dc.SetBrush(clrs->Get(ColourScheme::SLIDER_SHAFT_COLORED));
-		dc.DrawRoundedRectangle(rectShaft, 2);
+		dc.DrawRoundedRectangle(rectColoredShaft, 2);
     }
 
     // then draw the ticks
     if ( HasTicks() /*&& rectUpdate.Intersects(m_rectTicks) */)
     {
-        DrawSliderTicks(dc, m_rectSlider, len, m_min, m_max, m_tickFreq);
+		// DrawSliderTicks(dc, m_rectSlider, len, m_min, m_max, m_tickFreq);
+		DrawSliderTicks(dc, m_rectSlider, len, 0, 2, 1);
     }
 
     // then draw the thumb
@@ -756,34 +725,66 @@ void FlatSlider::render(wxDC& dc)
     }
 
 
-    // finally, draw the label near the thumb
-    if ( HasLabels() /*&& rectUpdate.Intersects(rectLabel) */)
-    {
-        // align it to be close to the shaft
-        int align = 0;
-        if (m_sliderstyle & wxSL_TOP)
-        {
-            align = wxALIGN_CENTRE_HORIZONTAL|wxALIGN_TOP;
-        }
-        else if (m_sliderstyle & wxSL_BOTTOM)
-        {
-            align = wxALIGN_CENTRE_HORIZONTAL|wxALIGN_BOTTOM;
-        }
-        else if (m_sliderstyle & wxSL_LEFT)
-        {
-            align = wxALIGN_CENTRE_VERTICAL|wxALIGN_LEFT;
-        }
-        else if (m_sliderstyle & wxSL_RIGHT)
-        {
-            align = wxALIGN_CENTRE_VERTICAL|wxALIGN_RIGHT;
-        }
+	if (HasLabels() || HasMinMaxLabels())
+	{
+		dc.SetFont(GetFont());
+		dc.SetTextForeground(GetForegroundColour());
 
-        dc.SetFont(GetFont());
-        dc.SetTextForeground(GetForegroundColour());
+		// finally, draw the label near the thumb
+		if (HasLabels() /*&& rectUpdate.Intersects(rectLabel) */)
+		{
+			// align it to be close to the shaft
+			int align = 0;
+			if (m_sliderstyle & wxSL_TOP)
+			{
+				align = wxALIGN_CENTRE_HORIZONTAL | wxALIGN_TOP;
+			}
+			else if (m_sliderstyle & wxSL_BOTTOM)
+			{
+				align = wxALIGN_CENTRE_HORIZONTAL | wxALIGN_BOTTOM;
+			}
+			else if (m_sliderstyle & wxSL_LEFT)
+			{
+				align = wxALIGN_CENTRE_VERTICAL | wxALIGN_LEFT;
+			}
+			else if (m_sliderstyle & wxSL_RIGHT)
+			{
+				align = wxALIGN_CENTRE_VERTICAL | wxALIGN_RIGHT;
+			}
+			// the slider label is never drawn focused
+			dc.DrawLabel(FormatValue(static_cast<int>(round((m_max-m_min)/2))), rectLabel, align);
+		}
+		if (HasMinMaxLabels())
+		{
+			if ( IsVertical() )
+			{
+				rectLabel.y = rectShaft.y;
+				rectLabel.height = rectShaft.height;
+			}
+			else
+			{
+				rectLabel.x = rectShaft.x;
+				rectLabel.width = rectShaft.width;
+			}
+			
+			int align = 0;
+			//Min Value
+			if (m_sliderstyle & wxSL_TOP)				align = wxALIGN_LEFT | wxALIGN_TOP;
+			else if (m_sliderstyle & wxSL_BOTTOM)		align = wxALIGN_LEFT | wxALIGN_BOTTOM;
+			else if (m_sliderstyle & wxSL_LEFT)			align = wxALIGN_BOTTOM | wxALIGN_LEFT;
+			else if (m_sliderstyle & wxSL_RIGHT)		align = wxALIGN_TOP | wxALIGN_RIGHT;
 
-        // the slider label is never drawn focused
-		dc.DrawLabel(FormatValue(m_value), rectLabel, align );
-    }
+			dc.DrawLabel(FormatValue(m_min), rectLabel, align);
+
+			//Max Value
+			if (m_sliderstyle & wxSL_TOP)				align = wxALIGN_RIGHT | wxALIGN_TOP;
+			else if (m_sliderstyle & wxSL_BOTTOM)		align = wxALIGN_RIGHT | wxALIGN_BOTTOM;
+			else if (m_sliderstyle & wxSL_LEFT)			align = wxALIGN_BOTTOM | wxALIGN_LEFT;
+			else if (m_sliderstyle & wxSL_RIGHT)		align = wxALIGN_TOP | wxALIGN_RIGHT;
+
+			dc.DrawLabel(FormatValue(m_max), rectLabel, align);
+		}
+	}
 }
 
 // ----------------------------------------------------------------------------
@@ -812,16 +813,6 @@ bool FlatSlider::PerformAction(const wxString& action,
     {
         scrollEvent = wxEVT_SCROLL_CHANGED;
         value = NormalizeValue(m_value + numArg * GetPageSize());
-    }
-    else if ( action == wxACTION_SLIDER_LINE_UP )
-    {
-        scrollEvent = wxEVT_SCROLL_LINEUP;
-        value = NormalizeValue(m_value + -GetLineSize());
-    }
-    else if ( action == wxACTION_SLIDER_LINE_DOWN )
-    {
-        scrollEvent = wxEVT_SCROLL_LINEDOWN;
-        value = NormalizeValue(m_value + +GetLineSize());
     }
     else if ( action == wxACTION_SLIDER_PAGE_UP )
     {
@@ -1048,14 +1039,16 @@ void DrawLine(wxDC& dc,
 void FlatSlider::DrawSliderThumb(wxDC& dc,	const wxRect& rect)
 {
 	ColourScheme *clrs = Preferences::Get()->GetColorScheme();
-	wxRect rectInt = rect;
 	wxColor clr = clrs->Get(ColourScheme::SLIDER_SHAFT_COLORED);
 	if ((m_status == statusPressed) || (m_status == statusHover))
 		clr = clr.ChangeLightness(80);
 	
 	dc.SetBrush(clr);
 	dc.SetPen(*wxTRANSPARENT_PEN);
-	dc.DrawEllipse(rectInt);
+	if ( HasMinMaxLabels() )
+		dc.DrawRoundedRectangle(rect,4);
+	else
+		dc.DrawEllipse(rect);
 }
 
 void FlatSlider::DrawSliderTicks(wxDC& dc,	const wxRect& rect,	int lenThumb,int start,	int end, int step)
