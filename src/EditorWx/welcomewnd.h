@@ -3,12 +3,12 @@
 
 //class WelcomProcessor;
 
-class WelcomeWnd : 	public wxHtmlWindow
+class WelcomeWndHtml : 	public wxHtmlWindow
 {
 
 public:
-	WelcomeWnd(wxWindow *parent); 
-	~WelcomeWnd();
+	WelcomeWndHtml(wxWindow *parent); 
+	~WelcomeWndHtml();
 	void OnHtmlLinkClicked(wxHtmlLinkEvent &event);
 	void ShowWelcome(bool bShow);
 	void SetHomePage();
@@ -19,9 +19,30 @@ public:
 	void UpdateFooter();
 private:
 	wxDECLARE_EVENT_TABLE();
-	wxDECLARE_NO_COPY_CLASS(WelcomeWnd);
+	wxDECLARE_NO_COPY_CLASS(WelcomeWndHtml);
 private:
 	//WelcomProcessor *processor;
 	wxFrame *pWelcomeFrame;
+};
+
+class WelcomeWnd : public wxPanel
+{
+	//wxDECLARE_ABSTRACT_CLASS(WelcomeWnd);
+public:
+	WelcomeWnd(wxWindow *parent);
+	virtual ~WelcomeWnd();
+	void OnHtmlLinkClicked(wxHtmlLinkEvent &event);
+	
+private:
+	wxBoxSizer *CreateRecentFilesList();
+	wxBoxSizer *CreateFooter();
+	wxBoxSizer *CreateCommand();
+	wxBoxSizer *CreateDoc();
+	void UpdateThemeColor();
+	void AddColumnHeader(wxBoxSizer *pane, const wxString &text);
+	void AddCommand(wxBoxSizer *pane, const wxString &text, int cmd);
+	void AddRecentFile(wxBoxSizer *pane, const wxFileName &p, int n);
+private:
+	wxDECLARE_EVENT_TABLE();
 };
 

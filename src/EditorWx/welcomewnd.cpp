@@ -1,14 +1,18 @@
 #include "wx/wx.h"
 #include "wx/html/htmlproc.h"
 #include "wx/html/m_templ.h"
+#include <wx/statline.h>
 
 #include "appdefs.h"
 #include "welcomewnd.h"
 #include "standartpaths.h"
 #include "configdata.h"
 #include "app.h"
+#include "prefs.h"
+#include "defsext.h"
+#include "flatbuttom.h"
 
-
+#define WELCOME_MARGIN 10
 
 class FooterCell : public wxHtmlContainerCell
 {
@@ -129,7 +133,7 @@ public:
 
 
 
-WelcomeWnd::WelcomeWnd(wxWindow *parent) : wxHtmlWindow()
+WelcomeWndHtml::WelcomeWndHtml(wxWindow *parent) : wxHtmlWindow()
 {
 	// tempoary create own frame
 	long style = GetWindowStyle();
@@ -146,7 +150,7 @@ WelcomeWnd::WelcomeWnd(wxWindow *parent) : wxHtmlWindow()
 	SetHomePage();
 }
 
-WelcomeWnd::~WelcomeWnd()
+WelcomeWndHtml::~WelcomeWndHtml()
 {
 }
 
@@ -172,7 +176,7 @@ FooterCell *FindFooter(wxHtmlContainerCell *Cell)
 	return 0;
 }
 
-void WelcomeWnd::SetHomePage()
+void WelcomeWndHtml::SetHomePage()
 {
 	wxString path_name = StandartPaths::Get()->GetResourcesPath(L"welcome.htm").c_str();
 	LoadFile(path_name);
@@ -181,23 +185,23 @@ void WelcomeWnd::SetHomePage()
 }
 
 
-void WelcomeWnd::ShowWelcome(bool bShow)
+void WelcomeWndHtml::ShowWelcome(bool bShow)
 {
 	pWelcomeFrame->Show(bShow);
 }
 
 
 
-wxBEGIN_EVENT_TABLE(WelcomeWnd, wxHtmlWindow)
+wxBEGIN_EVENT_TABLE(WelcomeWndHtml, wxHtmlWindow)
 //EVT_ERASE_BACKGROUND(WelcomeWnd::OnEraseBgEvent)
-EVT_HTML_LINK_CLICKED(wxID_ANY, WelcomeWnd::OnHtmlLinkClicked)
-EVT_SIZE(WelcomeWnd::OnSize)
+EVT_HTML_LINK_CLICKED(wxID_ANY, WelcomeWndHtml::OnHtmlLinkClicked)
+EVT_SIZE(WelcomeWndHtml::OnSize)
 wxEND_EVENT_TABLE()
 
 //EVT_HTML_LINK_CLICKED(wxID_ANY, MyFrame::OnHtmlLinkClicked)
 
 
-void WelcomeWnd::RunCommand(const wxString &url, int baseCmd)
+void WelcomeWndHtml::RunCommand(const wxString &url, int baseCmd)
 {
 	long n = 0;
 	if (url.After(':').ToLong(&n))
@@ -207,7 +211,7 @@ void WelcomeWnd::RunCommand(const wxString &url, int baseCmd)
 		wxQueueEvent(pWelcomeFrame->GetParent(), ev);
 	}
 }
-void WelcomeWnd::OnHtmlLinkClicked(wxHtmlLinkEvent &event)
+void WelcomeWndHtml::OnHtmlLinkClicked(wxHtmlLinkEvent &event)
 {
 	// skipping this event the default behaviour (load the clicked URL)
 	// will happen...
@@ -228,7 +232,7 @@ void WelcomeWnd::OnHtmlLinkClicked(wxHtmlLinkEvent &event)
 		event.Skip();
 }
 
-void WelcomeWnd::UpdateFooter()
+void WelcomeWndHtml::UpdateFooter()
 {
 	FooterCell *fc = FindFooter(m_Cell);
 	if (!fc)
@@ -247,7 +251,7 @@ void WelcomeWnd::UpdateFooter()
 	m_Cell->Layout(cs.x);
 }
 
-void WelcomeWnd::OnSize(wxSizeEvent& event)
+void WelcomeWndHtml::OnSize(wxSizeEvent& event)
 {
 	wxHtmlWindow::OnSize(event);
 	UpdateFooter();
@@ -256,4 +260,166 @@ void WelcomeWnd::OnSize(wxSizeEvent& event)
 
 
 
+
+
+//wxIMPLEMENT_ABSTRACT_CLASS(WelcomeWnd, wxPanel);
+
+wxBEGIN_EVENT_TABLE(WelcomeWnd, wxPanel)
+//EVT_BUTTON(ID_TO3DBUTTON, EditorPanel::OnTo3DButton)
+wxEND_EVENT_TABLE()
+
+WelcomeWnd::WelcomeWnd(wxWindow *parent) : wxPanel(parent)
+{
+	ColourScheme *clrs = Preferences::Get()->GetColorScheme();
+	const CommonInfo &common_prefs = Preferences::Get()->Common();
+
+	wxBoxSizer *totalpane = new wxBoxSizer(wxVERTICAL);
+	// Header
+	wxStaticText *ptxt = new wxStaticText(this, wxID_ANY, APP_NAME );
+	ptxt->SetFont(wxFontInfo(28).Bold());
+	totalpane->Add(ptxt, 0, wxEXPAND);
+	totalpane->AddSpacer(WELCOME_MARGIN);
+
+	wxBoxSizer *panemain = new wxBoxSizer(wxHORIZONTAL);
+	panemain->Add(CreateCommand(), 0, wxLEFT);
+	panemain->AddSpacer(WELCOME_MARGIN);
+	wxStaticLine *pGripper = new wxStaticLine(this,wxID_ANY,wxDefaultPosition, wxDefaultSize, wxLI_VERTICAL );
+	panemain->Add(pGripper, 0, wxGROW | wxLEFT | wxRIGHT, 5);
+	panemain->AddSpacer(WELCOME_MARGIN);
+	
+	panemain->Add(CreateRecentFilesList(), 0, wxEXPAND, wxBORDER);
+	panemain->AddSpacer(WELCOME_MARGIN);
+	pGripper = new wxStaticLine(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxLI_VERTICAL);
+	panemain->Add(pGripper, 0, wxGROW | wxLEFT | wxRIGHT, 5);
+	panemain->AddSpacer(WELCOME_MARGIN);
+	panemain->Add(CreateDoc(), 0, wxRIGHT);
+
+
+	totalpane->Add(panemain, 0, wxEXPAND);
+	
+	totalpane->Add(CreateFooter(), wxEXPAND, wxEXPAND);
+	totalpane->AddSpacer(WELCOME_MARGIN);
+	
+	UpdateThemeColor();
+	SetSizerAndFit(totalpane);
+}
+
+
+void WelcomeWnd::UpdateThemeColor()
+{
+	
+	ColourScheme *clrs = Preferences::Get()->GetColorScheme();
+	wxColor bgColor(0xeeeeee); //clrs->Get(ColourScheme::WINDOW);
+	wxColor fgColor(0x333333); //clrs->Get(ColourScheme::WINDOW_TEXT);
+
+	SetBackgroundColour(bgColor);
+	SetForegroundColour(fgColor);
+
+	wxWindowList::compatibility_iterator node = GetChildren().GetFirst();
+	while (node)
+	{
+		wxWindow* child = node->GetData();
+		child->SetBackgroundColour(bgColor);
+		//child->SetForegroundColour(fgColor);
+		node = node->GetNext();
+	}
+	
+}
+
+void WelcomeWnd::AddColumnHeader(wxBoxSizer *pane, const wxString &text)
+{
+	wxStaticText *ph = new wxStaticText(this, wxID_ANY, text);
+	ph->SetFont(wxFontInfo(10).Bold()); 
+	pane->Add(ph, 0, 0); 
+	pane->AddSpacer(WELCOME_MARGIN * 2);
+}
+
+void WelcomeWnd::AddCommand(wxBoxSizer *pane, const wxString &text, int cmd)
+{
+	//wxStaticText *ph = new wxStaticText(this, cmd, text);
+	
+	wxBitmap bmp = wxArtProvider::GetBitmap(wxART_FILE_OPEN, wxART_OTHER );
+	FlatButton *ph = new FlatButton(this, cmd, text, bmp);
+	ph->SetFont(wxFontInfo(10));
+	ph->SetForegroundColour(wxColor(0x333333));
+	pane->Add(ph, 0, wxEXPAND);
+}
+
+void WelcomeWnd::AddRecentFile(wxBoxSizer *pane, const wxFileName &p, int n)
+{
+	wxStaticText *ph = new wxStaticText(this, 100 + n, p.GetFullName());
+	ph->SetFont(wxFontInfo(10));
+	pane->Add(ph, 0, wxEXPAND);
+}
+
+wxBoxSizer *WelcomeWnd::CreateCommand()
+{
+	wxBoxSizer *pane = new wxBoxSizer(wxVERTICAL);
+	AddColumnHeader(pane, _("Files"));
+	AddCommand(pane, _("Open"), ID_OPENFILE);
+	pane->AddSpacer(WELCOME_MARGIN);
+	AddCommand(pane, _("New    GCODE"), ID_NEWNC );
+	AddCommand(pane, _("New GCMC"), ID_NEWGCMC);
+	return pane;
+}
+
+wxBoxSizer *WelcomeWnd::CreateDoc()
+{
+	wxBoxSizer *pane = new wxBoxSizer(wxVERTICAL);
+	AddColumnHeader(pane, _("Help"));
+	pane->Add(new wxStaticText(this, wxID_ANY, _("Use GCMC to write easy")));
+	pane->Add(new wxStaticText(this, wxID_ANY, _("Use GCode directly")));
+	pane->Add(new wxStaticText(this, wxID_ANY, _("Whats News")));
+	return pane;
+}
+
+wxBoxSizer *WelcomeWnd::CreateRecentFilesList( )
+{
+	wxBoxSizer *pane = new wxBoxSizer(wxVERTICAL);
+	AddColumnHeader(pane, _("Recent Files"));
+	ConfigData *config = dynamic_cast<ConfigData *>(wxConfigBase::Get());
+	if (config)
+	{
+		const FileNamesList &files = config->GetFiles();
+		if (!files.empty())
+		{
+			int n = 0;
+			WelcomeWnd *parent = this;
+			std::for_each(files.begin(), files.end(),
+				[&pane, &n, parent](const wxFileName &p) {
+				parent->AddRecentFile(pane, p, n++);
+				});
+		}
+	}
+	return pane;
+}
+
+
+wxBoxSizer *WelcomeWnd::CreateFooter()
+{
+	wxBoxSizer *pane = new wxBoxSizer(wxHORIZONTAL);
+	pane->AddSpacer(WELCOME_MARGIN);
+	pane->Add( new wxStaticText(this, wxID_ANY, APP_COPYRIGTH), 0, wxALIGN_BOTTOM);
+	pane->AddSpacer(WELCOME_MARGIN);
+	pane->Add(new wxStaticText(this, wxID_ANY, _("Preference")), 0, wxALIGN_BOTTOM);
+	pane->AddSpacer(WELCOME_MARGIN);
+	pane->Add(new wxStaticText(this, wxID_ANY, _("Check for Update")), 0, wxALIGN_BOTTOM);//wxLEFT| wxBOTTOM);
+	pane->AddStretchSpacer();
+	wxBoxSizer *pane1 = new wxBoxSizer(wxVERTICAL);
+	pane1->Add(new wxStaticText(this, wxID_ANY, _("Help us become better.")), 0, wxALIGN_CENTER_HORIZONTAL);
+	pane1->Add(new wxStaticText(this, wxID_ANY, _(" Tell us what you liked or what you lack in our application")), 0, wxALIGN_CENTER_HORIZONTAL);
+	pane1->Add(new FlatButton(this, wxID_ANY, _("WRITE TO ME")), 0, wxALIGN_CENTER_HORIZONTAL);
+	pane->Add(pane1, 0, wxRIGHT| wxALIGN_BOTTOM);
+	return pane;
+}
+
+WelcomeWnd::~WelcomeWnd()
+{
+
+}
+
+void WelcomeWnd::OnHtmlLinkClicked(wxHtmlLinkEvent &event)
+{
+
+}
 
