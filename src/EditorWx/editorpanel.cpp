@@ -18,14 +18,14 @@
 #include "app.h"          //for upadte title :(
 #include "appframe.h"     //for upadte title :(
 
-#include "bitmaps/simulate.xpm"
+#include "bitmaps/play.xpm"
 #include "bitmaps/pause.xpm"
 #include "bitmaps/stop.xpm"
 
 
 #define MAX_BTN_PRIORITY 1101
 #define SPEED_WND_WIDTH 150
-#define SPEED_WND_HEIGHT 100
+
 
 enum
 {
@@ -455,7 +455,7 @@ wxSizer *View3DPanel::CreateSimulationPanel()
 	//wxBitmapButton *bbt  = wxBitmapButton::NewCloseButton(this, ID_BTN_PAUSE);
 	FlatButton *bt = new FlatButton(this, ID_BTN_PAUSE, wxEmptyString, wxBitmap(pause_xpm));
 	btns->Add(bt, 0, wxALIGN_CENTRE_VERTICAL);
-	bt = new FlatButton(this, ID_BTN_SIMULATE, wxEmptyString, wxBitmap(simulate_xpm));
+	bt = new FlatButton(this, ID_BTN_SIMULATE, wxEmptyString, wxBitmap(play_xpm));
 	btns->Add(bt, 0, wxALIGN_CENTRE_VERTICAL);
 	bt = new FlatButton(this, ID_BTN_STOP, wxEmptyString, wxBitmap(stop_xpm));
 	btns->Add(bt, 0, wxALIGN_CENTRE_VERTICAL);
@@ -626,22 +626,18 @@ public:
 
 
 SpeedWindow::SpeedWindow(wxWindow *parent, int speedK, const wxPoint &pos)
-	: wxPopupWindow(parent)// wxPopupWindow(parent, -1, wxEmptyString, pos, wxSize(SPEED_WND_WIDTH, SPEED_WND_HEIGHT), wxFRAME_NO_TASKBAR|wxFRAME_FLOAT_ON_PARENT|wxBORDER_NONE)
-	 //wxWindow(parent, -1, pos, wxSize(SPEED_WND_WIDTH, SPEED_WND_HEIGHT), wxPOPUP_WINDOW | wxBORDER_NONE)
+	: wxPopupWindow(parent)
 {
 	SetWindowStyle(GetWindowStyle() &(~wxTAB_TRAVERSAL));
 	wxBoxSizer *box = new wxBoxSizer(wxVERTICAL);
 	
 	int flags = wxSL_LABELS | wxSL_BOTTOM | wxSL_MIN_MAX_LABELS | wxSL_AUTOTICKS;
 	
-	
-	//FlatSlider *sz = new FlatSlider(this, ID_SIMULATEDSPEED_SLIDER, speedK, 1, 50, wxDefaultPosition, wxSize(SPEED_WND_WIDTH, -1), flags);
 	FlatSlider *sz = new FlatSlider(this, ID_SIMULATEDSPEED_SLIDER, speedK, 1, 50, wxDefaultPosition, wxDefaultSize, flags);
 	sz->SetTickFreq(10);
 	box->Add(sz, 0, wxEXPAND);	
 	SetSizerAndFit(box);
-	wxSize bestsz = sz->GetBestSize();
-	int h = bestsz.y; SPEED_WND_HEIGHT;
+	int h = sz->GetBestSize().y;
 	SetSize(pos.x, pos.y - h - 5, SPEED_WND_WIDTH, h);
 	View3DPanel *panel = dynamic_cast<View3DPanel *>(parent);
 	sz->Bind(wxEVT_SCROLL_CHANGED, &View3DPanel::OnSpeedChanged, panel);

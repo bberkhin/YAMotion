@@ -7,6 +7,8 @@
 #include "standartpaths.h"
 #include <wx/wfstream.h>
 
+#include "bitmaps/file_new.xpm"
+
 
 static const unsigned char close_bits[] = {
 	 0xFF, 0xFF, 0xFF, 0xFF, 0x0F, 0xFE, 0x03, 0xF8, 0x01, 0xF0, 0x19, 0xF3,
@@ -37,9 +39,14 @@ wxBitmap ExArtProvider::CreateBitmap(const wxArtID& id, const wxArtClient& clien
 {
 
 	ColourScheme *clrs = Preferences::Get()->GetColorScheme();	
+/*
 	wxColor clrBtn(clrs->Get(ColourScheme::WINDOW_TEXT));
 	if (id == wxART_CLOSE)
 		return wxAuiBitmapFromBits(list_bits, 16, 16,wxColor(*wxRED));
+	*/
+
+	if (id == wxART_NEW)
+		return wxBitmap(file_new_xpm);
 	else
 		return wxArtProvider::CreateBitmap(id, client, size);
 }

@@ -29,6 +29,7 @@
 
 
 //Bitmaps
+/*
 #include "bitmaps/new.xpm"
 #include "bitmaps/open.xpm"
 #include "bitmaps/save.xpm"
@@ -39,6 +40,7 @@
 #include "bitmaps/check.xpm"
 #include "bitmaps/undo.xpm"
 #include "bitmaps/redo.xpm"
+*/
 
 #include "environmentsimple.h"
 #include "executorlog.h"
@@ -971,9 +973,10 @@ void AppFrame::CreateMacrosesMenu(wxMenu *menuInsert)
 
 wxAuiToolBar *AppFrame::CreateToolBar()
 {
+	
 	wxAuiToolBar* toolBar = new wxAuiToolBar(this, wxID_ANY, wxDefaultPosition, wxDefaultSize,
 		wxAUI_TB_DEFAULT_STYLE | wxAUI_TB_OVERFLOW | wxAUI_TB_HORIZONTAL);
-
+	/*
 	toolBar->AddTool(ID_NEWNC, wxEmptyString, wxBitmap(new_xpm), _("New"));
 	toolBar->AddTool(ID_OPENFILE, wxEmptyString, wxBitmap(open_xpm), _("Open"));
 	toolBar->AddTool(wxID_SAVE, wxEmptyString, wxBitmap(save_xpm), _("Save"));
@@ -992,7 +995,7 @@ wxAuiToolBar *AppFrame::CreateToolBar()
 	//toolBar->AddTool(ID_SEMULATE_START, wxEmptyString, wxBitmap(simulate_xpm), _("simulate"));
 	//toolBar->AddTool(ID_SEMULATE_PAUSE, wxEmptyString, wxBitmap(pause_xpm), _("pause"));
 	//toolBar->AddTool(ID_SEMULATE_STOP, wxEmptyString, wxBitmap(stop_xpm), _("stop"));
-	
+	*/
 	toolBar->Realize();
 	return toolBar;
 }

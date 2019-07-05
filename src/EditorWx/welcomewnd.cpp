@@ -273,6 +273,13 @@ WelcomeWnd::WelcomeWnd(wxWindow *parent) : wxPanel(parent)
 	ColourScheme *clrs = Preferences::Get()->GetColorScheme();
 	const CommonInfo &common_prefs = Preferences::Get()->Common();
 
+	
+	m_fgColor = wxColor(0xeeeeee); //clrs->Get(ColourScheme::WINDOW_TEXT);
+	m_fghColor = m_fgColor;
+	//m_fghColor = wxColor(0x800000); //clrs->Get(ColourScheme::WINDOW_TEXT);
+	m_bgColor = wxColor(0x333333); //clrs->Get(ColourScheme::WINDOW);
+	m_bghColor = wxColor(0x4d4d4d);
+
 	wxBoxSizer *totalpane = new wxBoxSizer(wxVERTICAL);
 	// Header
 	wxStaticText *ptxt = new wxStaticText(this, wxID_ANY, APP_NAME );
@@ -307,20 +314,16 @@ WelcomeWnd::WelcomeWnd(wxWindow *parent) : wxPanel(parent)
 
 void WelcomeWnd::UpdateThemeColor()
 {
-	
-	ColourScheme *clrs = Preferences::Get()->GetColorScheme();
-	wxColor bgColor(0xeeeeee); //clrs->Get(ColourScheme::WINDOW);
-	wxColor fgColor(0x333333); //clrs->Get(ColourScheme::WINDOW_TEXT);
 
-	SetBackgroundColour(bgColor);
-	SetForegroundColour(fgColor);
+	SetBackgroundColour(m_bgColor);
+	SetForegroundColour(m_fgColor);
 
 	wxWindowList::compatibility_iterator node = GetChildren().GetFirst();
 	while (node)
 	{
 		wxWindow* child = node->GetData();
-		child->SetBackgroundColour(bgColor);
-		//child->SetForegroundColour(fgColor);
+		child->SetBackgroundColour(m_bgColor);
+		child->SetForegroundColour(m_fgColor);
 		node = node->GetNext();
 	}
 	
@@ -334,21 +337,50 @@ void WelcomeWnd::AddColumnHeader(wxBoxSizer *pane, const wxString &text)
 	pane->AddSpacer(WELCOME_MARGIN * 2);
 }
 
-void WelcomeWnd::AddCommand(wxBoxSizer *pane, const wxString &text, int cmd)
+void WelcomeWnd::AddCommand(wxBoxSizer *pane, const wxString &text, int cmd, bool footer)
 {
 	//wxStaticText *ph = new wxStaticText(this, cmd, text);
+	FlatButton *ph = new FlatButton(this, cmd, text);
 	
-	wxBitmap bmp = wxArtProvider::GetBitmap(wxART_FILE_OPEN, wxART_OTHER );
-	FlatButton *ph = new FlatButton(this, cmd, text, bmp);
+	ph->SetCommand(cmd);
 	ph->SetFont(wxFontInfo(10));
-	ph->SetForegroundColour(wxColor(0x333333));
-	pane->Add(ph, 0, wxEXPAND);
+	ph->SetColour(FlatButton::BackgroundColour, m_bgColor);
+	//ph->SetColour(FlatButton::BackgroundColour, wxColor(*wxRED));
+	ph->SetColour(FlatButton::HoverBackgroundColour, m_bghColor);
+	ph->SetColour(FlatButton::PressBackgroundColour, m_bghColor);
+	ph->SetColour(FlatButton::ForegroundColour, m_fgColor);
+	ph->SetColour(FlatButton::HoverForegroundColour, m_fghColor);
+	ph->SetColour(FlatButton::PressForegroundColour, m_fghColor);
+
+	wxBitmap bmp = wxArtProvider::GetBitmap(wxART_NEW, wxART_OTHER);
+	if (footer)
+	{
+		ph->SetBitmap(bmp, 3, footer);
+		pane->Add(ph, 0, wxALIGN_BOTTOM);
+	}
+	else
+	{
+		ph->SetBitmap(bmp, 30, footer);
+		pane->Add(ph, 0, wxEXPAND);
+	}
 }
 
 void WelcomeWnd::AddRecentFile(wxBoxSizer *pane, const wxFileName &p, int n)
-{
-	wxStaticText *ph = new wxStaticText(this, 100 + n, p.GetFullName());
+{	
+	int cmd = wxID_FILE + n;
+	FlatButton *ph = new FlatButton(this,100+n, p.GetFullName());
+
+	ph->SetCommand(cmd);
 	ph->SetFont(wxFontInfo(10));
+	ph->SetColour(FlatButton::BackgroundColour, m_bgColor);
+	ph->SetColour(FlatButton::HoverBackgroundColour, m_bghColor);
+	ph->SetColour(FlatButton::PressBackgroundColour, m_bghColor);
+	ph->SetColour(FlatButton::ForegroundColour, m_fgColor);
+	ph->SetColour(FlatButton::HoverForegroundColour, m_fghColor);
+	ph->SetColour(FlatButton::PressForegroundColour, m_fghColor);
+
+	wxBitmap bmp = wxArtProvider::GetBitmap(wxART_NEW, wxART_OTHER);
+	ph->SetBitmap(bmp, 10, true );
 	pane->Add(ph, 0, wxEXPAND);
 }
 
@@ -363,13 +395,33 @@ wxBoxSizer *WelcomeWnd::CreateCommand()
 	return pane;
 }
 
+
+void WelcomeWnd::AddHelpLink(wxBoxSizer *pane, const wxString &text, int cmd )
+{
+	//wxStaticText *ph = new wxStaticText(this, cmd, text);
+	FlatButton *ph = new FlatButton(this, cmd, text);
+
+	ph->SetCommand(cmd);
+	ph->SetFont(wxFontInfo(10));
+	ph->SetColour(FlatButton::BackgroundColour, m_bgColor);
+	//ph->SetColour(FlatButton::BackgroundColour, wxColor(*wxRED));
+	ph->SetColour(FlatButton::HoverBackgroundColour, m_bghColor);
+	ph->SetColour(FlatButton::PressBackgroundColour, m_bghColor);
+	ph->SetColour(FlatButton::ForegroundColour, m_fgColor);
+	ph->SetColour(FlatButton::HoverForegroundColour, m_fghColor);
+	ph->SetColour(FlatButton::PressForegroundColour, m_fghColor);
+	pane->Add(ph, 0, wxEXPAND);
+
+}
+
+
 wxBoxSizer *WelcomeWnd::CreateDoc()
 {
 	wxBoxSizer *pane = new wxBoxSizer(wxVERTICAL);
 	AddColumnHeader(pane, _("Help"));
-	pane->Add(new wxStaticText(this, wxID_ANY, _("Use GCMC to write easy")));
-	pane->Add(new wxStaticText(this, wxID_ANY, _("Use GCode directly")));
-	pane->Add(new wxStaticText(this, wxID_ANY, _("Whats News")));
+	AddHelpLink(pane, _("Use GCMC to write easy"), 200);
+	AddHelpLink(pane, _("Use GCode directly"), 201);
+	AddHelpLink(pane, _("Whats News"), 203);
 	return pane;
 }
 
@@ -399,17 +451,45 @@ wxBoxSizer *WelcomeWnd::CreateFooter()
 {
 	wxBoxSizer *pane = new wxBoxSizer(wxHORIZONTAL);
 	pane->AddSpacer(WELCOME_MARGIN);
-	pane->Add( new wxStaticText(this, wxID_ANY, APP_COPYRIGTH), 0, wxALIGN_BOTTOM);
+	wxStaticText *pTxt = new wxStaticText(this, wxID_ANY, APP_COPYRIGTH);
+	pTxt->SetFont(wxFontInfo(10));
+	pTxt->SetForegroundColour(wxColor(0x999999));
+
+	pane->Add(pTxt , 0, wxALIGN_BOTTOM);
 	pane->AddSpacer(WELCOME_MARGIN);
-	pane->Add(new wxStaticText(this, wxID_ANY, _("Preference")), 0, wxALIGN_BOTTOM);
+	
+	AddCommand(pane, _("Preference"), ID_GLOBALPREFS, true);
+	//pane->Add(new wxStaticText(this, wxID_ANY, ), 0, wxALIGN_BOTTOM);
 	pane->AddSpacer(WELCOME_MARGIN);
-	pane->Add(new wxStaticText(this, wxID_ANY, _("Check for Update")), 0, wxALIGN_BOTTOM);//wxLEFT| wxBOTTOM);
+	AddCommand(pane, _("Check for Update"), ID_DOWNLOADUPDATE, true);
 	pane->AddStretchSpacer();
 	wxBoxSizer *pane1 = new wxBoxSizer(wxVERTICAL);
-	pane1->Add(new wxStaticText(this, wxID_ANY, _("Help us become better.")), 0, wxALIGN_CENTER_HORIZONTAL);
-	pane1->Add(new wxStaticText(this, wxID_ANY, _(" Tell us what you liked or what you lack in our application")), 0, wxALIGN_CENTER_HORIZONTAL);
-	pane1->Add(new FlatButton(this, wxID_ANY, _("WRITE TO ME")), 0, wxALIGN_CENTER_HORIZONTAL);
-	pane->Add(pane1, 0, wxRIGHT| wxALIGN_BOTTOM);
+
+	pTxt = new wxStaticText(this, wxID_ANY, _("Help us become better."));
+	pTxt->SetFont(wxFontInfo(10).Bold());
+	pane1->Add(pTxt, 0, wxALIGN_CENTER_HORIZONTAL);
+	
+	pTxt = new wxStaticText(this, wxID_ANY, _(" Tell us what you liked or what you lack in our application"));
+	pTxt->SetFont(wxFontInfo(10));
+	pane1->Add(pTxt, 0, wxALIGN_CENTER_HORIZONTAL);
+
+	FlatButton *ph = new FlatButton(this, wxID_ANY, _("WRITE TO US"));
+	ph->SetCommand(ID_WRITEFEEDBACK);
+	ph->SetFont(wxFontInfo(11).Bold() );
+	ph->SetMargins(-1, 8);
+
+	wxColor clrbg("#cc8830");
+	wxColor clrbghv("#bb6600");
+
+	ph->SetColour(FlatButton::BackgroundColour, clrbg);
+	ph->SetColour(FlatButton::HoverBackgroundColour, clrbghv);
+	ph->SetColour(FlatButton::PressBackgroundColour, clrbghv);
+	ph->SetColour(FlatButton::ForegroundColour, wxColor(*wxWHITE));
+	ph->SetColour(FlatButton::HoverForegroundColour, wxColor(*wxWHITE));
+	ph->SetColour(FlatButton::PressForegroundColour, wxColor(*wxWHITE));
+
+	pane1->Add(ph, 0, wxEXPAND );
+	pane->Add(pane1, 0, wxRIGHT | wxALIGN_BOTTOM);
 	return pane;
 }
 

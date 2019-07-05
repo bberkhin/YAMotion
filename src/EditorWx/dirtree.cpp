@@ -24,13 +24,14 @@
 #include "dirtree.h"
 #include "prefs.h"
 #include "standartpaths.h"
-//
+
+/*
 #include "bitmaps/icon1.xpm"
 #include "bitmaps/icon2.xpm"
 #include "bitmaps/icon3.xpm"
 #include "bitmaps/icon4.xpm"
 #include "bitmaps/icon5.xpm"
-
+*/
 //#include "state1.xpm"
 //#include "state2.xpm"
 //#include "state3.xpm"
@@ -149,7 +150,7 @@ void DirTreeCtrl::CreateImageList(int size)
     // should correspond to TreeCtrlIcon_xxx enum
     wxBusyCursor wait;
     wxIcon icons[5];
-
+	/*
     if (m_alternateImages)
     {
         icons[TreeCtrlIcon_File] = wxIcon(icon1_xpm);
@@ -158,7 +159,8 @@ void DirTreeCtrl::CreateImageList(int size)
         icons[TreeCtrlIcon_FolderSelected] = wxIcon(icon4_xpm);
         icons[TreeCtrlIcon_FolderOpened] = wxIcon(icon5_xpm);
     }
-    else
+    else 
+		*/
     {
         wxSize iconSize(size, size);
 
