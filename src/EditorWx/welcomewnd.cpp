@@ -339,8 +339,8 @@ void WelcomeWnd::AddColumnHeader(wxBoxSizer *pane, const wxString &text)
 
 void WelcomeWnd::AddCommand(wxBoxSizer *pane, const wxString &text, int cmd, bool footer)
 {
-	//wxStaticText *ph = new wxStaticText(this, cmd, text);
-	FlatButton *ph = new FlatButton(this, cmd, text);
+	//wxStaticText *ph = new wxStaticText(this, cmd, text);	
+	FlatButton *ph = new FlatButton(this, cmd, text, footer ? (FB_BITMAP_LEFT | FB_LABEL_LEFT) : (FB_BITMAP_RIGHT | FB_LABEL_LEFT));
 	
 	ph->SetCommand(cmd);
 	ph->SetFont(wxFontInfo(10));
@@ -352,15 +352,15 @@ void WelcomeWnd::AddCommand(wxBoxSizer *pane, const wxString &text, int cmd, boo
 	ph->SetColour(FlatButton::HoverForegroundColour, m_fghColor);
 	ph->SetColour(FlatButton::PressForegroundColour, m_fghColor);
 
-	wxBitmap bmp = wxArtProvider::GetBitmap(wxART_NEW, wxART_OTHER);
+	wxBitmap bmp = wxArtProvider::GetBitmap(wxART_NEW, wxART_MENU);
 	if (footer)
 	{
-		ph->SetBitmap(bmp, 3, footer);
+		ph->SetBitmap(bmp, 3);
 		pane->Add(ph, 0, wxALIGN_BOTTOM);
 	}
 	else
 	{
-		ph->SetBitmap(bmp, 30, footer);
+		ph->SetBitmap(bmp, 30);
 		pane->Add(ph, 0, wxEXPAND);
 	}
 }
@@ -368,7 +368,7 @@ void WelcomeWnd::AddCommand(wxBoxSizer *pane, const wxString &text, int cmd, boo
 void WelcomeWnd::AddRecentFile(wxBoxSizer *pane, const wxFileName &p, int n)
 {	
 	int cmd = wxID_FILE + n;
-	FlatButton *ph = new FlatButton(this,100+n, p.GetFullName());
+	FlatButton *ph = new FlatButton(this,100+n, p.GetFullName(), FB_BITMAP_LEFT);
 
 	ph->SetCommand(cmd);
 	ph->SetFont(wxFontInfo(10));
@@ -379,8 +379,8 @@ void WelcomeWnd::AddRecentFile(wxBoxSizer *pane, const wxFileName &p, int n)
 	ph->SetColour(FlatButton::HoverForegroundColour, m_fghColor);
 	ph->SetColour(FlatButton::PressForegroundColour, m_fghColor);
 
-	wxBitmap bmp = wxArtProvider::GetBitmap(wxART_NEW, wxART_OTHER);
-	ph->SetBitmap(bmp, 10, true );
+	wxBitmap bmp = wxArtProvider::GetBitmap(wxART_NEW, wxART_LIST);
+	ph->SetBitmap(bmp, 10 );
 	pane->Add(ph, 0, wxEXPAND);
 }
 
@@ -399,17 +399,18 @@ wxBoxSizer *WelcomeWnd::CreateCommand()
 void WelcomeWnd::AddHelpLink(wxBoxSizer *pane, const wxString &text, int cmd )
 {
 	//wxStaticText *ph = new wxStaticText(this, cmd, text);
-	FlatButton *ph = new FlatButton(this, cmd, text);
+	FlatButton *ph = new FlatButton(this, cmd, text, FB_LABEL_LEFT);
 
 	ph->SetCommand(cmd);
 	ph->SetFont(wxFontInfo(10));
-	ph->SetColour(FlatButton::BackgroundColour, m_bgColor);
-	//ph->SetColour(FlatButton::BackgroundColour, wxColor(*wxRED));
+	ph->SetColour(FlatButton::BackgroundColour, m_bgColor);	
 	ph->SetColour(FlatButton::HoverBackgroundColour, m_bghColor);
 	ph->SetColour(FlatButton::PressBackgroundColour, m_bghColor);
 	ph->SetColour(FlatButton::ForegroundColour, m_fgColor);
 	ph->SetColour(FlatButton::HoverForegroundColour, m_fghColor);
 	ph->SetColour(FlatButton::PressForegroundColour, m_fghColor);
+
+	ph->UpdateSize();
 	pane->Add(ph, 0, wxEXPAND);
 
 }
@@ -473,11 +474,14 @@ wxBoxSizer *WelcomeWnd::CreateFooter()
 	pTxt->SetFont(wxFontInfo(10));
 	pane1->Add(pTxt, 0, wxALIGN_CENTER_HORIZONTAL);
 
-	FlatButton *ph = new FlatButton(this, wxID_ANY, _("WRITE TO US"));
+	FlatButton *ph = new FlatButton(this, wxID_ANY, _("WRITE TO US"), FB_LABEL_CENTER);
 	ph->SetCommand(ID_WRITEFEEDBACK);
 	ph->SetFont(wxFontInfo(11).Bold() );
 	ph->SetMargins(-1, 8);
 
+	wxBitmap bmp = wxArtProvider::GetBitmap(wxART_NEW, wxART_OTHER);
+	ph->SetBitmap(bmp, 2);
+	
 	wxColor clrbg("#cc8830");
 	wxColor clrbghv("#bb6600");
 

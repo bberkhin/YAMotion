@@ -6,11 +6,12 @@
 
 
 
-FlatButton::FlatButton(wxWindow *parent, int id, const wxString &text, const wxBitmap &bmp, bool setwndcolor)
+FlatButton::FlatButton(wxWindow *parent, int id, const wxString &text, int style, const wxBitmap &bmp)
 	:  wxWindow(parent, id, wxDefaultPosition, wxDefaultSize, wxBORDER_NONE)
 {
 	SetLabel(text);
-	Init(setwndcolor);
+	m_style = style;
+	Init();
 	if (bmp.IsOk())
 		SetBitmap(bmp);
 	
@@ -18,7 +19,7 @@ FlatButton::FlatButton(wxWindow *parent, int id, const wxString &text, const wxB
 
 #define DO_SET_COLOUR( index, indexClr)  m_colors[index] = clrs->Get(indexClr)
 	
-void FlatButton::Init(bool setwndcolor)
+void FlatButton::Init()
 {
 	m_cmd = -1;
 	m_marginX = 6;
@@ -26,7 +27,6 @@ void FlatButton::Init(bool setwndcolor)
 	m_status = statusNone;
 	m_captured = false;
 	m_spacer = 0; // spacer between bmp and text
-	m_right = false;
 	m_colors.resize(ColourNum);
 	ColourScheme *clrs = Preferences::Get()->GetColorScheme();
 
@@ -34,7 +34,7 @@ void FlatButton::Init(bool setwndcolor)
 	DO_SET_COLOUR(HoverForegroundColour, ColourScheme::CONTROL_TEXT);
 	DO_SET_COLOUR(PressForegroundColour, ColourScheme::CONTROL_TEXT);
 	DO_SET_COLOUR(BorderColour, ColourScheme::BORDER);
-
+	/*
 	if (setwndcolor)
 	{
 		DO_SET_COLOUR(BackgroundColour, ColourScheme::WINDOW);
@@ -42,6 +42,7 @@ void FlatButton::Init(bool setwndcolor)
 		DO_SET_COLOUR(PressBackgroundColour, ColourScheme::FRAME);
 	}
 	else
+	*/
 	{
 		DO_SET_COLOUR(BackgroundColour, ColourScheme::CONTROL);
 		DO_SET_COLOUR(HoverBackgroundColour, ColourScheme::CONTROL_HOVER);
@@ -53,11 +54,10 @@ void FlatButton::Init(bool setwndcolor)
 }
 
 
-void FlatButton::SetBitmap(const wxBitmap& bitmap, int spacer, bool placetoright)
+void FlatButton::SetBitmap(const wxBitmap& bitmap, int spacer)
 {
 	m_bitmap = bitmap;
 	m_spacer = spacer;
-	m_right = placetoright;
 	SetBestClientSize();
 }
 
@@ -86,6 +86,7 @@ BEGIN_EVENT_TABLE(FlatButton, wxWindow)
 	EVT_MOUSEWHEEL(FlatButton::mouseWheelMoved)
 	// catch paint events
 	EVT_PAINT(FlatButton::paintEvent)
+	EVT_SIZE(FlatButton::OnSize)
 END_EVENT_TABLE()
 
 
@@ -110,6 +111,13 @@ void FlatButton::paintEvent(wxPaintEvent & evt)
  * background, and expects you will redraw it when the window comes
  * back (by sending a paint event).
  */
+void FlatButton::OnSize(wxSizeEvent& event)
+{
+	if (m_style & FB_LABEL_CENTER)
+		Refresh();
+}
+
+
 void FlatButton::paintNow()
 {
 	// depending on your system you may need to look at double-buffered dcs
@@ -126,8 +134,11 @@ void FlatButton::render(wxDC&  dc)
 {
 	wxRect rc = GetClientRect();
 	DrawBackground(dc, rc);
-	DrawLabel(dc, rc);
-	DrawBitmap(dc, rc);
+	wxRect rcLabel;
+	wxPoint ptButmap;
+	CalcGeometry(rc, rcLabel, ptButmap);
+	DrawLabel(dc, rcLabel);
+	DrawBitmap(dc, ptButmap);
 	
 }
 
@@ -153,6 +164,59 @@ void FlatButton::DrawBackground(wxDC&  dc, const wxRect &rc)
 	dc.DrawRectangle(rc);
 }
 
+void FlatButton::CalcGeometry(const wxRect &rcIn, wxRect &rcLabel, wxPoint &ptButmap)
+{
+	rcLabel = rcIn;
+	if (m_bitmap.IsOk())
+	{
+		int move = (m_bitmap.GetWidth() + m_spacer + m_marginX);
+		if (m_style & FB_BITMAP_LEFT)
+		{
+			rcLabel.x += move;
+			rcLabel.width -= move;
+		}
+		else if (m_style & FB_BITMAP_RIGHT)
+		{
+
+			rcLabel.width -= move;
+		}
+		else
+		{
+			rcLabel.width -= move;
+		}
+	}
+	rcLabel.Deflate(m_marginX, m_marginY);
+
+
+	if (m_bitmap.IsOk())
+	{
+		if (m_style & FB_BITMAP_LEFT)
+			ptButmap.x = rcIn.GetLeft() + m_marginX;
+		else if (m_style & FB_BITMAP_RIGHT)
+			ptButmap.x = rcIn.GetLeft() + rcIn.GetWidth() - m_bitmap.GetWidth() - m_marginX;
+		else
+		{
+			// just after label			
+			if (m_style & FB_LABEL_CENTER)
+			{
+				wxSize minSize = GetMinSize();
+				rcLabel.width = minSize.x - m_bitmap.GetWidth() - m_spacer - (3 * m_marginX);
+				if (rcIn.width > minSize.x)
+				{
+					rcLabel.x = rcIn.x + (rcIn.width - minSize.x) / 2;
+				}
+				else
+				{
+					rcLabel.x = rcIn.x;
+				}
+			}
+			ptButmap.x = rcLabel.x + rcLabel.width + m_spacer + m_marginX;
+			
+		}		
+		ptButmap.y = rcIn.GetTop() + (rcIn.GetHeight() - m_bitmap.GetHeight()) / 2;
+	}
+}
+
 void FlatButton::DrawLabel(wxDC&  dc, const wxRect &rc)
 {
 
@@ -166,44 +230,34 @@ void FlatButton::DrawLabel(wxDC&  dc, const wxRect &rc)
 	
 	dc.SetTextBackground(wxColor());
 	dc.SetTextForeground(clr);
-	wxRect rcLabel(rc);
-	int align = 0;
-	if (m_right)
-	{
-		if (m_bitmap.IsOk())
-		{
-			int move = (m_bitmap.GetWidth() + m_spacer + m_marginX);
-			rcLabel.x += move;
-			rcLabel.width -= move;
-		}
-		else 
-			align |= wxALIGN_RIGHT;
-	}
-
-	if ( !m_bitmap.IsOk() )
-		align |= wxALIGN_CENTER_HORIZONTAL;
-	else
-		align |=  wxALIGN_LEFT;
 	
-	align |= wxALIGN_CENTER_VERTICAL;
+	int align = 0;
 
-	rcLabel.Deflate(m_marginX, m_marginY);
-	dc.DrawLabel(GetLabel(), rcLabel, align );
+	
+
+	if (m_style & FB_LABEL_RIGHT)
+	{
+		align |= wxALIGN_RIGHT;
+	}
+	else if (m_style & FB_LABEL_CENTER)
+	{
+		align |= wxALIGN_CENTER_HORIZONTAL;
+	}
+	else
+		align |= wxALIGN_LEFT;
+
+	// in any casees
+	align |= wxALIGN_CENTER_VERTICAL;
+	
+	dc.DrawLabel(GetLabel(), rc, align );
 };
 
-void FlatButton::DrawBitmap(wxDC&  dc, const wxRect &rc)
+void FlatButton::DrawBitmap(wxDC&  dc, const wxPoint &pt)
 {
 	if (!m_bitmap.IsOk())
 		return;
 
-	wxPoint pt;
-	int marginX;
-	if ( m_right )
-		marginX = m_marginX;
-	else
-		marginX = rc.GetWidth() - m_bitmap.GetWidth() - m_marginX;
-	int marginY = (rc.GetHeight() - m_bitmap.GetHeight())/2;
-	dc.DrawBitmap(m_bitmap, rc.GetLeft() + marginX, rc.GetTop() + marginY, true );
+	dc.DrawBitmap(m_bitmap, pt, true );
 }
 
 

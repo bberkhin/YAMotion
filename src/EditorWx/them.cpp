@@ -31,22 +31,71 @@ static const unsigned char list_bits[] = {
    0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff };
 
 
+#include "bitmaps/stop.xpm"
 
 wxBitmap wxAuiBitmapFromBits(const unsigned char bits[], int w, int h,	const wxColour& color);
 
+//const char *const stop_xpm[];
+
+const char* const *GetBitmapColor(const char* const* xpm_data, const wxColor &clr)
+{
+	static char *xpmData1[124];
+	static  char pp[32];// = "  c #FF0000";
+	int count;
+	unsigned width, height, colors_cnt, chars_per_pixel;
+	count = sscanf(xpm_data[0], "%u %u %u %u",
+		&width, &height, &colors_cnt, &chars_per_pixel);
+	if (count != 4 || width * height * colors_cnt == 0)
+	{
+		return xpm_data;
+	}
+	int n = height + colors_cnt + 1;
+	if (n  >= 124 ) // very big
+		return xpm_data;
+
+	sprintf(pp, "  c %s", clr.GetAsString().c_str().AsChar());
+	
+	
+	for(unsigned i = 0; i < n; i++ )
+		xpmData1[i] = (char *)(xpm_data[i]);
+
+	xpmData1[1] = pp;
+	return xpmData1;
+}
 
 wxBitmap ExArtProvider::CreateBitmap(const wxArtID& id, const wxArtClient& client, const wxSize& size)
 {
 
 	ColourScheme *clrs = Preferences::Get()->GetColorScheme();	
-/*
-	wxColor clrBtn(clrs->Get(ColourScheme::WINDOW_TEXT));
-	if (id == wxART_CLOSE)
-		return wxAuiBitmapFromBits(list_bits, 16, 16,wxColor(*wxRED));
-	*/
+	
+		
+#define wxART_MENU                 wxART_MAKE_CLIENT_ID(wxART_MENU)
+#define wxART_FRAME_ICON           wxART_MAKE_CLIENT_ID(wxART_FRAME_ICON)
+
+#define wxART_CMN_DIALOG           wxART_MAKE_CLIENT_ID(wxART_CMN_DIALOG)
+#define wxART_HELP_BROWSER         wxART_MAKE_CLIENT_ID(wxART_HELP_BROWSER)
+#define wxART_MESSAGE_BOX          wxART_MAKE_CLIENT_ID(wxART_MESSAGE_BOX)
+#define wxART_BUTTON               wxART_MAKE_CLIENT_ID(wxART_BUTTON)
+#define wxART_LIST                 wxART_MAKE_CLIENT_ID(wxART_LIST)
 
 	if (id == wxART_NEW)
-		return wxBitmap(file_new_xpm);
+	{
+		wxColor clr;
+		
+		if (client == wxART_MENU)
+		{
+			clr = *wxRED;
+		}
+		else if (client == wxART_LIST)
+		{
+			clr = *wxYELLOW;
+		}
+		if ( clr.IsOk() )
+			return wxBitmap(GetBitmapColor(file_new_xpm, clr));
+		else
+			return wxBitmap(file_new_xpm);
+
+	}
 	else
 		return wxArtProvider::CreateBitmap(id, client, size);
 }

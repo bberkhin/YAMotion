@@ -137,19 +137,19 @@ wxBoxSizer *EditorPanel::CreateHeaderPanel()
 	{
 	
 		wxBitmap bmp = wxArtProvider::GetBitmap(wxART_GOTO_LAST, wxART_OTHER, FromDIP(wxSize(16, 16)));
-		FlatButton *p3dViewBt = new FlatButton(this, ID_TO3DBUTTON, _("3D view"), bmp, true);
+		FlatButton *p3dViewBt = new FlatButton(this, ID_TO3DBUTTON, _("3D view"), FB_BITMAP_RIGHT | FB_LABEL_LEFT, bmp);
 		totalpane->Add(p3dViewBt, 0, wxRIGHT);
 		totalpane->AddSpacer(10);
 
 		wxBitmap bmp1 = wxArtProvider::GetBitmap(wxART_ADD_BOOKMARK, wxART_OTHER, FromDIP(wxSize(16, 16)));
-		FlatButton *pCheckBt = new FlatButton(this, ID_CHECKBUTTON, _("Check"), bmp1, true);
+		FlatButton *pCheckBt = new FlatButton(this, ID_CHECKBUTTON, _("Check"), FB_BITMAP_RIGHT | FB_LABEL_LEFT, bmp1);
 
 		totalpane->Add(pCheckBt, 0,  wxRIGHT);
 		totalpane->AddSpacer(10);
 		if (ftype == FILETYPE_GCMC)
 		{
 			bmp1 = wxArtProvider::GetBitmap(wxART_HELP_BOOK, wxART_OTHER, FromDIP(wxSize(16, 16)));
-			FlatButton *pConvertBt = new FlatButton(this, ID_TOGCODEBUTTON, _("Convert"), bmp1, true);
+			FlatButton *pConvertBt = new FlatButton(this, ID_TOGCODEBUTTON, _("Convert"), FB_BITMAP_RIGHT | FB_LABEL_LEFT, bmp1);
 			totalpane->Add(pConvertBt, 0, wxRIGHT);
 			totalpane->AddSpacer(10);
 		}
@@ -451,20 +451,18 @@ wxSizer *View3DPanel::CreateSimulationPanel()
 	wxBoxSizer *panel = new wxBoxSizer(wxVERTICAL);
 	wxBoxSizer *btns = new wxBoxSizer(wxHORIZONTAL);
 	btns->AddStretchSpacer();
-	//wxBitmapButton *bbt = new wxBitmapButton(this, ID_BTN_PAUSE, wxBitmap(pause_xpm));	
-	//wxBitmapButton *bbt  = wxBitmapButton::NewCloseButton(this, ID_BTN_PAUSE);
-	FlatButton *bt = new FlatButton(this, ID_BTN_PAUSE, wxEmptyString, wxBitmap(pause_xpm));
+	
+	FlatButton *bt = new FlatButton(this, ID_BTN_PAUSE, wxEmptyString, FB_BITMAP_RIGHT | FB_LABEL_LEFT, wxBitmap(pause_xpm));
 	btns->Add(bt, 0, wxALIGN_CENTRE_VERTICAL);
-	bt = new FlatButton(this, ID_BTN_SIMULATE, wxEmptyString, wxBitmap(play_xpm));
+	bt = new FlatButton(this, ID_BTN_SIMULATE, wxEmptyString, FB_BITMAP_RIGHT | FB_LABEL_LEFT, wxBitmap(play_xpm));
 	btns->Add(bt, 0, wxALIGN_CENTRE_VERTICAL);
-	bt = new FlatButton(this, ID_BTN_STOP, wxEmptyString, wxBitmap(stop_xpm));
+	bt = new FlatButton(this, ID_BTN_STOP, wxEmptyString, FB_BITMAP_RIGHT | FB_LABEL_LEFT, wxBitmap(stop_xpm));
 	btns->Add(bt, 0, wxALIGN_CENTRE_VERTICAL);
 
 	btns->AddStretchSpacer();
 	bt = new FlatButton(this, ID_SETSIMULATIONSPEED, GetSpeedBtLabel() );
 	wxSizerItem *szi = btns->Add(bt, 0, wxALIGN_CENTRE_VERTICAL | wxRIGHT);
 	btns->Insert(0, bt->GetMinWidth(),1 );
-	//Insert(index, size, size);
 	panel->Add(btns, 0, wxEXPAND);
 
 	
@@ -759,7 +757,7 @@ LogPane::LogPane(wxWindow *parent, FilePage *fb)
 	header->Add(txt, 1, wxALIGN_CENTRE_VERTICAL);
 	
 	wxBitmap bmp = wxArtProvider::GetBitmap(wxART_GOTO_LAST, wxART_OTHER, FromDIP(wxSize(16, 16)));
-	FlatButton *padd = new FlatButton(this, ID_CLOSEOUTPUT, _("Close"), bmp);//| wxBORDER_NONE); 
+	FlatButton *padd = new FlatButton(this, ID_CLOSEOUTPUT, _("Close"), FB_BITMAP_RIGHT | FB_LABEL_LEFT, bmp);
 	header->Add(padd, 0, wxRIGHT);
 
 
