@@ -1,0 +1,27 @@
+/* XPM */
+static const char *const mail_xpm[] = {
+/* columns rows colors chars-per-pixel */
+"20 18 3 1 ",
+"  c #DDDDDD",
+". c gray87",
+"X c None",
+/* pixels */
+"XXXXXXXXX. XXXXXXXXX",
+"XXXXXXX......XXXXXXX",
+"XXXXXX.. ... .XXXXXX",
+"XXXX  ..XXXX ...XXXX",
+"XX    XXXXXXXX..  XX",
+"X.  .XXXXXXXXXX.  .X",
+".. ..XXXXXXXXXX.   .",
+"..  ..XXXXXXXX..    ",
+"       .XXXX..      ",
+"        ......      ",
+"        .           ",
+"        ..          ",
+"                    ",
+"                    ",
+"                    ",
+"                    ",
+"                    ",
+"                    "
+};

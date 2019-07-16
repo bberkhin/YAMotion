@@ -28,26 +28,6 @@
 #include "them.h"
 
 
-//Bitmaps
-/*
-#include "bitmaps/new.xpm"
-#include "bitmaps/open.xpm"
-#include "bitmaps/save.xpm"
-#include "bitmaps/copy.xpm"
-#include "bitmaps/cut.xpm"
-#include "bitmaps/paste.xpm"
-#include "bitmaps/find.xpm"
-#include "bitmaps/check.xpm"
-#include "bitmaps/undo.xpm"
-#include "bitmaps/redo.xpm"
-*/
-
-#include "environmentsimple.h"
-#include "executorlog.h"
-#include "ExecutorView.h"
-#include "GCodeInterpreter.h"
-
-
 using namespace Interpreter;
 
 
@@ -122,25 +102,25 @@ wxBEGIN_EVENT_TABLE (AppFrame, wxFrame)
 	EVT_MENU(ID_SHOWWLCOME, AppFrame::OnShowWelcome)
 
     // help
-    EVT_MENU (wxID_ABOUT,            AppFrame::OnAbout)
+    EVT_MENU(wxID_ABOUT,            AppFrame::OnAbout)
 	EVT_MENU(ID_DOWNLOADUPDATE,		AppFrame::OnDownloadUpdate)
 	EVT_MENU(ID_SHOWWLCOME, AppFrame::OnShowWelcome)
+	EVT_MENU(ID_WRITEFEEDBACK, AppFrame::OnWriteFeedback)
+	EVT_MENU(ID_HELPGCMC, AppFrame::OnHelp)
+	EVT_MENU(ID_HELPNC, AppFrame::OnHelp)
+	EVT_MENU(ID_WHATNEWS, AppFrame::OnHelp)
+
+
 
   //  EVT_CONTEXT_MENU(                AppFrame::OnContextMenu)
 //GCode
-	EVT_MENU(ID_GCODE_CONVERTGCMC, AppFrame::OnConvertGcmc)
-	EVT_MENU(ID_GCODE_KILLGCMCPROCESS, AppFrame::OnKillGcmcProcess)
-
-	EVT_UPDATE_UI(ID_GCODE_CONVERTGCMC, AppFrame::OnUpdateConvertGcmc)
-	EVT_UPDATE_UI(ID_GCODE_KILLGCMCPROCESS, AppFrame::OnUpdateKillGcmcProcess)
-
+	
 	EVT_MENU_RANGE(ID_3D_FIRST, ID_3D_LAST, AppFrame::On3DView)
 	EVT_UPDATE_UI_RANGE(ID_3D_FIRST, ID_3D_LAST, AppFrame::On3DViewUpdate)
-	
 
 	EVT_AUINOTEBOOK_PAGE_CLOSE(wxID_ANY, AppFrame::OnNotebookPageClose)
-	EVT_COMMAND(wxID_ANY,FILE_MODIFYED_EVENT, AppFrame::OnFileModified)
-	EVT_COMMAND(wxID_ANY,FILE_OPEN_EVENT, AppFrame::OnFileOpenEvent)
+	EVT_COMMAND(wxID_ANY, FILE_MODIFYED_EVENT, AppFrame::OnFileModified)
+	EVT_COMMAND(wxID_ANY, FILE_OPEN_EVENT, AppFrame::OnFileOpenEvent)
 	EVT_COMMAND(wxID_ANY, FILE_RENAME_EVENT, AppFrame::OnFileRenamed)
 	EVT_COMMAND(wxID_ANY, FILE_REMOVE_EVENT, AppFrame::OnFileRemoveEvent)
 	EVT_COMMAND(wxID_ANY, FILE_NEW_EVENT, AppFrame::OnFileNewEvent)
@@ -188,13 +168,7 @@ AppFrame::AppFrame (const wxString &title)
 		Left().Layer(1).Position(1).
 		CloseButton(false).MaximizeButton(false).CaptionVisible(false));
 
-	/*
-	wxAuiToolBar *toolBar = CreateToolBar();
-	m_mgr.AddPane(toolBar, wxAuiPaneInfo().
-		Name("tb").Caption("Standart commands").
-		ToolbarPane().Top().Row(1));
-	*/
-
+	
 	m_mgr.Update();
 	
 	ShowWelcome();
@@ -363,6 +337,24 @@ void AppFrame::OnClose (wxCloseEvent &event)
 void AppFrame::OnDownloadUpdate(wxCommandEvent &WXUNUSED(event)) 
 {
 	wxMessageBox("Download update");
+}
+
+void AppFrame::OnWriteFeedback( wxCommandEvent &WXUNUSED(event) )
+{
+	wxMessageBox("OnWriteFeedback");
+}
+
+void AppFrame::OnHelp(wxCommandEvent &event)
+{
+	wxString topic;
+	switch(event.GetId())
+	{
+	case ID_HELPGCMC: topic = "ID_HELPGCMC"; break;
+	case ID_HELPNC: topic = "ID_HELPNC"; break;
+	case ID_WHATNEWS: topic = "ID_WHATNEWS"; break;
+	default: topic = "unknown cmd"; break;
+	}
+	wxMessageBox(topic);
 }
 
 void AppFrame::OnAbout (wxCommandEvent &WXUNUSED(event)) {
@@ -830,7 +822,10 @@ wxMenuBar *AppFrame::CreateMenu ()
 	wxMenuBar *m_menuBar = new wxMenuBar;
     wxMenu *menuFile = new wxMenu;
 	//Open
-	menuFile->Append(ID_OPENFILE, _("Open ..\tCtrl+O")); 
+	wxMenuItem *mi = menuFile->Append(ID_OPENFILE, _("Open ..\tCtrl+O")); 
+	mi->SetBitmaps(wxArtProvider::GetBitmap(wxART_FILE_OPEN, wxART_MENU)); 
+
+
 	wxMenu *menuLastFiles = new wxMenu;
 	ConfigData *config = dynamic_cast<ConfigData *>(wxConfigBase::Get());
 	if (config)
@@ -906,7 +901,7 @@ wxMenuBar *AppFrame::CreateMenu ()
 	wxMenu *menuGCode = new wxMenu;
 	menuGCode->Append(ID_GCODE_CHECK, _("&Check"));
 	menuGCode->Append(ID_GCODE_SIMULATE, _("&Simulate"));
-	menuGCode->Append(ID_GCODE_CONVERTGCMC, _("&Convert Gcmc"));
+	
 	menuGCode->Append(ID_GCODE_KILLGCMCPROCESS, _("&Kill Gcmc process"));
 	
 	menuGCode->Append(ID_MACROSES, _("Run Macros"));
@@ -971,34 +966,6 @@ void AppFrame::CreateMacrosesMenu(wxMenu *menuInsert)
 }
 
 
-wxAuiToolBar *AppFrame::CreateToolBar()
-{
-	
-	wxAuiToolBar* toolBar = new wxAuiToolBar(this, wxID_ANY, wxDefaultPosition, wxDefaultSize,
-		wxAUI_TB_DEFAULT_STYLE | wxAUI_TB_OVERFLOW | wxAUI_TB_HORIZONTAL);
-	/*
-	toolBar->AddTool(ID_NEWNC, wxEmptyString, wxBitmap(new_xpm), _("New"));
-	toolBar->AddTool(ID_OPENFILE, wxEmptyString, wxBitmap(open_xpm), _("Open"));
-	toolBar->AddTool(wxID_SAVE, wxEmptyString, wxBitmap(save_xpm), _("Save"));
-	toolBar->AddSeparator();
-	toolBar->AddTool(wxID_UNDO, wxEmptyString, wxBitmap(undo_xpm), _("Cut"));
-	toolBar->AddTool(wxID_REDO, wxEmptyString, wxBitmap(redo_xpm), _("Cut"));
-	toolBar->AddSeparator();
-	toolBar->AddTool(ID_PROPERTIES, wxEmptyString, wxBitmap(cut_xpm), _("Properies"));
-	toolBar->AddTool(wxID_COPY, wxEmptyString, wxBitmap(copy_xpm), _("Copy"));
-	toolBar->AddTool(wxID_PASTE, wxEmptyString, wxBitmap(paste_xpm), _("Paste"));
-	toolBar->AddSeparator();
-	toolBar->AddTool(ID_GCODE_CHECK, wxEmptyString, wxBitmap(check_xpm), _("Check"));
-	toolBar->AddTool(ID_GCODE_SIMULATE, wxEmptyString, wxBitmap(find_xpm), _("Simulate"));
-	toolBar->AddTool(ID_GCODE_CONVERTGCMC, wxEmptyString, wxBitmap(new_xpm), _("Convert"));
-	toolBar->AddSeparator();
-	//toolBar->AddTool(ID_SEMULATE_START, wxEmptyString, wxBitmap(simulate_xpm), _("simulate"));
-	//toolBar->AddTool(ID_SEMULATE_PAUSE, wxEmptyString, wxBitmap(pause_xpm), _("pause"));
-	//toolBar->AddTool(ID_SEMULATE_STOP, wxEmptyString, wxBitmap(stop_xpm), _("stop"));
-	*/
-	toolBar->Realize();
-	return toolBar;
-}
 
 void AppFrame::FileOpen (wxString fname)
 {
@@ -1093,38 +1060,6 @@ wxRect AppFrame::DeterminePrintSize ()
 
     return rect;
 }
-
-void AppFrame::OnConvertGcmc(wxCommandEvent &event)
-{
-	wxWindow *wnd = m_notebook->GetCurrentPage();
-	FilePage *panel = dynamic_cast<FilePage *>(wnd);
-	if (panel && !panel->DoFileSave(false, false) )
-		return;
-
-//DoConvertGcmc(ConvertGcmcOpenFile);
-	
-}
-
-
-void AppFrame::OnUpdateConvertGcmc(wxUpdateUIEvent& event)
-{
-	//event.Enable(pedit->GetFileType() == FILETYPE_GCMC);
-	event.Enable(true);
-}
-
-void AppFrame::OnKillGcmcProcess(wxCommandEvent &event)
-{
-//	if (gcmcProcess)
-	//	wxKill(gcmcProcess->GetPid(), wxSIGKILL, NULL, wxKILL_CHILDREN);
-}
-
-void AppFrame::OnUpdateKillGcmcProcess(wxUpdateUIEvent& event)
-{
-//	event.Enable(gcmcProcess ? true : false);
-}
-
-
-
 
 
 void AppFrame::CreateWatcher()

@@ -4,7 +4,7 @@
 // declarations
 //============================================================================
 
-#define APP_NAME "GCode Editor"
+#define APP_NAME "Matilda"
 #define APP_DESCR "See http://www.yamotion.org"
 
 #define APP_MAINT "Boris Berkhin"

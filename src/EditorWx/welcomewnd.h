@@ -27,11 +27,12 @@ private:
 
 class WelcomeWnd : public wxPanel
 {
-	//wxDECLARE_ABSTRACT_CLASS(WelcomeWnd);
+	wxDECLARE_ABSTRACT_CLASS(WelcomeWnd);
 public:
 	WelcomeWnd(wxWindow *parent);
 	virtual ~WelcomeWnd();
 	void OnHtmlLinkClicked(wxHtmlLinkEvent &event);
+	void OnSize(wxSizeEvent& event);
 	
 private:
 	wxBoxSizer *CreateRecentFilesList();

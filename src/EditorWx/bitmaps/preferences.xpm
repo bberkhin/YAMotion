@@ -1,0 +1,23 @@
+/* XPM */
+static const char *const preferences_xpm[] = {
+/* columns rows colors chars-per-pixel */
+"14 15 2 1 ",
+"  c #DDDDDD",
+"X c None",
+/* pixels */
+"XXXXXXXXXXXXXX",
+"XXXXXX  XXXXXX",
+"XXXXXX  XXXXXX",
+"XX  X    X  XX",
+"XX          XX",
+"XXX  XXXX  XXX",
+"XX  XXXXXX  XX",
+"    XXXXXX    ",
+"    XXXXXX    ",
+"XX  XXXXXX  XX",
+"XXX  XXXX  XXX",
+"XX          XX",
+"XX  X    X  XX",
+"XXXXXX  XXXXXX",
+"XXXXXX  XXXXXX"
+};

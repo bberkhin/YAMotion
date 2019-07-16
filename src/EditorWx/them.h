@@ -6,6 +6,18 @@
 #include "wx/aui/tabart.h"
 #include "wx/artprov.h"
 
+#define ART_MENUHOVER 				    wxART_MAKE_CLIENT_ID(ART_MENUHOVER)
+#define ART_PREFERENCES                 wxART_MAKE_CLIENT_ID(ART_PREFERENCES)
+#define ART_MAIL						wxART_MAKE_CLIENT_ID(ART_MAIL)
+#define ART_UPDATE						wxART_MAKE_CLIENT_ID(ART_UPDATE)
+#define ART_VERIFY						wxART_MAKE_CLIENT_ID(ART_VERIFY)
+#define ART_CLOSE						wxART_MAKE_CLIENT_ID(ART_CLOSE)
+#define ART_CONVERT						wxART_MAKE_CLIENT_ID(ART_CONVERT)
+#define ART_DRAW3D						wxART_MAKE_CLIENT_ID(ART_DRAW3D)
+
+#define ART_PAUSE						wxART_MAKE_CLIENT_ID(ART_PAUSE)
+#define ART_PLAY						wxART_MAKE_CLIENT_ID(ART_PLAY)
+#define ART_STOP						wxART_MAKE_CLIENT_ID(ART_STOP)
 
 
 class ExArtProvider : public wxArtProvider
@@ -66,22 +78,31 @@ public:
 		FRAME,
 		// the background colour for a window
 		WINDOW,
+		WINDOW_HOVER,
 		WINDOW_TEXT,
+		WINDOW_TEXT_HOVER,
+		WINDOW_TEXT_DISABLE,
 
 		LINENUMBER,
 		LINENUMBER_TEXT,
 
 		CALLTIP,
 		CALLTIP_TEXT,
-
+		
+		BITMAP_CMD, //close button for example
+		BITMAP_CMD_HOVER, //close button
 		// the different background and text colours for the control
 		CONTROL,
 		CONTROL_PRESSED,
 		CONTROL_HOVER,
 		// the label text for the normal and the disabled state
 		CONTROL_TEXT,
+		CONTROL_TEXT_HOVER,
 		CONTROL_TEXT_DISABLED,
 		// the scrollbar background colour for the normal and pressed states
+
+		BUTTON_FEEDBACK,
+		BUTTON_FEEDBACK_HOVER,
 		SCROLLBAR,
 		SCROLLBAR_TUMB,		
 		SCROLLBAR_TUMB_HOVER,
@@ -98,6 +119,9 @@ public:
 		
 		SLIDER_SHAFT,
 		SLIDER_SHAFT_COLORED,
+
+		BITMAP_NEW_LIST,
+		STATIC_LINE,
 		// border
 		BORDER,
 		MAX

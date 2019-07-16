@@ -8,12 +8,18 @@
 #include <wx/wfstream.h>
 
 #include "bitmaps/file_new.xpm"
+#include "bitmaps/open.xpm"
+#include "bitmaps/preferences.xpm"
+#include "bitmaps/mail.xpm"
+#include "bitmaps/update.xpm"
+#include "bitmaps/close.xpm"
+#include "bitmaps/verify.xpm"
+#include "bitmaps/play.xpm"
+#include "bitmaps/pause.xpm"
+#include "bitmaps/stop.xpm"
+#include "bitmaps/view3d.xpm"
+#include "bitmaps/convert.xpm"
 
-
-static const unsigned char close_bits[] = {
-	 0xFF, 0xFF, 0xFF, 0xFF, 0x0F, 0xFE, 0x03, 0xF8, 0x01, 0xF0, 0x19, 0xF3,
-	 0xB8, 0xE3, 0xF0, 0xE1, 0xE0, 0xE0, 0xF0, 0xE1, 0xB8, 0xE3, 0x19, 0xF3,
-	 0x01, 0xF0, 0x03, 0xF8, 0x0F, 0xFE, 0xFF, 0xFF };
 
 static const unsigned char left_bits[] = {
    0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xfe, 0x7f, 0xfe, 0x3f, 0xfe,
@@ -31,11 +37,10 @@ static const unsigned char list_bits[] = {
    0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff };
 
 
-#include "bitmaps/stop.xpm"
+
 
 wxBitmap wxAuiBitmapFromBits(const unsigned char bits[], int w, int h,	const wxColour& color);
 
-//const char *const stop_xpm[];
 
 const char* const *GetBitmapColor(const char* const* xpm_data, const wxColor &clr)
 {
@@ -53,49 +58,72 @@ const char* const *GetBitmapColor(const char* const* xpm_data, const wxColor &cl
 	if (n  >= 124 ) // very big
 		return xpm_data;
 
-	sprintf(pp, "  c %s", clr.GetAsString().c_str().AsChar());
+	sprintf(pp, "  c %s", clr.GetAsString(wxC2S_HTML_SYNTAX).c_str().AsChar());
 	
 	
-	for(unsigned i = 0; i < n; i++ )
+	for(int i = 0; i < n; i++ )
 		xpmData1[i] = (char *)(xpm_data[i]);
 
 	xpmData1[1] = pp;
 	return xpmData1;
 }
 
+#define CHECK_ART_ID(idArt,client,filename) \
+	else if (id == idArt) \
+	{\
+		if ( client == ART_MENUHOVER) \
+			clr = clrs->Get(ColourScheme::BITMAP_CMD_HOVER); \
+		else\
+			clr = clrs->Get(ColourScheme::BITMAP_CMD);\
+		if (clr.IsOk())\
+			return wxBitmap(GetBitmapColor(filename, clr));\
+		else\
+			return wxBitmap(filename);\
+	}
+
+#define CHECK_ART_ID0(idArt,filename) \
+	else if (id == idArt) \
+	{\
+			return wxBitmap(filename);\
+	}
+
 wxBitmap ExArtProvider::CreateBitmap(const wxArtID& id, const wxArtClient& client, const wxSize& size)
 {
 
 	ColourScheme *clrs = Preferences::Get()->GetColorScheme();	
-	
-		
-#define wxART_MENU                 wxART_MAKE_CLIENT_ID(wxART_MENU)
-#define wxART_FRAME_ICON           wxART_MAKE_CLIENT_ID(wxART_FRAME_ICON)
 
-#define wxART_CMN_DIALOG           wxART_MAKE_CLIENT_ID(wxART_CMN_DIALOG)
-#define wxART_HELP_BROWSER         wxART_MAKE_CLIENT_ID(wxART_HELP_BROWSER)
-#define wxART_MESSAGE_BOX          wxART_MAKE_CLIENT_ID(wxART_MESSAGE_BOX)
-#define wxART_BUTTON               wxART_MAKE_CLIENT_ID(wxART_BUTTON)
-#define wxART_LIST                 wxART_MAKE_CLIENT_ID(wxART_LIST)
-
+	wxColor clr;
 	if (id == wxART_NEW)
 	{
-		wxColor clr;
-		
 		if (client == wxART_MENU)
 		{
-			clr = *wxRED;
+			clr = clrs->Get(ColourScheme::BITMAP_CMD);
 		}
 		else if (client == wxART_LIST)
 		{
-			clr = *wxYELLOW;
+			clr = clrs->Get(ColourScheme::BITMAP_NEW_LIST);
+		}
+		else if (client == ART_MENUHOVER)
+		{
+			clr = clrs->Get(ColourScheme::BITMAP_CMD_HOVER);
 		}
 		if ( clr.IsOk() )
 			return wxBitmap(GetBitmapColor(file_new_xpm, clr));
 		else
 			return wxBitmap(file_new_xpm);
-
 	}
+	CHECK_ART_ID(wxART_FILE_OPEN, client, file_open_xpm)
+	CHECK_ART_ID(ART_PREFERENCES, client, preferences_xpm)
+	CHECK_ART_ID(ART_UPDATE, client, update_xpm)
+	CHECK_ART_ID(ART_VERIFY, client, verify_xpm)
+	CHECK_ART_ID(ART_PAUSE, client, pause_xpm)
+	CHECK_ART_ID(ART_PLAY, client, play_xpm)
+	CHECK_ART_ID(ART_STOP, client, stop_xpm)
+	CHECK_ART_ID(ART_CLOSE, client, close_xpm)
+	CHECK_ART_ID(ART_CONVERT, client, convert_xpm)
+	CHECK_ART_ID(ART_DRAW3D, client, view3d_xpm)
+
+	CHECK_ART_ID0(ART_MAIL, mail_xpm)
 	else
 		return wxArtProvider::CreateBitmap(id, client, size);
 }
@@ -226,6 +254,7 @@ void EditorTabArt::DrawButton(wxDC& dc, wxWindow* wnd, const wxRect& inRect, int
 wxSize EditorTabArt::GetTabSize(wxDC& dc, wxWindow* wnd, const wxString& caption, const wxBitmap& bitmap, bool active, int closeButtonState, int* xExtent)
 {
 	wxSize sz = wxAuiGenericTabArt::GetTabSize(dc, wnd, caption, bitmap, active, closeButtonState, xExtent);
+	sz.y += 6;	
 	return sz;
 }
 
@@ -243,18 +272,19 @@ void EditorTabArt::UpdateColoursFromSystem()
 	m_activeColour = clrs->Get(ColourScheme::WINDOW);
 	m_borderPen = wxPen(clrs->Get(ColourScheme::WINDOW));
 	
-	//m_baseColourPen = wxPen(m_baseColour);
-	//m_baseColourBrush = wxBrush(m_baseColour);
+
 	m_baseColourBrush = wxBrush(m_activeColour);
 	m_baseColourPen = wxPen(m_activeColour);
 
-	wxColor clrBtn(clrs->Get(ColourScheme::WINDOW_TEXT));
-
-	m_activeCloseBmp = wxAuiBitmapFromBits(close_bits, 16, 16, clrBtn);
-	m_disabledCloseBmp = wxAuiBitmapFromBits(close_bits, 16, 16, wxColour(128, 128, 128));
-
-	m_activeLeftBmp = wxAuiBitmapFromBits(left_bits, 16, 16, clrBtn);
-	m_activeRightBmp = wxAuiBitmapFromBits(right_bits, 16, 16, clrBtn);
+	wxColor clrBtn = clrs->Get(ColourScheme::BITMAP_CMD);//wxColor(0x999999);
+	wxColor clrBtnActive = clrs->Get(ColourScheme::BITMAP_CMD_HOVER);//wxColor(0xe6e6e6);
+	m_activeCloseBmp = wxBitmap(GetBitmapColor(close_xpm, clrBtnActive));
+	m_disabledCloseBmp = wxBitmap(GetBitmapColor(close_xpm, clrBtn));
+	
+	m_activeLeftBmp = wxAuiBitmapFromBits(left_bits, 16, 16, clrBtnActive);
+	m_disabledLeftBmp = wxAuiBitmapFromBits(left_bits, 16, 16, clrBtn);
+	m_activeRightBmp = wxAuiBitmapFromBits(right_bits, 16, 16, clrBtnActive);
+	m_disabledRightBmp = wxAuiBitmapFromBits(right_bits, 16, 16, clrBtn);
 	m_activeWindowListBmp = wxAuiBitmapFromBits(list_bits, 16, 16, clrBtn);
 	
 }
@@ -332,7 +362,12 @@ void ColourScheme::Read()
 
 	ReadColor( root["frame"], m_colors[FRAME]);
 	ReadColor(root["window"],m_colors[WINDOW]);
+	ReadColor(root["window_hover"], m_colors[WINDOW_HOVER]);
 	ReadColor(root["window_txt"], m_colors[WINDOW_TEXT]);
+	ReadColor(root["window_txt_hover"], m_colors[WINDOW_TEXT_HOVER]);
+	ReadColor(root["window_txt_disable"], m_colors[WINDOW_TEXT_DISABLE]);
+	ReadColor(root["bitmap_cmd"], m_colors[BITMAP_CMD]);
+	ReadColor(root["bitmap_cmd_hover"], m_colors[BITMAP_CMD_HOVER]);		
 	ReadColor(root["linenumber"], m_colors[LINENUMBER]);
 	ReadColor(root["linenumber_txt"], m_colors[LINENUMBER_TEXT]);
 	ReadColor(root["calltip"], m_colors[CALLTIP]);
@@ -341,7 +376,10 @@ void ColourScheme::Read()
 	ReadColor(root["ctrl_pressed"],m_colors[CONTROL_PRESSED]);
 	ReadColor(root["ctrl_hover"],m_colors[CONTROL_HOVER]);
 	ReadColor(root["ctrl_text"],m_colors[CONTROL_TEXT]);
+	ReadColor(root["control_text_hover"], m_colors[CONTROL_TEXT_HOVER]);	
 	ReadColor(root["ctrl_text_dis"],m_colors[CONTROL_TEXT_DISABLED]);
+	ReadColor(root["button_feedback"], m_colors[BUTTON_FEEDBACK]);
+	ReadColor(root["button_feedback_hover"], m_colors[BUTTON_FEEDBACK_HOVER]);
 	ReadColor(root["scrollbar"],m_colors[SCROLLBAR]);
 	ReadColor(root["scrollbar_tubm"],m_colors[SCROLLBAR_TUMB]);
 	ReadColor(root["scrollbar_tumb_hvr"], m_colors[SCROLLBAR_TUMB_HOVER]);	
@@ -352,7 +390,10 @@ void ColourScheme::Read()
 	ReadColor(root["titlebar_txt"],m_colors[TITLEBAR_TEXT]);
 	ReadColor(root["titlebar_txt_active"],m_colors[TITLEBAR_ACTIVE_TEXT]);
 	ReadColor(root["slider_shaft"], m_colors[SLIDER_SHAFT]);
-	ReadColor(root["slider_shaft_colored"],m_colors[SLIDER_SHAFT_COLORED]);
+	ReadColor(root["slider_shaft_colored"],m_colors[SLIDER_SHAFT_COLORED]);	
+	ReadColor(root["bitmap_new_list"], m_colors[BITMAP_NEW_LIST]);
+	ReadColor(root["static_line"], m_colors[STATIC_LINE]);
+	
 	ReadColor(root["border"],m_colors[BORDER]);
 }
 
@@ -363,7 +404,13 @@ void ColourScheme::InitDef()
 	m_colors[FRAME] = wxColor(0,0,0);
 	// the background colour for a window
 	m_colors[WINDOW] = wxColor(0, 0, 0);
+	m_colors[WINDOW_HOVER] = wxColor(0x4d4d4d); 
 	m_colors[WINDOW_TEXT] = wxColor(0xFFFFFF);
+	m_colors[WINDOW_TEXT_HOVER] = wxColor(0xFFFFFF);
+	m_colors[WINDOW_TEXT_DISABLE] = wxColor(0x666666);
+	m_colors[BITMAP_CMD] = wxColor(0x999999);
+	m_colors[BITMAP_CMD_HOVER] = wxColor(0xe6e6e6);
+	
 	m_colors[LINENUMBER] = wxColor(32, 32, 32);
 	m_colors[LINENUMBER_TEXT] = wxColor(192, 192, 192);
 	m_colors[CALLTIP] = wxColor(0, 255, 255);
@@ -373,8 +420,11 @@ void ColourScheme::InitDef()
 	m_colors[CONTROL_PRESSED] = wxColour(0xe0e000);
 	m_colors[CONTROL_HOVER] = wxColour(0x00e000);
 	// the label text for the normal and the disabled state
-	m_colors[CONTROL_TEXT] = wxColour(0xFFFFFF);
+	m_colors[CONTROL_TEXT] = wxColour(0x999999);
+	m_colors[CONTROL_TEXT_HOVER] = wxColour(0xFFFFFF);
 	m_colors[CONTROL_TEXT_DISABLED] = m_colors[CONTROL_TEXT].MakeDisabled();	
+	m_colors[BUTTON_FEEDBACK] = wxColour(0x3088cc);
+	m_colors[BUTTON_FEEDBACK_HOVER] = wxColour(0x0066bb);
 		// the scrollbar background colour for the normal and pressed states
 	m_colors[SCROLLBAR] = m_colors[WINDOW].ChangeLightness(25);
 	m_colors[SCROLLBAR_TUMB] = m_colors[WINDOW].ChangeLightness(50);
@@ -392,7 +442,8 @@ void ColourScheme::InitDef()
 
 	m_colors[SLIDER_SHAFT] = wxColour(0xdddddd);
 	m_colors[SLIDER_SHAFT_COLORED] = wxColour(0xcc8830);
-
-		// border
+	m_colors[BITMAP_NEW_LIST] = wxColour(0xddaa55);
+	m_colors[STATIC_LINE] = wxColour(0x4d4d4d);
+	// border
 	m_colors[BORDER] = wxColour(0xFF0000);
 }

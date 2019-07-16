@@ -7,6 +7,7 @@
 #define FB_LABEL_CENTER 0x000002
 #define FB_BITMAP_LEFT 0x000004
 #define FB_BITMAP_RIGHT 0x000008
+#define FB_TRANSPARENT 0x0000010
 
 
 class FlatButton :
@@ -16,10 +17,12 @@ class FlatButton :
 public:
 	enum ColourIndex { BackgroundColour = 0, HoverBackgroundColour, PressBackgroundColour, ForegroundColour, HoverForegroundColour, PressForegroundColour, BorderColour, ColourNum };
 public:
-	FlatButton(wxWindow *parent, int Id, const wxString &text, int style = FB_BITMAP_RIGHT| FB_LABEL_LEFT, const wxBitmap &bmp = wxNullBitmap );
+	FlatButton(wxWindow *parent, int Id, const wxString &text, int style = FB_BITMAP_RIGHT| FB_LABEL_LEFT, const wxString& idArt = wxEmptyString );
 	~FlatButton();
 public:
 	void SetBitmap(const wxBitmap& bitmap, int spacer = 0);
+	void SetBitmap(const wxBitmap& bitmap, const wxBitmap& bitmaphover, int spacer = 0);
+	void SetBitmap(const wxString& id, int spacer = 0);
 	void paintEvent(wxPaintEvent & evt);
 	void paintNow();
 	void render(wxDC& dc);
@@ -53,6 +56,7 @@ private:
 	int  m_status;
 	wxString m_text;
 	wxBitmap m_bitmap;
+	wxBitmap m_bitmap_hover;
 	int m_marginX;
 	int m_marginY;
 	int m_cmd;

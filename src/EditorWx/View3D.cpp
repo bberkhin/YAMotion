@@ -140,7 +140,7 @@ void View3D::save_config()
 
 void View3D::initializeGL()
 {
-	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+	glClearColor(0.0f, 1.0f, 0.0f, 0.0f);
 	glShadeModel(GL_FLAT);
 	glEnable(GL_CULL_FACE);
 	glEnable(GL_BLEND);

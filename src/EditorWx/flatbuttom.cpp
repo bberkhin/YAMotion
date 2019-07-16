@@ -6,15 +6,13 @@
 
 
 
-FlatButton::FlatButton(wxWindow *parent, int id, const wxString &text, int style, const wxBitmap &bmp)
+FlatButton::FlatButton(wxWindow *parent, int id, const wxString &text, int style, const wxArtID& idArt)
 	:  wxWindow(parent, id, wxDefaultPosition, wxDefaultSize, wxBORDER_NONE)
 {
 	SetLabel(text);
 	m_style = style;
 	Init();
-	if (bmp.IsOk())
-		SetBitmap(bmp);
-	
+	SetBitmap(idArt, m_spacer);
 }
 
 #define DO_SET_COLOUR( index, indexClr)  m_colors[index] = clrs->Get(indexClr)
@@ -31,24 +29,12 @@ void FlatButton::Init()
 	ColourScheme *clrs = Preferences::Get()->GetColorScheme();
 
 	DO_SET_COLOUR(ForegroundColour, ColourScheme::CONTROL_TEXT);
-	DO_SET_COLOUR(HoverForegroundColour, ColourScheme::CONTROL_TEXT);
-	DO_SET_COLOUR(PressForegroundColour, ColourScheme::CONTROL_TEXT);
+	DO_SET_COLOUR(HoverForegroundColour, ColourScheme::CONTROL_TEXT_HOVER);
+	DO_SET_COLOUR(PressForegroundColour, ColourScheme::CONTROL_TEXT_HOVER);
 	DO_SET_COLOUR(BorderColour, ColourScheme::BORDER);
-	/*
-	if (setwndcolor)
-	{
-		DO_SET_COLOUR(BackgroundColour, ColourScheme::WINDOW);
-		DO_SET_COLOUR(HoverBackgroundColour, ColourScheme::FRAME);
-		DO_SET_COLOUR(PressBackgroundColour, ColourScheme::FRAME);
-	}
-	else
-	*/
-	{
-		DO_SET_COLOUR(BackgroundColour, ColourScheme::CONTROL);
-		DO_SET_COLOUR(HoverBackgroundColour, ColourScheme::CONTROL_HOVER);
-		DO_SET_COLOUR(PressBackgroundColour, ColourScheme::CONTROL_PRESSED);
-
-	}
+	DO_SET_COLOUR(BackgroundColour, ColourScheme::CONTROL);
+	DO_SET_COLOUR(HoverBackgroundColour, ColourScheme::CONTROL_HOVER);
+	DO_SET_COLOUR(PressBackgroundColour, ColourScheme::CONTROL_PRESSED);
 
 	SetBestClientSize();
 }
@@ -57,6 +43,25 @@ void FlatButton::Init()
 void FlatButton::SetBitmap(const wxBitmap& bitmap, int spacer)
 {
 	m_bitmap = bitmap;
+	m_bitmap_hover = m_bitmap;
+	m_spacer = spacer;
+	SetBestClientSize();
+}
+
+void FlatButton::SetBitmap(const wxBitmap& bitmap, const wxBitmap& bitmaphover, int spacer)
+{
+	m_bitmap = bitmap;
+	m_bitmap_hover = bitmaphover;
+	m_spacer = spacer;
+	SetBestClientSize();
+}
+
+void FlatButton::SetBitmap(const wxString& idArt, int spacer)
+{
+	if (idArt.IsEmpty())
+		return;
+	m_bitmap = wxArtProvider::GetBitmap(idArt, wxART_MENU);
+	m_bitmap_hover = wxArtProvider::GetBitmap(idArt, ART_MENUHOVER);
 	m_spacer = spacer;
 	SetBestClientSize();
 }
@@ -144,6 +149,9 @@ void FlatButton::render(wxDC&  dc)
 
 void FlatButton::DrawBackground(wxDC&  dc, const wxRect &rc)
 {
+	if (m_style & FB_TRANSPARENT)
+		return;
+
 	wxColor clr; 
 	if (m_status == statusHover)
 		clr = GetColour(HoverBackgroundColour);
@@ -257,7 +265,10 @@ void FlatButton::DrawBitmap(wxDC&  dc, const wxPoint &pt)
 	if (!m_bitmap.IsOk())
 		return;
 
-	dc.DrawBitmap(m_bitmap, pt, true );
+	if ( ((m_status == statusHover) || (m_status == statusPressed)) && m_bitmap_hover.IsOk() )
+		dc.DrawBitmap(m_bitmap_hover, pt, true);
+	else
+		dc.DrawBitmap(m_bitmap, pt, true );
 }
 
 
@@ -318,15 +329,21 @@ void FlatButton::keyReleased(wxKeyEvent& event) {}
 void FlatButton::SetBestClientSize() 
 {
 
-	wxClientDC dc(wxConstCast(this, FlatButton));
-	wxCoord width, height;
-	wxFont font(GetFont());
-	if (!font.IsOk())
-		font = wxSystemSettings::GetFont(wxSYS_DEFAULT_GUI_FONT);
 
-	dc.SetFont(font);
+	wxCoord width=0, height = 0;
+	wxString label = GetLabel();
+	if (!label.IsEmpty())
+	{
+		wxClientDC dc(wxConstCast(this, FlatButton));
+		wxFont font(GetFont());
+		if (!font.IsOk())
+			font = wxSystemSettings::GetFont(wxSYS_DEFAULT_GUI_FONT);
 
-	dc.GetMultiLineTextExtent(GetLabel(), &width, &height);
+		dc.SetFont(font);
+
+		dc.GetMultiLineTextExtent(label, &width, &height);
+	}
+
 	if (m_bitmap.IsOk())
 	{
 		// allocate extra space for the bitmap
@@ -334,8 +351,12 @@ void FlatButton::SetBestClientSize()
 		if (height < heightBmp)
 			height = heightBmp;
 
-		width += m_bitmap.GetWidth() + m_marginX;
-		width += m_spacer;
+		if (!label.IsEmpty())
+		{
+			width += m_marginX;
+			width += m_spacer;
+		}
+		width += m_bitmap.GetWidth();
 	}
 	
 	height += 2 * m_marginY;

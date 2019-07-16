@@ -1,9 +1,8 @@
 /* XPM */
-static char *ca22bd32a79c445be204600cb6d3869c[] = {
+static const char *const verify_xpm[] = {
 /* columns rows colors chars-per-pixel */
-"10 12 3 1 ",
+"10 12 2 1 ",
 "  c #DDDDDD",
-". c gray87",
 "X c None",
 /* pixels */
 "        XX",

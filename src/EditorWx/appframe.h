@@ -32,6 +32,8 @@ public:
 	void OnShowWelcome(wxCommandEvent &event);
 	void OnDownloadUpdate(wxCommandEvent &event);
 	void OnExit(wxCommandEvent &event);
+	void OnWriteFeedback(wxCommandEvent &event);
+	void OnHelp(wxCommandEvent &event);
 	//! file
 	void OnFileNew(wxCommandEvent &event);
 	void OnFileOpen(wxCommandEvent &event);
@@ -61,15 +63,6 @@ public:
 	//! dirtree events
 	void OnDirTree(wxCommandEvent &event);
 	
-	//Gcode
-
-	void OnConvertGcmc(wxCommandEvent &event);
-	void OnUpdateConvertGcmc(wxUpdateUIEvent& event);
-	void OnKillGcmcProcess(wxCommandEvent &event);
-	void OnUpdateKillGcmcProcess(wxUpdateUIEvent& event);
-
-
-
 	void OnNotebookPageClose(wxAuiNotebookEvent& evt);
 	void OnFileModified(wxCommandEvent& event);
 	void OnFileRenamed(wxCommandEvent &evt);
@@ -89,7 +82,6 @@ private:
 	void ShowWelcome();
 	void HideWelcome();
 	wxAuiNotebook* CreateNotebook();
-	wxAuiToolBar *CreateToolBar();
 	void CreateMacrosesMenu(wxMenu *menuInsert);
 	void UpdatePreferences();
 	void UpdateMacroses();

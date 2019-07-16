@@ -6,6 +6,7 @@
 #include "wx/aui/dockart.h"
 #include "wx/splitter.h"
 #include <wx/popupwin.h>
+#include "flatstaticline.h"
 
 #include "flatbuttom.h"
 #include "FlatScrollBar.h"
@@ -18,14 +19,9 @@
 #include "app.h"          //for upadte title :(
 #include "appframe.h"     //for upadte title :(
 
-#include "bitmaps/play.xpm"
-#include "bitmaps/pause.xpm"
-#include "bitmaps/stop.xpm"
-
-
 #define MAX_BTN_PRIORITY 1101
 #define SPEED_WND_WIDTH 150
-
+#define MARGIN_GRIPPER 12
 
 enum
 {
@@ -94,7 +90,13 @@ EditorPanel::EditorPanel(wxWindow *parent, FilePage *fp, int filetype, const wxS
 
 	wxBoxSizer *totalpane = new wxBoxSizer(wxVERTICAL);
 	wxBoxSizer *pHeader = CreateHeaderPanel();
+	totalpane->AddSpacer(5);
 	totalpane->Add(pHeader, 0, wxEXPAND);
+	totalpane->AddSpacer(10);
+	FlatStaticLine *pGripper = new FlatStaticLine(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxLI_HORIZONTAL);
+	totalpane->Add(pGripper, 0, wxGROW | wxLEFT | wxRIGHT, MARGIN_GRIPPER);
+	totalpane->AddSpacer(10);
+
 
 
 	wxFlexGridSizer  *gd = new wxFlexGridSizer(2);// 2, 0, 0);
@@ -112,11 +114,18 @@ EditorPanel::EditorPanel(wxWindow *parent, FilePage *fp, int filetype, const wxS
 	SetSizerAndFit(totalpane);
 }
 
+#define ADD_COMMAND_TO_VIEW(id, Text, artId) \
+	ph = new FlatButton(this, id, Text, FB_BITMAP_RIGHT | FB_LABEL_LEFT, artId); \
+	totalpane->Add(ph, 0, wxRIGHT); \
+	totalpane->AddSpacer(10);
+
+
+
 wxBoxSizer *EditorPanel::CreateHeaderPanel()
 {
-	//wxPanel *pHeader = new wxPanel(this);
-	wxBoxSizer *totalpane = new wxBoxSizer(wxHORIZONTAL);
-	
+	ColourScheme *clrs = Preferences::Get()->GetColorScheme();
+
+	wxBoxSizer *totalpane = new wxBoxSizer(wxHORIZONTAL);	
 	wxString label;
 	int ftype = m_pedit->GetFileType();
 	
@@ -129,30 +138,20 @@ wxBoxSizer *EditorPanel::CreateHeaderPanel()
 	if ( !label.empty() )
 	{
 		wxStaticText *txt = new wxStaticText(this, wxID_ANY, label);
+		txt->SetForegroundColour(clrs->Get(ColourScheme::WINDOW_TEXT));
+		totalpane->AddSpacer(MARGIN_GRIPPER);
 		totalpane->Add(txt, 1, wxALIGN_CENTRE_VERTICAL);// wxEXPAND);
 	}
 
-
+	FlatButton *ph;
 	if ((ftype == FILETYPE_NC) || (ftype == FILETYPE_GCMC) )
 	{
-	
-		wxBitmap bmp = wxArtProvider::GetBitmap(wxART_GOTO_LAST, wxART_OTHER, FromDIP(wxSize(16, 16)));
-		FlatButton *p3dViewBt = new FlatButton(this, ID_TO3DBUTTON, _("3D view"), FB_BITMAP_RIGHT | FB_LABEL_LEFT, bmp);
-		totalpane->Add(p3dViewBt, 0, wxRIGHT);
-		totalpane->AddSpacer(10);
-
-		wxBitmap bmp1 = wxArtProvider::GetBitmap(wxART_ADD_BOOKMARK, wxART_OTHER, FromDIP(wxSize(16, 16)));
-		FlatButton *pCheckBt = new FlatButton(this, ID_CHECKBUTTON, _("Check"), FB_BITMAP_RIGHT | FB_LABEL_LEFT, bmp1);
-
-		totalpane->Add(pCheckBt, 0,  wxRIGHT);
-		totalpane->AddSpacer(10);
+		ADD_COMMAND_TO_VIEW(ID_CHECKBUTTON, _("Check"), ART_VERIFY)
 		if (ftype == FILETYPE_GCMC)
 		{
-			bmp1 = wxArtProvider::GetBitmap(wxART_HELP_BOOK, wxART_OTHER, FromDIP(wxSize(16, 16)));
-			FlatButton *pConvertBt = new FlatButton(this, ID_TOGCODEBUTTON, _("Convert"), FB_BITMAP_RIGHT | FB_LABEL_LEFT, bmp1);
-			totalpane->Add(pConvertBt, 0, wxRIGHT);
-			totalpane->AddSpacer(10);
+			ADD_COMMAND_TO_VIEW(ID_TOGCODEBUTTON, _("Convert"), ART_CONVERT)
 		}
+		ADD_COMMAND_TO_VIEW(ID_TO3DBUTTON, _("3D view"), ART_DRAW3D)
 	}
 
 	return totalpane;
@@ -174,7 +173,7 @@ void EditorPanel::UpdateThemeColor()
 
 	SetBackgroundColour(bgColor);
 	SetForegroundColour(fgColor);
-
+	/*
 	wxWindowList::compatibility_iterator node = GetChildren().GetFirst();
 	while (node)
 	{
@@ -183,6 +182,8 @@ void EditorPanel::UpdateThemeColor()
 		child->SetForegroundColour(fgColor);
 		node = node->GetNext();
 	}
+	*/
+	
 }
 
 void EditorPanel::OnTo3DButton(wxCommandEvent &ev)
@@ -264,7 +265,7 @@ View3DPanel::~View3DPanel()
 void View3DPanel::UpdateThemeColor()
 {
 	ColourScheme *clrs = Preferences::Get()->GetColorScheme();
-	wxColor bgColor = clrs->Get(ColourScheme::WINDOW);
+	wxColor bgColor = wxColor(0x222222);// = clrs->Get(ColourScheme::WINDOW);
 	wxColor fgColor = clrs->Get(ColourScheme::WINDOW_TEXT);
 
 	SetBackgroundColour(bgColor);
@@ -370,35 +371,6 @@ void PriorityBoxSizer::RecalcSizes()
 	wxBoxSizer::RecalcSizes();
 }
 
-wxBitmap wxAuiBitmapFromBits(const unsigned char bits[], int w, int h, const wxColour& color);
-static const unsigned char close_bits[] = {
-	 0xFF, 0xFF, 0xFF, 0xFF, 0x0F, 0xFE, 0x03, 0xF8, 0x01, 0xF0, 0x19, 0xF3,
-	 0xB8, 0xE3, 0xF0, 0xE1, 0xE0, 0xE0, 0xF0, 0xE1, 0xB8, 0xE3, 0x19, 0xF3,
-	 0x01, 0xF0, 0x03, 0xF8, 0x0F, 0xFE, 0xFF, 0xFF };
-
-
-wxBitmapButton *NewCloseButton(wxWindow *parent, int winid)
-{
-	//wxBitmapButton::NewCloseButton
-	wxCHECK_MSG(parent, NULL, wxS("Must have a valid parent"));
-	ColourScheme *clrs = Preferences::Get()->GetColorScheme();
-	
-	wxBitmap bmp  = wxAuiBitmapFromBits(close_bits, 16, 16, clrs->Get(ColourScheme::FRAME));
-	wxBitmap bmppressed = wxAuiBitmapFromBits(close_bits, 16, 16, clrs->Get(ColourScheme::WINDOW_TEXT));
-	wxBitmap bmpcurrent = wxAuiBitmapFromBits(close_bits, 16, 16, clrs->Get(ColourScheme::WINDOW_TEXT));
-
-	wxBitmapButton* const button = new wxBitmapButton(parent, winid, bmp, wxDefaultPosition, wxDefaultSize, wxBORDER_NONE);
-
-	wxSize sizeBmp = bmp.GetSize();
-	
-	button->SetBitmapPressed(bmppressed);
-	button->SetBitmapCurrent(bmpcurrent);
-
-	// The button should blend with its parent background.
-	button->SetBackgroundColour(wxColor(*wxRED));// clrs->Get(ColourScheme::WINDOW));
-	return button;
-}
-
 
 #define APPEND_BUTTOM(id,label,pr,sh)  pbtn = new FlatButton(this, id, label); \
 								 header->AddButtonSpacer(5,pr); \
@@ -423,21 +395,11 @@ wxBoxSizer *View3DPanel::CreateHeaderPanel()
 	APPEND_BUTTOM(ID_BTN_OTHER, _("..."), MAX_BTN_PRIORITY, true);
 	header->AddStretchSpacer();
 
-
-
-	wxBitmapButton *pClose = NewCloseButton(this, ID_CLOSE3DVIEW);
-	//FlatButton *pClose = new FlatButton(this, ID_CLOSE3DVIEW, _("Close"));//| wxBORDER_NONE); 
-	//wxBitmap bmp2 = wxArtProvider::GetBitmap(wxART_CLOSE, wxART_OTHER, FromDIP(wxSize(16, 16)));
-	//pClose->SetBitmap(bmp2);
+	FlatButton *pClose = new FlatButton(this, ID_CLOSE3DVIEW, wxEmptyString, FB_TRANSPARENT, ART_CLOSE);
 	header->Add(pClose, 0, wxRIGHT);
 	header->AddSpacer(10);
 	return header;
 }
-
-//toolBar->AddTool(ID_SEMULATE_START, wxEmptyString, wxBitmap(simulate_xpm), _("simulate"));
-	//toolBar->AddTool(ID_SEMULATE_PAUSE, wxEmptyString, , _("pause"));
-	//toolBar->AddTool(ID_SEMULATE_STOP, wxEmptyString, wxBitmap(stop_xpm), _("stop"));
-
 
 wxString View3DPanel::GetSpeedBtLabel()
 {
@@ -452,11 +414,11 @@ wxSizer *View3DPanel::CreateSimulationPanel()
 	wxBoxSizer *btns = new wxBoxSizer(wxHORIZONTAL);
 	btns->AddStretchSpacer();
 	
-	FlatButton *bt = new FlatButton(this, ID_BTN_PAUSE, wxEmptyString, FB_BITMAP_RIGHT | FB_LABEL_LEFT, wxBitmap(pause_xpm));
+	FlatButton *bt = new FlatButton(this, ID_BTN_PAUSE, wxEmptyString, FB_TRANSPARENT, ART_PAUSE);
 	btns->Add(bt, 0, wxALIGN_CENTRE_VERTICAL);
-	bt = new FlatButton(this, ID_BTN_SIMULATE, wxEmptyString, FB_BITMAP_RIGHT | FB_LABEL_LEFT, wxBitmap(play_xpm));
+	bt = new FlatButton(this, ID_BTN_SIMULATE, wxEmptyString, FB_TRANSPARENT, ART_PLAY);
 	btns->Add(bt, 0, wxALIGN_CENTRE_VERTICAL);
-	bt = new FlatButton(this, ID_BTN_STOP, wxEmptyString, FB_BITMAP_RIGHT | FB_LABEL_LEFT, wxBitmap(stop_xpm));
+	bt = new FlatButton(this, ID_BTN_STOP, wxEmptyString, FB_TRANSPARENT, ART_STOP);
 	btns->Add(bt, 0, wxALIGN_CENTRE_VERTICAL);
 
 	btns->AddStretchSpacer();
@@ -753,12 +715,12 @@ LogPane::LogPane(wxWindow *parent, FilePage *fb)
 	wxBoxSizer *header = new wxBoxSizer(wxHORIZONTAL);
 	wxStaticText *txt = new wxStaticText(this, wxID_ANY, _("Output"));
 	
-	header->Add(10,0);
+	header->Add(5,0);
 	header->Add(txt, 1, wxALIGN_CENTRE_VERTICAL);
 	
-	wxBitmap bmp = wxArtProvider::GetBitmap(wxART_GOTO_LAST, wxART_OTHER, FromDIP(wxSize(16, 16)));
-	FlatButton *padd = new FlatButton(this, ID_CLOSEOUTPUT, _("Close"), FB_BITMAP_RIGHT | FB_LABEL_LEFT, bmp);
+	FlatButton *padd = new FlatButton(this, ID_CLOSEOUTPUT, wxEmptyString, FB_TRANSPARENT, ART_CLOSE);
 	header->Add(padd, 0, wxRIGHT);
+	header->AddSpacer(5);
 
 
 
@@ -781,6 +743,7 @@ LogPane::LogPane(wxWindow *parent, FilePage *fb)
 
 		
 	wxBoxSizer *totalpane = new wxBoxSizer(wxVERTICAL);
+	totalpane->AddSpacer(7);
 	totalpane->Add(header, 0, wxEXPAND);
 	totalpane->Add(gd, wxEXPAND, wxEXPAND); //wxEXPAND
 	
@@ -794,25 +757,19 @@ void LogPane::UpdateThemeColor()
 	ColourScheme *clrs = Preferences::Get()->GetColorScheme();
 	wxColor bgColor = clrs->Get(ColourScheme::WINDOW);
 	wxColor fgColor = clrs->Get(ColourScheme::WINDOW_TEXT);
-	wxColor bgColorFr = clrs->Get(ColourScheme::FRAME);
 	
 	
-	SetBackgroundColour(bgColorFr);
+	SetBackgroundColour(bgColor);
 	SetForegroundColour(fgColor);
 
 	wxWindowList::compatibility_iterator node = GetChildren().GetFirst();
 	while (node)
 	{
 		wxWindow* child = node->GetData();
-		child->SetBackgroundColour(bgColorFr);
+		child->SetBackgroundColour(bgColor);
 		child->SetForegroundColour(fgColor);
 		node = node->GetNext();
 	}
-
-	m_plog->SetBackgroundColour(bgColor);
-	m_plog->SetForegroundColour(fgColor);
-
-
 }
 
 void LogPane::OnClose(wxCommandEvent& WXUNUSED(ev))

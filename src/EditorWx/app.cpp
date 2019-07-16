@@ -236,5 +236,6 @@ const char *gcode_gettext(const char *s)
 
 void  App::OnEventLoopEnter(wxEventLoopBase* WXUNUSED(loop))
 {
-	m_frame->CreateWatcher();
+	if (m_frame)
+		m_frame->CreateWatcher();
 }

@@ -1,0 +1,20 @@
+/* XPM */
+static const char *const file_open_xpm[] = {
+/* columns rows colors chars-per-pixel */
+"12 12 2 1 ",
+"  c #DDDDDD",
+". c None",
+/* pixels */
+"..        ..",
+".          .",
+"            ",
+"            ",
+"    ....    ",
+"   ......   ",
+"   ......   ",
+"     ..     ",
+"     ..     ",
+"     ..     ",
+"     ..     ",
+"     ..     "
+};
