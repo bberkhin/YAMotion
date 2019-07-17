@@ -66,8 +66,9 @@ private:
 
 
 class LogWindow;
-class  LogPane : public wxPanel
+class  LogPane : public FlatSashWindow
 {
+	wxDECLARE_ABSTRACT_CLASS(LogPane);
 public:
 	LogPane(wxWindow *parent, FilePage *fb);
 	~LogPane() { }
@@ -118,7 +119,7 @@ private:
 	EditorPanel *m_editor;
 	View3DPanel *m_view3d;
 	LogPane *m_logwn;
-	wxSplitterWindow *m_splitter;
+//	wxSplitterWindow *m_splitter;
 	Worker *m_worker;
 	int m_view3dsize;
 	int m_splashpos;

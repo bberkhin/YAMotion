@@ -41,7 +41,9 @@ enum
 	ID_BTN_PAUSE,
 	ID_BTN_SIMULATE,
 	ID_BTN_STOP,
-	ID_SETSIMULATIONSPEED
+	ID_SETSIMULATIONSPEED,
+	ID_LOGWINDOW,
+	ID_3DVIEWWINDOW
 };
 
 enum
@@ -224,11 +226,12 @@ EVT_IDLE(View3DPanel::OnIdle)
 
 wxEND_EVENT_TABLE()
 
-wxIMPLEMENT_ABSTRACT_CLASS(View3DPanel, wxSashWindow);
+wxIMPLEMENT_ABSTRACT_CLASS(View3DPanel, View3DPanelBase);
 
 View3DPanel::View3DPanel(wxWindow *parent, FilePage *fp) :	
-	m_fp(fp), View3DPanelBase(parent, 100, wxDefaultPosition,wxDefaultSize,wxCLIP_CHILDREN|wxNO_BORDER )//| wxSW_BORDER)wxCLIP_CHILDREN | 
+	m_fp(fp), View3DPanelBase(parent, ID_3DVIEWWINDOW, wxDefaultPosition,wxDefaultSize,wxCLIP_CHILDREN|wxNO_BORDER )//| wxSW_BORDER)wxCLIP_CHILDREN | 
 {
+	
 	ColourScheme *clrs = Preferences::Get()->GetColorScheme();
 	const CommonInfo &common_prefs = Preferences::Get()->Common();
 
@@ -732,18 +735,20 @@ void View3DPanel::OnIdle(wxIdleEvent& event)
 }
 
 
-wxBEGIN_EVENT_TABLE(LogPane, wxPanel)
+wxIMPLEMENT_ABSTRACT_CLASS(LogPane, FlatSashWindow);
+
+wxBEGIN_EVENT_TABLE(LogPane, FlatSashWindow)
 EVT_BUTTON(ID_CLOSEOUTPUT, LogPane::OnClose)
 wxEND_EVENT_TABLE()
 
 LogPane::LogPane(wxWindow *parent, FilePage *fb)
-	: m_fb(fb), wxPanel(parent,-1,wxDefaultPosition,wxDefaultSize, wxTAB_TRAVERSAL | wxNO_BORDER | wxCAPTION)
+	: m_fb(fb), FlatSashWindow(parent, ID_LOGWINDOW, wxDefaultPosition, wxDefaultSize, wxCLIP_CHILDREN | wxNO_BORDER)
+	//wxPanel(parent,-1,wxDefaultPosition,wxDefaultSize, wxTAB_TRAVERSAL | wxNO_BORDER | wxCAPTION)
 {
-
 	wxBoxSizer *header = new wxBoxSizer(wxHORIZONTAL);
 	wxStaticText *txt = new wxStaticText(this, wxID_ANY, _("Output"));
 	
-	header->Add(5,0);
+	header->Add(5,10);
 	header->Add(txt, 1, wxALIGN_CENTRE_VERTICAL);
 	
 	FlatButton *padd = new FlatButton(this, ID_CLOSEOUTPUT, wxEmptyString, FB_TRANSPARENT, ART_CLOSE);
@@ -775,6 +780,9 @@ LogPane::LogPane(wxWindow *parent, FilePage *fb)
 	totalpane->Add(header, 0, wxEXPAND);
 	totalpane->Add(gd, wxEXPAND, wxEXPAND); //wxEXPAND
 	
+	SetSashVisible(wxSASH_TOP, true);
+	SetAutoLayout(true);
+	Show(false);
 	SetSizerAndFit(totalpane);
 	UpdateThemeColor();
 }
@@ -808,7 +816,8 @@ void LogPane::OnClose(wxCommandEvent& WXUNUSED(ev))
 
 wxBEGIN_EVENT_TABLE(FilePage, wxPanel)
 EVT_SIZE(FilePage::OnSize)
-EVT_SASH_DRAGGED_RANGE(100, 101, FilePage::OnSashDrag)
+EVT_SASH_DRAGGED(ID_LOGWINDOW, FilePage::OnSashDrag)
+EVT_SASH_DRAGGED(ID_3DVIEWWINDOW, FilePage::OnSashDrag)
 wxEND_EVENT_TABLE()
 
 wxIMPLEMENT_ABSTRACT_CLASS(FilePage, wxPanel);
@@ -825,21 +834,17 @@ FilePage::FilePage(wxWindow *parent, int filetype, const wxString &filename, boo
 
 		
 		
-	m_splitter = new wxSplitterWindow( this,-1, wxDefaultPosition,wxDefaultSize, wxSP_LIVE_UPDATE);
+	//m_splitter = new wxSplitterWindow( this,-1, wxDefaultPosition,wxDefaultSize, wxSP_LIVE_UPDATE);
 	m_splashpos = -250;
 	
 
-	m_splitter->SetSize(GetClientSize());
-	m_splitter->SetSashGravity(1.0);
-	m_editor = new EditorPanel(m_splitter,this, filetype, filename, isnew);		
+	//m_splitter->SetSize(GetClientSize());
+	//m_splitter->SetSashGravity(1.0);
+	m_editor = new EditorPanel(this ,this, filetype, filename, isnew);		
+	m_logwn = new LogPane(this,this );
 	
-	m_logwn = new LogPane(m_splitter,this );
-	
-	
-	
-	m_logwn->Show(false);
-	m_splitter->Initialize(m_editor);
-	m_splitter->SetMinimumPaneSize(40);
+//	m_splitter->Initialize(m_editor);
+	//m_splitter->SetMinimumPaneSize(40);
 
 	//wxGridSizer *totalpane;
 	int ftype = m_editor->GetEdit()->GetFileType();
@@ -847,6 +852,7 @@ FilePage::FilePage(wxWindow *parent, int filetype, const wxString &filename, boo
 	{
 		m_view3d = new View3DPanel(this, this);
 		m_view3d->SetSashVisible(wxSASH_LEFT, true);
+		;
 		//m_view3d->SetAutoLayout(true);	
 	}
 	else
@@ -882,7 +888,18 @@ void FilePage::DoLayout(const wxSize &szin)
 		}
 	}
 
-	m_splitter->SetSize(0, 0, sz.x, sz.y);
+	if (m_logwn->IsShown())
+	{
+		int hlog = sz.y / 4;
+		m_editor->SetSize(0, 0, sz.x, sz.y- hlog);
+		m_logwn->SetSize(0, sz.y - hlog, sz.x, hlog);
+		
+	//	m_logwn->Layout();
+	//	m_logwn->Refresh();
+	}
+	else
+		m_editor->SetSize(0, 0, sz.x, sz.y);
+
 	if (m_view3d && m_view3d->IsShown())
 	{
 		m_view3d->SetSize(sz.x, 0, GetSize().x - sz.x, sz.y);
@@ -898,7 +915,11 @@ void FilePage::OnSashDrag(wxSashEvent& event)
 		return;
 
 	wxRect rcDrag = event.GetDragRect();
-	wxSize szClient(GetSize().x - rcDrag.width, GetSize().GetY());
+	wxSize szClient;
+	if ( event.GetId() == ID_3DVIEWWINDOW )
+		szClient = wxSize(GetSize().x - rcDrag.width, GetSize().GetY());
+	else //ID_LOGWINDOW, FilePage::OnSashDrag)
+		szClient = wxSize(GetSize().x , GetSize().GetY()- rcDrag.height );
 	DoLayout(szClient);
 }
 
@@ -972,21 +993,20 @@ void FilePage::UpdateThemeColor()
 
 void FilePage::ShowLog( )
 {
-	if (m_splitter->IsSplit())
-		return;
-		
-	m_editor->Show(true);
-	m_logwn->Show(true);
-	
-	m_splitter->SplitHorizontally(m_editor, m_logwn, m_splashpos );
+	if (!m_logwn->IsShown())
+	{
+		m_logwn->Show(true);
+		DoLayout();
+	}
+
 }
 
 void FilePage::HideLog()
 {
-	if (m_splitter->IsSplit())
+	if (m_logwn->IsShown())
 	{
-		m_splashpos = m_splitter->GetSashPosition();
-		m_splitter->Unsplit();		
+		m_logwn->Show(false);
+		DoLayout();
 	}
 }
 
