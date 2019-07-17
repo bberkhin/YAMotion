@@ -44,6 +44,7 @@ public:
 	void SetCommand(int cmd) { m_cmd = cmd; }
 	void SetMargins(int marginX, int marginY);
 	void UpdateSize() { SetBestClientSize(); }
+	
 private:
 	void Init();
 	void SetBestClientSize();
@@ -51,12 +52,14 @@ private:
 	void DrawBackground(wxDC&  dc, const wxRect &rc);
 	void DrawLabel(wxDC&  dc, const wxRect &rc);
 	void DrawBitmap(wxDC&  dc, const wxPoint &pt);
+	void DoEnable(bool enable);
 
 private:
 	int  m_status;
 	wxString m_text;
 	wxBitmap m_bitmap;
 	wxBitmap m_bitmap_hover;
+	wxBitmap m_bitmap_disabled;
 	int m_marginX;
 	int m_marginY;
 	int m_cmd;

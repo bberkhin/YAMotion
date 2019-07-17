@@ -1,7 +1,7 @@
 #pragma once
 
 #include "workingthreads.h"
-#include <wx/sashwin.h>
+#include "flatsash.h"
 
 class FilePage;
 class Edit;
@@ -26,7 +26,7 @@ private:
 	wxDECLARE_EVENT_TABLE();
 };
 
-#define View3DPanelBase wxSashWindow//wxPanel
+#define View3DPanelBase FlatSashWindow//wxSashWindow//wxPanel
 
 class View3D;
 class View3DPanel : public View3DPanelBase//wxSashWindow//wxPanel

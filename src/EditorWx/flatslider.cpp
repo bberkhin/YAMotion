@@ -48,6 +48,7 @@ wxBEGIN_EVENT_TABLE(FlatSlider, wxWindow)
 	EVT_ENTER_WINDOW(FlatSlider::mouseEnterWindow)
 	EVT_LEAVE_WINDOW(FlatSlider::mouseLeftWindow)
 	EVT_MOUSEWHEEL(FlatSlider::mouseWheelMoved)
+	//EVT_ERASE_BACKGROUND(FlatSlider::OnEraseBackground)
 
 wxEND_EVENT_TABLE()
 
@@ -322,6 +323,11 @@ wxSize FlatSlider::DoGetBestClientSize() const
 
 	}
     return size;
+}
+
+void FlatSlider::OnEraseBackground(wxEraseEvent& event)
+{
+	//event.Skip();
 }
 
 void FlatSlider::OnSize(wxSizeEvent& event)

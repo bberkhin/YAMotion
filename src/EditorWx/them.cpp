@@ -73,6 +73,8 @@ const char* const *GetBitmapColor(const char* const* xpm_data, const wxColor &cl
 	{\
 		if ( client == ART_MENUHOVER) \
 			clr = clrs->Get(ColourScheme::BITMAP_CMD_HOVER); \
+		else if (client == ART_MENUDISABLED) \
+			clr = clrs->Get(ColourScheme::BITMAP_CMD_DISABLED); \
 		else\
 			clr = clrs->Get(ColourScheme::BITMAP_CMD);\
 		if (clr.IsOk())\
@@ -362,12 +364,14 @@ void ColourScheme::Read()
 
 	ReadColor( root["frame"], m_colors[FRAME]);
 	ReadColor(root["window"],m_colors[WINDOW]);
+	ReadColor(root["window_3dview"], m_colors[WINDOW_3DVIEW]);	
 	ReadColor(root["window_hover"], m_colors[WINDOW_HOVER]);
 	ReadColor(root["window_txt"], m_colors[WINDOW_TEXT]);
 	ReadColor(root["window_txt_hover"], m_colors[WINDOW_TEXT_HOVER]);
 	ReadColor(root["window_txt_disable"], m_colors[WINDOW_TEXT_DISABLE]);
 	ReadColor(root["bitmap_cmd"], m_colors[BITMAP_CMD]);
 	ReadColor(root["bitmap_cmd_hover"], m_colors[BITMAP_CMD_HOVER]);		
+	ReadColor(root["bitmap_cmd_disable"], m_colors[BITMAP_CMD_DISABLED]);
 	ReadColor(root["linenumber"], m_colors[LINENUMBER]);
 	ReadColor(root["linenumber_txt"], m_colors[LINENUMBER_TEXT]);
 	ReadColor(root["calltip"], m_colors[CALLTIP]);
@@ -404,12 +408,14 @@ void ColourScheme::InitDef()
 	m_colors[FRAME] = wxColor(0,0,0);
 	// the background colour for a window
 	m_colors[WINDOW] = wxColor(0, 0, 0);
+	m_colors[WINDOW_3DVIEW] = wxColor(0x222222);
 	m_colors[WINDOW_HOVER] = wxColor(0x4d4d4d); 
 	m_colors[WINDOW_TEXT] = wxColor(0xFFFFFF);
 	m_colors[WINDOW_TEXT_HOVER] = wxColor(0xFFFFFF);
 	m_colors[WINDOW_TEXT_DISABLE] = wxColor(0x666666);
 	m_colors[BITMAP_CMD] = wxColor(0x999999);
 	m_colors[BITMAP_CMD_HOVER] = wxColor(0xe6e6e6);
+	m_colors[BITMAP_CMD_DISABLED] = wxColor(0x555555);
 	
 	m_colors[LINENUMBER] = wxColor(32, 32, 32);
 	m_colors[LINENUMBER_TEXT] = wxColor(192, 192, 192);

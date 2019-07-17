@@ -62,6 +62,7 @@ void FlatButton::SetBitmap(const wxString& idArt, int spacer)
 		return;
 	m_bitmap = wxArtProvider::GetBitmap(idArt, wxART_MENU);
 	m_bitmap_hover = wxArtProvider::GetBitmap(idArt, ART_MENUHOVER);
+	m_bitmap_disabled = wxArtProvider::GetBitmap(idArt, ART_MENUDISABLED);
 	m_spacer = spacer;
 	SetBestClientSize();
 }
@@ -92,7 +93,16 @@ BEGIN_EVENT_TABLE(FlatButton, wxWindow)
 	// catch paint events
 	EVT_PAINT(FlatButton::paintEvent)
 	EVT_SIZE(FlatButton::OnSize)
+
 END_EVENT_TABLE()
+
+
+
+void FlatButton::DoEnable(bool enable)
+{
+	wxWindow::DoEnable(enable);
+	Refresh();
+}
 
 
 /*
@@ -264,8 +274,9 @@ void FlatButton::DrawBitmap(wxDC&  dc, const wxPoint &pt)
 {
 	if (!m_bitmap.IsOk())
 		return;
-
-	if ( ((m_status == statusHover) || (m_status == statusPressed)) && m_bitmap_hover.IsOk() )
+	if ( !IsEnabled() && m_bitmap_disabled.IsOk() )
+		dc.DrawBitmap(m_bitmap_disabled, pt, true);
+	else if ( ((m_status == statusHover) || (m_status == statusPressed)) && m_bitmap_hover.IsOk() )
 		dc.DrawBitmap(m_bitmap_hover, pt, true);
 	else
 		dc.DrawBitmap(m_bitmap, pt, true );

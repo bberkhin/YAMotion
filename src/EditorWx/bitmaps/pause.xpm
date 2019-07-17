@@ -1,22 +1,20 @@
 /* XPM */
 static const char *const pause_xpm[] = {
 /* columns rows colors chars-per-pixel */
-"10 13 3 1 ",
+"12 12 2 1 ",
 "  c #DDDDDD",
-". c gray87",
 "X c None",
 /* pixels */
-"XXXXXXXXXX",
-"    XX   .",
-"    XX    ",
-"    XX    ",
-"    XX    ",
-"    XX    ",
-"    XX    ",
-"    XX    ",
-"    XX    ",
-"    XX    ",
-"    XX    ",
-"    XX    ",
-"....XX...."
+"X    XX    X",
+"X    XX    X",
+"X    XX    X",
+"X    XX    X",
+"X    XX    X",
+"X    XX    X",
+"X    XX    X",
+"X    XX    X",
+"X    XX    X",
+"X    XX    X",
+"X    XX    X",
+"X    XX    X"
 };

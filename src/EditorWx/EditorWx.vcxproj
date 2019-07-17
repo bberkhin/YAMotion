@@ -46,6 +46,7 @@
     <ClCompile Include="executorlog.cpp" />
     <ClCompile Include="executorview.cpp" />
     <ClCompile Include="flatbuttom.cpp" />
+    <ClCompile Include="flatsash.cpp" />
     <ClCompile Include="FlatScrollBar.cpp" />
     <ClCompile Include="flatslider.cpp" />
     <ClCompile Include="flatstaticline.cpp" />
@@ -96,6 +97,7 @@
     <ClInclude Include="executorlog.h" />
     <ClInclude Include="executorview.h" />
     <ClInclude Include="flatbuttom.h" />
+    <ClInclude Include="flatsash.h" />
     <ClInclude Include="FlatScrollBar.h" />
     <ClInclude Include="flatslider.h" />
     <ClInclude Include="flatstaticline.h" />

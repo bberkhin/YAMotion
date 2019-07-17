@@ -12,6 +12,8 @@
 #include "configdata.h"
 #include "app.h"
 #include "appframe.h"    
+#include "them.h"
+#include "prefs.h"
 
 
 #include <glm/gtc/matrix_transform.hpp>
@@ -98,6 +100,12 @@ View3D::View3D( wxWindow *parent,wxWindowID id, int* gl_attrib)
 	make_axis(glm::vec4(1, 0, 0, 1), glm::vec3(0, 1, 0), 1.0f, axisX);
 	make_axis(glm::vec4(0, 1, 0, 1), glm::vec3(-1, 0, 0), 1.0f, axisY);
 	make_axis(glm::vec4(0, 0, 1, 1), glm::vec3(0, 0, 1), 1.0f, axisZ);
+
+	ColourScheme *clrs = Preferences::Get()->GetColorScheme();
+	wxColor bgColor = clrs->Get(ColourScheme::WINDOW_3DVIEW);
+	m_bgcolor.r = bgColor.Red() / 255.f; 
+	m_bgcolor.g = bgColor.Green() / 255.f;
+	m_bgcolor.b = bgColor.Blue() / 255.f;
 	
 	
 }
@@ -140,7 +148,9 @@ void View3D::save_config()
 
 void View3D::initializeGL()
 {
-	glClearColor(0.0f, 1.0f, 0.0f, 0.0f);
+	glClearColor(m_bgcolor.r, m_bgcolor.g, m_bgcolor.b, 0.0f);
+	
+
 	glShadeModel(GL_FLAT);
 	glEnable(GL_CULL_FACE);
 	glEnable(GL_BLEND);
@@ -230,8 +240,8 @@ void View3D::OnPaint(wxPaintEvent& WXUNUSED(event))
 
 	draw_axis_letters();
 		
-	if ( HasFocus() )
-		draw_border();
+//	if ( HasFocus() )
+	//	draw_border();
 	
 	glFlush();
 	SwapBuffers();

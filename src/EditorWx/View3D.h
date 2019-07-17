@@ -167,7 +167,7 @@ private:
 	size_t simulateLastIndex;
 	TrackPointGL end_simulate_point;
 	GLuint fontOffset;
-	
+	glm::vec3 m_bgcolor;
 
 	wxDECLARE_NO_COPY_CLASS(View3D);
 	wxDECLARE_EVENT_TABLE();

@@ -13,6 +13,9 @@
 #define wxACTION_SCROLL_THUMB_MOVE      wxT("thumbmove")
 #define wxACTION_SCROLL_THUMB_RELEASE   wxT("thumbrelease")
 
+#define TUMB_SIZE 10
+#define DRAW_TUMB_SIZE 6
+#define DEFLATE_TUMB_TODRAW 2// ((TUMB_SIZE-DRAW_TUMB_SIZE)/2)
 
 
 
@@ -86,6 +89,12 @@ void FlatScrollBar::render(wxDC&  dc)
 	//Draw Tumb
 
 	wxRect rcTumb = GetScrollbarRect();
+	if (IsVertical())
+		rcTumb.Deflate(DEFLATE_TUMB_TODRAW, 0); 
+	else
+		rcTumb.Deflate(0, DEFLATE_TUMB_TODRAW);
+		
+
 
 	if (m_status == statusHover)
 		clr = clrs->Get(ColourScheme::ColourScheme::SCROLLBAR_TUMB_HOVER);
@@ -189,9 +198,9 @@ void FlatScrollBar::rightClick(wxMouseEvent& event) {}
 void FlatScrollBar::SetBestClientSize()
 {
 	if( IsVertical() )
-		SetMinSize(FromDIP(wxSize(10, 100)));
+		SetMinSize(FromDIP(wxSize(TUMB_SIZE, 100)));
 	else
-		SetMinSize(FromDIP(wxSize(100, 10)));
+		SetMinSize(FromDIP(wxSize(100, TUMB_SIZE)));
 }
 
 

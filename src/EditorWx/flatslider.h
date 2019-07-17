@@ -92,6 +92,7 @@ public:
 	void rightClick(wxMouseEvent& event);
 	void mouseLeftWindow(wxMouseEvent& event);
 	void mouseEnterWindow(wxMouseEvent& event);
+	void OnEraseBackground(wxEraseEvent& event);
 
 
 protected:

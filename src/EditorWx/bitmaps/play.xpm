@@ -1,22 +1,20 @@
 /* XPM */
 static const char *const play_xpm[] = {
 /* columns rows colors chars-per-pixel */
-"11 12 4 1 ",
+"12 12 2 1 ",
 "  c #DDDDDD",
-". c gray87",
-"X c #DFDFDF",
-"o c None",
+"X c None",
 /* pixels */
-"..ooooooooo",
-".. .ooooooo",
-"    ..ooooo",
-"    ....ooo",
-"    .    oo",
-"    .    ..",
-"        ...",
-"        .oo",
-"    .. .ooo",
-"    ..ooooo",
-"..  ooooooo",
-"..ooooooooo"
+"  XXXXXXXXXX",
+"    XXXXXXXX",
+"      XXXXXX",
+"        XXXX",
+"         XXX",
+"           X",
+"           X",
+"         XXX",
+"        XXXX",
+"      XXXXXX",
+"    XXXXXXXX",
+"  XXXXXXXXXX"
 };

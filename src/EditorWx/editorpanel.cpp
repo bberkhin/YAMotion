@@ -173,17 +173,15 @@ void EditorPanel::UpdateThemeColor()
 
 	SetBackgroundColour(bgColor);
 	SetForegroundColour(fgColor);
-	/*
+	
 	wxWindowList::compatibility_iterator node = GetChildren().GetFirst();
 	while (node)
 	{
 		wxWindow* child = node->GetData();
 		child->SetBackgroundColour(bgColor);
-		child->SetForegroundColour(fgColor);
+	//	child->SetForegroundColour(fgColor);
 		node = node->GetNext();
 	}
-	*/
-	
 }
 
 void EditorPanel::OnTo3DButton(wxCommandEvent &ev)
@@ -222,7 +220,7 @@ EVT_BUTTON(ID_SETSIMULATIONSPEED, View3DPanel::OnSetSimulateSpeed)
 EVT_COMMAND_SCROLL(ID_SIMULATED_SLIDER, View3DPanel::OnSimulateProgress)
 EVT_COMMAND_SCROLL(ID_SIMULATEDSPEED_SLIDER, View3DPanel::OnSpeedChanged)
 
-//EVT_IDLE(View3DPanel::OnIdle)
+EVT_IDLE(View3DPanel::OnIdle)
 
 wxEND_EVENT_TABLE()
 
@@ -238,12 +236,22 @@ View3DPanel::View3DPanel(wxWindow *parent, FilePage *fp) :
 	m_pview = new View3D(this, wxID_ANY);
 	wxBoxSizer *totalpane = new wxBoxSizer(wxVERTICAL);
 	wxBoxSizer *pHeader = CreateHeaderPanel();
+	totalpane->AddSpacer(5);
 	totalpane->Add(pHeader, 0, wxEXPAND);
+	totalpane->AddSpacer(10);
+	FlatStaticLine *pGripper = new FlatStaticLine(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxLI_HORIZONTAL);
+	totalpane->Add(pGripper, 0, wxGROW | wxLEFT | wxRIGHT, MARGIN_GRIPPER);
+	totalpane->AddSpacer(10);
 	totalpane->Add(m_pview, wxEXPAND, wxEXPAND);
+
+	totalpane->AddSpacer(10);
+	pGripper = new FlatStaticLine(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxLI_HORIZONTAL);
+	totalpane->Add(pGripper, 0, wxGROW | wxLEFT | wxRIGHT, MARGIN_GRIPPER);
+	totalpane->AddSpacer(5);
 
 	wxSizer *pSimulate = CreateSimulationPanel();
 	wxSizer *pFooter = CreateFooterPanel();
-	//totalpane->AddSpacer( FromDIP(10) );
+	
 	totalpane->Add(pSimulate, 0, wxEXPAND);
 	//totalpane->AddSpacer(FromDIP(10));
 	totalpane->Add(pFooter, 0, wxEXPAND);
@@ -265,20 +273,21 @@ View3DPanel::~View3DPanel()
 void View3DPanel::UpdateThemeColor()
 {
 	ColourScheme *clrs = Preferences::Get()->GetColorScheme();
-	wxColor bgColor = wxColor(0x222222);// = clrs->Get(ColourScheme::WINDOW);
+	wxColor bgColor = clrs->Get(ColourScheme::WINDOW_3DVIEW);
 	wxColor fgColor = clrs->Get(ColourScheme::WINDOW_TEXT);
 
 	SetBackgroundColour(bgColor);
 	SetForegroundColour(fgColor);
-
+	
 	wxWindowList::compatibility_iterator node = GetChildren().GetFirst();
 	while (node)
 	{
 		wxWindow* child = node->GetData();
 		child->SetBackgroundColour(bgColor);
-		child->SetForegroundColour(fgColor);
+	//	child->SetForegroundColour(fgColor);
 		node = node->GetNext();
 	}
+	
 }
 
 
@@ -380,10 +389,14 @@ void PriorityBoxSizer::RecalcSizes()
 								
 wxBoxSizer *View3DPanel::CreateHeaderPanel()
 {
+	ColourScheme *clrs = Preferences::Get()->GetColorScheme();
+	wxColor colorfg = clrs->Get(ColourScheme::WINDOW_TEXT);
 	PriorityBoxSizer *header = new PriorityBoxSizer();
 	wxStaticText *txt = new wxStaticText(this, wxID_ANY, _("3D View:"));
+	txt->SetForegroundColour(colorfg);
+	header->AddSpacer(MARGIN_GRIPPER);
 	header->Add(txt, 0, wxALIGN_CENTRE_VERTICAL| wxLEFT);// wxEXPAND);
-	
+
 	FlatButton *pbtn;
 	APPEND_BUTTOM(ID_BTN_TOP, _("TOP"),9,true);
 	APPEND_BUTTOM(ID_BTN_ISOMETRIC, _("ISOMETRIC"),8, true);
@@ -396,8 +409,9 @@ wxBoxSizer *View3DPanel::CreateHeaderPanel()
 	header->AddStretchSpacer();
 
 	FlatButton *pClose = new FlatButton(this, ID_CLOSE3DVIEW, wxEmptyString, FB_TRANSPARENT, ART_CLOSE);
-	header->Add(pClose, 0, wxRIGHT);
-	header->AddSpacer(10);
+	header->Add(pClose, 0, wxRIGHT|wxALIGN_CENTER_VERTICAL);	
+	header->AddSpacer(MARGIN_GRIPPER);
+
 	return header;
 }
 
@@ -428,35 +442,42 @@ wxSizer *View3DPanel::CreateSimulationPanel()
 	panel->Add(btns, 0, wxEXPAND);
 
 	
-	FlatSlider *pguage = new FlatSlider(this, ID_SIMULATED_SLIDER, 500, 0, 1000);
+	FlatSlider *pguage = new FlatSlider(this, ID_SIMULATED_SLIDER, 0, 0, 1000);
 	
 	panel->Add(pguage, 0, wxEXPAND);
 
 	return panel;
 }
 
+#define ADD_STATISTIC_TEXT(id, text) pt = new wxStaticText(this, id, text); \
+									gd->Add(pt, 0, wxALIGN_LEFT); \
+									pt->SetForegroundColour(colorfg)
 
+#define ADD_STATISTIC_TEXT0(text)  ADD_STATISTIC_TEXT( wxID_ANY, text) 
+#define ADD_STATISTIC_TEXT1(id)  ADD_STATISTIC_TEXT( id, L"     ")
 
 wxSizer *View3DPanel::CreateFooterPanel()
 {
-	wxFlexGridSizer  *gd = new wxFlexGridSizer(4,wxSize(10,5));// 2, 0, 0);
-	gd->Add(new wxStaticText(this, wxID_ANY, _("X Min: ")),	0, wxALIGN_LEFT);
-	gd->Add(new wxStaticText(this, ID_CTRL_MINX, _("     ")), 0, wxALIGN_LEFT); 
-	gd->Add(new wxStaticText(this, wxID_ANY, _("X Max: ")), 0, wxALIGN_LEFT);
-	gd->Add(new wxStaticText(this, ID_CTRL_MAXX, _("     ")), 0, wxALIGN_LEFT); 
-	gd->Add(new wxStaticText(this, wxID_ANY, _("Y Min: ")), 0, wxALIGN_LEFT);
-	gd->Add(new wxStaticText(this, ID_CTRL_MINY, _("     ")), 0, wxALIGN_LEFT); 
-	gd->Add(new wxStaticText(this, wxID_ANY, _("Y Max: ")), 0, wxALIGN_LEFT);
-	gd->Add(new wxStaticText(this, ID_CTRL_MAXY, _("     ")), 0, wxALIGN_LEFT); 
-	gd->Add(new wxStaticText(this, wxID_ANY, _("Z Min: ")), 0, wxALIGN_LEFT);
-	gd->Add(new wxStaticText(this, ID_CTRL_MINZ, _("     ")), 0, wxALIGN_LEFT); 
-	gd->Add(new wxStaticText(this, wxID_ANY, _("Z Max: ")), 0, wxALIGN_LEFT);
-	gd->Add(new wxStaticText(this, ID_CTRL_MAXZ, _("     ")), 0, wxALIGN_LEFT); 
-	
-	gd->Add(new wxStaticText(this, wxID_ANY, _("Traverce: ")),0, wxALIGN_LEFT); 
-	gd->Add(new wxStaticText(this, ID_CTRL_TRAVERCE, _("       ")),	0, wxALIGN_LEFT); // lenght val
-	gd->Add(new wxStaticText(this, wxID_ANY, _("Path: ")),	0, wxALIGN_LEFT);
-	gd->Add(new wxStaticText(this, ID_CTRL_PATH, _("       ")),0, wxALIGN_LEFT); // path val
+	ColourScheme *clrs = Preferences::Get()->GetColorScheme();
+	wxColor colorfg = clrs->Get(ColourScheme::WINDOW_TEXT);
+	wxStaticText *pt;
+	wxFlexGridSizer  *gd = new wxFlexGridSizer(4,wxSize(10,5));// 2, 0, 0);	
+	ADD_STATISTIC_TEXT0(_("X Min: "));
+	ADD_STATISTIC_TEXT1(ID_CTRL_MINX);
+	ADD_STATISTIC_TEXT0(_("X Max: "));
+	ADD_STATISTIC_TEXT1(ID_CTRL_MAXX);
+	ADD_STATISTIC_TEXT0(_("Y Min: "));
+	ADD_STATISTIC_TEXT1(ID_CTRL_MINY);
+	ADD_STATISTIC_TEXT0(_("Y Max: "));
+	ADD_STATISTIC_TEXT1(ID_CTRL_MAXY);
+	ADD_STATISTIC_TEXT0(_("Z Min: "));
+	ADD_STATISTIC_TEXT1(ID_CTRL_MINZ);
+	ADD_STATISTIC_TEXT0(_("Z Max: "));
+	ADD_STATISTIC_TEXT1(ID_CTRL_MAXZ);
+	ADD_STATISTIC_TEXT0(_("Traverce: ")); 
+	ADD_STATISTIC_TEXT1(ID_CTRL_TRAVERCE);
+	ADD_STATISTIC_TEXT0(_("Path: "));
+	ADD_STATISTIC_TEXT1(ID_CTRL_PATH);
 	return gd;
 }
 
@@ -594,6 +615,13 @@ SpeedWindow::SpeedWindow(wxWindow *parent, int speedK, const wxPoint &pos)
 	int flags = wxSL_LABELS | wxSL_BOTTOM | wxSL_MIN_MAX_LABELS | wxSL_AUTOTICKS;
 	
 	FlatSlider *sz = new FlatSlider(this, ID_SIMULATEDSPEED_SLIDER, speedK, 1, 50, wxDefaultPosition, wxDefaultSize, flags);
+	
+	ColourScheme *clrs = Preferences::Get()->GetColorScheme();
+	wxColor bgColor = clrs->Get(ColourScheme::WINDOW);
+	wxColor fgColor = clrs->Get(ColourScheme::WINDOW_TEXT);
+	sz->SetBackgroundColour(bgColor);
+	sz->SetForegroundColour(fgColor);
+
 	sz->SetTickFreq(10);
 	box->Add(sz, 0, wxEXPAND);	
 	SetSizerAndFit(box);
@@ -804,6 +832,7 @@ FilePage::FilePage(wxWindow *parent, int filetype, const wxString &filename, boo
 	m_splitter->SetSize(GetClientSize());
 	m_splitter->SetSashGravity(1.0);
 	m_editor = new EditorPanel(m_splitter,this, filetype, filename, isnew);		
+	
 	m_logwn = new LogPane(m_splitter,this );
 	
 	
@@ -816,22 +845,9 @@ FilePage::FilePage(wxWindow *parent, int filetype, const wxString &filename, boo
 	int ftype = m_editor->GetEdit()->GetFileType();
 	if ((ftype == FILETYPE_NC) || (ftype == FILETYPE_GCMC))
 	{
-
-		//		wxSplitterWindow *splitMain = new wxSplitterWindow(this, -1, wxDefaultPosition, wxDefaultSize, 0);
-	//	splitMain->SetSize(GetClientSize());
-		//splitMain->SetSashGravity(1.0);
-		//m_splitter->Reparent(splitMain);
-		//m_view3d = new View3DPanel(splitMain);
-		//splitMain->SplitVertically(m_splitter, m_view3d);
-
-		//totalpane = new wxGridSizer(2);
-		//totalpane->Add(m_splitter, 0, wxEXPAND);
-		
 		m_view3d = new View3DPanel(this, this);
 		m_view3d->SetSashVisible(wxSASH_LEFT, true);
-		//m_view3d->SetAutoLayout(true);
-		
-		//totalpane->Add(m_view3d, 1, wxEXPAND);
+		//m_view3d->SetAutoLayout(true);	
 	}
 	else
 	{

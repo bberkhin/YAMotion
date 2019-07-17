@@ -7,6 +7,7 @@
 #include "wx/artprov.h"
 
 #define ART_MENUHOVER 				    wxART_MAKE_CLIENT_ID(ART_MENUHOVER)
+#define ART_MENUDISABLED				wxART_MAKE_CLIENT_ID(ART_MENUDISABLED)
 #define ART_PREFERENCES                 wxART_MAKE_CLIENT_ID(ART_PREFERENCES)
 #define ART_MAIL						wxART_MAKE_CLIENT_ID(ART_MAIL)
 #define ART_UPDATE						wxART_MAKE_CLIENT_ID(ART_UPDATE)
@@ -82,6 +83,7 @@ public:
 		WINDOW_TEXT,
 		WINDOW_TEXT_HOVER,
 		WINDOW_TEXT_DISABLE,
+		WINDOW_3DVIEW,
 
 		LINENUMBER,
 		LINENUMBER_TEXT,
@@ -91,6 +93,7 @@ public:
 		
 		BITMAP_CMD, //close button for example
 		BITMAP_CMD_HOVER, //close button
+		BITMAP_CMD_DISABLED,
 		// the different background and text colours for the control
 		CONTROL,
 		CONTROL_PRESSED,
