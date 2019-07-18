@@ -112,7 +112,7 @@ public:
 	void Hide3D();
 	void Show3D();
 
-	void DoLayout(const wxSize &sz = wxDefaultSize);
+	void DoLayout(const wxSize &sz = wxDefaultSize, bool from3dview = false);
 	void OnSize(wxSizeEvent& event);
 	void OnSashDrag(wxSashEvent& event);
 private:	
@@ -122,7 +122,7 @@ private:
 //	wxSplitterWindow *m_splitter;
 	Worker *m_worker;
 	int m_view3dsize;
-	int m_splashpos;
+	int m_logwndsize;
 
 private:
 	wxDECLARE_EVENT_TABLE();

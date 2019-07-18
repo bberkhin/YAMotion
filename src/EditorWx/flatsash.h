@@ -96,6 +96,8 @@ public:
     // Initialize colours
     void InitColours();
 
+	wxRect CalcDragRect(wxSashEdgePosition edge, int x, int y, wxSashDragStatus *pstatus=0);
+
 private:
     void Init();
 

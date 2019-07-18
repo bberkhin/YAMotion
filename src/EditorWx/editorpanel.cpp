@@ -747,6 +747,8 @@ LogPane::LogPane(wxWindow *parent, FilePage *fb)
 {
 	wxBoxSizer *header = new wxBoxSizer(wxHORIZONTAL);
 	wxStaticText *txt = new wxStaticText(this, wxID_ANY, _("Output"));
+	txt->SetFont(wxFontInfo(10).Bold());
+	
 	
 	header->Add(5,10);
 	header->Add(txt, 1, wxALIGN_CENTRE_VERTICAL);
@@ -828,32 +830,17 @@ FilePage::FilePage(wxWindow *parent, int filetype, const wxString &filename, boo
 {
 
 	m_view3dsize = -1;
+	m_logwndsize = -1;
 	m_view3d = 0;
 	m_worker = new Worker(this);
-	
-
-		
-		
-	//m_splitter = new wxSplitterWindow( this,-1, wxDefaultPosition,wxDefaultSize, wxSP_LIVE_UPDATE);
-	m_splashpos = -250;
-	
-
-	//m_splitter->SetSize(GetClientSize());
-	//m_splitter->SetSashGravity(1.0);
 	m_editor = new EditorPanel(this ,this, filetype, filename, isnew);		
 	m_logwn = new LogPane(this,this );
-	
-//	m_splitter->Initialize(m_editor);
-	//m_splitter->SetMinimumPaneSize(40);
 
-	//wxGridSizer *totalpane;
 	int ftype = m_editor->GetEdit()->GetFileType();
 	if ((ftype == FILETYPE_NC) || (ftype == FILETYPE_GCMC))
 	{
 		m_view3d = new View3DPanel(this, this);
 		m_view3d->SetSashVisible(wxSASH_LEFT, true);
-		;
-		//m_view3d->SetAutoLayout(true);	
 	}
 	else
 	{
@@ -872,55 +859,87 @@ void FilePage::OnSize(wxSizeEvent& event)
 	DoLayout();
 }
 
-void FilePage::DoLayout(const wxSize &szin)
+void FilePage::DoLayout(const wxSize &szin, bool from3d)
 {
-	wxSize sz = szin;
-	if (sz == wxDefaultSize)
+	wxSize szEditor(wxDefaultSize);
+	wxSize szLog(wxDefaultSize);
+	wxSize sz3DView(wxDefaultSize);
+	szEditor = GetSize();
+	if (szin == wxDefaultSize)
 	{
-		sz = GetSize();
 		if (m_view3d && m_view3d->IsShown())
 		{
-			if (m_view3dsize == -1 && sz.x > 25)
-				m_view3dsize = sz.x / 3;
+			if (m_view3dsize == -1 && szEditor.x > 25)
+				m_view3dsize = szEditor.x / 3;
 			else
 				m_view3dsize = m_view3d->GetSize().x;
-			sz.x -= m_view3dsize;
+			szEditor.x -= m_view3dsize;
+			sz3DView.Set(m_view3dsize, szEditor.y);
+		}
+		
+		if ( m_logwn->IsShown() )
+		{
+			if (m_logwndsize == -1)
+				m_logwndsize = szEditor.y / 4;
+			else
+				m_logwndsize = m_logwn->GetSize().y;
+			szEditor.y -= m_logwndsize;
+			szLog.Set(szEditor.x, m_logwndsize);
 		}
 	}
-
-	if (m_logwn->IsShown())
+	else if (from3d) // szIn is determined it is 3dView Size
 	{
-		int hlog = sz.y / 4;
-		m_editor->SetSize(0, 0, sz.x, sz.y- hlog);
-		m_logwn->SetSize(0, sz.y - hlog, sz.x, hlog);
-		
-	//	m_logwn->Layout();
-	//	m_logwn->Refresh();
+		wxCHECK_RET((m_view3d && m_view3d->IsShown()), "View3D should be shown");
+		sz3DView = szin;
+		m_view3dsize = szin.x;
+		szEditor.x -= sz3DView.x;
+		m_view3dsize = sz3DView.x;
+		if (m_logwn->IsShown())
+		{
+			szEditor.y -= m_logwndsize;
+			szLog.Set(szEditor.x, m_logwndsize);
+		}
 	}
-	else
-		m_editor->SetSize(0, 0, sz.x, sz.y);
-
-	if (m_view3d && m_view3d->IsShown())
+	else // szIn is determined it is LogWnd
 	{
-		m_view3d->SetSize(sz.x, 0, GetSize().x - sz.x, sz.y);
+		wxCHECK_RET((m_logwn->IsShown()), "LogWnd should be shown");
+		m_logwndsize = szin.y;
+		szEditor.y -= m_logwndsize;
+		szEditor.x = m_editor->GetSize().x;
+		szLog.x = szEditor.x;
+		szLog.y = m_logwndsize;
+	}
+
+//Set Sizes
+	m_editor->SetSize(0, 0, szEditor.x, szEditor.y);
+	if (szLog != wxDefaultSize)
+	{
+		wxCHECK_RET((m_logwn->IsShown()), "LogWnd should be shown");
+		m_logwn->SetSize(0, szEditor.y, szLog.x, szLog.y);
+		m_logwn->Layout();
+		m_logwn->Refresh();
+	}
+	if (sz3DView != wxDefaultSize)
+	{
+		wxCHECK_RET((m_view3d && m_view3d->IsShown()), "View3D should be shown");
+		m_view3d->SetSize(szEditor.x, 0, sz3DView.x, sz3DView.y);
 		m_view3d->Layout();
 		m_view3d->Refresh();
 	}
-
 }
 
 void FilePage::OnSashDrag(wxSashEvent& event)
 {
 	if (event.GetDragStatus() == wxSASH_STATUS_OUT_OF_RANGE)
 		return;
-
+// we calculate new size and mark which view should be relayout
 	wxRect rcDrag = event.GetDragRect();
 	wxSize szClient;
 	if ( event.GetId() == ID_3DVIEWWINDOW )
-		szClient = wxSize(GetSize().x - rcDrag.width, GetSize().GetY());
+		szClient = wxSize(rcDrag.width, GetSize().GetY());
 	else //ID_LOGWINDOW, FilePage::OnSashDrag)
-		szClient = wxSize(GetSize().x , GetSize().GetY()- rcDrag.height );
-	DoLayout(szClient);
+		szClient = wxSize(rcDrag.width, rcDrag.height );
+	DoLayout(szClient, event.GetId() == ID_3DVIEWWINDOW );
 }
 
 FilePage::~FilePage()

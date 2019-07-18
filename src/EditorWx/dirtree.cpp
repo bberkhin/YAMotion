@@ -25,25 +25,6 @@
 #include "prefs.h"
 #include "standartpaths.h"
 
-/*
-#include "bitmaps/icon1.xpm"
-#include "bitmaps/icon2.xpm"
-#include "bitmaps/icon3.xpm"
-#include "bitmaps/icon4.xpm"
-#include "bitmaps/icon5.xpm"
-*/
-//#include "state1.xpm"
-//#include "state2.xpm"
-//#include "state3.xpm"
-//#include "state4.xpm"
-//#include "state5.xpm"
-//
-//#include "unchecked.xpm"
-//#include "checked.xpm"
-
-#ifndef wxHAS_IMAGES_IN_RESOURCES
-    #include "../sample.xpm"
-#endif
 
 wxDEFINE_EVENT(FILE_OPEN_EVENT, wxCommandEvent);
 wxDEFINE_EVENT(FILE_REMOVE_EVENT, wxCommandEvent);
@@ -899,7 +880,9 @@ void DirTreeCtrl::UpdateThemeColor(const wxTreeItemId& idParent, const wxColor &
 
 void DirTreeCtrl::UpdateThemeColor()
 {
-	UpdateThemeColor(m_rootId, Preferences::Get()->GetArtProvider()->GetColor(wxAUI_DOCKART_INACTIVE_CAPTION_TEXT_COLOUR));
+	ColourScheme *clrs = Preferences::Get()->GetColorScheme();
+	wxColor fgColor = clrs->Get(ColourScheme::WINDOW_TEXT);
+	UpdateThemeColor(m_rootId, fgColor);
 }
 
 
@@ -925,35 +908,58 @@ wxBEGIN_EVENT_TABLE(DirPane, wxPanel)
 EVT_BUTTON(ID_ADDFILEBT, DirPane::OnAddButton)
 wxEND_EVENT_TABLE()
 
+#define MARGIN_TOP 5
+#define MARGIN_BOTTOM 5
+#define MARGIN_RIGHT 10
+#define MARGIN_LEFT 10
+
 DirPane::DirPane(wxWindow *parent)
 	: wxPanel(parent)
 {
 
+	ColourScheme *clrs = Preferences::Get()->GetColorScheme();
+
 	m_ptree = new DirTreeCtrl(this, wxID_ANY);
 	wxBoxSizer *totalpane = new wxBoxSizer(wxVERTICAL);
-	wxStaticText *txt = new wxStaticText(this, wxID_ANY, _("Faforite files and folders:"));
+	wxStaticText *txt = new wxStaticText(this, wxID_ANY, _("Folders"));
+	txt->SetFont(wxFontInfo(10));
+
+	totalpane->AddSpacer(MARGIN_TOP);
+
 	totalpane->Add(txt);
-	totalpane->Add(m_ptree, wxEXPAND, wxEXPAND); //wxEXPAND
+	totalpane->Add(m_ptree, wxEXPAND, wxGROW); //wxEXPAND
 	totalpane->Add(0, 10);
 	
-	FlatButton *padd = new FlatButton(this, ID_ADDFILEBT, _("Add folders") );//| wxBORDER_NONE); 
-	//wxButton *padd = new wxButton(this, ID_ADDFILEBT, _("Add folders"), wxDefaultPosition, wxDefaultSize, wxBU_LEFT);//| wxBORDER_NONE); 
-	wxBitmap bmp = wxArtProvider::GetBitmap(wxART_GOTO_LAST, wxART_OTHER, FromDIP(wxSize(16, 16)));
-	//padd->SetBitmap(bmp, wxRIGHT);
-	padd->SetBitmap(bmp);
-
+	FlatButton *padd = new FlatButton(this, ID_ADDFILEBT, _("Add folders"), FB_BITMAP_RIGHT | FB_LABEL_LEFT, ART_ADD);//| wxBORDER_NONE); 
+	padd->SetColour(FlatButton::BackgroundColour, clrs->Get(ColourScheme::WINDOW));
+	padd->SetColour(FlatButton::HoverBackgroundColour, clrs->Get(ColourScheme::WINDOW_HOVER));
+	padd->SetColour(FlatButton::PressBackgroundColour, clrs->Get(ColourScheme::WINDOW_HOVER));
+	padd->SetColour(FlatButton::ForegroundColour, clrs->Get(ColourScheme::WINDOW_TEXT));
+	padd->SetColour(FlatButton::HoverForegroundColour, clrs->Get(ColourScheme::WINDOW_TEXT_HOVER));
+	padd->SetColour(FlatButton::PressForegroundColour, clrs->Get(ColourScheme::WINDOW_TEXT_HOVER));
+	
 	totalpane->Add(padd,0, wxEXPAND);
-	SetSizerAndFit(totalpane);
+	totalpane->AddSpacer(MARGIN_BOTTOM);
+
+	wxBoxSizer *totalmargined = new wxBoxSizer(wxHORIZONTAL);
+	totalmargined->AddSpacer(MARGIN_LEFT);
+	totalmargined->Add(totalpane, wxEXPAND, wxEXPAND);
+	totalmargined->AddSpacer(MARGIN_RIGHT);
+
+	SetSizerAndFit(totalmargined);
 	UpdateThemeColor();
 }
 
 void DirPane::UpdateThemeColor()
 {
-
-	wxColor bgColor = Preferences::Get()->GetArtProvider()->GetColor(wxAUI_DOCKART_BACKGROUND_COLOUR);
-	wxColor fgColor = Preferences::Get()->GetArtProvider()->GetColor(wxAUI_DOCKART_INACTIVE_CAPTION_TEXT_COLOUR);
+	
+	ColourScheme *clrs = Preferences::Get()->GetColorScheme();
+	wxColor bgColor =clrs->Get(ColourScheme::FRAME);
+	wxColor fgColor = clrs->Get(ColourScheme::WINDOW_TEXT);
 
 	SetBackgroundColour(bgColor);
+	SetForegroundColour(fgColor);
+
 	wxWindowList::compatibility_iterator node = GetChildren().GetFirst();
 	while (node)
 	{

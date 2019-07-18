@@ -70,6 +70,114 @@ void FlatSashWindow::OnPaint(wxPaintEvent& WXUNUSED(event))
     DrawSashes(dc);
 }
 
+wxRect FlatSashWindow::CalcDragRect(wxSashEdgePosition edge, int x, int y, wxSashDragStatus *pstatus)
+{
+	wxRect dragRect;
+	int w, h;
+	GetSize(&w, &h);
+	int xp, yp;
+	GetPosition(&xp, &yp);
+
+
+	wxSashDragStatus status = wxSASH_STATUS_OK;
+
+	// the new height and width of the window - if -1, it didn't change
+	int newHeight = wxDefaultCoord,
+	newWidth = wxDefaultCoord;
+
+	// NB: x and y may be negative and they're relative to the sash window
+	//     upper left corner, while xp and yp are expressed in the parent
+	//     window system of coordinates, so adjust them! After this
+	//     adjustment, all coordinates are relative to the parent window.
+	y += yp;
+	x += xp;
+
+	switch (edge)
+	{
+	case wxSASH_TOP:
+		if (y > yp + h)
+		{
+			// top sash shouldn't get below the bottom one
+			status = wxSASH_STATUS_OUT_OF_RANGE;
+		}
+		else
+		{
+			newHeight = h - (y - yp);
+		}
+		break;
+
+	case wxSASH_BOTTOM:
+		if (y < yp)
+		{
+			// bottom sash shouldn't get above the top one
+			status = wxSASH_STATUS_OUT_OF_RANGE;
+		}
+		else
+		{
+			newHeight = y - yp;
+		}
+		break;
+
+	case wxSASH_LEFT:
+		if (x > xp + w)
+		{
+			// left sash shouldn't get beyond the right one
+			status = wxSASH_STATUS_OUT_OF_RANGE;
+		}
+		else
+		{
+			newWidth = w - (x - xp);
+		}
+		break;
+
+	case wxSASH_RIGHT:
+		if (x < xp)
+		{
+			// and the right sash, finally, shouldn't be beyond the
+			// left one
+			status = wxSASH_STATUS_OUT_OF_RANGE;
+		}
+		else
+		{
+			newWidth = x - xp;
+		}
+		break;
+
+	case wxSASH_NONE:
+		// can this happen at all?
+		break;
+	}
+
+	if (newHeight == wxDefaultCoord)
+	{
+		// didn't change
+		newHeight = h;
+	}
+	else
+	{
+		// make sure it's in m_minimumPaneSizeY..m_maximumPaneSizeY range
+		newHeight = wxMax(newHeight, m_minimumPaneSizeY);
+		newHeight = wxMin(newHeight, m_maximumPaneSizeY);
+	}
+
+	if (newWidth == wxDefaultCoord)
+	{
+		// didn't change
+		newWidth = w;
+	}
+	else
+	{
+		// make sure it's in m_minimumPaneSizeY..m_maximumPaneSizeY range
+		newWidth = wxMax(newWidth, m_minimumPaneSizeX);
+		newWidth = wxMin(newWidth, m_maximumPaneSizeX);
+	}
+
+	dragRect = wxRect(x, y, newWidth, newHeight);
+	if (pstatus)
+		*pstatus = status;
+	return dragRect;
+}
+
 void FlatSashWindow::OnMouseEvent(wxMouseEvent& event)
 {
     wxCoord x = 0, y = 0;
@@ -149,110 +257,11 @@ void FlatSashWindow::OnMouseEvent(wxMouseEvent& event)
         // End drawing on top (frees the window used for drawing
         // over the screen)
         wxScreenDC::EndDrawingOnTop();
-
-        int w, h;
-        GetSize(&w, &h);
-        int xp, yp;
-        GetPosition(&xp, &yp);
-
         wxSashEdgePosition edge = m_draggingEdge;
-        m_draggingEdge = wxSASH_NONE;
-
-        wxRect dragRect;
-        wxSashDragStatus status = wxSASH_STATUS_OK;
-
-        // the new height and width of the window - if -1, it didn't change
-        int newHeight = wxDefaultCoord,
-            newWidth = wxDefaultCoord;
-
-        // NB: x and y may be negative and they're relative to the sash window
-        //     upper left corner, while xp and yp are expressed in the parent
-        //     window system of coordinates, so adjust them! After this
-        //     adjustment, all coordinates are relative to the parent window.
-        y += yp;
-        x += xp;
-
-        switch (edge)
-        {
-            case wxSASH_TOP:
-                if ( y > yp + h )
-                {
-                    // top sash shouldn't get below the bottom one
-                    status = wxSASH_STATUS_OUT_OF_RANGE;
-                }
-                else
-                {
-                    newHeight = h - (y - yp);
-                }
-                break;
-
-            case wxSASH_BOTTOM:
-                if ( y < yp )
-                {
-                    // bottom sash shouldn't get above the top one
-                    status = wxSASH_STATUS_OUT_OF_RANGE;
-                }
-                else
-                {
-                    newHeight = y - yp;
-                }
-                break;
-
-            case wxSASH_LEFT:
-                if ( x > xp + w )
-                {
-                    // left sash shouldn't get beyond the right one
-                    status = wxSASH_STATUS_OUT_OF_RANGE;
-                }
-                else
-                {
-                    newWidth = w - (x - xp);
-                }
-                break;
-
-            case wxSASH_RIGHT:
-                if ( x < xp )
-                {
-                    // and the right sash, finally, shouldn't be beyond the
-                    // left one
-                    status = wxSASH_STATUS_OUT_OF_RANGE;
-                }
-                else
-                {
-                    newWidth = x - xp;
-                }
-                break;
-
-            case wxSASH_NONE:
-                // can this happen at all?
-                break;
-        }
-
-        if ( newHeight == wxDefaultCoord )
-        {
-            // didn't change
-            newHeight = h;
-        }
-        else
-        {
-            // make sure it's in m_minimumPaneSizeY..m_maximumPaneSizeY range
-            newHeight = wxMax(newHeight, m_minimumPaneSizeY);
-            newHeight = wxMin(newHeight, m_maximumPaneSizeY);
-        }
-
-        if ( newWidth == wxDefaultCoord )
-        {
-            // didn't change
-            newWidth = w;
-        }
-        else
-        {
-            // make sure it's in m_minimumPaneSizeY..m_maximumPaneSizeY range
-            newWidth = wxMax(newWidth, m_minimumPaneSizeX);
-            newWidth = wxMin(newWidth, m_maximumPaneSizeX);
-        }
-
-        dragRect = wxRect(x, y, newWidth, newHeight);
+		m_draggingEdge = wxSASH_NONE;
+		wxSashDragStatus status;
+        wxRect dragRect = CalcDragRect(edge, x, y, &status);
+		
 
         wxSashEvent eventSash(GetId(), edge);
         eventSash.SetEventObject(this);
@@ -329,6 +338,15 @@ void FlatSashWindow::OnMouseEvent(wxMouseEvent& event)
 
                 // Draw new one
                 DrawSashTracker(m_draggingEdge, x, y);
+/*
+				wxSashDragStatus status;
+				wxRect dragRect = CalcDragRect(m_draggingEdge, x, y, &status);
+				wxSashEvent eventSash(GetId(), m_draggingEdge);
+				eventSash.SetEventObject(this);
+				eventSash.SetDragStatus(status);
+				eventSash.SetDragRect(dragRect);
+				GetEventHandler()->ProcessEvent(eventSash);
+*/
             }
         }
         m_oldX = x;
@@ -456,6 +474,7 @@ void FlatSashWindow::DrawSash(wxSashEdgePosition edge, wxDC& dc)
 // Draw the sash tracker (for whilst moving the sash)
 void FlatSashWindow::DrawSashTracker(wxSashEdgePosition edge, int x, int y)
 {
+
     int w, h;
     GetClientSize(&w, &h);
 
@@ -509,6 +528,7 @@ void FlatSashWindow::DrawSashTracker(wxSashEdgePosition edge, int x, int y)
 
     screenDC.SetPen(wxNullPen);
     screenDC.SetBrush(wxNullBrush);
+	
 }
 
 // Position and size subwindows.
@@ -516,62 +536,7 @@ void FlatSashWindow::DrawSashTracker(wxSashEdgePosition edge, int x, int y)
 // including the edges next to the sash.
 void FlatSashWindow::SizeWindows()
 {
-    int cw, ch;
-    GetClientSize(&cw, &ch);
-
-    if (GetChildren().GetCount() == 1)
-    {
-        wxWindow* child = GetChildren().GetFirst()->GetData();
-
-        int x = 0;
-        int y = 0;
-        int width = cw;
-        int height = ch;
-
-        // Top
-        if (m_sashes[0].m_show)
-        {
-            y = m_borderSize;
-            height -= m_borderSize;
-        }
-        y += m_extraBorderSize;
-
-        // Left
-        if (m_sashes[3].m_show)
-        {
-            x = m_borderSize;
-            width -= m_borderSize;
-        }
-        x += m_extraBorderSize;
-
-        // Right
-        if (m_sashes[1].m_show)
-        {
-            width -= m_borderSize;
-        }
-        width -= 2*m_extraBorderSize;
-
-        // Bottom
-        if (m_sashes[2].m_show)
-        {
-            height -= m_borderSize;
-        }
-        height -= 2*m_extraBorderSize;
-
-        child->SetSize(x, y, width, height);
-    }
-    else if (GetChildren().GetCount() > 1)
-    {
-        // Perhaps multiple children are themselves sash windows.
-        // TODO: this doesn't really work because the subwindows sizes/positions
-        // must be set to leave a gap for the parent's sash (hit-test and decorations).
-        // Perhaps we can allow for this within LayoutWindow, testing whether the parent
-        // is a sash window, and if so, allowing some space for the edges.
-        wxLayoutAlgorithm layout;
-        layout.LayoutWindow(this);
-    }
-
-    wxClientDC dc(this);
+	wxClientDC dc(this);
     DrawBorders(dc);
     DrawSashes(dc);
 }

@@ -19,6 +19,8 @@
 #include "bitmaps/stop.xpm"
 #include "bitmaps/view3d.xpm"
 #include "bitmaps/convert.xpm"
+#include "bitmaps/add.xpm"
+#include "bitmaps/folder.xpm"
 
 
 static const unsigned char left_bits[] = {
@@ -124,6 +126,8 @@ wxBitmap ExArtProvider::CreateBitmap(const wxArtID& id, const wxArtClient& clien
 	CHECK_ART_ID(ART_CLOSE, client, close_xpm)
 	CHECK_ART_ID(ART_CONVERT, client, convert_xpm)
 	CHECK_ART_ID(ART_DRAW3D, client, view3d_xpm)
+	CHECK_ART_ID(ART_ADD, client, add_xpm)
+	CHECK_ART_ID(ART_FOLDER, client, folder_xpm)
 
 	CHECK_ART_ID0(ART_MAIL, mail_xpm)
 	else

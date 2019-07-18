@@ -19,6 +19,10 @@
 #define ART_PAUSE						wxART_MAKE_CLIENT_ID(ART_PAUSE)
 #define ART_PLAY						wxART_MAKE_CLIENT_ID(ART_PLAY)
 #define ART_STOP						wxART_MAKE_CLIENT_ID(ART_STOP)
+#define ART_ADD							wxART_MAKE_CLIENT_ID(ART_ADD)
+#define ART_FOLDER						wxART_MAKE_CLIENT_ID(ART_FOLDER)
+
+
 
 
 class ExArtProvider : public wxArtProvider
