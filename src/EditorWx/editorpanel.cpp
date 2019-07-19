@@ -21,7 +21,8 @@
 
 #define MAX_BTN_PRIORITY 1101
 #define SPEED_WND_WIDTH 150
-#define MARGIN_GRIPPER 12
+#define MARGIN_LEFT  12
+#define MARGIN_RIGHT 12
 
 enum
 {
@@ -96,7 +97,7 @@ EditorPanel::EditorPanel(wxWindow *parent, FilePage *fp, int filetype, const wxS
 	totalpane->Add(pHeader, 0, wxEXPAND);
 	totalpane->AddSpacer(10);
 	FlatStaticLine *pGripper = new FlatStaticLine(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxLI_HORIZONTAL);
-	totalpane->Add(pGripper, 0, wxGROW | wxLEFT | wxRIGHT, MARGIN_GRIPPER);
+	totalpane->Add(pGripper, 0, wxGROW | wxLEFT | wxRIGHT, MARGIN_LEFT);
 	totalpane->AddSpacer(10);
 
 
@@ -141,7 +142,7 @@ wxBoxSizer *EditorPanel::CreateHeaderPanel()
 	{
 		wxStaticText *txt = new wxStaticText(this, wxID_ANY, label);
 		txt->SetForegroundColour(clrs->Get(ColourScheme::WINDOW_TEXT));
-		totalpane->AddSpacer(MARGIN_GRIPPER);
+		totalpane->AddSpacer(MARGIN_LEFT);
 		totalpane->Add(txt, 1, wxALIGN_CENTRE_VERTICAL);// wxEXPAND);
 	}
 
@@ -243,13 +244,13 @@ View3DPanel::View3DPanel(wxWindow *parent, FilePage *fp) :
 	totalpane->Add(pHeader, 0, wxEXPAND);
 	totalpane->AddSpacer(10);
 	FlatStaticLine *pGripper = new FlatStaticLine(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxLI_HORIZONTAL);
-	totalpane->Add(pGripper, 0, wxGROW | wxLEFT | wxRIGHT, MARGIN_GRIPPER);
+	totalpane->Add(pGripper, 0, wxGROW | wxLEFT | wxRIGHT, MARGIN_LEFT);
 	totalpane->AddSpacer(10);
 	totalpane->Add(m_pview, wxEXPAND, wxEXPAND);
 
 	totalpane->AddSpacer(10);
 	pGripper = new FlatStaticLine(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxLI_HORIZONTAL);
-	totalpane->Add(pGripper, 0, wxGROW | wxLEFT | wxRIGHT, MARGIN_GRIPPER);
+	totalpane->Add(pGripper, 0, wxGROW | wxLEFT | wxRIGHT, MARGIN_LEFT);
 	totalpane->AddSpacer(5);
 
 	wxSizer *pSimulate = CreateSimulationPanel();
@@ -397,7 +398,7 @@ wxBoxSizer *View3DPanel::CreateHeaderPanel()
 	PriorityBoxSizer *header = new PriorityBoxSizer();
 	wxStaticText *txt = new wxStaticText(this, wxID_ANY, _("3D View:"));
 	txt->SetForegroundColour(colorfg);
-	header->AddSpacer(MARGIN_GRIPPER);
+	header->AddSpacer(MARGIN_LEFT);
 	header->Add(txt, 0, wxALIGN_CENTRE_VERTICAL| wxLEFT);// wxEXPAND);
 
 	FlatButton *pbtn;
@@ -413,7 +414,7 @@ wxBoxSizer *View3DPanel::CreateHeaderPanel()
 
 	FlatButton *pClose = new FlatButton(this, ID_CLOSE3DVIEW, wxEmptyString, FB_TRANSPARENT, ART_CLOSE);
 	header->Add(pClose, 0, wxRIGHT|wxALIGN_CENTER_VERTICAL);	
-	header->AddSpacer(MARGIN_GRIPPER);
+	header->AddSpacer(MARGIN_RIGHT);
 
 	return header;
 }
@@ -442,13 +443,12 @@ wxSizer *View3DPanel::CreateSimulationPanel()
 	bt = new FlatButton(this, ID_SETSIMULATIONSPEED, GetSpeedBtLabel() );
 	wxSizerItem *szi = btns->Add(bt, 0, wxALIGN_CENTRE_VERTICAL | wxRIGHT);
 	btns->Insert(0, bt->GetMinWidth(),1 );
+	btns->AddSpacer(MARGIN_RIGHT);
 	panel->Add(btns, 0, wxEXPAND);
-
 	
 	FlatSlider *pguage = new FlatSlider(this, ID_SIMULATED_SLIDER, 0, 0, 1000);
-	
+	pguage->SetMargin(MARGIN_LEFT);
 	panel->Add(pguage, 0, wxEXPAND);
-
 	return panel;
 }
 
@@ -461,10 +461,12 @@ wxSizer *View3DPanel::CreateSimulationPanel()
 
 wxSizer *View3DPanel::CreateFooterPanel()
 {
+
 	ColourScheme *clrs = Preferences::Get()->GetColorScheme();
 	wxColor colorfg = clrs->Get(ColourScheme::WINDOW_TEXT);
 	wxStaticText *pt;
 	wxFlexGridSizer  *gd = new wxFlexGridSizer(4,wxSize(10,5));// 2, 0, 0);	
+
 	ADD_STATISTIC_TEXT0(_("X Min: "));
 	ADD_STATISTIC_TEXT1(ID_CTRL_MINX);
 	ADD_STATISTIC_TEXT0(_("X Max: "));
@@ -481,7 +483,12 @@ wxSizer *View3DPanel::CreateFooterPanel()
 	ADD_STATISTIC_TEXT1(ID_CTRL_TRAVERCE);
 	ADD_STATISTIC_TEXT0(_("Path: "));
 	ADD_STATISTIC_TEXT1(ID_CTRL_PATH);
-	return gd;
+
+	wxBoxSizer *pane = new wxBoxSizer(wxHORIZONTAL);
+	pane->AddSpacer(MARGIN_LEFT);
+	pane->Add(gd,wxEXPAND, wxEXPAND);
+	pane->AddSpacer(MARGIN_RIGHT);
+	return pane;
 }
 
 void View3DPanel::SetValue(int id, const double &val, bool clear)
@@ -746,26 +753,26 @@ LogPane::LogPane(wxWindow *parent, FilePage *fb)
 	//wxPanel(parent,-1,wxDefaultPosition,wxDefaultSize, wxTAB_TRAVERSAL | wxNO_BORDER | wxCAPTION)
 {
 	wxBoxSizer *header = new wxBoxSizer(wxHORIZONTAL);
+	
 	wxStaticText *txt = new wxStaticText(this, wxID_ANY, _("Output"));
 	txt->SetFont(wxFontInfo(10).Bold());
 	
-	
-	header->Add(5,10);
+	header->AddSpacer(MARGIN_LEFT);
 	header->Add(txt, 1, wxALIGN_CENTRE_VERTICAL);
 	
 	FlatButton *padd = new FlatButton(this, ID_CLOSEOUTPUT, wxEmptyString, FB_TRANSPARENT, ART_CLOSE);
 	header->Add(padd, 0, wxRIGHT);
-	header->AddSpacer(5);
+	header->AddSpacer(MARGIN_LEFT);
 
 
 
+	
 	m_plog = new LogWindow(this, m_fb, wxID_ANY);
 	m_plog->SetWindowStyle(m_plog->GetWindowStyle() | wxNO_BORDER);
 	FlatScrollBar *barv = new FlatScrollBar(this, m_plog, wxID_ANY);
 	FlatScrollBar *barh = 0;
 	//if (common_prefs.visibleHSB)
 		//barh = new FlatScrollBar(this, m_pedit, wxID_ANY, FlatScrollBar::typeHorisontal);
-
 	m_plog->SetVScrollBar(barv);
 
 	wxFlexGridSizer  *gd = new wxFlexGridSizer(2);// 2, 0, 0);
@@ -776,11 +783,14 @@ LogPane::LogPane(wxWindow *parent, FilePage *fb)
 	if (barh)
 		gd->Add(barh, 0, wxEXPAND);
 
+	wxBoxSizer *body = new wxBoxSizer(wxHORIZONTAL);
+	body->AddSpacer(MARGIN_LEFT);
+	body->Add(gd, wxEXPAND, wxEXPAND); 
 		
 	wxBoxSizer *totalpane = new wxBoxSizer(wxVERTICAL);
 	totalpane->AddSpacer(7);
 	totalpane->Add(header, 0, wxEXPAND);
-	totalpane->Add(gd, wxEXPAND, wxEXPAND); //wxEXPAND
+	totalpane->Add(body, wxEXPAND, wxEXPAND); //wxEXPAND
 	
 	SetSashVisible(wxSASH_TOP, true);
 	SetAutoLayout(true);

@@ -42,6 +42,7 @@ public:
     virtual int GetPageSize() const ;
     virtual int GetTickFreq() const { return m_tickFreq; }
 	virtual void SetTickFreq(int freq);
+	void SetMargin(int margine);
 
       // is this a vertical slider?
     bool IsVertical() const { return m_type == typeVertical; }
@@ -180,6 +181,7 @@ private:
 	int m_ofsMouse;
 	bool m_capture;
 	bool m_dirty;
+	int m_slider_margin;
 	
 
     // the part of the client area reserved for the label, the ticks and the

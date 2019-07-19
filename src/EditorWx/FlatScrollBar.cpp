@@ -104,7 +104,7 @@ void FlatScrollBar::render(wxDC&  dc)
 		clr = clrs->Get(ColourScheme::SCROLLBAR_TUMB);
 
 	dc.SetBrush(wxBrush(clr));
-	dc.DrawRoundedRectangle(rcTumb,1);
+	dc.DrawRoundedRectangle(rcTumb,3);
 }
 
 wxCoord FlatScrollBar::GetMouseCoord( const wxMouseEvent& event) const

@@ -212,6 +212,7 @@ wxAuiNotebook* AppFrame::CreateNotebook()
 	// create the notebook off-window to avoid flicker
 	wxSize client_size = GetClientSize();
 
+	//wxAuiNotebook* ctrl = new wxAuiNotebook();
 	StubNotebook* ctrl = new StubNotebook();
 	ctrl->SetAuiArtProvider();
 	ctrl->Create(this, wxID_ANY,
@@ -482,6 +483,7 @@ void AppFrame::OnFileOpenEvent(wxCommandEvent &event)
 	// we should check all possible files dir
 
 	wxFileName fname( event.GetString() );
+
 	if (!fname.IsAbsolute())
 	{
 		wxPathList paths; 
@@ -967,11 +969,26 @@ void AppFrame::CreateMacrosesMenu(wxMenu *menuInsert)
 
 
 
-void AppFrame::FileOpen (wxString fname)
+void AppFrame::FileOpen (const wxString &fn)
 {
-    wxFileName w(fname); 
+    wxFileName w(fn); 
 	w.Normalize(); 
-	fname = w.GetFullPath();
+	wxString fname = w.GetFullPath();
+
+	// first check that it is a file
+		
+	if (!std::filesystem::is_regular_file(fname.wc_str()))
+	{
+		int ret = wxMessageBox(wxString::Format(_("File %s is not a regular file of the file system\nWould you like to add it to folders pane?"), fname),
+			wxMessageBoxCaptionStr,	wxYES_NO | wxICON_QUESTION);
+		if (ret == wxYES && m_dirtree)
+		{
+			m_dirtree->AddPath(fname);
+		}
+		return;
+	}
+
+
 	// first try  to find the file in the opened tabs
 	size_t nPage = 0;
 	if (FindPageByFileName(fname, &nPage) )

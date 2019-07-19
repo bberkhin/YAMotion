@@ -16,7 +16,9 @@ static const int BORDER_THICKNESS = 2;
 //static const size_t NUM_STATUSBAR_GRIP_BANDS = 3;
 //static const size_t WIDTH_STATUSBAR_GRIP_BAND = 4;
 //static const size_t STATUSBAR_GRIP_SIZE = WIDTH_STATUSBAR_GRIP_BAND * NUM_STATUSBAR_GRIP_BANDS;
-static const wxCoord SLIDER_MARGIN = 6; // margin around slider
+
+#define SLIDER_MARGIN 6
+
 //static const wxCoord SLIDER_THUMB_LENGTH = 18;
 static const wxCoord SLIDER_TICK_LENGTH = 6;
 
@@ -94,7 +96,7 @@ void FlatSlider::Init()
 	m_ofsMouse = -1;
 	m_capture = false;
 
-
+	m_slider_margin = SLIDER_MARGIN;
     m_type = typeHorisontal;
 }
 
@@ -616,6 +618,11 @@ void FlatSlider::GetSliderLabelsSides(bool *left, bool *right) const
 }
 
 
+void FlatSlider::SetMargin(int margine)
+{
+	m_slider_margin = margine;
+
+}
 
 wxRect FlatSlider::GetSliderShaftRect(const wxRect& rectOrig, int lenThumb ) const
 {
@@ -628,7 +635,7 @@ wxRect FlatSlider::GetSliderShaftRect(const wxRect& rectOrig, int lenThumb ) con
 
 	if ( !IsVertical() )
 	{
-		rect.x += SLIDER_MARGIN;
+		rect.x += m_slider_margin;
 		if (left && right)
 		{
 			rect.y += wxMax((rect.height - 2 * BORDER_THICKNESS) / 2, sizeThumb.y / 2);
@@ -641,12 +648,12 @@ wxRect FlatSlider::GetSliderShaftRect(const wxRect& rectOrig, int lenThumb ) con
 		{
 			rect.y += sizeThumb.y / 2;
 		}
-		rect.width -= 2 * SLIDER_MARGIN;
+		rect.width -= 2 * m_slider_margin;
 		rect.height = 2 * BORDER_THICKNESS;
 	}
 	else // == wxVERTICAL
 	{
-		rect.y += SLIDER_MARGIN;
+		rect.y += m_slider_margin;
 		if (left && right)
 		{
 			rect.x += wxMax((rect.width - 2 * BORDER_THICKNESS) / 2, sizeThumb.x / 2);
@@ -660,7 +667,7 @@ wxRect FlatSlider::GetSliderShaftRect(const wxRect& rectOrig, int lenThumb ) con
 			rect.x += sizeThumb.x / 2;
 		}
 		rect.width = 2 * BORDER_THICKNESS;
-		rect.height -= 2 * SLIDER_MARGIN;
+		rect.height -= 2 * m_slider_margin;
 	}
 
 	return rect;

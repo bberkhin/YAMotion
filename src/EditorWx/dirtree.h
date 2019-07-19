@@ -1,4 +1,9 @@
-#define USE_GENERIC_TREECTRL 0
+
+#pragma once
+#define USE_GENERIC_TREECTRL 1
+
+#include "wx/treectrl.h"
+
 
 #if USE_GENERIC_TREECTRL
 #include "wx/generic/treectlg.h"
@@ -8,7 +13,10 @@
 #endif
 #endif
 
-#include "wx/treectrl.h"
+
+
+//C:\wxWidgets\include\wx\treectrl.h
+//#include "C:/wxWidgets/include/wx/generic/treectlg.h"
 #include "wx/fswatcher.h"
 #include "wx/dnd.h"
 
@@ -30,6 +38,7 @@ private:
 };
 
 class DirTreeActor;
+
 
 class DirTreeCtrl : public wxTreeCtrl
 {
@@ -86,13 +95,12 @@ private:
 	wxTreeItemId FindItemsRecursively(const wxTreeItemId& idParent, const wxString &path);
 	bool ForEachItemRecursively(const wxTreeItemId& idParent, const wxString &path, DirTreeActor *pactor);
     wxTreeItemId GetLastTreeITem() const;
-    void CreateImageList(int size = 16);
+    void CreateImageList();
     void AddPath(const wxString &path);
     void DoSortChildren(const wxTreeItemId& item, bool reverse = false)
-        { m_reverseSort = reverse; wxTreeCtrl::SortChildren(item); }
+        { m_reverseSort = reverse; wxGenericTreeCtrl::SortChildren(item); }
 
     void DoToggleIcon(const wxTreeItemId& item);
-    int ImageSize(void) const { return m_imageSize; }
 	void UpdateThemeColor();
 	void UpdateThemeColor(const wxTreeItemId& idParent, const wxColor &color);
 	
@@ -112,7 +120,6 @@ private:
 
     void LogEvent(const wxString& name, const wxTreeEvent& event);
 
-    int          m_imageSize;               // current size of images
     bool         m_reverseSort;             // flag for OnCompareItems
     wxTreeItemId m_draggedItem;             // item being dragged right now
     bool         m_alternateImages;
@@ -148,6 +155,7 @@ public:
 	void SetWatcher(wxFileSystemWatcher *watcher) { m_ptree->SetWatcher(watcher); }
 	void OnAddButton(wxCommandEvent &ev);
 	void UpdateThemeColor();
+	void AddPath(const wxString &path);
 private:
 
 	DirTreeCtrl *m_ptree;

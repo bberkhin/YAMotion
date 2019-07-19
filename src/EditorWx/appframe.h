@@ -73,7 +73,7 @@ public:
 	void UpdateTitle(FilePage *page);
 	void UpdateTitle(size_t npage = wxNOT_FOUND);
 	FilePage *DoNewFile(int file_type, const wxString &defpath, bool closeWelcome, const wxString &contextFile = wxEmptyString);
-	void FileOpen(wxString fname);
+	void FileOpen(const wxString &fn);
 
 private:
 	bool FindPageByFileName(const wxString &new_file_name, size_t *nPage = NULL);

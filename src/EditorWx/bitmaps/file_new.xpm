@@ -1,21 +1,21 @@
 /* XPM */
 static const char *const file_new_xpm[] = {
 /* columns rows colors chars-per-pixel */
-"10 12 2 1 ",
+"12 12 2 1 ",
 //DDDDDD
 "  c #55AADD",
 ". c None",
 /* pixels */
-"        ..",
-"         .",
-"          ",
-"          ",
-"          ",
-"          ",
-"          ",
-"          ",
-"          ",
-"          ",
-"          ",
-"          "
+".        ...",
+".         ..",
+".          .",
+".          .",
+".          .",
+".          .",
+".          .",
+".          .",
+".          .",
+".          .",
+".          .",
+".          ."
 };

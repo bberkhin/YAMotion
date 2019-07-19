@@ -92,11 +92,19 @@ wxIMPLEMENT_DYNAMIC_CLASS(DirTreeCtrl, wxTreeCtrl);
 #endif
 
 DirTreeCtrl::DirTreeCtrl(wxWindow *parent, const wxWindowID id )
-          : wxTreeCtrl(parent, id, wxDefaultPosition,wxDefaultSize, wxTR_DEFAULT_STYLE | wxTR_EDIT_LABELS | wxTR_HIDE_ROOT| wxBORDER_NONE),
-            m_alternateImages(true), m_watcher(NULL)
+          : wxTreeCtrl(), m_watcher(NULL)
 {
-    m_reverseSort = false;
 
+	if (m_hilightBrush) delete m_hilightBrush;
+	if (m_hilightUnfocusedBrush)delete m_hilightUnfocusedBrush;
+	ColourScheme *clrs = Preferences::Get()->GetColorScheme();
+	wxColor clrSelected = clrs->Get(ColourScheme::WINDOW);
+	m_hilightBrush = new wxBrush(clrSelected, wxBRUSHSTYLE_SOLID);
+	m_hilightUnfocusedBrush = new wxBrush(clrSelected, wxBRUSHSTYLE_SOLID);
+	wxTreeCtrl::Create(parent, id, wxDefaultPosition, wxDefaultSize, wxTR_EDIT_LABELS | wxTR_FULL_ROW_HIGHLIGHT | wxTR_HIDE_ROOT | wxBORDER_NONE);
+
+
+	m_reverseSort = false;
     CreateImageList();
 	wxString initPath = StandartPaths::Get()->GetRootPath().c_str();
 	m_rootId = AddRoot("Root",-1, -1, new DirTreeItemData("Root item"));
@@ -105,6 +113,10 @@ DirTreeCtrl::DirTreeCtrl(wxWindow *parent, const wxWindowID id )
 	
 	SetDropTarget(new DnDFile(this));
 
+
+	
+
+	//wxTR_HAS_BUTTONS
 }
 
 DirTreeCtrl::~DirTreeCtrl()
@@ -113,46 +125,26 @@ DirTreeCtrl::~DirTreeCtrl()
 }
 
 
-void DirTreeCtrl::CreateImageList(int size)
+void DirTreeCtrl::CreateImageList()
 {
-    if ( size == -1 )
-    {
-        SetImageList(NULL);
-        return;
-    }
-    if ( size == 0 )
-        size = m_imageSize;
-    else
-        m_imageSize = size;
-
-    // Make an image list containing small icons
+	
+	// Make an image list containing small icons
+	int size = 12; // SHIT :(
     wxImageList *images = new wxImageList(size, size, true);
 
     // should correspond to TreeCtrlIcon_xxx enum
     wxBusyCursor wait;
     wxIcon icons[5];
-	/*
-    if (m_alternateImages)
-    {
-        icons[TreeCtrlIcon_File] = wxIcon(icon1_xpm);
-        icons[TreeCtrlIcon_FileSelected] = wxIcon(icon2_xpm);
-        icons[TreeCtrlIcon_Folder] = wxIcon(icon3_xpm);
-        icons[TreeCtrlIcon_FolderSelected] = wxIcon(icon4_xpm);
-        icons[TreeCtrlIcon_FolderOpened] = wxIcon(icon5_xpm);
-    }
-    else 
-		*/
-    {
-        wxSize iconSize(size, size);
+    wxSize iconSize(size, size); 
 
-        icons[TreeCtrlIcon_File] =
-        icons[TreeCtrlIcon_FileSelected] = wxArtProvider::GetIcon(wxART_NORMAL_FILE, wxART_LIST, iconSize);
-        icons[TreeCtrlIcon_Folder] =
-        icons[TreeCtrlIcon_FolderSelected] =
-        icons[TreeCtrlIcon_FolderOpened] = wxArtProvider::GetIcon(wxART_FOLDER, wxART_LIST, iconSize);
-    }
+    icons[TreeCtrlIcon_File] =
+    icons[TreeCtrlIcon_FileSelected] = wxArtProvider::GetIcon(wxART_NEW, wxART_LIST, iconSize);
+    icons[TreeCtrlIcon_Folder] =
+    icons[TreeCtrlIcon_FolderSelected] =
+    icons[TreeCtrlIcon_FolderOpened] = wxArtProvider::GetIcon(wxART_FOLDER, wxART_LIST, iconSize);
 
-    for ( size_t i = 0; i < WXSIZEOF(icons); i++ )
+
+	for ( size_t i = 0; i < WXSIZEOF(icons); i++ )
     {
         int sizeOrig = icons[0].GetWidth();
         if ( size == sizeOrig )
@@ -166,6 +158,22 @@ void DirTreeCtrl::CreateImageList(int size)
     }
 
     AssignImageList(images);
+
+	/*
+	images = new wxImageList(size, size, true);
+	wxIcon iconsb[5];
+	iconsb[0] =                                                                 // closed
+		iconsb[1] = wxArtProvider::GetIcon(ART_UPDATE, wxART_LIST, iconSize);     // closed, selected
+	iconsb[2] =                                                                 // open
+		iconsb[3] = wxArtProvider::GetIcon(wxART_FOLDER_OPEN, wxART_LIST, iconSize);// open, selected
+	
+	for (size_t i = 0; i < WXSIZEOF(iconsb); i++)
+	{
+		images->Add(iconsb[i]);
+	}
+	*/
+	//AssignButtonsImageList(images);
+
 }
 
 
@@ -229,7 +237,7 @@ void DirTreeCtrl::AddItemsRecursively(const wxTreeItemId& idParent, const wxStri
 	}
 }
 
-void DirTreeCtrl::AddPath(const wxString &path)                     
+void DirTreeCtrl::AddPath(const wxString &path)
 {
 	
 	wxFileName fn = path;
@@ -548,7 +556,15 @@ void DirTreeCtrl::OnItemActivated(wxTreeEvent& event)
 	wxTreeItemId itemId = event.GetItem();
 	wxCHECK_RET(itemId.IsOk(), "should have a valid item");
 	DirTreeItemData *item = (DirTreeItemData *)GetItemData(itemId);
-	OpenFile(item);
+	if (item != NULL && item->isFile())
+		OpenFile(item);
+	else if (itemId.IsOk())
+	{
+		if (IsExpanded(itemId) )
+			Collapse(itemId);
+		else
+			Expand(itemId);
+	}
 }
 
 void DirTreeCtrl::OpenFile(DirTreeItemData *item)
@@ -927,7 +943,9 @@ DirPane::DirPane(wxWindow *parent)
 	totalpane->AddSpacer(MARGIN_TOP);
 
 	totalpane->Add(txt);
-	totalpane->Add(m_ptree, wxEXPAND, wxGROW); //wxEXPAND
+	totalpane->AddSpacer(MARGIN_TOP);
+//	totalpane->Add(m_ptree, wxFIXED_MINSIZE, wxEXPAND ); //wxEXPAND
+	totalpane->Add(m_ptree, 1, wxGROW | wxALL | wxFIXED_MINSIZE);
 	totalpane->Add(0, 10);
 	
 	FlatButton *padd = new FlatButton(this, ID_ADDFILEBT, _("Add folders"), FB_BITMAP_RIGHT | FB_LABEL_LEFT, ART_ADD);//| wxBORDER_NONE); 
@@ -976,8 +994,13 @@ void DirPane::OnAddButton(wxCommandEvent& WXUNUSED(ev))
 	wxDirDialog dlg(NULL, _("Select directory"), "", wxDD_DEFAULT_STYLE | wxDD_DIR_MUST_EXIST);
 	if (dlg.ShowModal() == wxID_OK)
 	{
-		m_ptree->AddPath(dlg.GetPath());
+		AddPath(dlg.GetPath());
 	}
+}
+
+void DirPane::AddPath(const wxString &path)
+{
+	m_ptree->AddPath(path);
 }
 
 DirPane::~DirPane()
