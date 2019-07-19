@@ -112,7 +112,8 @@ DirTreeCtrl::DirTreeCtrl(wxWindow *parent, const wxWindowID id )
 	Bind(wxEVT_FSWATCHER, &DirTreeCtrl::OnFileSystemEvent, this);
 	
 	SetDropTarget(new DnDFile(this));
-
+	//m_dottedPen = wxPen(*wxLIGHT_GREY, 0, wxPENSTYLE_DOT);
+	m_dottedPen = *wxGREY_PEN;
 
 	
 
