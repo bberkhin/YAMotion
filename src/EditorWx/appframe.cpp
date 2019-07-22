@@ -43,7 +43,24 @@ public:
 		if (m_pOwner != NULL)
 		{
 			for (size_t n = 0; n < nFiles; n++)
-				m_pOwner->FileOpen(filenames[n]);
+			{
+
+				const wxString &fname = filenames[n];
+				// first check that it is a file
+				if (!std::filesystem::is_regular_file(filenames[n].wc_str()))
+				{
+					int ret = wxMessageBox(wxString::Format(_("File %s is not a regular file of the file system\nWould you like to add it to folders pane?"), fname),
+						wxMessageBoxCaptionStr, wxYES_NO | wxCANCEL | wxICON_QUESTION);
+					if (ret == wxYES)
+					{
+						m_pOwner->AddPath(fname);
+					}
+					else if (ret == wxCANCEL)
+						return false;
+				}
+				else
+					m_pOwner->FileOpen(fname);
+			}
 		}
 		return true;
 	}
@@ -99,12 +116,13 @@ wxBEGIN_EVENT_TABLE (AppFrame, wxFrame)
 	// help
 	EVT_MENU(wxID_ABOUT, AppFrame::OnAbout)
 	EVT_MENU(ID_DOWNLOADUPDATE, AppFrame::OnDownloadUpdate)
-	EVT_MENU(ID_SHOWWLCOME, AppFrame::OnShowWelcome)
+	EVT_MENU(ID_SHOWWELCOME, AppFrame::OnShowWelcome)
+	EVT_MENU(ID_SHOWDIRPANE, AppFrame::OnShowDirPane)
+	EVT_UPDATE_UI(ID_SHOWDIRPANE, AppFrame::OnUpdateUIShowDirPane)
+	
 
     // help
-    EVT_MENU(wxID_ABOUT,            AppFrame::OnAbout)
-	EVT_MENU(ID_DOWNLOADUPDATE,		AppFrame::OnDownloadUpdate)
-	EVT_MENU(ID_SHOWWLCOME, AppFrame::OnShowWelcome)
+    EVT_MENU(wxID_ABOUT,            AppFrame::OnAbout)	
 	EVT_MENU(ID_WRITEFEEDBACK, AppFrame::OnWriteFeedback)
 	EVT_MENU(ID_HELPGCMC, AppFrame::OnHelp)
 	EVT_MENU(ID_HELPNC, AppFrame::OnHelp)
@@ -166,9 +184,12 @@ AppFrame::AppFrame (const wxString &title)
 	m_mgr.AddPane(m_dirtree, wxAuiPaneInfo().
 		Name("Folders").Caption("Folders").
 		Left().Layer(1).Position(1).
-		CloseButton(false).MaximizeButton(false).CaptionVisible(false));
-
+		CloseButton(true).MaximizeButton(false).CaptionVisible(true));
 	
+	wxAuiPaneInfo& pinfo = m_mgr.GetPane(m_dirtree);
+	pinfo.Hide();
+
+		
 	m_mgr.Update();
 	
 	ShowWelcome();
@@ -365,6 +386,34 @@ void AppFrame::OnAbout (wxCommandEvent &WXUNUSED(event)) {
 void AppFrame::OnShowWelcome(wxCommandEvent &WXUNUSED(event))
 {
 	ShowWelcome();
+}
+
+void AppFrame::OnUpdateUIShowDirPane(wxUpdateUIEvent& event)
+{
+	if ( m_dirtree)
+		event.SetText(m_dirtree->IsShown() ? _("Hide Folders Pane") : _("Show Folders Pane") );
+}
+
+void AppFrame::ShowHideDirPane(bool allwaysshow)
+{
+	if (!m_dirtree->IsShown())
+	{
+		wxAuiPaneInfo& pinfo = m_mgr.GetPane(m_dirtree);
+		pinfo.Show();
+		m_mgr.Update();
+	}
+	else if(!allwaysshow)
+	{
+		wxAuiPaneInfo& pinfo = m_mgr.GetPane(m_dirtree);
+		pinfo.Hide();
+		m_mgr.Update();
+	}
+
+}
+
+void AppFrame::OnShowDirPane(wxCommandEvent &WXUNUSED(event))
+{
+	ShowHideDirPane();
 }
 
 void AppFrame::OnExit (wxCommandEvent &WXUNUSED(event)) {
@@ -792,7 +841,8 @@ void AppFrame::On3DViewUpdate(wxUpdateUIEvent& event)
 
 void AppFrame::OnDirTree(wxCommandEvent &event)
 {
-	if (m_dirtree) m_dirtree->GetEventHandler()->ProcessEvent(event);
+	if (m_dirtree) 
+		m_dirtree->GetEventHandler()->ProcessEvent(event);
 }
 
 
@@ -843,7 +893,9 @@ wxMenuBar *AppFrame::CreateMenu ()
 	//New
 	menuFile->Append(ID_NEWNC, _("New GCODE"));
 	menuFile->Append(ID_NEWGCMC, _("New GCMC"));
-	menuFile->Append(ID_SHOWWLCOME, _("Welcome"));
+	menuFile->AppendSeparator();
+	menuFile->Append(ID_SHOWDIRPANE, _("Show Folders Pane"));
+	menuFile->Append(ID_SHOWWELCOME, _("Welcome window"));
 	menuFile->AppendSeparator();
 	//Save	
 	menuFile->Append(wxID_SAVE, _("Save\tCtrl+S"));
@@ -967,28 +1019,21 @@ void AppFrame::CreateMacrosesMenu(wxMenu *menuInsert)
 	menuInsert->Append(ID_MACROSES, _("All Macroses..."));
 }
 
-
+void AppFrame::AddPath(const wxString &path)
+{
+	if (m_dirtree)
+	{
+		ShowHideDirPane(true);		
+		m_dirtree->AddPath(path);
+	}
+}
 
 void AppFrame::FileOpen (const wxString &fn)
 {
     wxFileName w(fn); 
 	w.Normalize(); 
 	wxString fname = w.GetFullPath();
-
-	// first check that it is a file
-		
-	if (!std::filesystem::is_regular_file(fname.wc_str()))
-	{
-		int ret = wxMessageBox(wxString::Format(_("File %s is not a regular file of the file system\nWould you like to add it to folders pane?"), fname),
-			wxMessageBoxCaptionStr,	wxYES_NO | wxICON_QUESTION);
-		if (ret == wxYES && m_dirtree)
-		{
-			m_dirtree->AddPath(fname);
-		}
-		return;
-	}
-
-
+	
 	// first try  to find the file in the opened tabs
 	size_t nPage = 0;
 	if (FindPageByFileName(fname, &nPage) )

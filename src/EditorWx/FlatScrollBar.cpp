@@ -58,6 +58,18 @@ BEGIN_EVENT_TABLE(FlatScrollBar, wxWindow)
 END_EVENT_TABLE()
 
 
+bool FlatScrollBar::IsStandalone() const
+{	
+	wxWindow *parent = dynamic_cast<wxWindow *>(m_handler);
+	if (!parent)
+	{
+		return true;
+	}
+
+	return ( (parent->GetWindowStyleFlag()&wxHSCROLL) && (parent->GetWindowStyleFlag()&wxVSCROLL) );
+}
+
+
 void FlatScrollBar::paintEvent(wxPaintEvent & evt)
 {
 	// depending on your system you may need to look at double-buffered dcs
@@ -460,9 +472,18 @@ void FlatScrollBar::SetScrollbar(int position, int thumbSize, int range, int pag
 	// there ir a lot of existing code which just calls SetScrollbar() without
 	// specifying the last parameter even though it doesn't need at all to
 	// refresh the window immediately
+	/*
+	if (range <= pageSize)
+	{
+		Show(false);
+	}
+	else 
+	*/
 	if (refresh && needsRefresh)
 	{
 		// and update the window
+		//if ( !IsShown() )
+			//Show(true);
 		paintNow();
 	}
 }
@@ -566,7 +587,7 @@ bool FlatScrollBar::PerformAction(const wxString& action,long numArg,const wxStr
 	bool changed = m_thumbPos != thumbOld;
 	if (notify || changed)
 	{
-		if (true)//IsStandalone())
+		if ( IsStandalone() )
 		{
 			// we should generate EVT_SCROLL events for the standalone
 			// scrollbars and not the EVT_SCROLLWIN ones

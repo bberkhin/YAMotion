@@ -30,6 +30,8 @@ public:
 	void OnClose(wxCloseEvent &event);
 	void OnAbout(wxCommandEvent &event);	
 	void OnShowWelcome(wxCommandEvent &event);
+	void OnShowDirPane(wxCommandEvent &event);
+	void OnUpdateUIShowDirPane(wxUpdateUIEvent& event);
 	void OnDownloadUpdate(wxCommandEvent &event);
 	void OnExit(wxCommandEvent &event);
 	void OnWriteFeedback(wxCommandEvent &event);
@@ -74,11 +76,15 @@ public:
 	void UpdateTitle(size_t npage = wxNOT_FOUND);
 	FilePage *DoNewFile(int file_type, const wxString &defpath, bool closeWelcome, const wxString &contextFile = wxEmptyString);
 	void FileOpen(const wxString &fn);
+	void AddPath(const wxString &path);
+
+
 
 private:
 	bool FindPageByFileName(const wxString &new_file_name, size_t *nPage = NULL);
 	bool DoSaveAllFiles();
 	void DoMathCalc(DoMathBase &mth);
+	void ShowHideDirPane(bool allwaysshow = false);
 	void ShowWelcome();
 	void HideWelcome();
 	wxAuiNotebook* CreateNotebook();

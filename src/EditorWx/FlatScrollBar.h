@@ -45,6 +45,7 @@ protected:
 	wxCoord ScrollbarToPixel(int thumbPos = -1);
 	wxCoord GetScrollbarSize() const;
 	bool PerformAction(const wxString& action, long numArg = 0, const wxString& strArg = wxEmptyString);
+	bool IsStandalone() const;
 protected:
 	int m_status;
 	int m_type;

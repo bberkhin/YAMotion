@@ -12,7 +12,7 @@
 #include <wx/dir.h>
 #include "them.h"
 #include "flatbuttom.h"
-
+#include "FlatScrollBar.h"
 
 #ifdef __WIN32__
     // this is not supported by native control
@@ -80,6 +80,8 @@ wxBEGIN_EVENT_TABLE(DirTreeCtrl, wxTreeCtrl)
     EVT_RIGHT_DOWN(DirTreeCtrl::OnRMouseDown)
     EVT_RIGHT_UP(DirTreeCtrl::OnRMouseUp)
     EVT_RIGHT_DCLICK(DirTreeCtrl::OnRMouseDClick)
+	EVT_SCROLL(DirTreeCtrl::OnScroll)
+	//EVT_SCROLLWIN(DirTreeCtrl::OnScroll)
 wxEND_EVENT_TABLE()
 
 
@@ -101,8 +103,10 @@ DirTreeCtrl::DirTreeCtrl(wxWindow *parent, const wxWindowID id )
 	wxColor clrSelected = clrs->Get(ColourScheme::WINDOW);
 	m_hilightBrush = new wxBrush(clrSelected, wxBRUSHSTYLE_SOLID);
 	m_hilightUnfocusedBrush = new wxBrush(clrSelected, wxBRUSHSTYLE_SOLID);
-	wxTreeCtrl::Create(parent, id, wxDefaultPosition, wxDefaultSize, wxTR_EDIT_LABELS | wxTR_FULL_ROW_HIGHLIGHT | wxTR_HIDE_ROOT | wxBORDER_NONE);
+	m_vScrollBar = 0;
+	m_hScrollBar = 0;
 
+	Create(parent, id);
 
 	m_reverseSort = false;
     CreateImageList();
@@ -110,15 +114,49 @@ DirTreeCtrl::DirTreeCtrl(wxWindow *parent, const wxWindowID id )
 	m_rootId = AddRoot("Root",-1, -1, new DirTreeItemData("Root item"));
 	//AddPath(initPath);
 	Bind(wxEVT_FSWATCHER, &DirTreeCtrl::OnFileSystemEvent, this);
-	
-	SetDropTarget(new DnDFile(this));
-	//m_dottedPen = wxPen(*wxLIGHT_GREY, 0, wxPENSTYLE_DOT);
-	m_dottedPen = *wxGREY_PEN;
-
-	
-
-	//wxTR_HAS_BUTTONS
+	SetDropTarget(new DnDFile(this));	
 }
+
+
+
+
+bool DirTreeCtrl::Create(wxWindow *parent, wxWindowID id)
+{
+
+	if (!wxControl::Create(parent, id, wxDefaultPosition, wxDefaultSize, 
+		wxTR_EDIT_LABELS | wxTR_FULL_ROW_HIGHLIGHT | wxTR_HIDE_ROOT | wxBORDER_NONE | wxHSCROLL | wxVSCROLL | wxWANTS_CHARS,
+		wxDefaultValidator, wxTreeCtrlNameStr ) )
+		return false;
+	/*
+	if (!wxControl::Create(parent, id, pos, size,
+		style | wxHSCROLL | wxVSCROLL | wxWANTS_CHARS,
+		validator,
+		name))
+		return false;
+		*/
+
+	// If the tree display has no buttons, but does have
+	// connecting lines, we can use a narrower layout.
+	// It may not be a good idea to force this...
+	if (!HasButtons() && !HasFlag(wxTR_NO_LINES))
+	{
+		m_indent = 10;
+		m_spacing = 10;
+	}
+
+	wxVisualAttributes attr = GetDefaultAttributes();
+	SetOwnForegroundColour(attr.colFg);
+	SetOwnBackgroundColour(attr.colBg);
+	if (!m_hasFont)
+		SetOwnFont(attr.font);
+
+	m_dottedPen = *wxGREY_PEN;
+	SetInitialSize(wxDefaultSize);
+
+	return true;
+}
+
+
 
 DirTreeCtrl::~DirTreeCtrl()
 {
@@ -527,7 +565,7 @@ void DirTreeCtrl::OnEndLabelEdit(wxTreeEvent& event)
 	try
 	{
 		std::filesystem::rename(old_path.wc_str(), fn.GetFullPath().wc_str());
-
+		item->SetPath( fn.GetFullPath() );// set new path 
 		wxCommandEvent event(FILE_RENAME_EVENT, GetId());
 		wxStringClientData string_data;
 		event.SetString(old_path);
@@ -903,6 +941,104 @@ void DirTreeCtrl::UpdateThemeColor()
 }
 
 
+
+void DirTreeCtrl::SetVScrollBar(wxScrollBar *barv)
+{
+	m_vScrollBar = barv;
+}
+
+void DirTreeCtrl::SetHScrollBar(wxScrollBar *bar)
+{
+	m_hScrollBar = bar;
+}
+
+void DirTreeCtrl::OnScroll(wxScrollEvent& evt)
+{
+	
+	wxScrollWinEvent event;
+	int scrollTypyDelta = wxEVT_SCROLL_TOP - wxEVT_SCROLLWIN_TOP;
+	event.SetEventType(evt.GetEventType() - scrollTypyDelta);
+	event.SetPosition(evt.GetPosition());
+	event.SetOrientation(evt.GetOrientation());
+	event.SetEventObject(this);
+	HandleOnScroll(event);
+	/*
+	wxScrollBar* sb = wxDynamicCast(evt.GetEventObject(), wxScrollBar);
+	if (sb) 
+	{
+		if (sb->IsVertical())
+			this->DoScrollToUnit(evt.GetPosition());
+		else
+			//m_swx->DoHScroll(evt.GetEventType(), evt.GetPosition());
+	}
+	*/
+}
+
+void DirTreeCtrl::SetScrollbar(int orient, int pos, int thumbvisible, int range, bool refresh)
+{
+	if (m_vScrollBar && orient != wxHORIZONTAL)
+	{
+		bool wasvisible = m_vScrollBar->IsShown();
+		m_vScrollBar->Show(range > thumbvisible);		
+		if (wasvisible != m_vScrollBar->IsShown())
+		{
+			GetParent()->Update();
+		}
+		m_vScrollBar->SetScrollbar(pos, thumbvisible, range, thumbvisible, refresh);
+	}
+	else if (m_hScrollBar && orient == wxHORIZONTAL)
+		m_hScrollBar->SetScrollbar(pos, thumbvisible, range, thumbvisible, refresh);
+	else
+		wxTreeCtrl::SetScrollbar(orient, pos, thumbvisible, range, refresh);
+}
+
+
+void DirTreeCtrl::SetScrollPos(int orient, int pos, bool refresh)
+{
+	if (m_vScrollBar && orient != wxHORIZONTAL)
+		m_vScrollBar->SetThumbPosition(pos);
+	else if (m_hScrollBar && orient == wxHORIZONTAL)
+		m_hScrollBar->SetThumbPosition(pos);
+	else
+		wxTreeCtrl::SetScrollPos(orient, pos, refresh);
+}
+
+int DirTreeCtrl::GetScrollPos(int orient) const
+{
+	if (m_vScrollBar && orient != wxHORIZONTAL)
+		return m_vScrollBar->GetThumbPosition();
+	else if (m_hScrollBar && orient == wxHORIZONTAL)
+		return m_hScrollBar->GetThumbPosition();
+	else
+		return wxTreeCtrl::GetScrollPos(orient);
+}
+int DirTreeCtrl::GetScrollThumb(int orient) const
+{
+	if (m_vScrollBar && orient != wxHORIZONTAL)
+		return m_vScrollBar->GetThumbSize();
+	else if (m_hScrollBar && orient == wxHORIZONTAL)
+		return m_hScrollBar->GetThumbSize();
+	else
+		return wxTreeCtrl::GetScrollThumb(orient);
+}
+int DirTreeCtrl::GetScrollRange(int orient) const
+{
+	if (m_vScrollBar && orient != wxHORIZONTAL)
+		return m_vScrollBar->GetRange();
+	else if (m_hScrollBar && orient == wxHORIZONTAL)
+		return m_hScrollBar->GetRange();
+	else
+		return wxTreeCtrl::GetScrollRange(orient);
+}
+// scroll window to the specified position
+void DirTreeCtrl::ScrollWindow(int dx, int dy, const wxRect* rect)
+{
+	wxTreeCtrl::ScrollWindow(dx, dy, rect);
+}
+
+
+
+
 bool DnDFile::OnDropFiles(wxCoord, wxCoord, const wxArrayString& filenames)
 {
 	size_t nFiles = filenames.GetCount();
@@ -937,17 +1073,33 @@ DirPane::DirPane(wxWindow *parent)
 	ColourScheme *clrs = Preferences::Get()->GetColorScheme();
 
 	m_ptree = new DirTreeCtrl(this, wxID_ANY);
+
 	wxBoxSizer *totalpane = new wxBoxSizer(wxVERTICAL);
 	wxStaticText *txt = new wxStaticText(this, wxID_ANY, _("Folders"));
 	txt->SetFont(wxFontInfo(10));
 
 	totalpane->AddSpacer(MARGIN_TOP);
-
 	totalpane->Add(txt);
 	totalpane->AddSpacer(MARGIN_TOP);
-//	totalpane->Add(m_ptree, wxFIXED_MINSIZE, wxEXPAND ); //wxEXPAND
-	totalpane->Add(m_ptree, 1, wxGROW | wxALL | wxFIXED_MINSIZE);
+
+
+	FlatScrollBar *barv = new FlatScrollBar(this, m_ptree, wxID_ANY);
+	FlatScrollBar *barh = new FlatScrollBar(this, m_ptree, wxID_ANY, FlatScrollBar::typeHorisontal);
+
+	m_ptree->SetVScrollBar(barv);
+	m_ptree->SetHScrollBar(barv);
+
+	wxFlexGridSizer  *gd = new wxFlexGridSizer(2);// 2, 0, 0);
+	gd->AddGrowableCol(0);
+	gd->AddGrowableRow(0);
+	gd->Add(m_ptree, wxEXPAND, wxEXPAND);
+	gd->Add(barv, 0, wxEXPAND);
+	if (barh)
+		gd->Add(barh, 0, wxEXPAND);
+
+	totalpane->Add(gd, 1, wxGROW | wxALL | wxFIXED_MINSIZE);
 	totalpane->Add(0, 10);
+
 	
 	FlatButton *padd = new FlatButton(this, ID_ADDFILEBT, _("Add folders"), FB_BITMAP_RIGHT | FB_LABEL_LEFT, ART_ADD);//| wxBORDER_NONE); 
 	padd->SetColour(FlatButton::BackgroundColour, clrs->Get(ColourScheme::WINDOW));
@@ -957,15 +1109,15 @@ DirPane::DirPane(wxWindow *parent)
 	padd->SetColour(FlatButton::HoverForegroundColour, clrs->Get(ColourScheme::WINDOW_TEXT_HOVER));
 	padd->SetColour(FlatButton::PressForegroundColour, clrs->Get(ColourScheme::WINDOW_TEXT_HOVER));
 	
-	totalpane->Add(padd,0, wxEXPAND);
+	totalpane->Add(padd,0, wxEXPAND, MARGIN_LEFT);
 	totalpane->AddSpacer(MARGIN_BOTTOM);
 
-	wxBoxSizer *totalmargined = new wxBoxSizer(wxHORIZONTAL);
-	totalmargined->AddSpacer(MARGIN_LEFT);
-	totalmargined->Add(totalpane, wxEXPAND, wxEXPAND);
-	totalmargined->AddSpacer(MARGIN_RIGHT);
+	//wxBoxSizer *totalmargined = new wxBoxSizer(wxHORIZONTAL);
+	//totalmargined->AddSpacer(MARGIN_LEFT);
+	//totalmargined->Add(totalpane, wxEXPAND, wxEXPAND);
+	//totalmargined->AddSpacer(MARGIN_RIGHT);
 
-	SetSizerAndFit(totalmargined);
+	SetSizerAndFit(totalpane);
 	UpdateThemeColor();
 }
 

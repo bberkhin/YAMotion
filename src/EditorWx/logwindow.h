@@ -44,7 +44,6 @@ public:
 	
 private:
 	void DoSinchronize();
-	void RemoveScrollbar();
 private:
 	wxScrollBar *m_vScrollBar;
 	wxScrollBar *m_hScrollBar;

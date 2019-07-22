@@ -56,6 +56,7 @@ public:
     };
 	DirTreeCtrl() { m_alternateImages = false; m_alternateStates = false; }
     DirTreeCtrl(wxWindow *parent, const wxWindowID id = wxID_ANY );
+	bool Create(wxWindow *parent, wxWindowID id );
 	virtual ~DirTreeCtrl();
 	// commands
 	void OnFileOpen(wxCommandEvent &event);
@@ -84,12 +85,29 @@ public:
     void OnTreeKeyDown(wxTreeEvent& event);
     void OnItemActivated(wxTreeEvent& event);
     void OnItemRClick(wxTreeEvent& event);
+	void OnScroll(wxScrollEvent& evt);
 
     void OnRMouseDown(wxMouseEvent& event);
     void OnRMouseUp(wxMouseEvent& event);
     void OnRMouseDClick(wxMouseEvent& event);
 	void OnFileSystemEvent(wxFileSystemWatcherEvent& event);
 	void SetWatcher(wxFileSystemWatcher *watcher);
+
+public:
+	void SetVScrollBar(wxScrollBar *bar);
+	void SetHScrollBar(wxScrollBar *bar);
+
+	virtual bool CanScroll(int orient) const { return true; }
+	// configure the window scrollbars
+	virtual void SetScrollbar(int orient, int pos, int thumbvisible, int range, bool refresh = true);
+	virtual void SetScrollPos(int orient, int pos, bool refresh = true);
+	virtual int GetScrollPos(int orient) const;
+	virtual int GetScrollThumb(int orient) const;
+	virtual int GetScrollRange(int orient) const;
+	// scroll window to the specified position
+	virtual void ScrollWindow(int dx, int dy, const wxRect* rect = NULL);
+
+
 
 private:
 	wxTreeItemId FindItemsRecursively(const wxTreeItemId& idParent, const wxString &path);
@@ -126,6 +144,8 @@ private:
     bool         m_alternateStates;
 	wxTreeItemId m_rootId;
 	wxFileSystemWatcher *m_watcher;
+	wxScrollBar *m_vScrollBar;
+	wxScrollBar *m_hScrollBar;
 
     // NB: due to an ugly wxMSW hack you _must_ use wxDECLARE_DYNAMIC_CLASS();
     //     if you want your overloaded OnCompareItems() to be called.
