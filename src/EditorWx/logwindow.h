@@ -1,20 +1,14 @@
 #pragma once
 #include "wx/htmllbox.h"
-#include "ilogger.h"
+#include "defsext.h"
 
 
-enum MsgStatusLevel
-{
-	MSLUndefened = 0,
-	MSLWarning = LOG_WARNING,
-	MSLError = LOG_ERROR,
-	MSLInfo = LOG_INFORMATION,
-	MSLFileStatus = LOG_INFORMATIONSUM
-	
-};
+
 
 class FlatScrollBar;
-class LogWindow : public wxSimpleHtmlListBox
+typedef wxWindowWithItems<wxVListBox, wxItemContainer> BaseLogClass;
+
+class LogWindow : public BaseLogClass
 {
 public:
 	LogWindow(wxEvtHandler *_handler);
@@ -41,13 +35,40 @@ public:
 	virtual void ScrollWindow(int dx, int dy,	const wxRect* rect = NULL);
 
 
+	// these must be overloaded otherwise the compiler will complain
+	// about  wxItemContainerImmutable::[G|S]etSelection being pure virtuals...
+	void SetSelection(int n)                 {	wxVListBox::SetSelection(n); }
+	int GetSelection() const wxOVERRIDE 	 {	return wxVListBox::GetSelection(); 	}
+	unsigned int GetCount() const wxOVERRIDE {	return m_items.GetCount();	}
+	wxString GetString(unsigned int n) const wxOVERRIDE;
+	// override default unoptimized wxItemContainer::GetStrings() function
+	wxArrayString GetStrings() const	{	return m_items; 	}
+	void SetString(unsigned int n, const wxString& s) wxOVERRIDE;
+	// resolve ambiguity between wxItemContainer and wxVListBox versions
 	
+protected:
+	virtual int DoInsertItems(const wxArrayStringsAdapter & items,
+		unsigned int pos,
+		void **clientData, wxClientDataType type) wxOVERRIDE;
+	virtual void DoSetItemClientData(unsigned int n, void *clientData) wxOVERRIDE 	{	m_clientData[n] = clientData;	}
+	virtual void *DoGetItemClientData(unsigned int n) const wxOVERRIDE	{		return m_clientData[n]; 	}
+	// wxItemContainer methods
+	virtual void DoClear() wxOVERRIDE;
+	virtual void DoDeleteOneItem(unsigned int n) wxOVERRIDE;
+	void UpdateCount();
+protected:
+	virtual void OnDrawItem(wxDC& dc, const wxRect& rect, size_t n) const;
+	virtual wxCoord OnMeasureItem(size_t n) const;
+
 private:
 	void DoSinchronize();
 private:
 	wxScrollBar *m_vScrollBar;
 	wxScrollBar *m_hScrollBar;
 	wxEvtHandler *handler;
+	wxArrayString   m_items;
+	wxArrayPtrVoid  m_clientData;
+
 	wxDECLARE_EVENT_TABLE();
 };
 

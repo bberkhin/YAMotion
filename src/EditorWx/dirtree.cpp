@@ -13,6 +13,8 @@
 #include "them.h"
 #include "flatbuttom.h"
 #include "FlatScrollBar.h"
+//#include "app.h"
+//#include "appframe.h"
 
 #ifdef __WIN32__
     // this is not supported by native control
@@ -163,6 +165,10 @@ DirTreeCtrl::~DirTreeCtrl()
 
 }
 
+wxSize DirTreeCtrl::DoGetBestSize() const
+{
+	return wxControl::DoGetBestSize();
+}
 
 void DirTreeCtrl::CreateImageList()
 {
@@ -641,7 +647,7 @@ void DirTreeCtrl::OnItemMenu(wxTreeEvent& event)
 	}
 	else
 	{
-		menu.Append(ID_TREE_NEWNC, _("&ew NC File"));
+		menu.Append(ID_TREE_NEWNC, _("&New NC File"));
 		menu.Append(ID_TREE_NEWGCMC, _("New GCMC File"));
 		menu.Append(ID_TREE_FILE_RENAME, _("Rename"));
 		menu.Append(ID_TREE_FOLDER_OPEN, _("Open Folder"));
@@ -978,12 +984,6 @@ void DirTreeCtrl::SetScrollbar(int orient, int pos, int thumbvisible, int range,
 {
 	if (m_vScrollBar && orient != wxHORIZONTAL)
 	{
-		bool wasvisible = m_vScrollBar->IsShown();
-		m_vScrollBar->Show(range > thumbvisible);		
-		if (wasvisible != m_vScrollBar->IsShown())
-		{
-			GetParent()->Update();
-		}
 		m_vScrollBar->SetScrollbar(pos, thumbvisible, range, thumbvisible, refresh);
 	}
 	else if (m_hScrollBar && orient == wxHORIZONTAL)
@@ -1055,16 +1055,20 @@ bool DnDFile::OnDropFiles(wxCoord, wxCoord, const wxArrayString& filenames)
 
 
 #define ID_ADDFILEBT 100
+#define ID_CLOSEBT 101
 
 
 wxBEGIN_EVENT_TABLE(DirPane, wxPanel)
 EVT_BUTTON(ID_ADDFILEBT, DirPane::OnAddButton)
+//EVT_BUTTON(ID_ADDFILEBT, DirPane::OnClose)
 wxEND_EVENT_TABLE()
 
 #define MARGIN_TOP 5
 #define MARGIN_BOTTOM 5
 #define MARGIN_RIGHT 10
 #define MARGIN_LEFT 10
+
+
 
 DirPane::DirPane(wxWindow *parent)
 	: wxPanel(parent)
@@ -1075,11 +1079,20 @@ DirPane::DirPane(wxWindow *parent)
 	m_ptree = new DirTreeCtrl(this, wxID_ANY);
 
 	wxBoxSizer *totalpane = new wxBoxSizer(wxVERTICAL);
+	
+	wxBoxSizer *header = new wxBoxSizer(wxHORIZONTAL);
 	wxStaticText *txt = new wxStaticText(this, wxID_ANY, _("Folders"));
 	txt->SetFont(wxFontInfo(10));
 
+	header->Add(txt, 1, wxALIGN_CENTRE_VERTICAL | wxLEFT);
+	FlatButton *pbt = new FlatButton(this, ID_CLOSEBT, wxEmptyString, FB_TRANSPARENT, ART_CLOSE);
+	pbt->SetCommand(ID_SHOWDIRPANE);
+	header->Add(pbt, 0, wxRIGHT | wxALIGN_CENTRE_VERTICAL);
+	//header->AddSpacer(0);
+
+
 	totalpane->AddSpacer(MARGIN_TOP);
-	totalpane->Add(txt);
+	totalpane->Add(header, 0, wxEXPAND);
 	totalpane->AddSpacer(MARGIN_TOP);
 
 
@@ -1087,7 +1100,7 @@ DirPane::DirPane(wxWindow *parent)
 	FlatScrollBar *barh = new FlatScrollBar(this, m_ptree, wxID_ANY, FlatScrollBar::typeHorisontal);
 
 	m_ptree->SetVScrollBar(barv);
-	m_ptree->SetHScrollBar(barv);
+	m_ptree->SetHScrollBar(barh);
 
 	wxFlexGridSizer  *gd = new wxFlexGridSizer(2);// 2, 0, 0);
 	gd->AddGrowableCol(0);
@@ -1095,9 +1108,9 @@ DirPane::DirPane(wxWindow *parent)
 	gd->Add(m_ptree, wxEXPAND, wxEXPAND);
 	gd->Add(barv, 0, wxEXPAND);
 	if (barh)
-		gd->Add(barh, 0, wxEXPAND);
+		gd->Add(barh, 1, wxEXPAND);
 
-	totalpane->Add(gd, 1, wxGROW | wxALL | wxFIXED_MINSIZE);
+	totalpane->Add(gd, 1, wxEXPAND);
 	totalpane->Add(0, 10);
 
 	
@@ -1109,15 +1122,18 @@ DirPane::DirPane(wxWindow *parent)
 	padd->SetColour(FlatButton::HoverForegroundColour, clrs->Get(ColourScheme::WINDOW_TEXT_HOVER));
 	padd->SetColour(FlatButton::PressForegroundColour, clrs->Get(ColourScheme::WINDOW_TEXT_HOVER));
 	
-	totalpane->Add(padd,0, wxEXPAND, MARGIN_LEFT);
+	wxBoxSizer *marginedright = new wxBoxSizer(wxHORIZONTAL);
+	marginedright->Add(padd, 1, wxEXPAND);
+	marginedright->AddSpacer(MARGIN_RIGHT);
+
+	totalpane->Add(marginedright,0, wxEXPAND);
 	totalpane->AddSpacer(MARGIN_BOTTOM);
 
-	//wxBoxSizer *totalmargined = new wxBoxSizer(wxHORIZONTAL);
-	//totalmargined->AddSpacer(MARGIN_LEFT);
-	//totalmargined->Add(totalpane, wxEXPAND, wxEXPAND);
-	//totalmargined->AddSpacer(MARGIN_RIGHT);
-
-	SetSizerAndFit(totalpane);
+	wxBoxSizer *totalmargined = new wxBoxSizer(wxHORIZONTAL);
+	totalmargined->AddSpacer(MARGIN_LEFT);
+	totalmargined->Add(totalpane, wxEXPAND, wxEXPAND);
+	
+	SetSizerAndFit(totalmargined);
 	UpdateThemeColor();
 }
 
@@ -1149,6 +1165,16 @@ void DirPane::OnAddButton(wxCommandEvent& WXUNUSED(ev))
 	{
 		AddPath(dlg.GetPath());
 	}
+}
+
+
+void DirPane::OnClose(wxCommandEvent& WXUNUSED(ev))
+{
+//	wxGetApp().GetFrame()->ShowHideDirPane();
+	wxCommandEvent event(wxEVT_MENU, ID_SHOWDIRPANE );
+	event.SetEventObject(this);
+	wxQueueEvent(GetParent(), event.Clone() );
+	//ProcessWindowEvent(event);
 }
 
 void DirPane::AddPath(const wxString &path)

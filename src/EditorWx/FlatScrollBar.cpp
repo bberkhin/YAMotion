@@ -65,8 +65,8 @@ bool FlatScrollBar::IsStandalone() const
 	{
 		return true;
 	}
-
-	return ( (parent->GetWindowStyleFlag()&wxHSCROLL) && (parent->GetWindowStyleFlag()&wxVSCROLL) );
+	return true;
+	//return ( (parent->GetWindowStyleFlag()&wxHSCROLL) && (parent->GetWindowStyleFlag()&wxVSCROLL) );
 }
 
 
@@ -445,7 +445,7 @@ int FlatScrollBar::GetThumbPosition() const
 }
 void FlatScrollBar::SetThumbPosition(int pos)
 {
-	wxCHECK_RET(pos >= 0 && pos <= m_range, wxT("thumb position out of range"));
+	//wxCHECK_RET(pos >= 0 && pos <= m_range, wxT("thumb position out of range"));
 	DoSetThumb(pos);
 }
 
@@ -468,22 +468,19 @@ void FlatScrollBar::SetScrollbar(int position, int thumbSize, int range, int pag
 	SetThumbPosition(position);
 	m_pageSize = pageSize;
 
-	// ignore refresh parameter unless we really need to refresh everything -
-	// there ir a lot of existing code which just calls SetScrollbar() without
-	// specifying the last parameter even though it doesn't need at all to
-	// refresh the window immediately
-	/*
-	if (range <= pageSize)
+	
+	// Hide or show bar if needed
+	bool wasvisible = IsShown();
+	Show(m_range > m_pageSize);
+
+	if (wasvisible != IsShown())
 	{
-		Show(false);
+		GetParent()->Layout();
 	}
-	else 
-	*/
-	if (refresh && needsRefresh)
+
+
+	if (refresh && needsRefresh && IsShown() )
 	{
-		// and update the window
-		//if ( !IsShown() )
-			//Show(true);
 		paintNow();
 	}
 }

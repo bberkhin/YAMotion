@@ -128,6 +128,13 @@ Edit::~Edit ()
 		config->WriteFindAndReplase(&find_data);
 }
 
+
+
+wxSize Edit::DoGetBestSize() const
+{
+	return wxControl::DoGetBestSize();
+}
+
 //----------------------------------------------------------------------------
 
 
@@ -201,10 +208,10 @@ void Edit::OnEditSelectAll (wxCommandEvent &WXUNUSED(event)) {
 
 void Edit::OnEditSelectLine (wxCommandEvent &event ) 
 {
-	IntClientData *data = dynamic_cast<IntClientData *>(event.GetClientObject());
-	if (data && data->GetData() >= 0)
+	LogClientData *data = dynamic_cast<LogClientData *>(event.GetClientObject());
+	if (data && data->GetLine() >= 0)
 	{
-		DoSelectLine(data->GetData() - 1);
+		DoSelectLine(data->GetLine() - 1);
 		SetFocus();
 	}
 }
@@ -497,6 +504,8 @@ void Edit::UpdatePreferences()
 	SetTabWidth(common_prefs.tabWidth);
 	SetBackSpaceUnIndents(true);
 	SetIndent(common_prefs.indentEnable ? common_prefs.tabWidth : 0);
+	SetScrollWidthTracking(true);
+	SetScrollWidth(100);
 	if (m_language)
 	{
 		// we need use FindByType to reinit lanfuage

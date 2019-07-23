@@ -23,6 +23,10 @@
 #define SPEED_WND_WIDTH 150
 #define MARGIN_LEFT  12
 #define MARGIN_RIGHT 12
+#define MIN_EDITOR_X 50
+#define MIN_EDITOR_Y 50
+#define MIN_3DVIEW_X 20
+#define MIN_LOGWND_Y 40
 
 enum
 {
@@ -77,12 +81,6 @@ EditorPanel::EditorPanel(wxWindow *parent, FilePage *fp, int filetype, const wxS
 	const CommonInfo &common_prefs = Preferences::Get()->Common();
 
     m_pedit = new Edit(this, wxID_ANY);
-
-	if (isnew)
-		m_pedit->NewFile(filetype, filename);
-	else
-		m_pedit->LoadFile(filename);
-
 	FlatScrollBar *barv = new FlatScrollBar(this, m_pedit, wxID_ANY);
 	FlatScrollBar *barh = 0;
 	if (common_prefs.visibleHSB)
@@ -91,6 +89,12 @@ EditorPanel::EditorPanel(wxWindow *parent, FilePage *fp, int filetype, const wxS
 	m_pedit->SetVScrollBar(barv);
 	m_pedit->SetHScrollBar(barh);
 
+
+	if (isnew)
+		m_pedit->NewFile(filetype, filename);
+	else
+		m_pedit->LoadFile(filename);
+	
 	wxBoxSizer *totalpane = new wxBoxSizer(wxVERTICAL);
 	wxBoxSizer *pHeader = CreateHeaderPanel();
 	totalpane->AddSpacer(5);
@@ -99,7 +103,6 @@ EditorPanel::EditorPanel(wxWindow *parent, FilePage *fp, int filetype, const wxS
 	FlatStaticLine *pGripper = new FlatStaticLine(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxLI_HORIZONTAL);
 	totalpane->Add(pGripper, 0, wxGROW | wxLEFT | wxRIGHT, MARGIN_LEFT);
 	totalpane->AddSpacer(10);
-
 
 
 	wxFlexGridSizer  *gd = new wxFlexGridSizer(2);// 2, 0, 0);
@@ -845,12 +848,13 @@ FilePage::FilePage(wxWindow *parent, int filetype, const wxString &filename, boo
 	m_worker = new Worker(this);
 	m_editor = new EditorPanel(this ,this, filetype, filename, isnew);		
 	m_logwn = new LogPane(this,this );
-
+	m_logwn->SetMinimumSizeY(MIN_LOGWND_Y);
 	int ftype = m_editor->GetEdit()->GetFileType();
 	if ((ftype == FILETYPE_NC) || (ftype == FILETYPE_GCMC))
 	{
 		m_view3d = new View3DPanel(this, this);
 		m_view3d->SetSashVisible(wxSASH_LEFT, true);
+		m_view3d->SetMinimumSizeX(MIN_3DVIEW_X);
 	}
 	else
 	{
@@ -869,26 +873,31 @@ void FilePage::OnSize(wxSizeEvent& event)
 	DoLayout();
 }
 
+
+
 void FilePage::DoLayout(const wxSize &szin, bool from3d)
 {
 	wxSize szEditor(wxDefaultSize);
 	wxSize szLog(wxDefaultSize);
 	wxSize sz3DView(wxDefaultSize);
-	szEditor = GetSize();
+	szEditor = GetSize();	
 	if (szin == wxDefaultSize)
 	{
 		if (m_view3d && m_view3d->IsShown())
 		{
+			m_view3d->SetMaximumSizeX(szEditor.x - MIN_EDITOR_X);
 			if (m_view3dsize == -1 && szEditor.x > 25)
 				m_view3dsize = szEditor.x / 3;
 			else
 				m_view3dsize = m_view3d->GetSize().x;
-			szEditor.x -= m_view3dsize;
+			szEditor.x -= m_view3dsize;			
 			sz3DView.Set(m_view3dsize, szEditor.y);
+			
 		}
 		
 		if ( m_logwn->IsShown() )
 		{
+			m_logwn->SetMaximumSizeY(szEditor.y - MIN_EDITOR_Y);
 			if (m_logwndsize == -1)
 				m_logwndsize = szEditor.y / 4;
 			else
@@ -1091,7 +1100,8 @@ bool FilePage::DoFileSave(bool askToSave, bool bSaveAs)
 	// Ask need to save
 	if (askToSave)
 	{
-		int rez = wxMessageBox(_("Text is not saved, save before closing?"), _("Save file"),
+		wxString filename = pedit->GetFileName();
+		int rez = wxMessageBox(_("File %s is not saved!\nSave file before closing?"), _("Save file"),
 			wxYES_NO | wxCANCEL | wxICON_QUESTION);
 		if (rez == wxCANCEL)
 			return false;

@@ -184,10 +184,11 @@ AppFrame::AppFrame (const wxString &title)
 	m_mgr.AddPane(m_dirtree, wxAuiPaneInfo().
 		Name("Folders").Caption("Folders").
 		Left().Layer(1).Position(1).
-		CloseButton(true).MaximizeButton(false).CaptionVisible(true));
+		CloseButton(false).MaximizeButton(false).CaptionVisible(false));
 	
 	wxAuiPaneInfo& pinfo = m_mgr.GetPane(m_dirtree);
-	pinfo.Hide();
+	pinfo.Show();
+	
 
 		
 	m_mgr.Update();

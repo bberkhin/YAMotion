@@ -128,6 +128,10 @@ public:
 
 		BITMAP_NEW_LIST,
 		STATIC_LINE,
+
+		MSG_LOG_ERROR,
+		MSG_LOG_INFO,
+		MSG_LOG_WARNING,
 		// border
 		BORDER,
 		MAX

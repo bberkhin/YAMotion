@@ -92,6 +92,7 @@ public:
     void OnRMouseDClick(wxMouseEvent& event);
 	void OnFileSystemEvent(wxFileSystemWatcherEvent& event);
 	void SetWatcher(wxFileSystemWatcher *watcher);
+	wxSize DoGetBestSize() const;
 
 public:
 	void SetVScrollBar(wxScrollBar *bar);
@@ -174,6 +175,7 @@ public:
 	~DirPane();
 	void SetWatcher(wxFileSystemWatcher *watcher) { m_ptree->SetWatcher(watcher); }
 	void OnAddButton(wxCommandEvent &ev);
+	void OnClose(wxCommandEvent &ev);
 	void UpdateThemeColor();
 	void AddPath(const wxString &path);
 private:

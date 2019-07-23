@@ -162,6 +162,9 @@
     <ClCompile Include="flatsash.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
+    <ClCompile Include="FlatRenderer.cpp">
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h">
@@ -303,6 +306,9 @@
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
     <ClInclude Include="flatsash.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="FlatRenderer.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
   </ItemGroup>

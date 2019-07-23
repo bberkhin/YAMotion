@@ -114,6 +114,7 @@ public:
 	void UpdatePreferences();
 
 	void DoSelectLine(int line);
+	wxSize DoGetBestSize() const;
 
 private:
 	bool InitializePrefs(const LanguageInfo * language);	

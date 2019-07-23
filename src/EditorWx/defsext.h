@@ -10,6 +10,7 @@
 
 #define MAX_EDITOR_FILE_SIZE 300000000
 #define NUM_MENU_MACROS 30
+#include "ilogger.h"
 
 enum {
 	// menu IDs
@@ -101,38 +102,47 @@ enum {
 	ID_TREE_FOLDER_REMOVE,
 	ID_TREE_FOLDER_OPEN, 
 	ID_DIRTREE_LAST = ID_TREE_FOLDER_OPEN,
-    ID_WINDOW_MINIMAL,
+    
     // other IDs
-    ID_STATUSBAR,
-    ID_TITLEBAR,
     ID_ABOUTTIMER,
     ID_UPDATETIMER,
 
     // dialog find IDs
-    ID_DLG_FIND_TEXT,
+    ID_DLG_FIND_TEXT
 
     // preferences IDs
-    ID_PREFS_LANGUAGE,
-    ID_PREFS_STYLETYPE,
-    ID_PREFS_KEYWORDS,
+ //   ID_PREFS_LANGUAGE,
+ //   ID_PREFS_STYLETYPE,
+ //   ID_PREFS_KEYWORDS,
 
 };
 
+enum MsgStatusLevel
+{
+	MSLUndefened = 0,
+	MSLWarning = LOG_WARNING,
+	MSLError = LOG_ERROR,
+	MSLInfo = LOG_INFORMATION,
+	MSLFileStatus = LOG_INFORMATIONSUM
+
+};
 
 // ----------------------------------------------------------------------------
 // global items
 // ----------------------------------------------------------------------------
 
-class  IntClientData : public wxClientData
+class  LogClientData : public wxClientData
 {
 public:
-	IntClientData(int i = 0) : m_data(i) { }
-	virtual ~IntClientData() { }
-	void SetData(int &data) { m_data = data; }
-	int GetData() const { return m_data; }
-
+	LogClientData(const int &line, const MsgStatusLevel & type) : m_line(line), m_type(type) { }
+	virtual ~LogClientData() { }
+	void SetLine(const int &line) { m_line = line; }
+	int GetLine() const { return m_line; }
+	void SetType(const MsgStatusLevel &type) { m_type = type; }
+	MsgStatusLevel GetType() const { return m_type; }
 private:
-	int m_data;
+	int m_line;
+	MsgStatusLevel m_type;
 };
 
 

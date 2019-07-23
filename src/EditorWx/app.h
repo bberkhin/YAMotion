@@ -4,6 +4,7 @@
 
 class AppFrame;
 class Preferences;
+class FlatTraits;
 
 //----------------------------------------------------------------------------
 //
@@ -25,6 +26,7 @@ public:
 	IEnvironment *GetEnvironment() { return env.get(); }
 	virtual void OnEventLoopEnter(wxEventLoopBase* WXUNUSED(loop)) wxOVERRIDE;
 	AppFrame  *GetFrame() { return m_frame; }
+	virtual wxAppTraits *CreateTraits();
 
 	// create the file system watcher here, because it needs an active loop
 	

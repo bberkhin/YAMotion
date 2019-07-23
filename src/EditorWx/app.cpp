@@ -9,6 +9,7 @@
 #include "environmentsimple.h"
 #include "prefs.h"
 #include "them.h"
+#include "FlatRenderer.h"
 
 /// RUNCH
 
@@ -117,6 +118,12 @@ App::~App()
 		env.cwd = StandartPaths::Get()->GetRootPath().c_str();
 		wxExecute(argv[0], wxEXEC_ASYNC, NULL, &env);
 	}
+
+}
+
+wxAppTraits *App::CreateTraits()
+{
+	return new FlatTraits();
 
 }
 

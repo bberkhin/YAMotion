@@ -175,7 +175,7 @@ void ThemArtProvider::UpdateColoursFromSystem()
 	m_inactiveCaptionGradientColour = clrs->Get(ColourScheme::FRAME);
 	m_inactiveCaptionTextColour = clrs->Get(ColourScheme::WINDOW_TEXT);
 
-	m_sashBrush = wxBrush(*wxRED);
+	m_sashBrush = wxBrush(clrs->Get(ColourScheme::BORDER));
 	m_backgroundBrush = wxBrush(baseColour);
 	m_gripperBrush = wxBrush(*wxGREEN);
 
@@ -196,7 +196,7 @@ void ThemArtProvider::UpdateColoursFromSystem()
 	m_captionFont.SetPointSize(10);
 	m_captionSize = m_captionFont.GetPixelSize().y + 10;
 	m_borderSize = 1;
-	m_sashSize = 1;
+	m_sashSize = 4;
 	m_buttonSize = 12;
 }
 
@@ -413,6 +413,9 @@ void ColourScheme::Read()
 	ReadColor(root["slider_shaft_colored"],m_colors[SLIDER_SHAFT_COLORED]);	
 	ReadColor(root["bitmap_new_list"], m_colors[BITMAP_NEW_LIST]);
 	ReadColor(root["static_line"], m_colors[STATIC_LINE]);
+	ReadColor(root["msg_log_error"], m_colors[MSG_LOG_ERROR]);
+	ReadColor(root["msg_log_info"], m_colors[MSG_LOG_INFO]);
+	ReadColor(root["msg_log_warning"], m_colors[MSG_LOG_WARNING]);
 	
 	ReadColor(root["border"],m_colors[BORDER]);
 }
@@ -466,6 +469,11 @@ void ColourScheme::InitDef()
 	m_colors[SLIDER_SHAFT_COLORED] = wxColour(0xcc8830);
 	m_colors[BITMAP_NEW_LIST] = wxColour(0xddaa55);
 	m_colors[STATIC_LINE] = wxColour(0x4d4d4d);
+
+	m_colors[MSG_LOG_ERROR] = wxColour(0x7766ee);
+	m_colors[MSG_LOG_INFO] = wxColour(0x84e484);
+	m_colors[MSG_LOG_WARNING] = wxColour(0x44bbff);
+
 	// border
 	m_colors[BORDER] = wxColour(0xFF0000);
 }
