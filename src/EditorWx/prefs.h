@@ -95,6 +95,7 @@ public:
 	void SetFileName(const wxString &filename) { m_filename = filename; }
 	void SetFilePattern(const wxString &filename) { m_filepattern = filename; }
 	void Clear();
+	const StyleInfo *GetById(int id) const;
 
 private:
 	bool Read();

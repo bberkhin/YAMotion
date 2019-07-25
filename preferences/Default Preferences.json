@@ -15,7 +15,7 @@
   "files": [
     {
       "name": "GCODE",
-      "syntax": "nc_syntax_white.json",
+      "syntax": "nc_syntax_black.json",
       "extensions": "*.ngc;*.nc;*.cnc"
     },
     {

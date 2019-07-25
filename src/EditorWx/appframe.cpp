@@ -225,9 +225,44 @@ public:
 	{
 		m_mgr.SetArtProvider(Preferences::Get()->GetArtProvider(true));
 	}
+	void OnContextMenu(wxContextMenuEvent& event);
+	wxDECLARE_EVENT_TABLE();
 };
 
+wxBEGIN_EVENT_TABLE(StubNotebook, wxAuiNotebook)
+	//EVT_CONTEXT_MENU(StubNotebook::OnContextMenu)
+wxEND_EVENT_TABLE()
 
+//TODO
+void StubNotebook::OnContextMenu(wxContextMenuEvent& event)
+{
+	wxMenu menu(wxEmptyString);
+	/*
+	if (IsModified())
+	{
+		wxFileName fn(m_filename);
+		wxString menuTxt = wxString::Format(_("Save %s"), fn.GetFullName());
+		menu.Append(wxID_SAVE, menuTxt);
+		menu.AppendSeparator();
+	}
+	wxString incl_file = GetGcmcIncludeFileName();
+	if (!incl_file.empty())
+	{
+		menu.Append(ID_INCLUDE_FILE_OPEN, wxString::Format(_("Open file: \"%s\""), incl_file));
+		menu.AppendSeparator();
+	}
+	*/
+	menu.Append(wxID_UNDO, _("Undo form wxAuiNotebook"));
+	menu.AppendSeparator();
+	menu.Append(wxID_CUT, _("Cut"));
+	menu.Append(wxID_COPY, _("Copy"));
+	menu.Append(wxID_PASTE, _("Paste"));
+	menu.AppendSeparator();
+	menu.Append(wxID_SELECTALL, "Select All");
+
+	PopupMenu(&menu, ScreenToClient(event.GetPosition()));
+	event.Skip();
+}
 
 wxAuiNotebook* AppFrame::CreateNotebook()
 {

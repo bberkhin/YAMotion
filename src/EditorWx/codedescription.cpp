@@ -5,12 +5,52 @@
 #include "codedescription.h"
 #include "standartpaths.h"
 #include "environmentsimple.h"
-
+#include "LexGCode.h"
 
 
 using namespace Interpreter;
 
 #pragma warning(disable : 4996)
+
+bool ICodeDescription::get_description(const char *src, const char *word)
+{
+	m_results.clear();
+	return false;
+}
+
+bool ICodeDescription::GetFirst(wxString &cmd, wxString &desc)
+{
+	if (m_results.empty())
+		return false;
+	
+	m_it = m_results.begin();
+	cmd = m_it->first;
+	desc = m_it->second;
+
+	return true;
+}
+
+wxColor ICodeDescription::GetKeyColor(const wxString &cmd)
+{
+	return *wxRED;
+}
+
+bool ICodeDescription::GetNext(wxString &cmd, wxString &desc)
+{	
+	if (m_it == m_results.end() )
+		return false;
+	m_it++;
+	if (m_it == m_results.end())
+		return false;
+
+	cmd = m_it->first;
+	desc = m_it->second;
+
+	return true;
+
+}
+
+
 
 GCodeDescription::GCodeDescription() : parser( wxGetApp().GetEnvironment() )
 {
@@ -41,11 +81,17 @@ GCodeDescription::GCodeDescription() : parser( wxGetApp().GetEnvironment() )
 				line[n - 1] = 0; 
 			}
 		}
-
+	
 		c = wcschr(line, L'=');
 		if (c == NULL)
 			continue;
 		*c = 0;
+		// change '|' to '\n' 
+		for (wchar_t *s = c + 1; *s != 0; s++)
+		{
+			if (*s == '|') *s = '\n';
+		}
+
 		switch (line[0])
 		{
 		case L'G':
@@ -65,6 +111,7 @@ GCodeDescription::GCodeDescription() : parser( wxGetApp().GetEnvironment() )
 		}
 	}
 	fclose(file);	
+	
 }
 
 
@@ -142,15 +189,15 @@ bool GCodeDescription::cpy_close_and_downcase(char *line, const char *src, std::
 
 }
 
-
-std::wstring GCodeDescription::get_description(const char *src, const char *word)
+bool GCodeDescription::get_description(const char *src, const char *word)
 {
 	
-	std::wstring out;
-	char line[MAX_GCODE_LINELEN];
+	ICodeDescription::get_description(src, word);
 
-	if (!cpy_close_and_downcase(line, src, out))
-		return out;
+	char line[MAX_GCODE_LINELEN];
+	std::wstring error;
+	if (!cpy_close_and_downcase(line, src, error))
+		return false;
 
 	if (word && *word != 0)
 	{
@@ -168,45 +215,36 @@ std::wstring GCodeDescription::get_description(const char *src, const char *word
 	
 	if (!parser.parse(line))
 	{
-		wxString s( parser.get_state().description.c_str());
-		out = s.wc_str();
-		return out;
+
+		wxString desc( parser.get_state().description.c_str());		
+		m_results.push_back(std::make_pair(_("ERROR"), desc));		
+		return true;
 	}
 
 
 	if (!parser.neead_execute())
 	{
-		out = L"The string contains nothing to execute";
-		return out;
+		return false;
 	}
 
 
 	int gc;
-	bool first = true;
+	//bool first = true;
 	for (int i = 0; i < ModalGroup_Size; ++i)
 	{
 		if ((gc = parser.getGCode( (GModalGroup)i )) != -1)
 		{
-			if (!first)
-				out += L"\n";
-			else 
-				first = false;
-			out += get_g_description(gc);
-			
+			do_get_description(gc, L'G');
 		}
 	}
 	const m_container &mcodes = parser.getMCodes();
 	for (auto iter = mcodes.begin(); iter != mcodes.end(); ++iter)
 	{
-		if (!first)
-			out += L"\n";
-		else
-			first = false;
-		out += get_m_description(*iter);
+		do_get_description(*iter, L'M');
 
 	}
 
-	if (out.empty())
+	if (IsEmpty())
 	{
 
 		bool axis_flag = (parser.hasParam(PARAM_X) || parser.hasParam(PARAM_Y) ||
@@ -214,20 +252,19 @@ std::wstring GCodeDescription::get_description(const char *src, const char *word
 			parser.hasParam(PARAM_B) || parser.hasParam(PARAM_C));
 		if (axis_flag)
 		{
-			out += get_p_description(2001);
+			get_p_description(2001);
 		}
-		else if (parser.hasParam(PARAM_S))
-		{
-			out += get_p_description(2002);
-		}
-		else if (parser.hasParam(PARAM_F))
-		{
-			out += get_p_description(2003);
-		}
-
-
 	}
-	return out;
+
+	if (parser.hasParam(PARAM_S))
+	{
+		get_p_description(2002);
+	}
+	else if (parser.hasParam(PARAM_F))
+	{
+		get_p_description(2003);
+	}
+	return !IsEmpty();
 
 }
 
@@ -320,39 +357,74 @@ std::wstring GCodeDescription::format(const std::wstring &src)
 	return out;
 }
 
-std::wstring GCodeDescription::get_g_description(int gc)
+
+void GCodeDescription::get_p_description(int cmd)
 {
-	std::wstring  out(L"G");
-	out += std::to_wstring(gc/10);
-	out += L": ";
-	
-	auto iter = commands.find(gc);
-	if (iter != commands.end())
-		out += format(iter->second);
-	else if( !parser.acsept_gcode(gc) )
-		out += L"Unknown G Cod";
-	return out;
+	do_get_description(cmd,0);
 }
 
-std::wstring GCodeDescription::get_m_description(int mc )
+void GCodeDescription::do_get_description(int cm,  wchar_t letter, int k )
 {
-	std::wstring out(L"M");
-	out += std::to_wstring(mc);
-	out += L": ";
-	auto iter = commands.find(1000+mc);
+	wxString key;
+	wxString desc;
+	int cmdkey = cm;
+
+	if (letter != 0)
+	{
+		if (letter == L'G')
+		{
+			cmdkey = cm;
+			int fl = static_cast<int>(floor(cm/10.));
+			int dec = cm%10;
+			if (dec == 0)
+				key = wxString::Format(L"%c%d", letter, fl);
+			else
+				key = wxString::Format(L"%c%d.%d", letter, fl,dec);
+		}
+		else if (letter == L'M')
+		{
+			cmdkey = cm + 1000;
+			key = wxString::Format(L"%c%d", letter, cm);
+		}
+		else
+			key = wxString::Format(L"%c%d", letter, cm);
+	}
+
+
+	auto iter = commands.find(cmdkey);
 	if (iter != commands.end())
-		out += format(iter->second);
-	return out;
+		desc = format(iter->second);
+	else if (letter == L'G' )// && !parser.acsept_gcode(cm*10))
+		desc = L"There is no any description for this G Cod";
+	else if (letter == L'M')
+		desc = L"There is no any description for this G Cod";
+
+	m_results.push_back(std::make_pair(key, desc));
 }
 
-std::wstring GCodeDescription::get_p_description(int cmd)
-{
-	std::wstring out;
-	auto iter = commands.find(cmd);
-	if (iter != commands.end())
-		out += format(iter->second);
-	return out;
+wxColor GCodeDescription::GetKeyColor(const wxString &cmd)
+{	
+	const StyleInfo *s = 0;
+	if (!cmd.empty())
+	{
+		const LanguageInfo *langinfo = Preferences::Get()->FindByType(file_type(), false);
+		char c = cmd.at(0);
+		switch (c)
+		{
+			case 'G':
+			case 'g':
+				s = langinfo->GetById(SCE_GCODE_G);
+				break;
+			case 'M':
+			case 'm':
+				s = langinfo->GetById(SCE_GCODE_M);
+				break;
+		}
+	}
+
+	return s != 0 ? s->foreground : ICodeDescription::GetKeyColor(cmd);
 }
+
 
 /////////////////////////////////////////////////////////////////////////////////
 GcmcCodeDescription::GcmcCodeDescription()
@@ -402,13 +474,32 @@ GcmcCodeDescription::~GcmcCodeDescription()
 
 }
 
-std::wstring GcmcCodeDescription::get_description(const char *src, const char *word)
+bool GcmcCodeDescription::get_description(const char *src, const char *word)
 {
+	ICodeDescription::get_description(src, word);
 	
 	std::wstring key;
-	std::string keych(word);
-	
+	std::string keych(word);	
 	key.assign( keych.begin(), keych.end() ); // this converter is OK for keys
+	
 	auto it = commands.find(key);
-	return it == commands.end() ? std::wstring() : it->second;
+	if (it == commands.end())
+		return false;	
+
+	m_results.push_back(std::make_pair(wxString(key), wxString(it->second.c_str())));
+	
+	return !IsEmpty();
 }
+
+wxColor GcmcCodeDescription::GetKeyColor(const wxString &cmd)
+{
+	const StyleInfo *s = 0;
+	if (!cmd.empty())
+	{
+		const LanguageInfo *langinfo = Preferences::Get()->FindByType(file_type(), false);
+		s = langinfo->GetById(SCE_GCMC_WORD1);
+	}
+
+	return s != 0 ? s->foreground : ICodeDescription::GetKeyColor(cmd);
+}
+

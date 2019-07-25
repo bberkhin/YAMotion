@@ -3,6 +3,7 @@
 #include "defsext.h"
 #include "prefs.h"
 
+#define MARGIN_ITEM_HEIGHT 2
 
 wxBEGIN_EVENT_TABLE(LogWindow, BaseLogClass)
 
@@ -23,14 +24,19 @@ LogWindow::LogWindow(wxWindow *parent, wxEvtHandler *_handler, wxWindowID id )
 	: handler(_handler) , BaseLogClass()
 {
 	m_vScrollBar = 0;
+	m_hScrollBar = 0;
+	m_height = -1;
+
+
 	(void)Create(parent, id, wxDefaultPosition, wxDefaultSize, 0);
 
 	SetClientDataType(wxClientData_Object);
 	SetWindowStyle(GetWindowStyle() & (~(wxVSCROLL | wxHSCROLL)));
 	ColourScheme *clrs = Preferences::Get()->GetColorScheme();
 	SetSelectionBackground(clrs->Get(ColourScheme::HIGHLIGHT));
-}
+	CalcSizes();
 
+}
 
 LogWindow::~LogWindow()
 {
@@ -213,9 +219,23 @@ void LogWindow::OnDrawItem(wxDC& dc, const wxRect& rect, size_t n) const
 
 }
 
+
+void LogWindow::CalcSizes()
+{
+	wxClientDC dc(this);
+	wxFont font(GetFont());
+	if (!font.IsOk())
+		font = wxSystemSettings::GetFont(wxSYS_DEFAULT_GUI_FONT);
+
+	int width, height;
+	dc.SetFont(font);
+	dc.GetMultiLineTextExtent(L"WhK1", &width, &height);
+	m_height = height + 2 * MARGIN_ITEM_HEIGHT;
+}
+
 wxCoord LogWindow::OnMeasureItem(size_t n) const
 {
-	return 20;
+	return m_height;
 }
 
 

@@ -59,6 +59,7 @@ protected:
 protected:
 	virtual void OnDrawItem(wxDC& dc, const wxRect& rect, size_t n) const;
 	virtual wxCoord OnMeasureItem(size_t n) const;
+	void CalcSizes();
 
 private:
 	void DoSinchronize();
@@ -68,6 +69,7 @@ private:
 	wxEvtHandler *handler;
 	wxArrayString   m_items;
 	wxArrayPtrVoid  m_clientData;
+	int m_height;
 
 	wxDECLARE_EVENT_TABLE();
 };

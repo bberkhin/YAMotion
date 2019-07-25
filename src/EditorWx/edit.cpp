@@ -1,5 +1,6 @@
 #include "wx/wx.h"
 #include "wx/filename.h" // filename support
+#include <wx/popupwin.h>
 
 //! application headers
 #include "defsext.h"     // additional definitions
@@ -10,6 +11,7 @@
 #include "app.h"
 #include "appframe.h"
 
+
 //#include "..\..\src\stc\ScintillaWX.h"
 
 
@@ -18,6 +20,81 @@
 #elif wxUSE_FILE
 #include "wx/file.h"
 #endif
+
+
+#define FT_MARGIN_LEFT 10
+#define FT_MARGIN_RIGHT 10
+#define FT_MARGIN_TOP 10
+#define FT_MARGIN_BOTTOM 10
+
+class FlatTipWindow : public wxPopupWindow
+{
+public:
+	FlatTipWindow(wxWindow *parent, ICodeDescription *desc, const wxPoint &pos);
+	void OnKillFocus(wxFocusEvent& event);
+	void OnKey(wxKeyEvent& event);
+	wxDECLARE_EVENT_TABLE();
+};
+
+wxBEGIN_EVENT_TABLE(FlatTipWindow, wxPopupWindow)
+	EVT_KILL_FOCUS(FlatTipWindow::OnKillFocus)
+	EVT_KEY_DOWN(FlatTipWindow::OnKey)
+wxEND_EVENT_TABLE()
+
+FlatTipWindow::FlatTipWindow(wxWindow *parent, ICodeDescription *desc, const wxPoint &pos)
+	: wxPopupWindow(parent)
+{
+	SetWindowStyle(GetWindowStyle() &(~wxTAB_TRAVERSAL));
+	
+	ColourScheme *clrs = Preferences::Get()->GetColorScheme();
+	wxColor bgColor = clrs->Get(ColourScheme::CALLTIP);
+	wxColor fgColor = clrs->Get(ColourScheme::CALLTIP_TEXT);
+	
+	SetBackgroundColour(bgColor);
+	SetForegroundColour(fgColor);
+
+
+	wxFlexGridSizer  *gd = new wxFlexGridSizer(4, wxSize(10, 5));// 2, 0, 0);		
+	wxString strKey, strDesc;
+	bool bCont = desc->GetFirst(strKey, strDesc);
+	while (bCont)
+	{
+		gd->AddSpacer(FT_MARGIN_LEFT);
+		wxStaticText *p = new wxStaticText(this, wxID_ANY, strKey);
+		p->SetBackgroundColour(bgColor);
+		p->SetForegroundColour( desc->GetKeyColor(strKey) );
+		gd->Add(p, 0, wxALIGN_LEFT); 
+
+		p = new wxStaticText(this, wxID_ANY, strDesc);
+		p->SetBackgroundColour(bgColor);
+		p->SetForegroundColour(fgColor);
+		gd->Add(p, 0, wxALIGN_LEFT);
+		gd->AddSpacer(FT_MARGIN_RIGHT);
+		bCont = desc->GetNext(strKey, strDesc);
+	}
+		
+	wxBoxSizer  *box = new wxBoxSizer(wxVERTICAL);		
+	box->AddSpacer(FT_MARGIN_TOP);
+	box->Add(gd, 1, wxEXPAND);
+	box->AddSpacer(FT_MARGIN_BOTTOM);
+	SetSizerAndFit(box);
+
+	wxSize sz = box->GetSize();
+	SetSize(pos.x, pos.y, sz.x, sz.y);
+	Show(true);
+	SetFocus();	
+}
+
+void FlatTipWindow::OnKey(wxKeyEvent&)
+{
+	dynamic_cast<Edit *>(GetParent())->FlatTipCancel();
+}
+
+void FlatTipWindow::OnKillFocus(wxFocusEvent& event)
+{
+	dynamic_cast<Edit *>(GetParent())->FlatTipCancel();
+}
+
 
 
 //----------------------------------------------------------------------------
@@ -102,6 +179,7 @@ Edit::Edit(wxWindow *parent, wxWindowID id)
 	m_DividerID = 1;
 	m_FoldingID = 2;
 	m_modified = false;
+	m_ftooltip = 0;
 	// initialize language
 	m_language = NULL;
 	dlg_find = NULL;
@@ -156,23 +234,23 @@ void Edit::OnEditClear (wxCommandEvent &WXUNUSED(event)) {
 
 void Edit::OnMouseLeave(wxMouseEvent &event)
 {
-	if (CallTipActive())
-		CallTipCancel();
+	//if (FlatTipActive())
+		//FlatTipCancel();
 	event.Skip();
 }
 
 void Edit::OnKillFocus(wxFocusEvent& event)
 {
-	//if (CallTipActive())
-		//CallTipCancel();
+	//if (FlatTipActive())
+		//FlatTipCancel();
 	event.Skip();
 }
 
 
 void Edit::OnKeyDown (wxKeyEvent &event)
 {
-    if (CallTipActive())
-        CallTipCancel();
+    if (FlatTipActive())
+        FlatTipCancel();
    
     event.Skip();
 }
@@ -399,6 +477,8 @@ void Edit::OnDwellStart(wxStyledTextEvent &event)
 	if ( !HasFocus() )
 		return;
 
+	FlatTipCancel();
+
 	int pos = event.GetPosition();
 	wxString strWord;
 	int lineN = this->LineFromPosition(pos);
@@ -419,15 +499,29 @@ void Edit::OnDwellStart(wxStyledTextEvent &event)
 		else
 			code_description.reset(new GCodeDescription());
 	}
+	
+	if ( !code_description->get_description(str, strWord) )
+		return;
 
-	wxString strOut = code_description->get_description(str.c_str(), strWord.c_str() );
-	if (strOut.size() > 1 )
-		CallTipShow(pos, strOut);
+	wxPoint pt(event.GetX(), event.GetY());
+	m_ftooltip = new FlatTipWindow(this, code_description.get(), ClientToScreen(pt));
 }
+
+
+void Edit::FlatTipCancel()
+{
+	if (m_ftooltip)
+	{
+		m_ftooltip->Destroy();
+		m_ftooltip = 0;
+		SetFocus();
+	}
+}
+
 void Edit::OnDwellEnd(wxStyledTextEvent &event)
 {
-	if (CallTipActive())
-		CallTipCancel();
+	if (FlatTipActive())
+		FlatTipCancel();
 }
 
 
@@ -494,7 +588,7 @@ void Edit::UpdatePreferences()
 	CallTipSetForeground(clrs->Get(ColourScheme::CALLTIP_TEXT));
 	SetCaretForeground(clrs->Get(ColourScheme::WINDOW_TEXT));
 
-	SetMouseDwellTime(2000);
+	SetMouseDwellTime(1000);
 
 	SetUseHorizontalScrollBar(common_prefs.visibleHSB);
 	
@@ -692,12 +786,12 @@ bool Edit::Modified () {
 
 
 
-void Edit::PasteFile(std::wstring fname, bool toend)
+void Edit::PasteFile(const wxString &fname, bool toend)
 {
 	wxString errtext;
 	try
 	{
-		FILE *file = _wfopen(fname.c_str(), L"r");
+		FILE *file = _wfopen(fname.wc_str(), L"r");
 		if (file == NULL)
 		{
 			std::string errmsg("Can not open file: ");
@@ -728,7 +822,7 @@ void Edit::PasteFile(std::wstring fname, bool toend)
 		errtext = _T("Can not open file");
 	}
 
-	wxMessageBox(errtext, fname.c_str(),
+	wxMessageBox(errtext, fname,
 		wxOK | wxICON_EXCLAMATION);
 }
 
@@ -1035,12 +1129,20 @@ void Edit::OnContextMenu(wxContextMenuEvent& event)
 //	wxPoint screenpt = ClientToScreen(clientpt);
 	wxMenu menu(wxEmptyString);
 
+	if (IsModified())
+	{
+		wxFileName fn(m_filename);
+		wxString menuTxt = wxString::Format(_("Save %s"), fn.GetFullName() );
+		menu.Append(wxID_SAVE, menuTxt );
+		menu.AppendSeparator();
+	}
 	wxString incl_file = GetGcmcIncludeFileName();
 	if (!incl_file.empty())
 	{
 		menu.Append(ID_INCLUDE_FILE_OPEN, wxString::Format(_("Open file: \"%s\""), incl_file));
+		menu.AppendSeparator();
 	}
-	menu.AppendSeparator();
+	
 	menu.Append(wxID_UNDO, _("Undo"));
 	menu.AppendSeparator();
 	menu.Append(wxID_CUT, _("Cut"));

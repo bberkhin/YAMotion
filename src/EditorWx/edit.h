@@ -28,11 +28,13 @@
 //============================================================================
 
 class ICodeDescription;
+class FlatTipWindow;
 //----------------------------------------------------------------------------
 //! Edit
 class Edit: public wxStyledTextCtrl {
     friend class EditProperties;
     friend class EditPrint;
+	friend class FlatTipWindow;
 
 public:
     //! constructor
@@ -105,7 +107,7 @@ public:
     bool Modified ();
     wxString GetFileName () {return m_filename;}
 	void SetFileName(const wxString &filename) { m_filename = filename; }
-	void PasteFile(std::wstring fname, bool toend = false);
+	void PasteFile(const wxString &fname, bool toend = false);
 	bool IsNew() { return m_newfile; }
 
 	//find
@@ -120,6 +122,8 @@ private:
 	bool InitializePrefs(const LanguageInfo * language);	
 	wxString GetGcmcIncludeFileName();
 	bool DoLoadFile(const wxString& filename, int WXUNUSED(fileType));
+	bool FlatTipActive() { return (m_ftooltip != 0); }
+	void FlatTipCancel();
 
 private:
     // file
@@ -140,7 +144,7 @@ private:
 	wxFindReplaceData find_data;
 	bool m_modified;
 	bool m_newfile;
-	
+	FlatTipWindow *m_ftooltip;
     wxDECLARE_EVENT_TABLE();
 };
 

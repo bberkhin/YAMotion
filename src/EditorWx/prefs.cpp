@@ -329,6 +329,16 @@ void LanguageInfo::InitDef()
 	}
 }
 
+const StyleInfo *LanguageInfo::GetById(int id) const
+{
+	auto it = std::find_if(m_styles.begin(), m_styles.end(), [id](const StyleInfo &p)
+	{  return p.style_Id == id; });
+
+	if (it == m_styles.end())
+		return 0;
+	return &(*it);
+}
+
 bool LanguageInfo::Read()
 {
 	

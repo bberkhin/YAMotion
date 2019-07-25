@@ -270,6 +270,7 @@ void GcmcProcess::OnTerminate(int pid, int status)
 	while (HasInput())
 		;
 
+	//this call will kill this GcmcProcess instance
 	m_worker->GcmcProcessTerminated(status, dst_file.c_str(), what_to_do);
 }
 
@@ -633,7 +634,7 @@ int Worker::RunGcmc(const wchar_t *src_fname, const  wchar_t *dst_fname, const w
 }
 
 
-void Worker::SendEvnToFrame(wxEventType commandType, const wchar_t *str, int i)
+void Worker::SendEvnToFrame(wxEventType  commandType, const wchar_t *str, int i)
 {
 	wxCommandEvent event(commandType);
 	if ( str )
@@ -650,6 +651,7 @@ void Worker::GcmcProcessTerminated(int status, const wchar_t *dst_fname, DoAfter
 
 	if (m_gcmcProcess)
 	{
+		wxString wxdstfile(dst_fname); // copy string befor kill the m_gcmcProcess
 		m_gcmc_running_in_sec = 0;
 		m_timer.Stop();
 		delete m_gcmcProcess;
@@ -663,22 +665,22 @@ void Worker::GcmcProcessTerminated(int status, const wchar_t *dst_fname, DoAfter
 			switch (what_to_do)
 			{
 				case ConvertGcmcOpenFile:
-					wxGetApp().GetFrame()->FileOpen(dst_fname);
+					wxGetApp().GetFrame()->FileOpen(wxdstfile);
 					break;
 				case ConvertGcmcPasteFile:
 					pedit = m_fp->GetEdit();
 					if (pedit != NULL)
-						pedit->PasteFile(dst_fname);
+						pedit->PasteFile( wxdstfile );
 					break;
 				//case ConvertGcmcNewFile:	
 				//	//SendEvnToFrame(FILE_NEW_EVENT, dst_fname, FILETYPE_NC);
 				//	wxGetApp().GetFrame()->DoNewFile(FILETYPE_NC, wxEmptyString, true, dst_fname);
 				//	break;
 				case ConvertGcmc3DDraw:
-					Do3DDraw(dst_fname,false);
+					Do3DDraw(wxdstfile,false);
 					break;
 				case ConvertGcmc3DDrawAndSimulate:
-					Do3DDraw(dst_fname, true);
+					Do3DDraw(wxdstfile, true);
 					break;
 			}
 		}
