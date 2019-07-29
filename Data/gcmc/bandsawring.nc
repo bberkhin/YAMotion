@@ -1,5 +1,5 @@
 (gcmc compiled code, do not change)
-(2019-07-25 17:35:31)
+(2019-07-29 11:29:48)
 (-- prologue begin --)
 G17 ( Use XY plane )
 G21 ( Use mm )
@@ -45,7 +45,7 @@ G1 Z-2.00000000 F50.00000000
 (Center point:0,0)
 (Radius:40)
 (Mill dianetr:6)
-(Z save:5)
+(Z save:5mm)
 (Z max:-10)
 G0 Z5.00000000
 G0 X-43.00000000 Y0.00000000

@@ -979,6 +979,10 @@ void FilePage::Draw3D()
 	Show3D();
 }
 
+bool FilePage::IsModified()
+{ 
+	return GetEdit()->Modified(); 
+}
 
 void FilePage::Check()
 {

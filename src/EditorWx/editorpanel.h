@@ -97,6 +97,7 @@ public:
 	View3D *Get3D() { return m_view3d ? m_view3d->Get3D() : NULL; }
 	LogWindow *GetLogWnd() { return m_logwn ? m_logwn->GetLogWnd() : NULL; }
 	Worker * GetWorker() { return m_worker; }
+	bool IsModified();
 	void Check();
 	void Draw3D();
 	void ConvertGcmc();

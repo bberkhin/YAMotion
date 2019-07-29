@@ -74,6 +74,14 @@ private:
 // AppFrame
 //----------------------------------------------------------------------------
 
+const int wxAuiBaseTabCtrlId = 5380;
+
+
+// -- wxAuiNotebook class implementation --
+
+#define EVT_AUI_ANY(event, func) \
+    wx__DECLARE_EVT2(event, wxID_ANY, wxID_ANY, wxAuiNotebookEventHandler(func))
+
 
 wxBEGIN_EVENT_TABLE (AppFrame, wxFrame)
     // common
@@ -90,10 +98,13 @@ wxBEGIN_EVENT_TABLE (AppFrame, wxFrame)
 	EVT_MENU (ID_MACROSES,			 AppFrame::OnMacroses)
 	EVT_MENU(ID_MATHCALC,			 AppFrame::OnMathCalc)
 	EVT_MENU(ID_MATHEXPRESSION, AppFrame::OnMathExpression)
+	EVT_UPDATE_UI(ID_MATHCALC, AppFrame::OnUpdateNCIsOpen)
+	EVT_UPDATE_UI(ID_MATHEXPRESSION, AppFrame::OnUpdateNCIsOpen)
 
     // print and exit
 	EVT_MENU(wxID_EXIT, AppFrame::OnExit)
 	// Menu items with standard IDs forwarded to the editor.
+
 	EVT_MENU(wxID_CLEAR, AppFrame::OnEdit)
 	EVT_MENU(wxID_CUT, AppFrame::OnEdit)
 	EVT_MENU(wxID_COPY, AppFrame::OnEdit)
@@ -125,6 +136,7 @@ wxBEGIN_EVENT_TABLE (AppFrame, wxFrame)
     EVT_MENU(wxID_ABOUT,            AppFrame::OnAbout)	
 	EVT_MENU(ID_WRITEFEEDBACK, AppFrame::OnWriteFeedback)
 	EVT_MENU(ID_HELPGCMC, AppFrame::OnHelp)
+	EVT_MENU(ID_HELPGCMC, AppFrame::OnHelp)
 	EVT_MENU(ID_HELPNC, AppFrame::OnHelp)
 	EVT_MENU(ID_WHATNEWS, AppFrame::OnHelp)
 
@@ -143,7 +155,10 @@ wxBEGIN_EVENT_TABLE (AppFrame, wxFrame)
 	EVT_COMMAND(wxID_ANY, FILE_REMOVE_EVENT, AppFrame::OnFileRemoveEvent)
 	EVT_COMMAND(wxID_ANY, FILE_NEW_EVENT, AppFrame::OnFileNewEvent)
 	
+	EVT_AUI_ANY(wxEVT_AUINOTEBOOK_TAB_RIGHT_UP,	AppFrame::OnTabRightUp)
+	
 wxEND_EVENT_TABLE ()
+
 
 
 AppFrame::AppFrame (const wxString &title)
@@ -165,8 +180,8 @@ AppFrame::AppFrame (const wxString &title)
     SetIcon(wxICON(sample));
     SetTitle (APP_NAME);
     //SetBackgroundColour ("GREEN");
-	ConfigData *config;
-	if ((config = dynamic_cast<ConfigData *>(wxConfigBase::Get())) != NULL)
+	ConfigData *config = dynamic_cast<ConfigData *>(wxConfigBase::Get());
+	if (config != NULL)
 		config->ReadFileNames();
 
     // create menu
@@ -186,11 +201,18 @@ AppFrame::AppFrame (const wxString &title)
 		Left().Layer(1).Position(1).
 		CloseButton(false).MaximizeButton(false).CaptionVisible(false));
 	
-	wxAuiPaneInfo& pinfo = m_mgr.GetPane(m_dirtree);
-	pinfo.Show();
+	
 	
 
-		
+	
+	bool visibleDir = true;
+	if (config != NULL)
+		visibleDir = config->Read(L"DirVisible", visibleDir);
+	
+	wxAuiPaneInfo& pinfo = m_mgr.GetPane(m_dirtree);
+	pinfo.Show(visibleDir);
+
+
 	m_mgr.Update();
 	
 	ShowWelcome();
@@ -215,6 +237,35 @@ AppFrame::~AppFrame ()
 		delete m_macroses;
 }
 
+void AppFrame::OnTabRightUp(wxAuiNotebookEvent& evt)
+{
+	wxMenu menu(wxEmptyString);
+	/*
+	if (IsModified())
+	{
+		wxFileName fn(m_filename);
+		wxString menuTxt = wxString::Format(_("Save %s"), fn.GetFullName());
+		menu.Append(wxID_SAVE, menuTxt);
+		menu.AppendSeparator();
+	}
+	wxString incl_file = GetGcmcIncludeFileName();
+	if (!incl_file.empty())
+	{
+		menu.Append(ID_INCLUDE_FILE_OPEN, wxString::Format(_("Open file: \"%s\""), incl_file));
+		menu.AppendSeparator();
+	}
+	*/
+	menu.Append(wxID_UNDO, _("Undo form wxAuiNotebook"));
+	menu.AppendSeparator();
+	menu.Append(wxID_CUT, _("Cut"));
+	menu.Append(wxID_COPY, _("Copy"));
+	menu.Append(wxID_PASTE, _("Paste"));
+	menu.AppendSeparator();
+	menu.Append(wxID_SELECTALL, "Select All");
+
+	PopupMenu(&menu, ScreenToClient(wxPoint(0,0)));
+}
+
 class StubNotebook : public wxAuiNotebook
 {
 public:
@@ -225,11 +276,12 @@ public:
 	{
 		m_mgr.SetArtProvider(Preferences::Get()->GetArtProvider(true));
 	}
-	void OnContextMenu(wxContextMenuEvent& event);
+	void OnContextMenu(wxContextMenuEvent& event);	
 	wxDECLARE_EVENT_TABLE();
 };
 
 wxBEGIN_EVENT_TABLE(StubNotebook, wxAuiNotebook)
+//	EVT_RIGHT_UP(StubNotebook::OnRightUp)
 	//EVT_CONTEXT_MENU(StubNotebook::OnContextMenu)
 wxEND_EVENT_TABLE()
 
@@ -383,11 +435,17 @@ void AppFrame::OnClose (wxCloseEvent &event)
 		return;
 	}
 	
+	wxAuiPaneInfo& pinfo = m_mgr.GetPane(m_dirtree);
+	bool visibleDir  = pinfo.IsShown();
 
-	ConfigData *config;
-	if ((config = dynamic_cast<ConfigData *>(wxConfigBase::Get())) != NULL)
+	wxString strPerspective = m_mgr.SavePerspective();
+	ConfigData *config = dynamic_cast<ConfigData *>(wxConfigBase::Get());
+	if (config != NULL)
+	{
 		config->WriteFileNames();
-
+		config->Write(L"DirVisible", visibleDir);
+	}
+	
     Destroy();
 }
 
@@ -399,7 +457,12 @@ void AppFrame::OnDownloadUpdate(wxCommandEvent &WXUNUSED(event))
 
 void AppFrame::OnWriteFeedback( wxCommandEvent &WXUNUSED(event) )
 {
-	wxMessageBox("OnWriteFeedback");
+	wxString sendTo = APP_MAIL;
+	sendTo += L"?subject=";
+	sendTo += wxString::Format(L"%s%%20%s", wxString(APP_NAME), wxString(APP_VERSION));	
+	ShellExecute(NULL, L"open", sendTo.c_str(), L"", L"", 0);
+	
+
 }
 
 void AppFrame::OnHelp(wxCommandEvent &event)
@@ -407,12 +470,14 @@ void AppFrame::OnHelp(wxCommandEvent &event)
 	wxString topic;
 	switch(event.GetId())
 	{
-	case ID_HELPGCMC: topic = "ID_HELPGCMC"; break;
-	case ID_HELPNC: topic = "ID_HELPNC"; break;
-	case ID_WHATNEWS: topic = "ID_WHATNEWS"; break;
-	default: topic = "unknown cmd"; break;
+		case ID_HELPGCMC: topic = L"gcodehelp\\gcode.htm"; break;
+		case ID_HELPNC: topic = L"gcmchelp\\gcmc.htm"; break;
+		case ID_WHATNEWS: topic = "whatnews.htm"; break;
+		default: topic = "unknown cmd"; break;
 	}
-	wxMessageBox(topic);
+
+	std::filesystem::path name_topic = StandartPaths::Get()->GetResourcesPath( topic.wc_str() );	
+	wxLaunchDefaultApplication(name_topic.c_str());	
 }
 
 void AppFrame::OnAbout (wxCommandEvent &WXUNUSED(event)) {
@@ -467,7 +532,11 @@ bool AppFrame::DoSaveAllFiles()
 		if (m_notebook->GetPage(i)->IsKindOf(CLASSINFO(FilePage)))
 		{
 			FilePage *pEdit = dynamic_cast<FilePage *>(m_notebook->GetPage(i));
-			if (pEdit && !pEdit->DoFileSave(true, false))
+			if (pEdit == 0 || !pEdit->IsModified())
+				continue;
+
+			m_notebook->SetSelection(i);
+			if (  !pEdit->DoFileSave(true, false) )
 			{
 				return false;
 			}
@@ -794,13 +863,37 @@ void AppFrame::OnMathCalc(wxCommandEvent &WXUNUSED(event))
 	FilePage *panel = dynamic_cast<FilePage *>(m_notebook->GetCurrentPage());
 	if (panel)
 		pedit = panel->GetEdit();
-
-
+	else
+		return;
+	
 	DoMathSimple mth;
 	MathSimpleDlg dlg(&mth, this, pedit->HasSelection() );
 	if (dlg.ShowModal() != wxID_OK)
 		return;
 	DoMathCalc(mth);
+}
+
+
+void AppFrame::OnUpdateNCIsOpen(wxUpdateUIEvent& event)
+{
+
+	FilePage *panel = dynamic_cast<FilePage *>(m_notebook->GetCurrentPage());
+	bool enable = false;
+	if (panel)
+	{
+		Edit *pedit = panel->GetEdit();
+		if (pedit && pedit->GetFileType() == FILETYPE_NC)
+			enable = true;
+	}
+	event.Enable( enable );
+}
+
+
+void AppFrame::OnUpdateAnyFileIsOpen(wxUpdateUIEvent& event)
+{
+	FilePage *panel = dynamic_cast<FilePage *>(m_notebook->GetCurrentPage());
+	bool enable = panel != 0;
+	event.Enable(enable);
 }
 
 // properties event handlers
@@ -812,7 +905,8 @@ void AppFrame::OnMathExpression(wxCommandEvent &WXUNUSED(event))
 	FilePage *panel = dynamic_cast<FilePage *>(m_notebook->GetCurrentPage());
 	if (panel)
 		pedit = panel->GetEdit();
-
+	else
+		return;
 
 	try
 	{
@@ -873,6 +967,8 @@ void AppFrame::On3DViewUpdate(wxUpdateUIEvent& event)
 
 	if (view)
 		view->GetEventHandler()->ProcessEvent(event);
+	else
+		event.Enable(false);
 }
 
 void AppFrame::OnDirTree(wxCommandEvent &event)

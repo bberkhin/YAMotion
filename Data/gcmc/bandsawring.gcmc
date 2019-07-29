@@ -5,7 +5,7 @@
 // zFull - deep
 
 ccw = 1;
-zSave = 5;
+zSave = 5mm;
 zRate = 50;
 rate = 200;
 d=6;

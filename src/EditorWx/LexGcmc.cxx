@@ -47,6 +47,7 @@ static void ColouriseGcmcDoc(Sci_PositionU startPos, Sci_Position length, int in
 {
 	WordList &keywords1= *keywordLists[0];
 	WordList &keywords2 = *keywordLists[1];
+	WordList &keywords3 = *keywordLists[2];
 	
 	CharacterSet operators(CharacterSet::setNone, "*/=+<>");
 	StyleContext sctmp(startPos, length, initStyle, styler);
@@ -112,6 +113,10 @@ static void ColouriseGcmcDoc(Sci_PositionU startPos, Sci_Position length, int in
 				{
 					sc.ChangeState(SCE_GCMC_WORD2); 				// It's a keyword, change its state
 				}
+				else if (keywords3.InList(s))
+				{
+					sc.ChangeState(SCE_GCMC_WORD3); 				// It's a keyword, change its state
+				}				
 				sc.SetState(SCE_GCMC_DEFAULT);
 			}
 		}

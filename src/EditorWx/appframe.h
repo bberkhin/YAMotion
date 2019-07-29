@@ -79,6 +79,9 @@ public:
 	void AddPath(const wxString &path);
 
 
+	void OnUpdateNCIsOpen(wxUpdateUIEvent& event);
+	void OnUpdateAnyFileIsOpen(wxUpdateUIEvent& event);
+	void OnTabRightUp(wxAuiNotebookEvent& evt);
 
 private:
 	bool FindPageByFileName(const wxString &new_file_name, size_t *nPage = NULL);

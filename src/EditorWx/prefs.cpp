@@ -18,7 +18,12 @@ const char* GcmcWordlist1 = "abs acos asin atan atan_xy atan_xz atan_yz ceil com
 "round scale sign sin sqrt svg_closepath tail tan to_chr to_deg to_distance to_float to_in to_inch to_int to_mm to_native to_none to_rad to_string to_val typeset undef warning "
 "arc_ccw arc_ccw_r arc_cw arc_cw_r circle_ccw circle_ccw_r circle_cw circle_cw_r coolant drill dwell feedmode feedrate fixpos_restore fixpos_store goto goto_r move move_r pathmode "
 "pause plane spindle spindlespeed toolchange";
-const char* GcmcWordlist2 = "for if while do else return function foreach include";
+
+const char* GcmcWordlist2 = "function for foreach do while if elif else break continue return include local repeat const";
+const char* GcmcWordlist3 = "mm mil in deg rad";
+
+
+
  
 const char* jsonWordlist = "true false title description default examples";
 
@@ -304,6 +309,7 @@ void LanguageInfo::InitDef()
 			AddStyle(SCE_GCMC_IDENTIFIER, "BLACK", "", "", 10, 0, 0);
 			AddStyle(SCE_GCMC_WORD1, "RED", "", "", 10, true, 0, GcmcWordlist1);
 			AddStyle(SCE_GCMC_WORD2,"BLUE", "","", 10, true, 0, GcmcWordlist2);
+			AddStyle(SCE_GCMC_WORD3, "BLACK", "", "", 10, true, 0, GcmcWordlist3);	
 			AddStyle(SCE_GCMC_STRING, "GREEN", "", "", 10, true, 0);
 		break;
 		case FILETYPE_JSON:

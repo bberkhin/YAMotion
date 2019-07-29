@@ -22,59 +22,64 @@
     {
       "nameid": 0,
       "name": "default",
-      "fclr": "GRAY"
+      "fclr": "WHITE"
     },
     {
       "nameid": 1,
       "name": "comment",
-      "fclr": "#008040",
+      "fclr": "#84e484",
       "italic": false
     },
     {
       "nameid": 2,
       "name": "comment_ml",
-      "fclr": "#008040"
-      //"fclr": "FOREST GREEN"
+      "fclr": "#84e484"
     },
     {
       "nameid": 3,
       "name": "var",
-      "fclr": "SIENNA",
+      "fclr": "WHITE",
       "bold": true
     },
     {
       "nameid": 4,
       "name": "number",
-      "fclr": "0xFF0000",
+      "fclr": "#ee6677",
       "bold": true
     },
     {
       "nameid": 5,
       "name": "operators",
-      "fclr": "VIOLET RED",
+      "fclr": "#ffffff",
       "bold": true
     },
     {
       "nameid": 6,
       "name": "identifiers",
-      "fclr": "BLACK"
+      "fclr": "#ffbb44"
     },
     {
       "nameid": 7,
-      "name": "word1",
-      "fclr": "RED",
+      "name": "functions",
+      "fclr": "#ff0044",
       "bold": true
     },
     {
       "nameid": 8,
-      "name": "word2",
-      "fclr": "BLUE",
+      "name": "syntaxwords",
+      "fclr": "#55aadd",
       "bold": true
     },
     {
       "nameid": 9,
+      "name": "units",
+      "fclr": "#ffffff",
+      "bold": true
+    },
+    {
+      "nameid": 10,
       "name": "strings",
-      "fclr": "FOREST GREEN",
+      "fclr": "#238e23",
       "bold": true,
       "italic": true
     }

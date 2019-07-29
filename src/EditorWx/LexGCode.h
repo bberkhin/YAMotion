@@ -22,7 +22,8 @@
 #define SCE_GCMC_IDENTIFIER 6
 #define SCE_GCMC_WORD1 7
 #define SCE_GCMC_WORD2 8
-#define SCE_GCMC_STRING 9
+#define SCE_GCMC_WORD3  9
+#define SCE_GCMC_STRING 10
 
 #define SCLEX_GCODE 200
 #define SCLEX_GCMC 201

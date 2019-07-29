@@ -1,29 +1,5 @@
 #pragma once
-#include <wx\html\htmlwin.h>
-
-//class WelcomProcessor;
-
-class WelcomeWndHtml : 	public wxHtmlWindow
-{
-
-public:
-	WelcomeWndHtml(wxWindow *parent); 
-	~WelcomeWndHtml();
-	void OnHtmlLinkClicked(wxHtmlLinkEvent &event);
-	void ShowWelcome(bool bShow);
-	void SetHomePage();
-	void OnSize(wxSizeEvent& event);
-	//void OnEraseBgEvent(wxEraseEvent& event);
-public:
-	void RunCommand(const wxString &url, int baseCmd);
-	void UpdateFooter();
-private:
-	wxDECLARE_EVENT_TABLE();
-	wxDECLARE_NO_COPY_CLASS(WelcomeWndHtml);
-private:
-	//WelcomProcessor *processor;
-	wxFrame *pWelcomeFrame;
-};
+#include "wx/filename.h"
 
 class WelcomeWnd : public wxPanel
 {
@@ -31,7 +7,6 @@ class WelcomeWnd : public wxPanel
 public:
 	WelcomeWnd(wxWindow *parent);
 	virtual ~WelcomeWnd();
-	void OnHtmlLinkClicked(wxHtmlLinkEvent &event);
 	void OnSize(wxSizeEvent& event);
 	
 private:

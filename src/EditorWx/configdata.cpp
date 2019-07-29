@@ -95,3 +95,5 @@ void ConfigData::ReadFileNames()
 	SetPath(strOldPath);
 }
 
+
+
