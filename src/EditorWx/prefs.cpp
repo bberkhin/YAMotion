@@ -55,12 +55,12 @@ Preferences::Preferences() : m_artprovider(0), m_tabartprovider(0)
 	};
 
 	m_colors = new ColourScheme();
+	m_languages.push_back(LanguageInfo("ALL", FILETYPE_UNKNOW, 0, "*.*"));
 	m_languages.push_back(LanguageInfo("GCODE",FILETYPE_NC, SCLEX_GCODE, "*.ngc; *.nc; *.cnc" ));
 	m_languages.push_back(LanguageInfo("GCMC", FILETYPE_GCMC, SCLEX_GCMC, "*.gcmc"));
 	m_languages.push_back(LanguageInfo("JSON", FILETYPE_JSON, SCLEX_JSON, "*.json"));
-	m_languages.push_back(LanguageInfo());
-
 };
+
 Preferences::~Preferences()
 {
 	delete m_colors;
@@ -91,10 +91,17 @@ const  LanguageInfo *Preferences::FindByFileName(const wxString &name, bool init
 	auto it = std::find_if(m_languages.begin(), m_languages.end(), [filename](LanguageInfo &p)
 	{  return p.Match(filename); });
 
-	LanguageInfo &ln = (it == m_languages.end()) ? m_languages[0] : (*it);
+
+	if (it == m_languages.end())
+	{
+		// def lang is GCODEE
+		return FindByType(FILETYPE_NC, init);
+	}
+
+	LanguageInfo *ln = &(*it);
 	if (init)
-		ln.Init();
-	return  &ln;
+		ln->Init();
+	return  ln;
 
 }
 
@@ -114,6 +121,19 @@ LanguageInfo  *Preferences::FindByName(const wxString &name, bool init)
 }
 
 
+wxString Preferences::CreateWildCard() const
+{
+	//Clear
+	wxString wldCrd;
+	std::for_each(m_languages.begin(), m_languages.end(), [&wldCrd](const LanguageInfo &p)
+	{
+		if ( !wldCrd.IsEmpty() )
+			wldCrd += L'|';
+		wldCrd += p.CreateWildCard();
+		
+	});
+	return wldCrd;
+}
 
 
 bool Preferences::Read()
@@ -192,7 +212,7 @@ bool Preferences::DoRead(const wxString& fileName, bool errifnoexist )
 		wxString name = val["name"].AsString();
 		wxString filename, filepattern;
 		val["syntax"].AsString(filename);
-		val["pattern"].AsString(filepattern);
+		val["extensions"].AsString(filepattern);
 		LanguageInfo *lang = FindByName(name,false);
 		if (lang && !filename.empty())
 			lang->SetFileName(filename );
@@ -441,3 +461,13 @@ bool  LanguageInfo::Match(const wxString &fname)
 	return false;
 }
 
+wxString LanguageInfo::CreateWildCard() const
+{
+	return wxString::Format(_("%s Files (%s)|%s"), m_name,m_filepattern, m_filepattern);
+	/*
+	if (pedit->GetFileType() == FILETYPE_GCMC)
+		wildCard = _("GCMC Files (*.gcmc)|*.gcmc");
+	else
+		wildCard = _("GCode Files (*.ngc;*.nc)|*.ngc;*.nc");
+	*/
+}

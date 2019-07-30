@@ -16,20 +16,20 @@
     {
       "name": "GCODE",
       "syntax": "nc_syntax_black.json",
-      "extensions": "*.ngc;*.nc;*.cnc"
+      "extensions": "*.ngc;*.nc;*.cnc;*.tap"
     },
     {
       "name": "GCMC",
       "syntax": "gcmc_syntax_white.json",
-      "extensions": "*.gcmc;"
+      "extensions": "*.gcmc"
     },
     {
       "name": "JSON",
-      "extensions": "*.json;"
+      "extensions": "*.json"
     },
     {
       "name": "ALL",
-      "extensions": "*.*;"
+      "extensions": "*.*"
     }
   ]
 }

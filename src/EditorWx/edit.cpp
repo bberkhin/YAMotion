@@ -494,10 +494,12 @@ void Edit::OnDwellStart(wxStyledTextEvent &event)
 
 	if ( !code_description || code_description->file_type() != GetFileType() )
 	{
-		if (GetFileType() == FILETYPE_GCMC )
+		if (GetFileType() == FILETYPE_GCMC)
 			code_description.reset(new GcmcCodeDescription());
-		else
+		else if (GetFileType() == FILETYPE_NC)
 			code_description.reset(new GCodeDescription());
+		else //unknown file type
+			return;
 	}
 	
 	if ( !code_description->get_description(str, strWord) )

@@ -1116,20 +1116,18 @@ bool FilePage::DoFileSave(bool askToSave, bool bSaveAs)
 	if (bSaveAs || pedit->IsNew())
 	{
 		wxString filename = pedit->GetFileName();
+		const LanguageInfo *plang = Preferences::Get()->FindByType(pedit->GetFileType());
 		wxString wildCard;
-		if (pedit->GetFileType() == FILETYPE_GCMC)
-			wildCard = _("GCMC Files (*.gcmc)|*.gcmc");
+		if ( plang )
+			wildCard = plang->CreateWildCard();
 		else
-			wildCard = _("GCode Files (*.ngc;*.nc)|*.ngc;*.nc");
-
+			wildCard = _("All Files|*.*");		
 		wxFileDialog dlg(this, _("Save file As"), wxEmptyString, filename, wildCard, wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
 		if (dlg.ShowModal() != wxID_OK)
 			return false;
 		filename = dlg.GetPath();
 		pedit->SaveFile(filename);
-		ConfigData *config;
-		if ((config = dynamic_cast<ConfigData *>(wxConfigBase::Get())) != NULL)
-			config->AddFileNameToSaveList(filename);
+		wxGetApp().GetFrame()->AddFileToHisotyList(filename);
 	}
 	else //  fname exist && not save as  - just save
 	{

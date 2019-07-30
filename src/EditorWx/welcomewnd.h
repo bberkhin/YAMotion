@@ -8,6 +8,7 @@ public:
 	WelcomeWnd(wxWindow *parent);
 	virtual ~WelcomeWnd();
 	void OnSize(wxSizeEvent& event);
+	void AddLastFilesToMenu(bool update = true);
 	
 private:
 	wxBoxSizer *CreateRecentFilesList();
@@ -25,6 +26,7 @@ private:
 	wxColor m_bghColor; 
 	wxColor m_fgColor; //clrs->Get(ColourScheme::WINDOW_TEXT);
 	wxColor m_fghColor;
+	wxBoxSizer *m_LastFiles;
 
 	wxDECLARE_EVENT_TABLE();
 };

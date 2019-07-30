@@ -1,19 +1,17 @@
-#include "wx/wx.h"
+#include "wx/wx.h" // filename support
 #include "wx/filename.h" // filename support
+#include "app.h"
+#include "appframe.h"       // Prefs
+
+
 #include "wx/event.h"
 #include "wx/artprov.h"
-
-
-//! application headers
-#include "appframe.h"       // Prefs
-#include "app.h"
 #include "appdefs.h"      
 #include "defsext.h"     
 #include "prefs.h"
 #include "editorpanel.h"
 #include "edit.h"
 #include "View3D.h"
-
 #include "about.h"
 #include "propertiesdlg.h"
 #include "macrosesdlg.h"
@@ -23,9 +21,14 @@
 #include "configdata.h"
 #include "mathsimpledlg.h"
 #include "mathexpressiondlg.h"
+
 #include "welcomewnd.h"
 #include "dirtree.h"
 #include "them.h"
+
+/**/
+//! application headers
+
 
 
 using namespace Interpreter;
@@ -92,7 +95,7 @@ wxBEGIN_EVENT_TABLE (AppFrame, wxFrame)
     EVT_MENU (ID_OPENFILE,             AppFrame::OnFileOpen)
     EVT_MENU (wxID_SAVE,             AppFrame::OnFileSave)
     EVT_MENU (wxID_SAVEAS,           AppFrame::OnFileSaveAs)
-    EVT_MENU (wxID_CLOSE,            AppFrame::OnFileClose)
+    EVT_MENU (ID_CLOSEACTIVETAB,            AppFrame::OnFileClose)
 	EVT_MENU_RANGE(wxID_FILE, wxID_FILE9, AppFrame::OnOpenLastFile)	
 	EVT_MENU_RANGE(ID_MACROSFIRST, ID_MACROSLAST, AppFrame::OnMacros)
 	EVT_MENU (ID_MACROSES,			 AppFrame::OnMacroses)
@@ -100,6 +103,9 @@ wxBEGIN_EVENT_TABLE (AppFrame, wxFrame)
 	EVT_MENU(ID_MATHEXPRESSION, AppFrame::OnMathExpression)
 	EVT_UPDATE_UI(ID_MATHCALC, AppFrame::OnUpdateNCIsOpen)
 	EVT_UPDATE_UI(ID_MATHEXPRESSION, AppFrame::OnUpdateNCIsOpen)
+	EVT_MENU(ID_CLOSEALL, AppFrame::OnFileCloseAll)
+	EVT_MENU(ID_CLOSEALLBUTTHIS, AppFrame::OnFileCloseAllButThis)
+	EVT_MENU(ID_ADDFIILEDIRTOPANE, AppFrame::OnAddFilePathToDirPane)
 
     // print and exit
 	EVT_MENU(wxID_EXIT, AppFrame::OnExit)
@@ -202,13 +208,7 @@ AppFrame::AppFrame (const wxString &title)
 		CloseButton(false).MaximizeButton(false).CaptionVisible(false));
 	
 	
-	
-
-	
-	bool visibleDir = true;
-	if (config != NULL)
-		visibleDir = config->Read(L"DirVisible", visibleDir);
-	
+	bool visibleDir = m_dirtree->Load();
 	wxAuiPaneInfo& pinfo = m_mgr.GetPane(m_dirtree);
 	pinfo.Show(visibleDir);
 
@@ -239,31 +239,34 @@ AppFrame::~AppFrame ()
 
 void AppFrame::OnTabRightUp(wxAuiNotebookEvent& evt)
 {
+	m_notebook->SetSelection(evt.GetSelection());
 	wxMenu menu(wxEmptyString);
-	/*
-	if (IsModified())
+	int nPage = m_notebook->GetSelection();
+	FilePage *pFile = dynamic_cast<FilePage *>(m_notebook->GetPage(nPage));
+	if ( pFile && pFile->IsModified() )
 	{
-		wxFileName fn(m_filename);
-		wxString menuTxt = wxString::Format(_("Save %s"), fn.GetFullName());
+		wxFileName fn(pFile->GetEdit()->GetFileName());
+		wxString menuTxt = wxString::Format(_("Save %s"), fn.GetFullName()); 	// Save
 		menu.Append(wxID_SAVE, menuTxt);
-		menu.AppendSeparator();
 	}
-	wxString incl_file = GetGcmcIncludeFileName();
-	if (!incl_file.empty())
-	{
-		menu.Append(ID_INCLUDE_FILE_OPEN, wxString::Format(_("Open file: \"%s\""), incl_file));
-		menu.AppendSeparator();
-	}
-	*/
-	menu.Append(wxID_UNDO, _("Undo form wxAuiNotebook"));
-	menu.AppendSeparator();
-	menu.Append(wxID_CUT, _("Cut"));
-	menu.Append(wxID_COPY, _("Copy"));
-	menu.Append(wxID_PASTE, _("Paste"));
-	menu.AppendSeparator();
-	menu.Append(wxID_SELECTALL, "Select All");
 
-	PopupMenu(&menu, ScreenToClient(wxPoint(0,0)));
+	menu.Append(ID_CLOSEACTIVETAB, _("Close")); 	//Close
+	menu.Append(ID_CLOSEALL, _("Close All")); 	//Close All but this
+	wxMenuItem *item = menu.Append(ID_CLOSEALLBUTTHIS, _("Close All but this")); 	//Close All but this
+	item->Enable(m_notebook->GetPageCount() > 1);
+
+	if (pFile)
+	{
+		menu.Append(ID_ADDFIILEDIRTOPANE, _("Add file path to Pane")); 	//Close All but this
+	}
+
+	menu.AppendSeparator();
+	menu.Append(ID_NEWNC, _("New GCODE"));
+	menu.Append(ID_NEWGCMC, _("New GCMC"));
+	menu.Append(ID_OPENFILE, _("Open file..."));
+
+	
+	PopupMenu(&menu, ScreenToClient( wxGetMousePosition()));
 }
 
 class StubNotebook : public wxAuiNotebook
@@ -276,45 +279,12 @@ public:
 	{
 		m_mgr.SetArtProvider(Preferences::Get()->GetArtProvider(true));
 	}
-	void OnContextMenu(wxContextMenuEvent& event);	
 	wxDECLARE_EVENT_TABLE();
 };
 
 wxBEGIN_EVENT_TABLE(StubNotebook, wxAuiNotebook)
-//	EVT_RIGHT_UP(StubNotebook::OnRightUp)
-	//EVT_CONTEXT_MENU(StubNotebook::OnContextMenu)
 wxEND_EVENT_TABLE()
 
-//TODO
-void StubNotebook::OnContextMenu(wxContextMenuEvent& event)
-{
-	wxMenu menu(wxEmptyString);
-	/*
-	if (IsModified())
-	{
-		wxFileName fn(m_filename);
-		wxString menuTxt = wxString::Format(_("Save %s"), fn.GetFullName());
-		menu.Append(wxID_SAVE, menuTxt);
-		menu.AppendSeparator();
-	}
-	wxString incl_file = GetGcmcIncludeFileName();
-	if (!incl_file.empty())
-	{
-		menu.Append(ID_INCLUDE_FILE_OPEN, wxString::Format(_("Open file: \"%s\""), incl_file));
-		menu.AppendSeparator();
-	}
-	*/
-	menu.Append(wxID_UNDO, _("Undo form wxAuiNotebook"));
-	menu.AppendSeparator();
-	menu.Append(wxID_CUT, _("Cut"));
-	menu.Append(wxID_COPY, _("Copy"));
-	menu.Append(wxID_PASTE, _("Paste"));
-	menu.AppendSeparator();
-	menu.Append(wxID_SELECTALL, "Select All");
-
-	PopupMenu(&menu, ScreenToClient(event.GetPosition()));
-	event.Skip();
-}
 
 wxAuiNotebook* AppFrame::CreateNotebook()
 {
@@ -334,23 +304,32 @@ wxAuiNotebook* AppFrame::CreateNotebook()
 }
 
 
+WelcomeWnd *AppFrame::FindWelcomePage(size_t *welcome_page)
+{
+	size_t n = m_notebook->GetPageCount();
+	WelcomeWnd *welcome = 0;
+	if ( welcome_page )
+		*welcome_page = wxNOT_FOUND;
+	for (size_t i = 0; i < n; ++i)
+	{
+		if (m_notebook->GetPage(i)->IsKindOf(CLASSINFO(WelcomeWnd)))
+		{
+			welcome = dynamic_cast<WelcomeWnd *>(m_notebook->GetPage(i));
+			if (welcome_page)
+				*welcome_page = i;
+			break;
+		}
+
+	}
+	return welcome;
+}
+
 void AppFrame::ShowWelcome()
 {
 	m_notebook->Freeze();
 	// check is welcome window exist
 	size_t welcome_page = wxNOT_FOUND;
-	size_t n = m_notebook->GetPageCount();
-	for (size_t i = 0; i < n; ++i)
-	{
-		//WelcomeWnd *welcome = dynamic_cast<WelcomeWnd *>(m_notebook->GetPage(i));
-		if (m_notebook->GetPage(i)->IsKindOf(CLASSINFO(WelcomeWnd)))
-		//if (welcome)
-		{
-			welcome_page = i;
-			break;
-		}
-			
-	}
+	FindWelcomePage(&welcome_page);
 	if (welcome_page == wxNOT_FOUND)
 	{
 		m_notebook->InsertPage(0, new WelcomeWnd(this), _("Welcome"), true);
@@ -369,17 +348,7 @@ void AppFrame::HideWelcome()
 	m_notebook->Freeze();
 	// check is welcome window exist
 	size_t welcome_page = wxNOT_FOUND;
-	size_t n = m_notebook->GetPageCount();
-	for (size_t i = 0; i < n; ++i)
-	{
-		//WelcomeWnd *welcome = dynamic_cast<WelcomeWnd *>(m_notebook->GetPage(i));		
-		if (m_notebook->GetPage(i)->IsKindOf(CLASSINFO(WelcomeWnd)))
-		{
-			welcome_page = i;
-			break;
-		}
-
-	}
+	FindWelcomePage(&welcome_page);
 	if (welcome_page != wxNOT_FOUND)
 	{
 		m_notebook->DeletePage(welcome_page);
@@ -435,15 +404,15 @@ void AppFrame::OnClose (wxCloseEvent &event)
 		return;
 	}
 	
-	wxAuiPaneInfo& pinfo = m_mgr.GetPane(m_dirtree);
-	bool visibleDir  = pinfo.IsShown();
+//	wxAuiPaneInfo& pinfo = m_mgr.GetPane(m_dirtree);
+//	bool visibleDir  = pinfo.IsShown();
 
 	wxString strPerspective = m_mgr.SavePerspective();
 	ConfigData *config = dynamic_cast<ConfigData *>(wxConfigBase::Get());
 	if (config != NULL)
 	{
 		config->WriteFileNames();
-		config->Write(L"DirVisible", visibleDir);
+		m_dirtree->Save();				
 	}
 	
     Destroy();
@@ -619,9 +588,13 @@ void AppFrame::OnFileOpen (wxCommandEvent &event )
 {
   
 	wxString fname;
-    wxFileDialog dlg (this, _("Open file"), wxEmptyString, wxEmptyString, 
-		_("GCMC and NC files (*.gcmc;*.nc;*.ngc)|*.gcmc;*.nc;*.ngc|GCMC files (*.gcmc)|*.gcmc|NC files (*.nc;*.ngc)|*.nc;*.ngc|Any file(*.*) |*"),
-        wxFD_OPEN | wxFD_FILE_MUST_EXIST | wxFD_CHANGE_DIR);
+	wxString wildCard = Preferences::Get()->CreateWildCard();
+	//wildCard = _("Any file(*.*)|*.*|GCMC and NC files (*.gcmc;*.nc;*.ngc)|*.gcmc;*.nc;*.ngc|GCMC files (*.gcmc)|*.gcmc|NC files (*.nc;*.ngc)|*.nc;*.ngc");
+
+    wxFileDialog dlg (this, _("Open file"), wxEmptyString, wxEmptyString, wildCard,
+		wxFD_OPEN | wxFD_FILE_MUST_EXIST | wxFD_CHANGE_DIR);
+	
+//		_("GCMC and NC files (*.gcmc;*.nc;*.ngc)|*.gcmc;*.nc;*.ngc|GCMC files (*.gcmc)|*.gcmc|NC files (*.nc;*.ngc)|*.nc;*.ngc|Any file(*.*) |*")
 
     if (dlg.ShowModal() != wxID_OK) return;
     fname = dlg.GetPath();
@@ -729,9 +702,68 @@ void AppFrame::OnFileSaveAs(wxCommandEvent &WXUNUSED(event))
 	//UpdateTitle();
 }
 
-void AppFrame::OnFileClose (wxCommandEvent &event) 
+
+bool AppFrame::DoClosePage(int nPage)
 {
-	OnFileNew(event);
+	wxCHECK_MSG((nPage >= 0 && nPage < int(m_notebook->GetPageCount())), false,  "Invalid page index");
+	FilePage *pEdit = dynamic_cast<FilePage *>(m_notebook->GetPage(nPage));
+	if (pEdit != 0 && !pEdit->DoFileSave(true, false))
+		return false;
+	m_notebook->DeletePage(nPage);
+	return true;
+}
+
+
+void AppFrame::OnFileClose(wxCommandEvent &event)
+{
+	DoClosePage(m_notebook->GetSelection());	
+	m_mgr.Update();
+}
+
+
+
+void AppFrame::OnFileCloseAll(wxCommandEvent &event)
+{
+	m_notebook->Freeze();
+	while (m_notebook->GetPageCount())
+	{
+		if (!DoClosePage(0))
+			return;
+	}
+	m_notebook->Thaw();
+	m_mgr.Update();
+}
+void AppFrame::OnFileCloseAllButThis(wxCommandEvent &event)
+{
+	m_notebook->Freeze();
+	int nPage = m_notebook->GetSelection();
+	wxWindow *wnd = m_notebook->GetPage(nPage);
+	//class all befor
+	for (int i = 0; i < nPage; i++)
+	{
+		if ( !DoClosePage(0) )
+			return;
+	}
+	// close all after
+	while ((nPage=m_notebook->GetPageCount()-1) > 0)
+	{
+		if (!DoClosePage(nPage))
+			return;
+	}
+	m_notebook->Thaw();
+	m_mgr.Update();
+}
+
+void AppFrame::OnAddFilePathToDirPane(wxCommandEvent &event)
+{
+	int nPage = m_notebook->GetSelection();
+	FilePage *pEdit = dynamic_cast<FilePage *>(m_notebook->GetPage(nPage));
+	if (pEdit == 0)
+		return;	
+
+	wxFileName fn( pEdit->GetEdit()->GetFileName() );
+	wxString path = fn.GetPath(wxPATH_GET_VOLUME, wxPATH_NATIVE);
+	AddPath(path);
 }
 
 // properties event handlers
@@ -999,6 +1031,62 @@ void AppFrame::OnContextMenu(wxContextMenuEvent& evt)
     PopupMenu(&menu, point);
 }
 
+void AppFrame::AddFileToHisotyList(const wxFileName &filename)
+{
+	ConfigData *config = dynamic_cast<ConfigData *>(wxConfigBase::Get());
+	if (!config)
+		return;
+	config->AddFileNameToSaveList(filename);
+	AddLastFilesToMenu();
+	WelcomeWnd *welcome = FindWelcomePage();
+	if (welcome)
+		welcome->AddLastFilesToMenu();
+
+}
+
+
+
+
+void AppFrame::AddLastFilesToMenu()
+{
+	
+	ConfigData *config = dynamic_cast<ConfigData *>(wxConfigBase::Get());
+	if ( !config )
+		return;
+	size_t n;
+	wxMenu *menuFiles = m_menuLastFiles;
+	const FileNamesList &files = config->GetFiles();
+	size_t files_count = files.size();
+	size_t menuitem_count = menuFiles->GetMenuItemCount();
+	if (menuitem_count > files_count) // remove not needed  menuitem
+	{
+		n = menuitem_count - files_count;
+		for (size_t i = 0; i < n; i++)
+		{
+			auto nodeLast = menuFiles->GetMenuItems().GetLast();
+			if (nodeLast)
+			{
+				wxMenuItem * const lastMenuItem = nodeLast->GetData();
+				menuFiles->Delete(lastMenuItem);
+				menuitem_count--;
+			}
+		}
+	}
+	
+	// set new label
+	n = 0;
+	for (auto it = files.begin(); it != files.end(); ++it,++n)
+	{
+		if (n >= 10) 
+			break;
+		if (n < menuitem_count)
+			menuFiles->SetLabel(wxID_FILE + n, it->GetFullPath());
+		else
+			menuFiles->Append(wxID_FILE + n, it->GetFullPath());
+	}
+	
+}
+
 // private functions
 wxMenuBar *AppFrame::CreateMenu ()
 {
@@ -1010,17 +1098,12 @@ wxMenuBar *AppFrame::CreateMenu ()
 	mi->SetBitmaps(wxArtProvider::GetBitmap(wxART_FILE_OPEN, wxART_MENU)); 
 
 
-	wxMenu *menuLastFiles = new wxMenu;
-	ConfigData *config = dynamic_cast<ConfigData *>(wxConfigBase::Get());
-	if (config)
-	{
-		const FileNamesList &files = config->GetFiles();
-		int n = 0;
-		std::for_each( files.begin(), files.end(), 
-			[menuLastFiles,&n](const wxFileName &p) {
-			if (n < 10) { menuLastFiles->Append(wxID_FILE + n, p.GetFullPath() ); n++; } });
-	}
-	menuFile->Append(ID_OPENRECENT, _("Open recent"), menuLastFiles);
+	m_menuLastFiles = new wxMenu;
+	
+	AddLastFilesToMenu();
+
+
+	menuFile->Append(ID_OPENRECENT, _("Open recent"), m_menuLastFiles);
 	menuFile->AppendSeparator();
 	//New
 	menuFile->Append(ID_NEWNC, _("New GCODE"));
@@ -1032,7 +1115,7 @@ wxMenuBar *AppFrame::CreateMenu ()
 	//Save	
 	menuFile->Append(wxID_SAVE, _("Save\tCtrl+S"));
 	menuFile->Append(wxID_SAVEAS, _("Save  as ..\tCtrl+Shift+S"));
-	menuFile->Append(wxID_CLOSE, _("Close\tCtrl+W"));
+	menuFile->Append(ID_CLOSEACTIVETAB, _("Close\tCtrl+W"));
 	menuFile->AppendSeparator();
 	
 	menuFile->AppendSeparator();
@@ -1189,9 +1272,7 @@ void AppFrame::FileOpen (const wxString &fn)
 			//pedit->LoadFile(fname);
 			m_notebook->AddPage(pedit, w.GetFullName(), true);
 			UpdateTitle();
-			ConfigData *config;
-			if ((config = dynamic_cast<ConfigData *>(wxConfigBase::Get())) != NULL)
-				config->AddFileNameToSaveList(w);
+			AddFileToHisotyList(w);		
 
 		}
 	}

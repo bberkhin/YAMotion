@@ -13,8 +13,8 @@
 #include "them.h"
 #include "flatbuttom.h"
 #include "FlatScrollBar.h"
-//#include "app.h"
-//#include "appframe.h"
+#include "configdata.h"
+
 
 #ifdef __WIN32__
     // this is not supported by native control
@@ -282,12 +282,30 @@ void DirTreeCtrl::AddItemsRecursively(const wxTreeItemId& idParent, const wxStri
 	}
 }
 
+bool DirTreeCtrl::IsPathInTree(const wxString &path, bool )
+{
+	wxTreeItemIdValue cookie;
+	wxTreeItemId child = GetFirstChild(m_rootId, cookie);
+	while (child.IsOk())
+	{
+		DirTreeItemData *item = (DirTreeItemData *)GetItemData(child);
+		if (item->GetPath() == path)
+			return true;		
+		child = GetNextChild(m_rootId, cookie);
+	}
+	return false;
+}
+
+
 void DirTreeCtrl::AddPath(const wxString &path)
 {
-	
 	wxFileName fn = path;
 	if (std::filesystem::is_directory(path.wc_str()))
 	{
+		// Check is this directory already in the tree
+		if (IsPathInTree(path))
+			return;
+
 		AddItemsRecursively(m_rootId, path);
 		if (m_watcher)
 		{
@@ -1184,4 +1202,62 @@ void DirPane::AddPath(const wxString &path)
 
 DirPane::~DirPane()
 {
+}
+
+
+void DirPane::Save()
+{
+	ConfigData *config = dynamic_cast<ConfigData *>(wxConfigBase::Get());
+	if (config == NULL)
+		return;
+
+	bool visibleDir  = IsShown();
+	wxString strOldPath = config->GetPath();
+	config->SetPath(L"/DIRPANE");
+	config->Write(L"DirVisible", visibleDir);
+	config->SetPath(L"/DIRPANE/PATHS");
+
+// write dirs
+	int n = 0;
+	wxTreeItemIdValue cookie;
+	wxTreeItemId child = m_ptree->GetFirstChild(m_ptree->m_rootId, cookie);
+	while (child.IsOk())
+	{
+		DirTreeItemData *item = (DirTreeItemData *)m_ptree->GetItemData(child);
+		config->Write(wxString::Format(L"Path%d", n), item->GetPath() );
+		child = m_ptree->GetNextChild(m_ptree->m_rootId, cookie);
+		n++;
+	}
+	
+	config->SetPath(L"strOldPath");
+}
+
+bool DirPane::Load()
+{
+	ConfigData *config = dynamic_cast<ConfigData *>(wxConfigBase::Get());
+	if (config == NULL)
+		return true;
+
+
+	wxString strOldPath = config->GetPath();
+	config->SetPath(L"/DIRPANE");
+	bool visibleDir = config->Read(L"DirVisible", true);
+
+	config->SetPath(L"/DIRPANE/PATHS");
+	wxString strKey;
+	wxString strfname;
+	long dummy;
+	// first enum all entries
+	bool bCont = config->GetFirstEntry(strKey, dummy);
+	while (bCont)
+	{
+		if (config->Read(strKey, &strfname))
+		{
+			AddPath(strfname);
+			bCont = config->GetNextEntry(strKey, dummy);
+		}
+	}
+
+	config->SetPath(L"strOldPath");
+	return visibleDir;
 }

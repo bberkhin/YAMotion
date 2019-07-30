@@ -62,6 +62,7 @@ struct CommonInfo
 #define FILETYPE_GCMC 2
 #define FILETYPE_JSON 3
 
+
 //----------------------------------------------------------------------------
 // StyleInfo
 struct StyleInfo 
@@ -96,6 +97,7 @@ public:
 	void SetFilePattern(const wxString &filename) { m_filepattern = filename; }
 	void Clear();
 	const StyleInfo *GetById(int id) const;
+	wxString CreateWildCard() const;
 
 private:
 	bool Read();
@@ -139,6 +141,8 @@ public:
 	const LanguageInfo *FindByType(int type,bool init = true) ;
 	const LanguageInfo *FindByFileName(const wxString &name, bool init = true);
 	LanguageInfo *FindByName(const wxString &name, bool init = true);
+	wxString CreateWildCard() const;
+	
 private:
 	bool DoRead(const wxString& fileName, bool errifnoexist);
 private:

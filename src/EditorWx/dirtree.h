@@ -122,7 +122,7 @@ private:
     void DoToggleIcon(const wxTreeItemId& item);
 	void UpdateThemeColor();
 	void UpdateThemeColor(const wxTreeItemId& idParent, const wxColor &color);
-	
+	bool IsPathInTree(const wxString &path, bool root = true);
 
 protected:
     virtual int OnCompareItems(const wxTreeItemId& i1, const wxTreeItemId& i2) wxOVERRIDE;
@@ -178,6 +178,8 @@ public:
 	void OnClose(wxCommandEvent &ev);
 	void UpdateThemeColor();
 	void AddPath(const wxString &path);
+	void Save();
+	bool Load();
 private:
 
 	DirTreeCtrl *m_ptree;

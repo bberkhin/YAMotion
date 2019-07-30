@@ -10,6 +10,7 @@ class DirPane;
 class DropFileOpen;
 class Macroses;
 class FilePage;
+class WelcomeWnd;
 //----------------------------------------------------------------------------
 //! frame of the application APP_VENDOR-APP_NAME.
 class AppFrame : public wxFrame 
@@ -46,6 +47,10 @@ public:
 	void OnFileSaveAs(wxCommandEvent &event);
 	void OnFileClose(wxCommandEvent &event);
 	void OnOpenLastFile(wxCommandEvent &event);
+	void OnFileCloseAll(wxCommandEvent &event);
+	void OnFileCloseAllButThis(wxCommandEvent &event);
+	void OnAddFilePathToDirPane(wxCommandEvent &event);
+
 	//properties
 	void OnProperties(wxCommandEvent &event);
 	void OnDefaultPreferences(wxCommandEvent &event);
@@ -77,6 +82,7 @@ public:
 	FilePage *DoNewFile(int file_type, const wxString &defpath, bool closeWelcome, const wxString &contextFile = wxEmptyString);
 	void FileOpen(const wxString &fn);
 	void AddPath(const wxString &path);
+	void AddFileToHisotyList(const wxFileName &path);
 
 
 	void OnUpdateNCIsOpen(wxUpdateUIEvent& event);
@@ -86,6 +92,7 @@ public:
 private:
 	bool FindPageByFileName(const wxString &new_file_name, size_t *nPage = NULL);
 	bool DoSaveAllFiles();
+	bool DoClosePage(int nPage);
 	void DoMathCalc(DoMathBase &mth);
 	void ShowHideDirPane(bool allwaysshow = false);
 	void ShowWelcome();
@@ -97,6 +104,8 @@ private:
 	wxMenuBar *CreateMenu();
 	wxRect DeterminePrintSize();
 	void DoRunMacros(int idx);
+	void AddLastFilesToMenu();
+	WelcomeWnd *FindWelcomePage(size_t *welcome_page = 0);
 	
 private:
 	// edit object
@@ -107,6 +116,7 @@ private:
 	long m_notebook_style;
 	long m_notebook_theme;
 	Macroses *m_macroses;
+	wxMenu *m_menuLastFiles;
 	
 	wxDECLARE_EVENT_TABLE();
 };

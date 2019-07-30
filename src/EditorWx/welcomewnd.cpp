@@ -225,24 +225,57 @@ wxBoxSizer *WelcomeWnd::CreateDoc()
 	return pane;
 }
 
-wxBoxSizer *WelcomeWnd::CreateRecentFilesList( )
+void WelcomeWnd::AddLastFilesToMenu(bool update)
 {
-	wxBoxSizer *pane = new wxBoxSizer(wxVERTICAL);
-	AddColumnHeader(pane, _("Recent Files"));
+	
 	ConfigData *config = dynamic_cast<ConfigData *>(wxConfigBase::Get());
-	if (config)
+	if (!config)
+		return;
+
+	size_t n;
+	const FileNamesList &files = config->GetFiles();
+	size_t files_count = files.size();
+	size_t menuitem_count = m_LastFiles->GetItemCount() - 2; // -2 becouse of header
+	if (menuitem_count > files_count) // remove not needed  menuitem
 	{
-		const FileNamesList &files = config->GetFiles();
-		if (!files.empty())
+		n = menuitem_count - files_count;
+		for (size_t i = 0; i < n; i++)
 		{
-			int n = 0;
-			WelcomeWnd *parent = this;
-			std::for_each(files.begin(), files.end(),
-				[&pane, &n, parent](const wxFileName &p) {
-				parent->AddRecentFile(pane, p, n++);
-				});
+			wxSizerItem *sizeritem = m_LastFiles->GetItem(menuitem_count);
+			if (sizeritem && sizeritem->IsWindow())
+			{
+				sizeritem->DeleteWindows();
+				m_LastFiles->Remove(menuitem_count);
+				menuitem_count--;
+			}
 		}
 	}
+
+	// set new label
+	n = 0;
+	for (auto it = files.begin(); it != files.end(); ++it, ++n)
+	{
+		if (n >= 10)
+			break;
+		if (n < menuitem_count)
+		{
+			wxSizerItem *sizeritem = m_LastFiles->GetItem(n+2);
+			if ( sizeritem && sizeritem->IsWindow() )
+				sizeritem->GetWindow()->SetLabel(it->GetFullName());
+		}
+		else
+			AddRecentFile(m_LastFiles, *it, n);
+	}
+	if (update)
+		Layout();
+}
+
+wxBoxSizer *WelcomeWnd::CreateRecentFilesList( )
+{
+	m_LastFiles = new wxBoxSizer(wxVERTICAL);
+	wxBoxSizer *pane = m_LastFiles;
+	AddColumnHeader(pane, _("Recent Files"));
+	AddLastFilesToMenu(false);
 	return pane;
 }
 
