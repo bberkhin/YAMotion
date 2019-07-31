@@ -101,10 +101,17 @@ public:
 		CONTROL,
 		CONTROL_PRESSED,
 		CONTROL_HOVER,
+
+		CONTROL_ACTIVE,
+		CONTROL_ACTIVE_PRESSED,
+		CONTROL_ACTIVE_HOVER,
 		// the label text for the normal and the disabled state
 		CONTROL_TEXT,
 		CONTROL_TEXT_HOVER,
 		CONTROL_TEXT_DISABLED,
+		CONTROL_ACTIVE_TEXT,
+		CONTROL_ACTIVE_TEXT_HOVER,
+
 		// the scrollbar background colour for the normal and pressed states
 
 		BUTTON_FEEDBACK,

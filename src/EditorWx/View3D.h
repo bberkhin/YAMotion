@@ -33,6 +33,13 @@ enum View
 	ISOMETR
 };
 
+// visible flags
+#define VSTYLE_SHOWAXIS		0x0001
+#define VSTYLE_SHOWGRID		0x0002
+#define VSTYLE_SHOWBOX		0x0004
+#define VSTYLE_SHOWTOOL		0x0008
+#define VSTYLE_SHOWGRID3D	0x0010
+
 class Camera
 {
 public:
@@ -125,8 +132,8 @@ public:
 
 //command
 	void DoSetView(View stdview);
-	void OnSetShow(wxCommandEvent &event);
-	void OnSetShowUpdate(wxUpdateUIEvent& event);
+	void ToggleStyle( int style); 
+	 int GetStyleFlag() const { return m_viewstyle; }
 
 
 private:
@@ -148,13 +155,7 @@ private:
 	wxGLContext* m_glRC;
 	TrackPoints track;
 	std::vector<glm::vec3> realTrack; //пройденна¤ фрезой траектори¤
-
-	bool   show2dGrid;
-	bool   showbounds;
-	bool   show3dGrid;
-	bool   showTool;
-	bool   showAxis;
-
+	int m_viewstyle;
 	float  m_gridStep;   //размер ¤чейки сетки
 	
 	Camera camera;

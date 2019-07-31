@@ -46,6 +46,9 @@ enum
 	ID_BTN_PAUSE,
 	ID_BTN_SIMULATE,
 	ID_BTN_STOP,
+	ID_BTN_SHOWAXIS,
+	ID_BTN_SHOWGRID,
+	ID_BTN_SHOWBOX,
 	ID_SETSIMULATIONSPEED,
 	ID_LOGWINDOW,
 	ID_3DVIEWWINDOW
@@ -223,6 +226,10 @@ EVT_BUTTON(ID_BTN_PAUSE, View3DPanel::OnPauseSimulate)
 EVT_BUTTON(ID_BTN_SIMULATE, View3DPanel::OnRunSimulate)
 EVT_BUTTON(ID_BTN_STOP, View3DPanel::OnStopSimulate)
 EVT_BUTTON(ID_SETSIMULATIONSPEED, View3DPanel::OnSetSimulateSpeed)
+EVT_BUTTON(ID_BTN_SHOWAXIS, View3DPanel::OnTune3DView)
+EVT_BUTTON(ID_BTN_SHOWGRID, View3DPanel::OnTune3DView)
+EVT_BUTTON(ID_BTN_SHOWBOX, View3DPanel::OnTune3DView)
+
 EVT_COMMAND_SCROLL(ID_SIMULATED_SLIDER, View3DPanel::OnSimulateProgress)
 EVT_COMMAND_SCROLL(ID_SIMULATEDSPEED_SLIDER, View3DPanel::OnSpeedChanged)
 
@@ -433,6 +440,23 @@ wxSizer *View3DPanel::CreateSimulationPanel()
 
 	wxBoxSizer *panel = new wxBoxSizer(wxVERTICAL);
 	wxBoxSizer *btns = new wxBoxSizer(wxHORIZONTAL);
+	// Create view button
+	
+	int dxLeft = 0;
+	//wxSizerItem *szi;
+	FlatButton *btv = new FlatButton(this, ID_BTN_SHOWAXIS, _("AXIS"));
+	btns->Add(btv, 0, wxALIGN_CENTRE_VERTICAL);
+	dxLeft += btv->GetMinWidth();
+	btns->AddSpacer(5);
+	btv = new FlatButton(this, ID_BTN_SHOWGRID, _("GRID"));
+	btns->Add(btv, 0, wxALIGN_CENTRE_VERTICAL);
+	dxLeft += btv->GetMinWidth();
+	btns->AddSpacer(5);
+	btv = new FlatButton(this, ID_BTN_SHOWBOX, _("BOX"));
+	btns->Add(btv, 0, wxALIGN_CENTRE_VERTICAL);
+	dxLeft += btv->GetMinWidth();
+	dxLeft += 10;
+	
 	btns->AddStretchSpacer();
 	
 	FlatButton *bt = new FlatButton(this, ID_BTN_PAUSE, wxEmptyString, FB_TRANSPARENT, ART_PAUSE);
@@ -444,8 +468,10 @@ wxSizer *View3DPanel::CreateSimulationPanel()
 
 	btns->AddStretchSpacer();
 	bt = new FlatButton(this, ID_SETSIMULATIONSPEED, GetSpeedBtLabel() );
-	wxSizerItem *szi = btns->Add(bt, 0, wxALIGN_CENTRE_VERTICAL | wxRIGHT);
-	btns->Insert(0, bt->GetMinWidth(),1 );
+	btns->Add(bt, 0, wxALIGN_CENTRE_VERTICAL | wxRIGHT);
+	
+	//btns->Insert(0, bt->GetMinWidth(),1 );
+	
 	btns->AddSpacer(MARGIN_RIGHT);
 	panel->Add(btns, 0, wxEXPAND);
 	
@@ -683,7 +709,7 @@ void View3DPanel::OnSetSimulateSpeed(wxCommandEvent& WXUNUSED(ev))
 	
 	int speedK = m_fp->GetWorker()->GetSimulationSpeed();
 	SpeedWindow *sp = new SpeedWindow(this, speedK, pt);//, wxPOPUP_WINDOW);
-	
+
 }
 
 
@@ -711,20 +737,23 @@ void View3DPanel::OnSimulateProgress(wxScrollEvent& event)
 	int position = event.GetPosition();
 	int value = event.GetInt();
 	m_fp->GetWorker()->SetSimulationPos(value);
+}
 
+void View3DPanel::OnTune3DView(wxCommandEvent& event)
+{
+	unsigned int style = 0;
 
-	/*
-		case wxEVT_SCROLL_TOP:
-		case wxEVT_SCROLL_BOTTOM:
-		case wxEVT_SCROLL_LINEUP:
-		case wxEVT_SCROLL_LINEDOWN:
-		case wxEVT_SCROLL_PAGEUP:
-		case wxEVT_SCROLL_PAGEDOWN:
-		case wxEVT_SCROLL_THUMBTRACK:
-		case wxEVT_SCROLL_THUMBRELEASE:
-		case wxEVT_SCROLL_CHANGED:\
-		*/
-	
+	switch ( event.GetId())
+	{
+		case ID_BTN_SHOWAXIS: style = VSTYLE_SHOWAXIS;  break;
+		case ID_BTN_SHOWGRID: style = VSTYLE_SHOWGRID;  break;
+		case ID_BTN_SHOWBOX : style = VSTYLE_SHOWBOX;  break;
+	}
+
+	m_pview->ToggleStyle(style);
+
+	FlatButton *fb = dynamic_cast<FlatButton *>(FindWindowById(event.GetId(), this));
+	fb->SetChecked((m_pview->GetStyleFlag() & style) != 0);
 }
 
 

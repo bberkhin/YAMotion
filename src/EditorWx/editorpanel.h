@@ -54,6 +54,7 @@ protected:
 	void OnRunSimulate(wxCommandEvent& event);
 	void OnStopSimulate(wxCommandEvent& event);
 	void OnSetSimulateSpeed(wxCommandEvent& event);
+	void OnTune3DView(wxCommandEvent& event);
 	
 	void OnIdle(wxIdleEvent& event);
 

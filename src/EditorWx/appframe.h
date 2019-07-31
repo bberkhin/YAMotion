@@ -64,9 +64,7 @@ public:
 	//! edit events
 	void OnEdit(wxCommandEvent &event);
 	void OnContextMenu(wxContextMenuEvent& evt);
-	//! 3DViewevents
-	void On3DView(wxCommandEvent &event);
-	void On3DViewUpdate(wxUpdateUIEvent& event);
+
 	//! dirtree events
 	void OnDirTree(wxCommandEvent &event);
 	

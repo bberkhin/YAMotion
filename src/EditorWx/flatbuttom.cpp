@@ -36,6 +36,14 @@ void FlatButton::Init()
 	DO_SET_COLOUR(HoverBackgroundColour, ColourScheme::CONTROL_HOVER);
 	DO_SET_COLOUR(PressBackgroundColour, ColourScheme::CONTROL_PRESSED);
 
+
+	DO_SET_COLOUR(BackgroundColourActive, ColourScheme::CONTROL_ACTIVE);
+	DO_SET_COLOUR(HoverBackgroundColourActive, ColourScheme::CONTROL_ACTIVE_HOVER);
+	DO_SET_COLOUR(PressBackgroundColourActive, ColourScheme::CONTROL_ACTIVE_PRESSED);
+	DO_SET_COLOUR(ForegroundColourActive, ColourScheme::CONTROL_ACTIVE_TEXT);
+	DO_SET_COLOUR(HoverForegroundColourActive, ColourScheme::CONTROL_ACTIVE_TEXT_HOVER);
+	DO_SET_COLOUR(PressForegroundColourActive, ColourScheme::CONTROL_ACTIVE_TEXT_HOVER);
+
 	SetBestClientSize();
 }
 
@@ -163,13 +171,14 @@ void FlatButton::DrawBackground(wxDC&  dc, const wxRect &rc)
 		return;
 
 	wxColor clr; 
+	bool checked = ((m_style & FB_CHECKED) != 0);
 	if (m_status == statusHover)
-		clr = GetColour(HoverBackgroundColour);
+		clr = GetColour(checked ? HoverBackgroundColourActive : HoverBackgroundColour);
 	else if (m_status == statusPressed)
-		clr = GetColour(PressBackgroundColour);
+		clr = GetColour(checked ? PressBackgroundColourActive : PressBackgroundColour);
 	else
-		clr = GetColour(BackgroundColour);
-
+		clr = GetColour(checked ? BackgroundColourActive : BackgroundColour);
+		
 	dc.SetBrush(wxBrush(clr));
 
 	if (this->GetWindowStyle() & wxBORDER_NONE)
@@ -179,6 +188,7 @@ void FlatButton::DrawBackground(wxDC&  dc, const wxRect &rc)
 		dc.SetPen(GetColour(BorderColour));
 	}
 	
+
 	dc.DrawRectangle(rc);
 }
 
@@ -239,12 +249,13 @@ void FlatButton::DrawLabel(wxDC&  dc, const wxRect &rc)
 {
 
 	wxColor clr;
+	bool checked = ((m_style & FB_CHECKED) != 0);
 	if (m_status == statusHover)
-		clr = GetColour(HoverForegroundColour);
+		clr = GetColour(checked ? HoverForegroundColourActive : HoverForegroundColour);
 	else if(m_status == statusPressed)
-		clr = GetColour(PressForegroundColour);
+		clr = GetColour(checked ? PressForegroundColourActive : PressForegroundColour);
 	else
-		clr = GetColour(ForegroundColour);
+		clr = GetColour(checked ? ForegroundColourActive : ForegroundColour);
 	
 	dc.SetTextBackground(wxColor());
 	dc.SetTextForeground(clr);
@@ -388,4 +399,13 @@ void FlatButton::DoClick()
 		wxCommandEvent *ev = new wxCommandEvent(wxEVT_MENU, m_cmd);
 		wxQueueEvent( wxGetApp().GetFrame(), ev);
 	}
+}
+
+void FlatButton::SetChecked(bool checked)
+{
+	if ( checked )
+		m_style |= FB_CHECKED; 
+	else
+		m_style &= ~FB_CHECKED;
+		
 }

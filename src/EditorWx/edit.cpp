@@ -478,6 +478,11 @@ void Edit::OnDwellStart(wxStyledTextEvent &event)
 		return;
 
 	FlatTipCancel();
+	
+	// check that the mouse is inside the window
+	wxPoint ptMouse = wxGetMousePosition();
+	if (!GetClientRect().Contains(ptMouse))
+		return;
 
 	int pos = event.GetPosition();
 	wxString strWord;
@@ -589,7 +594,10 @@ void Edit::UpdatePreferences()
 	CallTipSetBackground(clrs->Get(ColourScheme::CALLTIP));
 	CallTipSetForeground(clrs->Get(ColourScheme::CALLTIP_TEXT));
 	SetCaretForeground(clrs->Get(ColourScheme::WINDOW_TEXT));
+	//SetSelForeground(true, const wxColour& fore);
+	SetSelBackground(true, clrs->Get(ColourScheme::HIGHLIGHT));
 
+	
 	SetMouseDwellTime(1000);
 
 	SetUseHorizontalScrollBar(common_prefs.visibleHSB);

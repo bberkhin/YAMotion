@@ -5,9 +5,10 @@
 #define FB_LABEL_LEFT   0x000000
 #define FB_LABEL_RIGHT  0x000001
 #define FB_LABEL_CENTER 0x000002
-#define FB_BITMAP_LEFT 0x000004
+#define FB_BITMAP_LEFT	0x000004
 #define FB_BITMAP_RIGHT 0x000008
-#define FB_TRANSPARENT 0x0000010
+#define FB_TRANSPARENT	0x000010
+#define FB_CHECKED		0x000020
 
 
 class FlatButton :
@@ -15,7 +16,12 @@ class FlatButton :
 {
 	enum { statusNone, statusHover, statusPressed };
 public:
-	enum ColourIndex { BackgroundColour = 0, HoverBackgroundColour, PressBackgroundColour, ForegroundColour, HoverForegroundColour, PressForegroundColour, BorderColour, ColourNum };
+	enum ColourIndex {	BackgroundColour = 0, HoverBackgroundColour, PressBackgroundColour, 
+						ForegroundColour, HoverForegroundColour, PressForegroundColour, 
+						BackgroundColourActive, HoverBackgroundColourActive, PressBackgroundColourActive, 
+						ForegroundColourActive, HoverForegroundColourActive, PressForegroundColourActive,
+						BorderColour, ColourNum };
+
 public:
 	FlatButton(wxWindow *parent, int Id, const wxString &text, int style = FB_BITMAP_RIGHT| FB_LABEL_LEFT, const wxString& idArt = wxEmptyString );
 	~FlatButton();
@@ -44,6 +50,7 @@ public:
 	void SetCommand(int cmd) { m_cmd = cmd; }
 	void SetMargins(int marginX, int marginY);
 	void UpdateSize() { SetBestClientSize(); }
+	void SetChecked(bool checked);
 	
 private:
 	void Init();

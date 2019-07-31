@@ -79,16 +79,13 @@ wxBEGIN_EVENT_TABLE(View3D, wxGLCanvas)
 	EVT_PAINT(View3D::OnPaint)
 	EVT_CHAR(View3D::OnChar)
 	EVT_MOUSE_EVENTS(View3D::OnMouseEvent)
-	
-	EVT_MENU_RANGE(ID_SETSHOWFIRST, ID_SETSHOWLAST, View3D::OnSetShow)
-	EVT_UPDATE_UI_RANGE(ID_SETSHOWFIRST, ID_SETSHOWLAST, View3D::OnSetShowUpdate)
-
 wxEND_EVENT_TABLE()
 
 View3D::View3D( wxWindow *parent,wxWindowID id, int* gl_attrib)
 	:  wxGLCanvas(parent, id, gl_attrib, wxDefaultPosition, wxDefaultSize, wxWANTS_CHARS | wxFULL_REPAINT_ON_RESIZE)	
 {	
 	
+	m_viewstyle = 0;
 	simulateLastIndex = wxNOT_FOUND;
 	// Explicitly create a new rendering context instance for this canvas.
 	m_glRC = new wxGLContext(this);	
@@ -123,12 +120,8 @@ void View3D::load_config()
 	wxASSERT(config);
 
 	wxString strOldPath = config->GetPath();
-	config->SetPath("/GLView");
-	show2dGrid = config->ReadBool("2dGrid", true);
-	showbounds = config->ReadBool("Bounds", true);
-	show3dGrid = config->ReadBool("3dGrid", true);
-	showTool = config->ReadBool("Tool", true);
-	showAxis = config->ReadBool("Axis", true);
+	config->SetPath(L"/GLView");
+	config->Read(L"3DStyle", &m_viewstyle, m_viewstyle);
 	config->SetPath(strOldPath);
 }
 
@@ -137,12 +130,8 @@ void View3D::save_config()
 	ConfigData *config = dynamic_cast<ConfigData *>(wxConfigBase::Get());
 	wxASSERT(config);
 	wxString strOldPath = config->GetPath();
-	config->SetPath("/GLView");
-	config->Write("2dGrid", show2dGrid);
-	config->Write("Bounds", showbounds);
-	config->Write("3dGrid", show3dGrid);
-	config->Write("Tool", showTool);
-	config->Write("Axis",showAxis);
+	config->SetPath(L"/GLView");
+	config->Write("L3DStyle", m_viewstyle);
 	config->SetPath(strOldPath);
 }
 
@@ -217,25 +206,27 @@ void View3D::OnPaint(wxPaintEvent& WXUNUSED(event))
 
 	glEnable(GL_DEPTH_TEST);
 	
-	if (showbounds)
+
+
+	if (m_viewstyle&VSTYLE_SHOWBOX)
 		draw_bounds();
 	
-	if (show3dGrid )
+	if (m_viewstyle&VSTYLE_SHOWGRID3D)
 		draw_3d_grid();
 	
 	draw_track();
 	
-	if (showTool)
+	if (m_viewstyle&VSTYLE_SHOWTOOL)
 		tool.draw();
 
-	if (showAxis)
+	if (m_viewstyle&VSTYLE_SHOWAXIS)
 		draw_axis();
 
 	glDisable(GL_DEPTH_TEST);
 
 	camera.screen_matrix();
 
-	if (show2dGrid)
+	if (m_viewstyle&VSTYLE_SHOWGRID)
 		draw_grid();
 
 	draw_axis_letters();
@@ -831,31 +822,16 @@ void View3D::DoSetView(View stdview)
 }
 
 
-void View3D::OnSetShow(wxCommandEvent &event)
+void View3D::ToggleStyle( int style)
 {
-	switch (event.GetId())
-	{
-	case ID_SHOW2DGRID:	show2dGrid = !show2dGrid; break;
-	case ID_SHOWBOUNDS: showbounds = !showbounds; break;
-	case ID_SHOW3DGRID: show3dGrid = !show3dGrid; break;
-	case ID_SHOWTOOL:	showTool = !showTool ; break;
-	case ID_SHOWAXIS:	showAxis = !showAxis; break;
-	}
+	if (m_viewstyle & style)
+		m_viewstyle &= (~style);
+	else
+		m_viewstyle |= style;
+
 	Refresh(false);
 }
 
-void View3D::OnSetShowUpdate(wxUpdateUIEvent& event)
-{
-	event.Enable(true);
-	switch (event.GetId())
-	{
-	case ID_SHOW2DGRID:	event.Check(show2dGrid ); break;
-	case ID_SHOWBOUNDS: event.Check(showbounds); break;
-	case ID_SHOW3DGRID: event.Check(show3dGrid); break;
-	case ID_SHOWTOOL:	event.Check(showTool); break;
-	case ID_SHOWAXIS:	event.Check(showAxis); break;
-	}
-}
 
 void View3D::setSimulationPos(int index, const TrackPointGL &endpt )
 {

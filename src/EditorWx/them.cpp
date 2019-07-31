@@ -397,7 +397,12 @@ void ColourScheme::Read()
 	ReadColor(root["ctrl_hover"],m_colors[CONTROL_HOVER]);
 	ReadColor(root["ctrl_text"],m_colors[CONTROL_TEXT]);
 	ReadColor(root["control_text_hover"], m_colors[CONTROL_TEXT_HOVER]);	
-	ReadColor(root["ctrl_text_dis"],m_colors[CONTROL_TEXT_DISABLED]);
+	ReadColor(root["ctrl_text_dis"], m_colors[CONTROL_TEXT_DISABLED]);
+	ReadColor(root["ctrl_active"], m_colors[CONTROL_ACTIVE]);
+	ReadColor(root["ctrl_active_pressed"], m_colors[CONTROL_ACTIVE_PRESSED]);
+	ReadColor(root["ctrl_active_hover"], m_colors[CONTROL_ACTIVE_HOVER]);
+	ReadColor(root["ctrl_active_text"], m_colors[CONTROL_ACTIVE_TEXT]);
+	ReadColor(root["control_active_text_hover"], m_colors[CONTROL_ACTIVE_TEXT_HOVER]);
 	ReadColor(root["button_feedback"], m_colors[BUTTON_FEEDBACK]);
 	ReadColor(root["button_feedback_hover"], m_colors[BUTTON_FEEDBACK_HOVER]);
 	ReadColor(root["scrollbar"],m_colors[SCROLLBAR]);
@@ -444,10 +449,16 @@ void ColourScheme::InitDef()
 	m_colors[CONTROL] = wxColour(0xe0e0e0);
 	m_colors[CONTROL_PRESSED] = wxColour(0xe0e000);
 	m_colors[CONTROL_HOVER] = wxColour(0x00e000);
+	m_colors[CONTROL_ACTIVE] = wxColour(0xbbbbbb);
+	m_colors[CONTROL_ACTIVE_PRESSED] = wxColour(0x999999);
+	m_colors[CONTROL_ACTIVE_HOVER] = wxColour(0x999999);
+
 	// the label text for the normal and the disabled state
 	m_colors[CONTROL_TEXT] = wxColour(0x999999);
 	m_colors[CONTROL_TEXT_HOVER] = wxColour(0xFFFFFF);
 	m_colors[CONTROL_TEXT_DISABLED] = m_colors[CONTROL_TEXT].MakeDisabled();	
+	m_colors[CONTROL_ACTIVE_TEXT] = wxColour(0,0,0);
+	m_colors[CONTROL_ACTIVE_TEXT_HOVER] = wxColour(0,0,0);
 	m_colors[BUTTON_FEEDBACK] = wxColour(0x3088cc);
 	m_colors[BUTTON_FEEDBACK_HOVER] = wxColour(0x0066bb);
 		// the scrollbar background colour for the normal and pressed states

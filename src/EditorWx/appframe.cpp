@@ -11,7 +11,6 @@
 #include "prefs.h"
 #include "editorpanel.h"
 #include "edit.h"
-#include "View3D.h"
 #include "about.h"
 #include "propertiesdlg.h"
 #include "macrosesdlg.h"
@@ -150,10 +149,6 @@ wxBEGIN_EVENT_TABLE (AppFrame, wxFrame)
 
   //  EVT_CONTEXT_MENU(                AppFrame::OnContextMenu)
 //GCode
-	
-	EVT_MENU_RANGE(ID_3D_FIRST, ID_3D_LAST, AppFrame::On3DView)
-	EVT_UPDATE_UI_RANGE(ID_3D_FIRST, ID_3D_LAST, AppFrame::On3DViewUpdate)
-
 	EVT_AUINOTEBOOK_PAGE_CLOSE(wxID_ANY, AppFrame::OnNotebookPageClose)
 	EVT_COMMAND(wxID_ANY, FILE_MODIFYED_EVENT, AppFrame::OnFileModified)
 	EVT_COMMAND(wxID_ANY, FILE_OPEN_EVENT, AppFrame::OnFileOpenEvent)
@@ -972,35 +967,6 @@ void AppFrame::OnEdit (wxCommandEvent &event)
 
     if (pedit) 
 		pedit->GetEventHandler()->ProcessEvent (event);
-}
-
-
-void AppFrame::On3DView(wxCommandEvent &event)
-{
-	View3D *view = 0;
-	wxWindow *wnd = m_notebook->GetCurrentPage();
-	FilePage *panel = dynamic_cast<FilePage *>(wnd);
-	if (panel)
-		view = panel->Get3D();
-
-	if (view)
-		view->GetEventHandler()->ProcessEvent(event);
-}
-
-
-void AppFrame::On3DViewUpdate(wxUpdateUIEvent& event)
-{
-	View3D *view = 0;
-	wxWindow *wnd = m_notebook->GetCurrentPage();
-	FilePage *panel = dynamic_cast<FilePage *>(wnd);
-	if (panel)
-		view = panel->Get3D();
-
-
-	if (view)
-		view->GetEventHandler()->ProcessEvent(event);
-	else
-		event.Enable(false);
 }
 
 void AppFrame::OnDirTree(wxCommandEvent &event)
