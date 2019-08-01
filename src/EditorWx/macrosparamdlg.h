@@ -4,12 +4,18 @@
 class MacrosParamDlg :	public wxDialog
 {
 public:
-	MacrosParamDlg(MacrosDesc *pm, wxWindow *parent, bool new_window = true);
+	MacrosParamDlg(MacrosDesc *pm, wxWindow *parent, int curfiletype );
 	~MacrosParamDlg(); 
-	virtual int ShowModal();
 	bool IsInNewWindow() { return m_new_window; }
+	bool IsInGCMC() { return m_as_gcmc; }
+private:
+	void OnOk(wxCommandEvent& event);
+	bool GetAndValidateInput();
 private:
 	MacrosDesc *mdesc;
-	bool m_new_window;
+	static bool m_new_window;
+	static bool m_as_gcmc;
+	int m_curfiletype;
+	wxDECLARE_EVENT_TABLE();
 };
 

@@ -4,15 +4,10 @@
 (Z save:2)
 (Z max:1)
 (Step over:70)
-
-S2000
-M0
-M03 S4000
-G0 Z2.00
-F50.00000000 
-G17  G0 Z2.000000 00 F100 S300 M3
-G0 X30.00000000 Y50.0 0000000
-G1 Z-1.00000000 
+G0 Z2.00000000
+G0 X30.00000000 Y50.00000000
+G1 Z-1.00000000 F50.00000000
+F200.00000000
 G2 X31.80000000 Y50.00000000 I0.90000000 J0.00000000
 G2 X28.20000000 Y50.00000000 I-1.80000000 J0.00000000
 F200.00000000
@@ -44,3 +39,8 @@ G2 X13.00000000 Y50.00000000 I-17.00000000 J0.00000000
 G2 X47.00000000 Y50.00000000 I17.00000000 J0.00000000
 G2 X37.00000000 Y40.00000000 I-10.00000000 J0.00000000
 G0 Z2.00000000
+include("circular_pocket.inc.gcmc");
+zSave=2;xCenter=30;yCenter=50;r=20;d=6;rate=200;zRate=50;per_stepover=70;RampDist=10;zDelta=1;zFull=1;ccw=0;
+ DoCirculePocket(xCenter,yCenter,zSave,r,d,rate,zRate,per_stepover,RampDist,zDelta,zFull,ccw);
+zSave=2;xCenter=30;yCenter=50;r=20;d=6;rate=200;zRate=50;per_stepover=70;RampDist=10;zDelta=1;zFull=1;ccw=0;
+ DoCirculePocket(xCenter,yCenter,zSave,r,d,rate,zRate,per_stepover,RampDist,zDelta,zFull,ccw);

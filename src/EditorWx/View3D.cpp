@@ -229,7 +229,8 @@ void View3D::OnPaint(wxPaintEvent& WXUNUSED(event))
 	if (m_viewstyle&VSTYLE_SHOWGRID)
 		draw_grid();
 
-	draw_axis_letters();
+	if (m_viewstyle&VSTYLE_SHOWAXIS)
+		draw_axis_letters();
 		
 //	if ( HasFocus() )
 	//	draw_border();

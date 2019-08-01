@@ -802,30 +802,42 @@ void AppFrame::DoRunMacros(int indx)
 	if (indx < 0 || indx >= m_macroses->Count())
 		return;
 
+	FilePage *panel = dynamic_cast<FilePage *>( m_notebook->GetCurrentPage() );
+	int ftype = FILETYPE_UNKNOW;
+	if ( panel )
+		ftype = panel->GetEdit()->GetFileType();
+
+
 	MacrosDesc &desc = m_macroses->Get(indx);
-	MacrosParamDlg dlgparam(&desc, this);
+	MacrosParamDlg dlgparam(&desc, this, ftype );
 	if (dlgparam.ShowModal() != wxID_OK)
 		return;
 
-	wxString  args = m_macroses->BuildCommandLine(indx);
-	std::wstring src_fname = StandartPaths::Get()->GetMacrosPath(desc.gcmcfile.c_str());
-	std::wstring dst_fname = StandartPaths::Get()->GetTemporaryPath(L"tmp.nc");
-
-	FilePage *panel = 0;
-	if (!dlgparam.IsInNewWindow())
+	
+	if ( dlgparam.IsInNewWindow() )
 	{
-		wxWindow *wnd = m_notebook->GetCurrentPage();
-		panel = dynamic_cast<FilePage *>(wnd);		
-	}
-	else
-	{
-		panel = DoNewFile(FILETYPE_NC, wxEmptyString, true);
+		panel = DoNewFile(dlgparam.IsInGCMC() ? FILETYPE_GCMC : FILETYPE_NC, wxEmptyString, true);
 	}
 
 	if (!panel)
 		return;
 
-	panel->ConvertGcmc(src_fname.c_str(), dst_fname.c_str(), args.c_str());
+
+	std::wstring src_fname = StandartPaths::Get()->GetMacrosPath(desc.gcmcfile.c_str());
+
+	if (dlgparam.IsInGCMC())
+	{
+		std::wstring include_file;
+		wxString  args = m_macroses->BuildGCMCCode(indx, include_file);
+		panel->GetEdit()->PasteGCMCText(args, include_file);		
+	}
+	else
+	{
+
+		wxString  args = m_macroses->BuildCommandLine(indx);
+		std::wstring dst_fname = StandartPaths::Get()->GetTemporaryPath(L"tmp.nc");
+		panel->ConvertGcmc(src_fname.c_str(), dst_fname.c_str(), args.c_str());
+	}
 	
 }
 

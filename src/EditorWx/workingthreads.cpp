@@ -552,6 +552,8 @@ void Worker::AppendGcmcError(wxString &src)
 		MsgStatusLevel lvl = MSLError;
 		if (tmp.compare(L"warning") == 0)
 			lvl = MSLWarning;
+		else if (tmp.compare(L"Runtime message():") == 0)
+			lvl = MSLInfo;
 
 		output += src.Mid(colon4 + 1).wc_str(); // get message
 		GetLogWnd()->Append(lvl, output.c_str(), linen);

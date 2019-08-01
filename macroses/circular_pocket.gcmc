@@ -1,119 +1,17 @@
-function putpad(offset)
-{
-	literal("(-- putpad at offset=", offset, " --)\n");	
-}
+include ("circular_pocket.inc.gcmc");
+/*
+xCenter=0;
+yCenter=0;
+zSave=5;
+r=100;
+d=6;
+rate=200;
+zRate=50;
+per_stepover=2;
+RampDist=10;
+zDelta = 2;
+zFull = 2;
+ccw = 1;
+*/
 
-
-function do_arc(endpt,rrr)
-{
-if ( ccw ) { arc_ccw(endpt,rrr); }
-else  { arc_cw(endpt,rrr); }
-}
-
-
-// input parameters 
-// rate - feed rate
-// xCenter, yCenter - center of circle
-// d  - mill diameter 
-// ccw - clockwise  0 - clockwise, 2- counter clockwise 
-// zSave -  save z
-// zFull - deep
-// r - Radius
-// zRate - Plunge feed rate 
-
-// test inputs
-if( d <= 0 ) { error("Tool diametr can not be zero or negitive"); }
-if( (per_stepover <= 0) || (per_stepover > 100) ) { error("Stepover is wrong"); }
-if( r <= (0.51*d)  ) { error("Tool diametr  is to large or radius is too small"); }
-if( rate <= 0 ) { error("Feed rate can not be zero or negitive"); }
-if( zRate <= 0 ) { error("Plunge feed rate can not be zero or negitive"); }
-if( zDelta == 0 ) { error("Step can not be zero"); }
-
-
-comment("Center point:" + to_string(xCenter) +"," + to_string(yCenter));
-comment("Radius:" + to_string(r));
-comment("Mill dianetr:" + to_string(d));
-comment("Z save:" + to_string(zSave));
-comment("Z max:" + to_string(zFull));
-comment("Step over:" + per_stepover );
-
-Stepover = d * (abs(100-per_stepover)/100.);
-
-RampDis = 10;
-rhole = (r - d / 2);
-message( "rhole = ", rhole);
-message( "Stepover = ", Stepover);
-
-
-zCur = 0;
-zFull = -1*zFull;
-goto([-,-,zSave]);
-while(zFull < zCur) 
-{
- zCur = zCur - zDelta;
- if ( zCur < zFull){
-	zCur = zFull;
- }
- goto([xCenter,yCenter,-]);
- move([-,-,zCur ], zRate);
- nc1=0;
- RAD = Stepover;
- while ( rhole >= RAD )
- {
-	xEnd =  xCenter + RAD;
-	message( "RAD = ", RAD);
-	RADCIRCLE = RAD - Stepover/2;
-	feedrate(rate);
-	if ( nc1 == 0 )
-	{
-		do_arc( [xEnd,yCenter,-], RADCIRCLE );		
-	}
-	else
-	{
-	   nc1=1;
-	   do_arc( [xEnd,yCenter,-],RADCIRCLE );		
-	   //literal("Y",yCenter, " X",  xEnd, " R", RADCIRCLE, "\n");
-      // CODE "Y" & YPOS & " X" & XENDPOINT & " R" & RADCIRCLE
-	 }
-     xEnd =  xCenter - RAD;
-     //Clean out the other side of the cut
-	 //literal("Y",yCenter, " X",  xEnd, " R", RAD, "\n");
-	 do_arc( [xEnd,yCenter,-],RAD );
-
-     RAD = RAD + Stepover;
-     if( rhole <= RAD)
-	 {
-	    RADCIRCLE = (abs( xCenter-xEnd) + rhole )/2; //Need to have a round HERE
-		do_arc( [xCenter+rhole,yCenter,-],RADCIRCLE );
-		do_arc( [xCenter-rhole,yCenter,-],rhole );		
-		do_arc( [xCenter+rhole,yCenter,-],rhole );
-     }
-               
-  } 
-   // for small hole
-   if ( rhole < Stepover )
-   {
-
-		if ( ccw )
-		{
-			arc_ccw( [xCenter+rhole,yCenter,-],rhole/2 );
-			arc_ccw( [xCenter-rhole,yCenter,-],rhole );
-			arc_ccw( [xCenter+rhole,yCenter,-],rhole );
-		}
-        else
-		{
-			arc_cw( [xCenter+rhole,yCenter,-],rhole/2 );
-			arc_cw( [xCenter-rhole,yCenter,-],rhole );
-			arc_cw( [xCenter+rhole,yCenter,-],rhole );
-		}
-   }
-
-if ( RampDis > 0 )
-{
-	RD = (rhole > RampDis ) ? RampDis : rhole/2;
-	if ( ccw ) { arc_ccw( [xCenter+rhole-RD,yCenter+RD,-], RD  ); }
-	else        { arc_cw( [xCenter+rhole-RD,yCenter-RD,-], RD  ); }
-}
-goto([-,-,zSave]);
-}
-
+DoCirculePocket(xCenter,yCenter,zSave,r,d,rate,zRate,per_stepover,RampDist,zDelta,zFull,ccw);

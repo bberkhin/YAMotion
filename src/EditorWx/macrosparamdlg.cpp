@@ -2,19 +2,28 @@
 #include <wx/textctrl.h>
 #include "standartpaths.h"
 #include "macrosparamdlg.h"
+#include "prefs.h"
 
 #define ID_IN_NEW_WINDOW wxID_HIGHEST+100
+#define ID_AS_GCMC_CODE  wxID_HIGHEST+101
 
 
-MacrosParamDlg::MacrosParamDlg(MacrosDesc *pm, wxWindow *parent, bool new_window)
-	: mdesc(pm), m_new_window(new_window),wxDialog(parent, wxID_ANY, wxEmptyString,
-		wxDefaultPosition, wxDefaultSize,
-		wxDEFAULT_DIALOG_STYLE)//| wxRESIZE_BORDER) 
+
+wxBEGIN_EVENT_TABLE(MacrosParamDlg, wxDialog)
+	EVT_BUTTON(wxID_OK, MacrosParamDlg::OnOk)
+wxEND_EVENT_TABLE()
+
+bool MacrosParamDlg::m_new_window = true;
+bool MacrosParamDlg::m_as_gcmc = false;
+
+MacrosParamDlg::MacrosParamDlg(MacrosDesc *pm, wxWindow *parent, int curfiletype )
+	: mdesc(pm), m_curfiletype(curfiletype), 
+	wxDialog(parent, wxID_ANY, wxEmptyString,wxDefaultPosition, wxDefaultSize,wxDEFAULT_DIALOG_STYLE)//| wxRESIZE_BORDER) 
 	{
 
 		// sets the application title
 		SetTitle(mdesc->name.c_str());
-			
+					
 		wxBoxSizer *inputpane = new wxBoxSizer(wxHORIZONTAL);
 		
 		wxStaticBoxSizer *textinfos = new wxStaticBoxSizer(
@@ -53,9 +62,22 @@ MacrosParamDlg::MacrosParamDlg(MacrosDesc *pm, wxWindow *parent, bool new_window
 			//textinfos->Add(0, 6);
 		}
 		textinfos->Add(sizer, 1, wxALL | wxEXPAND, 10);
+
+
 		wxCheckBox *pcheck_newwnd = new wxCheckBox(this, ID_IN_NEW_WINDOW, _("Create new window"));
-		pcheck_newwnd->SetValue(m_new_window);
+
+		if (curfiletype == FILETYPE_UNKNOW)
+		{
+			m_new_window = true;
+			pcheck_newwnd->Enable(false);
+		}
+		pcheck_newwnd->SetValue(m_new_window );
 		textinfos->Add(pcheck_newwnd);
+
+		wxCheckBox *pcheck_as_gcmc = new wxCheckBox(this, ID_AS_GCMC_CODE, _("Insert as GCMC"));
+		pcheck_as_gcmc->SetValue(m_as_gcmc);
+		textinfos->Add(pcheck_as_gcmc);
+			   
 		textinfos->Add(Info);	
 		inputpane->Add(textinfos);
 
@@ -91,50 +113,68 @@ MacrosParamDlg::~MacrosParamDlg()
 {
 }
 
-int MacrosParamDlg::ShowModal()
+bool MacrosParamDlg::GetAndValidateInput()
 {
-	int ret = wxDialog::ShowModal();
-	if (ret == wxID_OK)
+	int id_input = wxID_HIGHEST;
+	for (size_t i = 0; i < mdesc->args.size(); ++i)
 	{
 
-		int id_input = wxID_HIGHEST;
-		for (size_t i = 0; i < mdesc->args.size(); ++i)
+		wxWindow *pwnd = FindWindow(wxID_HIGHEST + i);
+		if (pwnd)
 		{
-			
-			wxWindow *pwnd = FindWindow(wxID_HIGHEST + i);
-			if (pwnd)
+			if (mdesc->args[i].type == "list")
 			{
-				if (mdesc->args[i].type == "list")
+				wxComboBox *plist = dynamic_cast<wxComboBox *>(pwnd);
+				int select = plist->GetSelection();
+				if (select >= 0)
 				{
-					wxComboBox *plist = dynamic_cast<wxComboBox *>(pwnd);
-					int select = plist->GetSelection();
-					if (select >= 0)
-					{
-						mdesc->args[i].val = mdesc->args[i].vars[select].first;
-					}
-					else
-						mdesc->args[i].val = mdesc->args[i].defval;
+					mdesc->args[i].val = mdesc->args[i].vars[select].first;
 				}
 				else
-				{
-					wxTextCtrl *pedit = dynamic_cast<wxTextCtrl *>(pwnd);
-					if (pedit)
-					{
-						wxString label = pedit->GetValue();
-						if (mdesc->args[i].type == "scalar")
-						{
-							label.Replace(",", ".");
-							mdesc->args[i].val = label;
-						}
-						else
-							mdesc->args[i].val = label;
-					}
-				}
+					mdesc->args[i].val = mdesc->args[i].defval;
 			}
+			else
+			{
+				wxTextCtrl *pedit = dynamic_cast<wxTextCtrl *>(pwnd);
+				if (pedit)
+				{
+					wxString label = pedit->GetValue();
+					if (mdesc->args[i].type == "scalar")
+					{
+						label.Replace(",", ".");
+						mdesc->args[i].val = label;
+					}
+					else
+						mdesc->args[i].val = label;
+				}
+				// Save def value
+			}
+			mdesc->args[i].defval = mdesc->args[i].val;
 		}
-		wxCheckBox *pcheck_newwnd = dynamic_cast<wxCheckBox *>(FindWindow(ID_IN_NEW_WINDOW));
-		m_new_window = pcheck_newwnd->GetValue();
 	}
-	return ret;
 
+	wxCheckBox *pcheck_newwnd = dynamic_cast<wxCheckBox *>(FindWindow(ID_IN_NEW_WINDOW));
+	m_new_window = pcheck_newwnd->GetValue();
+	wxCheckBox *pcheck_as_gcmc = dynamic_cast<wxCheckBox *>(FindWindow(ID_AS_GCMC_CODE));
+	m_as_gcmc = pcheck_as_gcmc->GetValue();
+
+	if (m_as_gcmc && !m_new_window && (m_curfiletype == FILETYPE_NC))
+	{
+		wxMessageBox(_("Can not insert GCMC code to GCODE file!"),wxMessageBoxCaptionStr, wxOK | wxICON_INFORMATION);
+		return false;
+	}
+	else if (!m_as_gcmc && !m_new_window && (m_curfiletype == FILETYPE_GCMC))
+	{
+		wxMessageBox(_("Can not insert GCODE to GCMC file!"), wxMessageBoxCaptionStr, wxOK | wxICON_INFORMATION);
+		return false;
+	}
+	return true;
 }
+
+
+void MacrosParamDlg::OnOk(wxCommandEvent& WXUNUSED(event))
+{
+	if ( GetAndValidateInput() )
+		EndModal(wxID_OK);
+}
+

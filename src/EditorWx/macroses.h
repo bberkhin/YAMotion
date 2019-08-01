@@ -23,6 +23,8 @@ struct MacrosDesc
 	std::wstring desc;
 	std::wstring gcmcfile;
 	std::wstring imgfile;
+	std::wstring funct;
+	std::wstring inc_file;
 	ArgumentMap args;
 	
 };
@@ -37,6 +39,7 @@ public:
 	~Macroses();
 	int Count() { return m_mcrs.size(); }
 	MacrosDesc &Get(int index) { return m_mcrs[index];  }
+	std::wstring BuildGCMCCode(int indx, std::wstring &include_file);
 	std::wstring BuildCommandLine(int indx);
 	void Init();
 private:

@@ -117,6 +117,7 @@ public:
 
 	void DoSelectLine(int line);
 	wxSize DoGetBestSize() const;
+	void PasteGCMCText(const wxString &args, const wxString &include_file);
 
 private:
 	bool InitializePrefs(const LanguageInfo * language);	

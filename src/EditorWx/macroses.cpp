@@ -155,6 +155,14 @@ void Macroses::parse_file(const wchar_t *path)
 				{
 					read_arguments(cn, mdesc);
 				}
+				else if(strcmp(cn->name(), "include") == 0)
+				{
+					toWstring(cn->value(), mdesc.inc_file);
+				}
+				else if (strcmp(cn->name(), "function") == 0)
+				{
+					toWstring(cn->value(), mdesc.funct);
+				}
 			}
 			m_mcrs.push_back(mdesc);
 		}
@@ -213,6 +221,35 @@ void Macroses::read_arguments(xml_nodew *node, MacrosDesc &mdesc)
 		}
 	}
 		
+}
+
+std::wstring Macroses::BuildGCMCCode(int indx, std::wstring &include_file)
+{
+	std::wstring arg;
+	std::wstring tmp;
+	MacrosDesc &mdesc = Get(indx);
+	
+	include_file = mdesc.inc_file;
+	for (auto it = mdesc.args.begin(); it != mdesc.args.end(); ++it)
+	{
+		toWstring(it->ref.c_str(), tmp);
+		arg += tmp;
+		arg += L"=";
+		if (it->val.empty())
+			toWstring(it->defval.c_str(), tmp);
+		else
+			toWstring(it->val.c_str(), tmp);
+		arg += tmp;
+		arg += L";";
+	}
+	arg += L"\n";
+	if (!mdesc.funct.empty())
+	{
+		arg += mdesc.funct;
+		arg += L";\n";
+	}
+
+	return arg;
 }
 
 std::wstring Macroses::BuildCommandLine(int indx)

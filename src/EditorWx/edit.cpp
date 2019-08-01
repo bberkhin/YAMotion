@@ -481,7 +481,7 @@ void Edit::OnDwellStart(wxStyledTextEvent &event)
 	
 	// check that the mouse is inside the window
 	wxPoint ptMouse = wxGetMousePosition();
-	if (!GetClientRect().Contains(ptMouse))
+	if (!GetClientRect().Contains(ScreenToClient(ptMouse)))
 		return;
 
 	int pos = event.GetPosition();
@@ -837,7 +837,17 @@ void Edit::PasteFile(const wxString &fname, bool toend)
 }
 
 
-
+void Edit::PasteGCMCText(const wxString &args, const wxString &include_file)
+{
+	if (!include_file.IsEmpty())
+	{
+		wxString inc_text = wxString::Format(L"include(\"%s\");\n", include_file);
+		if ( FindText(0, GetTextLength(), inc_text) == -1 )
+			InsertText(0, inc_text);
+	}
+	InsertText(GetTextLength(), args);
+	SelectNone();
+}
 
 
 bool Edit::DoLoadFile(const wxString& filename, int WXUNUSED(fileType))
