@@ -267,7 +267,14 @@ View3DPanel::View3DPanel(wxWindow *parent, FilePage *fp) :
 	wxSizer *pFooter = CreateFooterPanel();
 	
 	totalpane->Add(pSimulate, 0, wxEXPAND);
-	//totalpane->AddSpacer(FromDIP(10));
+	
+	//totalpane->AddSpacer(FromDIP(15));
+	totalpane->AddSpacer(10);
+	pGripper = new FlatStaticLine(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxLI_HORIZONTAL);
+	totalpane->Add(pGripper, 0, wxGROW | wxLEFT | wxRIGHT, MARGIN_LEFT);
+	totalpane->AddSpacer(8);
+
+
 	totalpane->Add(pFooter, 0, wxEXPAND);
 	
 // move all content left for sizer
@@ -442,9 +449,11 @@ wxSizer *View3DPanel::CreateSimulationPanel()
 	wxBoxSizer *btns = new wxBoxSizer(wxHORIZONTAL);
 	// Create view button
 	
+	btns->AddSpacer(MARGIN_LEFT);
+	/*
 	int dxLeft = 0;
 	//wxSizerItem *szi;
-	btns->AddSpacer(MARGIN_LEFT);
+	
 	FlatButton *btv = new FlatButton(this, ID_BTN_SHOWAXIS, _("AXIS"));
 	btns->Add(btv, 0, wxALIGN_CENTRE_VERTICAL);
 	dxLeft += btv->GetMinWidth();
@@ -457,10 +466,10 @@ wxSizer *View3DPanel::CreateSimulationPanel()
 	btns->Add(btv, 0, wxALIGN_CENTRE_VERTICAL);
 	dxLeft += btv->GetMinWidth();
 	dxLeft += 10;//spacers between buttons
+	*/
+	btns->AddStretchSpacer();
 	
-	//btns->AddStretchSpacer();
-	
-	wxBoxSizer *centerbtns = new wxBoxSizer(wxHORIZONTAL);
+	wxBoxSizer *centerbtns = btns;// new wxBoxSizer(wxHORIZONTAL);
 	FlatButton *bt = new FlatButton(this, ID_BTN_PAUSE, wxEmptyString, FB_TRANSPARENT, ART_PAUSE);
 	centerbtns->Add(bt, 0, wxALIGN_CENTRE_VERTICAL);
 	bt = new FlatButton(this, ID_BTN_SIMULATE, wxEmptyString, FB_TRANSPARENT, ART_PLAY);
@@ -468,12 +477,12 @@ wxSizer *View3DPanel::CreateSimulationPanel()
 	bt = new FlatButton(this, ID_BTN_STOP, wxEmptyString, FB_TRANSPARENT, ART_STOP);
 	centerbtns->Add(bt, 0, wxALIGN_CENTRE_VERTICAL);
 
-	btns->AddStretchSpacer();
-	btns->Add(centerbtns, 0, wxALIGN_CENTRE_HORIZONTAL| wxALIGN_CENTRE_VERTICAL);
+	//btns->AddStretchSpacer();
+	//btns->Add(centerbtns, 0, wxALIGN_CENTRE_HORIZONTAL| wxALIGN_CENTRE_VERTICAL);
 	btns->AddStretchSpacer();
 	bt = new FlatButton(this, ID_SETSIMULATIONSPEED, GetSpeedBtLabel() );
 	btns->Add(bt, 0, wxALIGN_CENTRE_VERTICAL | wxRIGHT);
-	
+	btns->Insert(0, bt->GetMinWidth(),1 );
 	// so dxLeft is the size in pixels when we need move simulation buttons to place it in center of window
 	//dxLeft -= bt->GetMinWidth();
 	//btns->Insert(btns->GetItemCount() - 1, dxLeft,1 );
@@ -484,6 +493,20 @@ wxSizer *View3DPanel::CreateSimulationPanel()
 	FlatSlider *pguage = new FlatSlider(this, ID_SIMULATED_SLIDER, 0, 0, 1000);
 	pguage->SetMargin(MARGIN_LEFT);
 	panel->Add(pguage, 0, wxEXPAND);
+
+	// 
+	btns = new wxBoxSizer(wxHORIZONTAL);
+	FlatButton *btv = new FlatButton(this, ID_BTN_SHOWAXIS, _("AXIS"));
+	btns->Add(btv, 0, wxALIGN_CENTRE_VERTICAL);	
+	btns->AddSpacer(5);
+	btv = new FlatButton(this, ID_BTN_SHOWGRID, _("GRID"));
+	btns->Add(btv, 0, wxALIGN_CENTRE_VERTICAL);
+	btns->AddSpacer(5);
+	btv = new FlatButton(this, ID_BTN_SHOWBOX, _("BOX"));
+	btns->Add(btv, 0, wxALIGN_CENTRE_VERTICAL);
+	panel->AddSpacer(5);
+	panel->Add(btns, 0, wxALIGN_CENTRE_HORIZONTAL);
+
 	return panel;
 }
 

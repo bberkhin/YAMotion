@@ -621,6 +621,7 @@ void AppFrame::OnFileOpenEvent(wxCommandEvent &event)
 		
 		paths.Add(StandartPaths::Get()->GetRootPath().c_str());
 		paths.Add(StandartPaths::Get()->GetMacrosPath().c_str());
+		paths.Add(StandartPaths::Get()->GetMacrosPath(L"library").c_str());
 
 		wxString abs_fname  = paths.FindAbsoluteValidPath(fname.GetFullPath());
 		if (abs_fname.empty())
@@ -828,8 +829,11 @@ void AppFrame::DoRunMacros(int indx)
 	if (dlgparam.IsInGCMC())
 	{
 		std::wstring include_file;
-		wxString  args = m_macroses->BuildGCMCCode(indx, include_file);
-		panel->GetEdit()->PasteGCMCText(args, include_file);		
+		bool needGcmcFileBody;
+		wxString  args = m_macroses->BuildGCMCCode(indx, include_file, needGcmcFileBody);
+		panel->GetEdit()->PasteGCMCText(args, include_file);
+		if (needGcmcFileBody)
+			panel->GetEdit()->PasteFile(src_fname.c_str(), true);
 	}
 	else
 	{

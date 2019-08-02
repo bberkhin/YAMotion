@@ -1,16 +1,3 @@
-(gcmc compiled code, do not change)
-(2019-08-02 18:05:32)
-(-- prologue begin --)
-G17 ( Use XY plane )
-G21 ( Use mm )
-G40 ( Cancel cutter radius compensation )
-G49 ( Cancel tool length compensation )
-G54 ( Default coordinate system )
-G80 ( Cancel canned cycle )
-G90 ( Use absolute distance mode )
-G94 ( Units Per Minute feed rate mode )
-G64 ( Enable path blending for best speed )
-(-- prologue end --)
 (Center point:30,50)
 (Radius:20)
 (Mill dianetr:6)
@@ -52,5 +39,3 @@ G2 X13.00000000 Y50.00000000 I-17.00000000 J0.00000000
 G2 X47.00000000 Y50.00000000 I17.00000000 J0.00000000
 G2 X37.00000000 Y40.00000000 I-10.00000000 J0.00000000
 G0 Z2.00000000
-(-- epilogue begin --)
-M30 (-- epilogue end --)

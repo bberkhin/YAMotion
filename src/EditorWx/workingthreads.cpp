@@ -703,7 +703,12 @@ int Worker::DoConvertGcmc(DoAfterConvertGcmc what_to_do)
 		dst_fname = src_fname;
 	dst_fname += wxString(".nc");
 
-	return RunGcmc(src_fname, dst_fname, 0, what_to_do);
+	std::wstring arg;
+	arg = L" --include=\"";
+	arg += StandartPaths::Get()->GetMacrosPath(L"library");
+	arg += L"\"";
+
+	return RunGcmc(src_fname, dst_fname, arg.c_str(), what_to_do);
 }
 
 void Worker::OnTimer(wxTimerEvent &event)

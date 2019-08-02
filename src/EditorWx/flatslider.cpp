@@ -274,7 +274,8 @@ wxSize FlatSlider::DoGetBestClientSize() const
     
     // first calculate the size of the slider itself: i.e. the shaft and the
     // thumb
-	 wxCoord height = TUMB_SIZE_L.y;// GetRenderer()->GetSliderDim();
+	
+	 wxCoord height = GetThumbSize().y;// GetRenderer()->GetSliderDim();
 
     wxSize size;
     if ( IsVertical() )
@@ -285,7 +286,8 @@ wxSize FlatSlider::DoGetBestClientSize() const
     else // horizontal
     {
         size.x = SLIDER_WIDTH;
-        size.y = height;
+        size.y = height + 2 * BORDER_THICKNESS;
+
     }
 
     // add space for ticks

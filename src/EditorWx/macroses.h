@@ -39,7 +39,7 @@ public:
 	~Macroses();
 	int Count() { return m_mcrs.size(); }
 	MacrosDesc &Get(int index) { return m_mcrs[index];  }
-	std::wstring BuildGCMCCode(int indx, std::wstring &include_file);
+	std::wstring BuildGCMCCode(int indx, std::wstring &include_file, bool &needGcmcFileBody);
 	std::wstring BuildCommandLine(int indx);
 	void Init();
 private:

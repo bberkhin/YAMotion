@@ -223,7 +223,7 @@ void Macroses::read_arguments(xml_nodew *node, MacrosDesc &mdesc)
 		
 }
 
-std::wstring Macroses::BuildGCMCCode(int indx, std::wstring &include_file)
+std::wstring Macroses::BuildGCMCCode(int indx, std::wstring &include_file, bool &needGcmcFileBody)
 {
 	std::wstring arg;
 	std::wstring tmp;
@@ -247,8 +247,12 @@ std::wstring Macroses::BuildGCMCCode(int indx, std::wstring &include_file)
 	{
 		arg += mdesc.funct;
 		arg += L";\n";
+		needGcmcFileBody = false;
 	}
-
+	else
+	{
+		needGcmcFileBody = true;
+	}
 	return arg;
 }
 
@@ -273,6 +277,9 @@ std::wstring Macroses::BuildCommandLine(int indx)
 		arg += tmp;	
 		arg += L";";
 	}
+	arg += L"\"";
+	arg += L" --include=\"";
+	arg += StandartPaths::Get()->GetMacrosPath(L"library");
 	arg += L"\"";
 	return arg;
 }
