@@ -520,7 +520,11 @@ void Worker::AppendGcmcError(wxString &src)
 	size_t colon1 = wxString::npos, colon2 = wxString::npos, colon3 = wxString::npos, colon4 = wxString::npos;
 	if ((colon1 = src.find(':', 0)) != wxString::npos)
 	{
-		if ((colon2 = src.find(':', colon1 + 1)) != wxString::npos)
+		if (colon1 == 1) // грязный костыль есди полное имя файла то : не раздалитель
+		{
+			colon1 = src.find(':', 2);
+		}
+		if (colon1 != wxString::npos && ((colon2 = src.find(':', colon1 + 1)) != wxString::npos) )
 		{
 			if ((colon3 = src.find(':', colon2 + 1)) != wxString::npos)
 			{
@@ -550,7 +554,7 @@ void Worker::AppendGcmcError(wxString &src)
 		int linen = _wtoi(tmp.c_str());
 		tmp = src.SubString(colon3 + 2, colon4).wc_str(); // Erro type
 		MsgStatusLevel lvl = MSLError;
-		if (tmp.compare(L"warning") == 0)
+		if (tmp.compare(L"warning:") == 0)
 			lvl = MSLWarning;
 		else if (tmp.compare(L"Runtime message():") == 0)
 			lvl = MSLInfo;
@@ -590,11 +594,29 @@ int Worker::RunGcmc(const wchar_t *src_fname, const  wchar_t *dst_fname, const w
 
 	arg += " -o ";
 	arg += dst_fname_no_path.c_str();
-	arg += " ";
 	if (args)
 		arg += args;
-	arg += " ";
+	
+	arg += L" -q"; // do not use prologue\epilogue
+	arg += L" --include=\"";
+	arg += StandartPaths::Get()->GetMacrosPath(L"library").c_str();
+	arg += L"\"";
+	arg += wxString::Format(L" --precision=%d ", Preferences::Get()->PostPocessing().Precision());
+	
+	const wxString &pro_fn = Preferences::Get()->PostPocessing().PrologFileName();
+	if ( !pro_fn.IsEmpty() )
+		arg += wxString::Format(L"--prologue=\"%s\" ", pro_fn );
+	
+	const wxString &epi_fn = Preferences::Get()->PostPocessing().EpilogFileName();
+	if (!epi_fn.IsEmpty())
+		arg += wxString::Format(L"--epilogue=\"%s\" ", epi_fn);
+	
+
 	arg += src_fname_no_path.c_str();
+
+	
+	
+
 
 	wxArrayString output;
 	wxArrayString errors;
@@ -695,20 +717,12 @@ int Worker::DoConvertGcmc(DoAfterConvertGcmc what_to_do)
 	if (!pedit)
 		return 1;
 
-	wxString src_fname = pedit->GetFileName();
-	if (src_fname.IsEmpty())
-		return 1;
-	wxString dst_fname = src_fname.BeforeLast('.');
-	if (dst_fname.IsEmpty())
-		dst_fname = src_fname;
-	dst_fname += wxString(".nc");
-
-	std::wstring arg;
-	arg = L" --include=\"";
-	arg += StandartPaths::Get()->GetMacrosPath(L"library");
-	arg += L"\"";
-
-	return RunGcmc(src_fname, dst_fname, arg.c_str(), what_to_do);
+	
+	wxFileName dst_fname = pedit->GetFileName();
+	if ( !dst_fname.IsOk() )
+		return 1;		
+	dst_fname.SetExt(Preferences::Get()->PostPocessing().FileExtension());
+	return RunGcmc(pedit->GetFileName(), dst_fname.GetFullPath(), 0, what_to_do);
 }
 
 void Worker::OnTimer(wxTimerEvent &event)

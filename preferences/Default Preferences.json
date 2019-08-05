@@ -12,6 +12,7 @@
   "visibleHSB": true,
   "enableLogExecution": false,
   "theme_syntax": "them_black.json",
+  "postpocessing": "wincnc.con",
   "files": [
     {
       "name": "GCODE",

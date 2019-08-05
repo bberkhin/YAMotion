@@ -240,7 +240,9 @@ std::wstring Macroses::BuildGCMCCode(int indx, std::wstring &include_file, bool 
 		else
 			toWstring(it->val.c_str(), tmp);
 		arg += tmp;
-		arg += L";";
+		arg += L"; //";
+		arg += it->name; // add comment
+		arg += L"\n";
 	}
 	arg += L"\n";
 	if (!mdesc.funct.empty())
@@ -263,7 +265,6 @@ std::wstring Macroses::BuildCommandLine(int indx)
 	MacrosDesc &mdesc = Get(indx);
 	//std::pair<std::string, ArgumntDesc> itt;
 	//itt.first
-	arg = L"-q"; // do not use prologue\epilogue
 	arg += L" --define=\"";
 	for (auto it = mdesc.args.begin(); it != mdesc.args.end(); ++it)
 	{
@@ -277,9 +278,6 @@ std::wstring Macroses::BuildCommandLine(int indx)
 		arg += tmp;	
 		arg += L";";
 	}
-	arg += L"\"";
-	arg += L" --include=\"";
-	arg += StandartPaths::Get()->GetMacrosPath(L"library");
 	arg += L"\"";
 	return arg;
 }

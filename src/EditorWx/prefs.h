@@ -52,6 +52,7 @@ struct CommonInfo
 	wxString gcmc_syntax;
 	wxString nc_syntax;
 	wxString theme_color;
+	wxString postprocessing_fn;
 };
 
 //----------------------------------------------------------------------------
@@ -117,6 +118,34 @@ private:
 	bool	m_inited;
 };
 
+class PostProcessing
+{
+public:
+	PostProcessing();
+	~PostProcessing();
+	bool Read(const wxString& fileName);
+	const wxString &Prolog() const { return m_prolog; }
+	const wxString &Epilog() const { return m_epilog; }
+	int Precision() const { return m_precision; }
+	const wxString &FileExtension() const {	return m_fext;	}
+	bool IsInited() { return m_inited; }
+	const wxString &PrologFileName() const { return m_prologfn; }
+	const wxString &EpilogFileName() const { return m_epilogfn; }
+private:
+	void BuildPrologEpilogFiles();
+	bool CreateTmpFile(const wchar_t *fname, const wxString &context);
+private:
+	bool m_inited;
+	int m_precision;
+	wxString m_prologfn;
+	wxString m_epilogfn;
+	wxString m_prolog; //START
+	wxString m_epilog; //END
+	wxString m_desc; // DESCRIPTION = "WinCNC (mm) (*.tap)"
+	wxString m_fext; //FILE_EXTENSION = "tap
+};
+
+
 //class Preferences;
 extern class Preferences global_pprefs;
 
@@ -124,6 +153,7 @@ extern class Preferences global_pprefs;
 
 class wxAuiDockArt;
 class wxAuiTabArt;
+
 
 
 class Preferences
@@ -134,6 +164,7 @@ public:
 	bool Read();
 	static Preferences *Get() { return &global_pprefs; }
 	const CommonInfo &Common() const { return m_common;  }
+	const PostProcessing &PostPocessing(); 
 	wxAuiDockArt *GetArtProvider(bool createnew = false);
 	wxAuiTabArt *GetTabArtProvider();
 	ColourScheme *GetColorScheme();
@@ -151,7 +182,11 @@ private:
 	wxAuiDockArt *m_artprovider;
 	wxAuiTabArt *m_tabartprovider;
 	ColourScheme *m_colors;
+	PostProcessing m_postrocessing;
 };
+
+// will use ArtCam format of postrocessing file *.con
+
 
 
 #endif // _PREFS_H_

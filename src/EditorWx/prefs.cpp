@@ -51,7 +51,8 @@ Preferences::Preferences() : m_artprovider(0), m_tabartprovider(0)
 		4,//tabWidth
 		"", // gcmc_sybatx;
 		"", //nc_syntax
-		"" //them_color
+		"", //them_color
+		"" //postprocessing_fn
 	};
 
 	m_colors = new ColourScheme();
@@ -203,6 +204,8 @@ bool Preferences::DoRead(const wxString& fileName, bool errifnoexist )
 	
 	root["theme_syntax"].AsString(m_common.theme_color);	
 	m_colors->SetFileName(m_common.theme_color);
+	root["postpocessing"].AsString(m_common.postprocessing_fn);
+	
 
 	wxJSONValue &files = root["files"];
 	
@@ -470,4 +473,184 @@ wxString LanguageInfo::CreateWildCard() const
 	else
 		wildCard = _("GCode Files (*.ngc;*.nc)|*.ngc;*.nc");
 	*/
+}
+
+
+const PostProcessing &Preferences::PostPocessing()
+{ 
+	if (!m_postrocessing.IsInited() && !m_common.postprocessing_fn.IsEmpty())
+	{
+		m_postrocessing.Read(m_common.postprocessing_fn);
+	}
+	return m_postrocessing;
+}
+
+PostProcessing::PostProcessing()
+{
+	m_inited = false;
+	m_precision = 4;
+	m_fext = L"nc";
+	m_desc = L"Default preprocessor";
+	m_prolog = "G90G80G21G49"; //START
+	m_epilog = "M30"; //END
+}
+
+PostProcessing::~PostProcessing()
+{
+
+}
+
+static wchar_t *do_trim(wchar_t *line, bool *token)
+{
+	wchar_t *s;
+	wchar_t *end;
+	bool in_token = false;
+	if (token)	*token = false;
+	for (s = line; *s != 0 && ::iswblank(*s); s++);
+
+	for (end = s; *end != 0; end++)
+	{
+		if (*end == L'"')
+		{
+			if (!in_token)
+			{
+				*end = 0;
+				s = end + 1;
+				in_token = true;
+				if (token)
+					*token = true;
+			}
+			else // Last "
+			{
+				*end = 0;
+				break;
+			}
+			continue;
+		}
+		if (::iswblank(*end) && !in_token)
+		{
+			*end = 0;
+			break;
+		}
+		if (*end == '\r' || *end == '\n')
+		{
+			*end = 0;
+			break;
+		}
+	}
+	return s;
+}
+
+bool PostProcessing::Read(const wxString& fileName)
+{
+	std::filesystem::path name = StandartPaths::Get()->GetPreferencesPath(fileName);
+	FILE *file = _wfopen(name.c_str(), L"r,ccs=UTF-8");
+	if (file == NULL)
+	{
+		wxString msg = wxString::Format(_("Can not open file %s"), fileName);
+		wxMessageBox(msg, _("Error opening file"));
+		return false;
+	}
+
+	double d = 0;
+	int index = 0;
+	wchar_t *c = 0;
+	wchar_t line[512];
+	wchar_t *arg, *val;
+	bool token;
+	bool first_start = true;
+	bool first_end = true;
+	while (true)
+	{
+		if (fgetws(line, 512, file) == NULL)
+			break;
+		line[511] = 0;
+		if (line[0] == L';')
+			continue;
+		c = wcschr(line, L'=');
+		if (c == NULL)
+			continue;
+		*c = 0;
+			
+		arg = do_trim(line,0);
+		val = do_trim(c+1, &token);
+		if (wcscmp(arg, L"DESCRIPTION") == 0)
+			m_desc = val;
+		else if (wcscmp(arg, L"FILE_EXTENSION") == 0)
+			m_fext = val;
+		else if (wcscmp(arg, L"PRECISION") == 0 && ::iswdigit(*val) )
+			m_precision = ::_wtoi(val);
+		else if (wcscmp(arg, L"START") == 0)
+		{
+			if (first_start)
+			{
+				m_prolog = val;
+				first_start = false;
+			}
+			else
+			{ 
+				m_prolog += L"\n";
+				m_prolog += val;
+			}
+		}
+		else if (wcscmp(arg, L"END") == 0)
+		{
+			if (first_end)
+			{
+				m_epilog = val;
+				first_end = false;
+			}
+			else
+			{
+				m_epilog += L"\n";
+				m_epilog += val;
+			}
+		}		
+	}
+	fclose(file);
+	BuildPrologEpilogFiles();
+	m_inited = true;
+	return true;
+}
+
+bool PostProcessing::CreateTmpFile(const wchar_t *fname, const wxString &context)
+{
+	FILE *file = _wfopen(fname, L"wt,ccs=UTF-8");
+	if (file == NULL)
+	{
+		wxString msg = wxString::Format(_("Can not open create file %s"), fname);
+		wxMessageBox(msg, _("Error opening file"));
+		return false;
+	}
+	// Write a string into the file.
+	size_t strSize = context.length();
+	if (fwrite(context.wc_str(), sizeof(wchar_t), strSize, file) != strSize)
+	{
+		wxString msg = wxString::Format(_("Can not write to the file %s"), fname);
+		wxMessageBox(msg, _("Error writing file"));
+		fclose(file);
+		return false;
+	}
+	fclose(file);
+	return true;
+}
+
+void PostProcessing::BuildPrologEpilogFiles()
+{
+
+	m_prologfn.clear();
+	m_epilogfn.clear();
+	if (!m_prolog.IsEmpty())
+	{
+		std::wstring dst_fname = StandartPaths::Get()->GetTemporaryPath(L"prologue.nc");
+		if (CreateTmpFile(dst_fname.c_str(), m_prolog))
+			m_prologfn = dst_fname;
+
+	}
+	if (!m_epilog.IsEmpty())
+	{
+		std::wstring dst_fname = StandartPaths::Get()->GetTemporaryPath(L"epilogue.nc");
+		if ( CreateTmpFile(dst_fname.c_str(), m_epilog) )
+			m_epilogfn = dst_fname;
+	}
 }
