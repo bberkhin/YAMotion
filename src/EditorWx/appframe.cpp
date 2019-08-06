@@ -840,7 +840,7 @@ void AppFrame::DoRunMacros(int indx)
 
 		wxString  args = m_macroses->BuildCommandLine(indx);
 		std::wstring dst_fname = StandartPaths::Get()->GetTemporaryPath(L"tmp.nc");
-		panel->ConvertGcmc(src_fname.c_str(), dst_fname.c_str(), args.c_str());
+		panel->ConvertGcmc(src_fname.c_str(), dst_fname.c_str(), args.c_str(), dlgparam.IsInNewWindow() );
 	}
 	
 }

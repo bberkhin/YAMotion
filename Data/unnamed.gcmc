@@ -1,3 +1,32 @@
 include("circular_pocket.inc.gcmc");
-zSave=2;xCenter=30;yCenter=50;r=20;d=6;rate=200;zRate=50;per_stepover=70;RampDist=10;zDelta=1;zFull=1;ccw=0;
+zSave=2; //Save Z:
+xCenter=60; //Specify Xc of the circle:
+yCenter=80; //Specify Yc of the circle:
+r=20; //Radius
+d=6; //Mill diameter
+rate=200; //Feed rate:
+zRate=50; //Z feed rate:
+per_stepover=70; //Step over(%):
+RampDist=10; //Ramp distance:
+zDelta=1; //Step Z:
+zFull=1; //Thikness:
+ccw=0; //Direction:
+
+ DoCirculePocket(xCenter,yCenter,zSave,r,d,rate,zRate,per_stepover,RampDist,zDelta,zFull,ccw);
+ 
+ 
+ 
+zSave=2; //Save Z:
+xCenter=0; //Specify Xc of the circle:
+yCenter=0; //Specify Yc of the circle:
+r=35; //Radius
+d=6; //Mill diameter
+rate=200; //Feed rate:
+zRate=50; //Z feed rate:
+per_stepover=70; //Step over(%):
+RampDist=10; //Ramp distance:
+zDelta=1; //Step Z:
+zFull=1; //Thikness:
+ccw=0; //Direction:
+
  DoCirculePocket(xCenter,yCenter,zSave,r,d,rate,zRate,per_stepover,RampDist,zDelta,zFull,ccw);

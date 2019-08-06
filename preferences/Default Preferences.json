@@ -26,7 +26,8 @@
     },
     {
       "name": "JSON",
-      "extensions": "*.json"
+      "extensions": "*.json",
+      "syntax": "json_syntax_black.json"
     },
     {
       "name": "ALL",

@@ -566,7 +566,7 @@ void Worker::AppendGcmcError(wxString &src)
 }
 
 
-int Worker::RunGcmc(const wchar_t *src_fname, const  wchar_t *dst_fname, const wchar_t *args, DoAfterConvertGcmc what_to_do)
+int Worker::RunGcmc(const wchar_t *src_fname, const  wchar_t *dst_fname, const wchar_t *args, DoAfterConvertGcmc what_to_do, bool addprologepilog)
 {
 
 	GetLogWnd()->Clear();
@@ -603,13 +603,16 @@ int Worker::RunGcmc(const wchar_t *src_fname, const  wchar_t *dst_fname, const w
 	arg += L"\"";
 	arg += wxString::Format(L" --precision=%d ", Preferences::Get()->PostPocessing().Precision());
 	
-	const wxString &pro_fn = Preferences::Get()->PostPocessing().PrologFileName();
-	if ( !pro_fn.IsEmpty() )
-		arg += wxString::Format(L"--prologue=\"%s\" ", pro_fn );
-	
-	const wxString &epi_fn = Preferences::Get()->PostPocessing().EpilogFileName();
-	if (!epi_fn.IsEmpty())
-		arg += wxString::Format(L"--epilogue=\"%s\" ", epi_fn);
+	if (addprologepilog) // if we paste in thr existing file do not add prologue and epilogue
+	{
+		const wxString &pro_fn = Preferences::Get()->PostPocessing().PrologFileName();
+		if (!pro_fn.IsEmpty())
+			arg += wxString::Format(L"--prologue=\"%s\" ", pro_fn);
+
+		const wxString &epi_fn = Preferences::Get()->PostPocessing().EpilogFileName();
+		if (!epi_fn.IsEmpty())
+			arg += wxString::Format(L"--epilogue=\"%s\" ", epi_fn);
+	}
 	
 
 	arg += src_fname_no_path.c_str();

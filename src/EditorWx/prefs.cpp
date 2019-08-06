@@ -491,8 +491,8 @@ PostProcessing::PostProcessing()
 	m_precision = 4;
 	m_fext = L"nc";
 	m_desc = L"Default preprocessor";
-	m_prolog = "G90G80G21G49"; //START
-	m_epilog = "M30"; //END
+	m_prolog = "G90 G80 G21 G49\n"; //START
+	m_epilog = "M30\n"; //END
 }
 
 PostProcessing::~PostProcessing()
@@ -585,12 +585,13 @@ bool PostProcessing::Read(const wxString& fileName)
 			if (first_start)
 			{
 				m_prolog = val;
+				m_prolog += L"\n";
 				first_start = false;
 			}
 			else
-			{ 
-				m_prolog += L"\n";
+			{ 				
 				m_prolog += val;
+				m_prolog += L"\n";
 			}
 		}
 		else if (wcscmp(arg, L"END") == 0)
@@ -598,12 +599,13 @@ bool PostProcessing::Read(const wxString& fileName)
 			if (first_end)
 			{
 				m_epilog = val;
+				m_epilog += L"\n";
 				first_end = false;
 			}
 			else
-			{
-				m_epilog += L"\n";
+			{				
 				m_epilog += val;
+				m_epilog += L"\n";
 			}
 		}		
 	}
@@ -615,23 +617,28 @@ bool PostProcessing::Read(const wxString& fileName)
 
 bool PostProcessing::CreateTmpFile(const wchar_t *fname, const wxString &context)
 {
-	FILE *file = _wfopen(fname, L"wt,ccs=UTF-8");
-	if (file == NULL)
+
+#if wxUSE_FFILE
+	// Take care to use "b" to ensure that possibly non-native EOLs in the file
+	// contents are not mangled when saving it.
+	wxFFile file(fname, wxS("wb"));
+#elif wxUSE_FILE
+	wxFile file(filename, wxFile::write);
+#endif
+
+	if ( !file.IsOpened() )
 	{
 		wxString msg = wxString::Format(_("Can not open create file %s"), fname);
 		wxMessageBox(msg, _("Error opening file"));
 		return false;
 	}
-	// Write a string into the file.
-	size_t strSize = context.length();
-	if (fwrite(context.wc_str(), sizeof(wchar_t), strSize, file) != strSize)
+
+	if (!file.Write(context, *wxConvCurrent))
 	{
 		wxString msg = wxString::Format(_("Can not write to the file %s"), fname);
 		wxMessageBox(msg, _("Error writing file"));
-		fclose(file);
 		return false;
 	}
-	fclose(file);
 	return true;
 }
 

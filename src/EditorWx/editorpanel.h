@@ -102,7 +102,7 @@ public:
 	void Check();
 	void Draw3D();
 	void ConvertGcmc();
-	void ConvertGcmc(const wchar_t *src_fname, const  wchar_t *dst_fname, const wchar_t *args);
+	void ConvertGcmc(const wchar_t *src_fname, const  wchar_t *dst_fname, const wchar_t *args, bool addprologepilog);
 	void UpdateStatistics(const ConvertGCMCInfo &dt);
 	void UpdateSimulationPos(int index, int dist, const TrackPointGL &pt);
 

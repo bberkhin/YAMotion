@@ -21,7 +21,7 @@
 #include "bitmaps/convert.xpm"
 #include "bitmaps/add.xpm"
 #include "bitmaps/folder.xpm"
-
+#include "bitmaps/save.xpm"
 
 static const unsigned char left_bits[] = {
    0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xfe, 0x7f, 0xfe, 0x3f, 0xfe,
@@ -116,6 +116,7 @@ wxBitmap ExArtProvider::CreateBitmap(const wxArtID& id, const wxArtClient& clien
 		else
 			return wxBitmap(file_new_xpm);
 	}
+	CHECK_ART_ID(ART_SAVE, client, file_save_xpm)
 	CHECK_ART_ID(wxART_FILE_OPEN, client, file_open_xpm)
 	CHECK_ART_ID(ART_PREFERENCES, client, preferences_xpm)
 	CHECK_ART_ID(ART_UPDATE, client, update_xpm)

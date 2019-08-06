@@ -1,0 +1,89 @@
+{
+  //#define SCE_GCMC_DEFAULT 0
+  //SCE_GCMC_COMMENT 1
+  //SCE_GCMC_COMMENT_ML 2
+  //SCE_GCMC_VAR  3
+  //SCE_GCMC_NUMBER 4,
+  //SCE_GCMC_OPERATORS  5
+  //SCE_GCMC_IDENTIFIER 6,
+  //SCE_GCMC_WORD1 7
+  //SCE_GCMC_WORD2 8,
+  //SCE_GCMC_STRING 9
+  "name": "Black GCMC",
+  "type": "GCMC",
+  "fontsize": 10,
+  "fontname" : "",
+  "fontname1" : "Courier new",
+   "fclr": "WHITE",
+  "bclr": "",
+  "italic": false,
+  "bold": false,
+  "styles": [
+    {
+      "nameid": 0,
+      "name": "default",
+      "fclr": "WHITE"
+    },
+    {
+      "nameid": 1,
+      "name": "comment",
+      "fclr": "#84e484",
+      "italic": false
+    },
+    {
+      "nameid": 2,
+      "name": "comment_ml",
+      "fclr": "#84e484"
+    },
+    {
+      "nameid": 3,
+      "name": "var",
+      "fclr": "WHITE",
+      "bold": true
+    },
+    {
+      "nameid": 4,
+      "name": "number",
+      "fclr": "#ee6677",
+      "bold": true
+    },
+    {
+      "nameid": 5,
+      "name": "operators",
+      "fclr": "#ffffff",
+      "bold": true
+    },
+    {
+      "nameid": 6,
+      "name": "identifiers",
+      "fclr": "#ffbb44"
+    },
+    {
+      "nameid": 7,
+      "name": "functions",
+      "fclr": "#ff0044",
+      "bold": true
+    },
+    {
+      "nameid": 8,
+      "name": "syntaxwords",
+      "fclr": "#55aadd",
+      "bold": true
+    },
+    {
+      "nameid": 9,
+      "name": "units",
+      "fclr": "#ffffff",
+      "bold": true
+    },
+    {
+      "nameid": 10,
+      "name": "strings",
+      "fclr": "#238e23",
+      "bold": true,
+      "italic": true
+    }
+  ]
+}
+	
+	

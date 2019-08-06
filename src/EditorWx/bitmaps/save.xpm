@@ -1,22 +1,20 @@
 /* XPM */
-static char *fcac68a2a1f34b6c8895c5cfab77357d[] = {
+static const char *const file_save_xpm[] = {
 /* columns rows colors chars-per-pixel */
-"12 13 3 1 ",
+"12 12 2 1 ",
 "  c #DDDDDD",
-". c gray87",
 "X c None",
 /* pixels */
 "XXXXXXXXXXXX",
-"     XX  .XX",
+"     XX   XX",
 "     XX    X",
 "     XX     ",
 "     XX     ",
-"   . XX .   ",
+"     XX     ",
 "   XXXXXX   ",
 "    XXXX    ",
 "     XX     ",
 "            ",
 "            ",
-"            ",
-"............"
+"            "
 };

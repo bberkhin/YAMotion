@@ -1,0 +1,107 @@
+{
+  //#define SCE_JSON_NUMBER 1
+  //#define SCE_JSON_STRING 2
+  //#define SCE_JSON_STRINGEOL 3
+  //#define SCE_JSON_PROPERTYNAME 4
+  //#define SCE_JSON_ESCAPESEQUENCE 5
+  //#define SCE_JSON_LINECOMMENT 6
+  //#define SCE_JSON_BLOCKCOMMENT 7
+  //#define SCE_JSON_OPERATOR 8
+  //#define SCE_JSON_URI 9
+  //#define SCE_JSON_COMPACTIRI 10
+  //#define SCE_JSON_KEYWORD 11
+  //#define SCE_JSON_LDKEYWORD 12
+  //#define SCE_JSON_ERROR 13
+
+  "name": "Black JSON",
+  "type": "GCMC",
+  "fontsize": 10,
+  "fontname": "",
+  "fontname1": "Courier new",
+  "fclr": "WHITE",
+  "bclr": "",
+  "italic": false,
+  "bold": false,
+  "styles": [
+    {
+      "nameid": 0,
+      "name": "default",
+      "fclr": "WHITE"
+    },
+    {
+      "nameid": 1,
+      "name": "number",
+      "fclr": "#ee6677",
+      "bold": true
+    },
+    {
+      "nameid": 2,
+      "name": "strings",
+      "fclr": "#84e484",
+      "bold": true,
+    },
+    {
+      "nameid": 3,
+      "name": "stringeol",
+      "fclr": "#84e484",
+      "bold": true,
+    },
+    {
+      "nameid": 4,
+      "name": "propname",
+      "fclr": "#55aadd",
+
+      "bold": true
+    },
+    {
+      "nameid": 5,
+      "name": "SCE_JSON_ESCAPESEQUENCE",
+      "fclr": "#84e484",
+      "bold": true
+    },
+    {
+      "nameid": 6,
+      "name": "comment",
+      "fclr": "#84e484",
+      "italic": false
+    },
+    {
+      "nameid": 7,
+      "name": "comment_ml",
+      "fclr": "#84e484"
+    },
+
+    {
+      "nameid": 8,
+      "name": "SCE_JSON_OPERATOR",
+      "fclr": "WHITE",
+      "bold": true
+    },
+    {
+      "nameid": 9,
+      "name": "number",
+      "fclr": "#ee6677",
+      "bold": true
+    },
+    {
+      "nameid": 11,
+      "name": "syntaxwords",
+      "fclr": "#ffbb44",
+      "bold": true
+    },
+    {
+      "nameid": 12,
+      "name": "SCE_JSON_LDKEYWORD",
+      "fclr": "#ffbb44",
+      "bold": true
+    },
+    {
+      "nameid": 13,
+      "name": "error",
+      "fclr": "#ff0000",
+      "bold": true
+    }
+  ]
+}
+	
+	

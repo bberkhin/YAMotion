@@ -35,6 +35,7 @@ enum
 	ID_CHECKBUTTON,
 	ID_CLOSEOUTPUT,
 	ID_CLOSE3DVIEW,
+	ID_SAVEBUTTON,
 	ID_BTN_TOP,
 	ID_BTN_ISOMETRIC,
 	ID_BTN_BOTTOM,
@@ -153,6 +154,9 @@ wxBoxSizer *EditorPanel::CreateHeaderPanel()
 	}
 
 	FlatButton *ph;
+	//ADD_COMMAND_TO_VIEW(ID_SAVEBUTTON, _("Save"), ART_SAVE)
+	//ph->SetCommand(wxID_SAVE);
+
 	if ((ftype == FILETYPE_NC) || (ftype == FILETYPE_GCMC) )
 	{
 		ADD_COMMAND_TO_VIEW(ID_CHECKBUTTON, _("Check"), ART_VERIFY)
@@ -499,9 +503,9 @@ wxSizer *View3DPanel::CreateSimulationPanel()
 	FlatButton *btv = new FlatButton(this, ID_BTN_SHOWAXIS, _("AXIS"));
 	btns->Add(btv, 0, wxALIGN_CENTRE_VERTICAL);	
 	btns->AddSpacer(5);
-	btv = new FlatButton(this, ID_BTN_SHOWGRID, _("GRID"));
-	btns->Add(btv, 0, wxALIGN_CENTRE_VERTICAL);
-	btns->AddSpacer(5);
+	//btv = new FlatButton(this, ID_BTN_SHOWGRID, _("GRID"));
+	//btns->Add(btv, 0, wxALIGN_CENTRE_VERTICAL);
+	//btns->AddSpacer(5);
 	btv = new FlatButton(this, ID_BTN_SHOWBOX, _("BOX"));
 	btns->Add(btv, 0, wxALIGN_CENTRE_VERTICAL);
 	panel->AddSpacer(5);
@@ -1054,12 +1058,12 @@ void FilePage::Check()
 	m_worker->Check();
 }
 
-void FilePage::ConvertGcmc(const wchar_t *src_fname, const  wchar_t *dst_fname, const wchar_t *args)
+void FilePage::ConvertGcmc(const wchar_t *src_fname, const  wchar_t *dst_fname, const wchar_t *args, bool addprologepilog)
 {
 	if (m_worker->IsRunning())
 		return;
 	ShowLog();
-	m_worker->RunGcmc(src_fname, dst_fname, args, ConvertGcmcPasteFile);
+	m_worker->RunGcmc(src_fname, dst_fname, args, ConvertGcmcPasteFile, addprologepilog);
 }
 
 void FilePage::ConvertGcmc()

@@ -173,7 +173,7 @@ public:
 	void  Draw3D( bool runsimulation );
 	int DoConvertGcmc(DoAfterConvertGcmc what_to_do);
 	LogWindow *GetLogWnd();
-	int RunGcmc(const wchar_t *src_fname, const  wchar_t *dst_fname, const wchar_t *args, DoAfterConvertGcmc what_to_do);
+	int RunGcmc(const wchar_t *src_fname, const  wchar_t *dst_fname, const wchar_t *args, DoAfterConvertGcmc what_to_do, bool addprologepilog = true);
 	void SemulateStart();
 	void SemulatePause();
 	void SemulateStop();
