@@ -438,12 +438,14 @@ GcmcCodeDescription::GcmcCodeDescription()
 	wchar_t *c = 0;
 	wchar_t line[512];
 	int n;
+	std::wstring key;
 	while (true)
 	{
 		if (fgetws(line, 512, file) == NULL)
 			break;
 		line[511] = 0;
 		n = wcsnlen(line, 512);
+
 		// remove '\n' && '\r'
 		if (n > 0 && (line[n - 1] == '\n' || line[n - 1] == '\r'))
 		{
@@ -456,15 +458,30 @@ GcmcCodeDescription::GcmcCodeDescription()
 		}
 
 		c = wcschr(line, L'=');
-		if (c == NULL)
+		if (c != NULL)
+		{
+			*c = 0;
+			key = line;
+			c++;
+		}
+		else
+			c = line;
+
+		if (key.empty())
 			continue;
-		*c = 0;
 		// change '|' to '\n' 
-		for (wchar_t *s = c + 1; *s != 0; s++)
+		for (wchar_t *s = c; *s != 0; s++)
 		{
 			if (*s == '|') *s = '\n';
 		}
-		commands[line] = c + 1;
+		auto it = commands.find(key);
+		if (it == commands.end() )
+			commands[line] = c;
+		else
+		{
+			it->second += L"\n";
+			it->second += c;
+		}
 	}
 	fclose(file);
 }
