@@ -458,7 +458,12 @@ GcmcCodeDescription::GcmcCodeDescription()
 		}
 
 		c = wcschr(line, L'=');
-		if (c != NULL)
+		if (c != NULL && c != line && *(c-1) == L'\\' )
+		{
+			*(c - 1) = L' ';
+			c = line;
+		}
+		else if (c != NULL)
 		{
 			*c = 0;
 			key = line;

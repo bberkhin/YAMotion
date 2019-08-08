@@ -449,7 +449,7 @@ static wxString GetWord(const wxString &in, int pos)
 	const wchar_t *s = in.wc_str() + pos;
 	for (start = pos; start >= 0; start--, s--)
 	{
-		if ( !(::iswalpha(*s) || ::iswdigit(*s)) )
+		if ( !(::iswalpha(*s) || ::iswdigit(*s) || *s == L'_') )
 		{
 			start++;
 			break;
@@ -460,7 +460,7 @@ static wxString GetWord(const wxString &in, int pos)
 	s = in.wc_str() + pos;
 	for (end = pos; *s != 0; s++, end++)
 	{
-		if (!(::iswalpha(*s) || ::iswdigit(*s)))
+		if (!(::iswalpha(*s) || ::iswdigit(*s) || *s == L'_'))
 		{
 			end--;
 			break;

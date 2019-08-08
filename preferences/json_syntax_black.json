@@ -38,7 +38,7 @@
       "nameid": 2,
       "name": "strings",
       "fclr": "#84e484",
-      "bold": true,
+      "bold": true
     },
     {
       "nameid": 3,
@@ -50,7 +50,6 @@
       "nameid": 4,
       "name": "propname",
       "fclr": "#55aadd",
-
       "bold": true
     },
     {
