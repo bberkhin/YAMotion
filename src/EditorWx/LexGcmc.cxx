@@ -101,7 +101,7 @@ static void ColouriseGcmcDoc(Sci_PositionU startPos, Sci_Position length, int in
 		//}
 		else if ((sc.state == SCE_GCMC_IDENTIFIER)  )
 		{
-			if (!isALetter(sc.ch))
+			if (!isALetter(sc.ch) && !IsADigit(sc.ch))
 			{
 				char s[124];
 				sc.GetCurrent(s, sizeof(s));

@@ -445,7 +445,6 @@ GcmcCodeDescription::GcmcCodeDescription()
 			break;
 		line[511] = 0;
 		n = wcsnlen(line, 512);
-
 		// remove '\n' && '\r'
 		if (n > 0 && (line[n - 1] == '\n' || line[n - 1] == '\r'))
 		{
@@ -456,6 +455,8 @@ GcmcCodeDescription::GcmcCodeDescription()
 				line[n - 1] = 0;
 			}
 		}
+		if (n == 0) // skip empty line
+			continue;
 
 		c = wcschr(line, L'=');
 		if (c != NULL && c != line && *(c-1) == L'\\' )

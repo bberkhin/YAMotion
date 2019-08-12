@@ -2,9 +2,7 @@
 <macroses>
   <macros>
     <name>Mill circular pocket</name>
-    <desc>
-      Mill circular pocket; and circle raius
-    </desc>
+    <desc>Mill circular pocket; and circle raius</desc>
     <image>circular_pocket.jpg</image>
     <gcmc>circular_pocket.gcmc</gcmc>
     <include>circular_pocket.inc.gcmc</include>

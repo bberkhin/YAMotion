@@ -149,6 +149,7 @@ private:
 	void draw_axis_letters();
 	void update_tool_coords(float x, float y, float z);
 	void print_string(const glm::vec4 &color, int x, int y, char *s, int len);
+	CoordsBox CheckBox(const CoordsBox &bx);
 	
 private:
 	wxWindow *appframe;

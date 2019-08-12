@@ -2,12 +2,15 @@
 #include <wx/textctrl.h>
 #include "standartpaths.h"
 #include "macrosparamdlg.h"
+#include "flatstaticline.h"
+#include "flatbuttom.h"
 #include "prefs.h"
 
 #define ID_IN_NEW_WINDOW wxID_HIGHEST+100
 #define ID_AS_GCMC_CODE  wxID_HIGHEST+101
 
-
+#define MARGIN_HOR 10
+#define MARGIN_VERT 10
 
 wxBEGIN_EVENT_TABLE(MacrosParamDlg, wxDialog)
 	EVT_BUTTON(wxID_OK, MacrosParamDlg::OnOk)
@@ -16,96 +19,160 @@ wxEND_EVENT_TABLE()
 bool MacrosParamDlg::m_new_window = true;
 bool MacrosParamDlg::m_as_gcmc = false;
 
-MacrosParamDlg::MacrosParamDlg(MacrosDesc *pm, wxWindow *parent, int curfiletype )
-	: mdesc(pm), m_curfiletype(curfiletype), 
-	wxDialog(parent, wxID_ANY, wxEmptyString,wxDefaultPosition, wxDefaultSize,wxDEFAULT_DIALOG_STYLE)//| wxRESIZE_BORDER) 
+
+class FaltChoise : public wxChoice
+{
+public:
+	FaltChoise(wxWindow *parent, wxWindowID id)
+		: wxChoice(parent, id, wxDefaultPosition, wxDefaultSize) { }
+protected:
+virtual WXHBRUSH MSWControlColor(WXHDC hDC, WXHWND hWnd) wxOVERRIDE;
+};
+
+WXHBRUSH FaltChoise::MSWControlColor(WXHDC hDC, WXHWND hWnd)
+{
+	static HBRUSH hbr = 0;
+	if (!IsThisEnabled())
+		return MSWControlColorDisabled(hDC);
+
+	SetTextColor(hDC, RGB(255, 255, 0));
+	SetBkColor(hDC, RGB(0, 255, 0));
+	if (hbr == 0 )
+		hbr = CreateSolidBrush(RGB(0, 255, 255));
+	return hbr;
+	//return wxChoiceBase::MSWControlColor(hDC, hWnd);
+}
+
+
+MacrosParamDlg::MacrosParamDlg(MacrosDesc *pm, wxWindow *parent, int curfiletype)
+	: mdesc(pm), m_curfiletype(curfiletype),
+	wxDialog(parent, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxDEFAULT_DIALOG_STYLE)//| wxRESIZE_BORDER) 
+{
+
+	// sets the application title
+	SetTitle(mdesc->name.c_str());
+	// create 2 column flex grid sizer with growable 2nd column
+	wxFlexGridSizer *sizer = new wxFlexGridSizer(2, MARGIN_VERT, MARGIN_HOR);
+	sizer->AddGrowableCol(0);
+	int id_input = wxID_HIGHEST;
+	for (auto it = mdesc->args.begin(); it != mdesc->args.end(); ++it)
 	{
-
-		// sets the application title
-		SetTitle(mdesc->name.c_str());
-					
-		wxBoxSizer *inputpane = new wxBoxSizer(wxHORIZONTAL);
-		
-		wxStaticBoxSizer *textinfos = new wxStaticBoxSizer(
-			new wxStaticBox(this, wxID_ANY, _("Fill parameters:")),
-			wxVERTICAL);
-
-		wxStaticText *Info = new wxStaticText(this, wxID_ANY, pm->desc );
-		// create 2 column flex grid sizer with growable 2nd column
-		wxFlexGridSizer *sizer = new wxFlexGridSizer(2, 10, 20);
-		sizer->AddGrowableCol(0);
-		int id_input = wxID_HIGHEST;
-		for(auto it = mdesc->args.begin(); it != mdesc->args.end(); ++it )
-		{ 
-			wxStaticText *prompt = new wxStaticText(this, wxID_ANY, it->name);
-			sizer->Add(prompt, 0, 0);
+		wxStaticText *prompt = new wxStaticText(this, wxID_ANY, it->name);
+		sizer->Add(prompt, 0, wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL);
 		//	textinfos->Add(0, 6);	
-			if (it->type == "list" )
-			{
-				int select = 0, i = 0;
-				wxComboBox *plist = new wxComboBox(this, id_input);
-				for (auto itl = it->vars.begin(); itl != it->vars.end(); ++itl, ++i)
-				{
-					plist->Append(itl->second, (void *)itl->first.c_str() );
-					if (it->defval == itl->first)
-						select = i;
-				}
-				plist->SetSelection(select);
-				sizer->Add(plist, 0, 0);
-			}
-			else
-			{
-				wxTextCtrl *pedit = new wxTextCtrl(this, id_input, it->defval);
-				sizer->Add(pedit, 0, 0);
-			}
-			id_input++;
-			//textinfos->Add(0, 6);
-		}
-		textinfos->Add(sizer, 1, wxALL | wxEXPAND, 10);
-
-
-		wxCheckBox *pcheck_newwnd = new wxCheckBox(this, ID_IN_NEW_WINDOW, _("Create new window"));
-
-		if (curfiletype == FILETYPE_UNKNOW)
+		if (it->type == "list")
 		{
-			m_new_window = true;
-			pcheck_newwnd->Enable(false);
-		}
-		pcheck_newwnd->SetValue(m_new_window );
-		textinfos->Add(pcheck_newwnd);
-
-		wxCheckBox *pcheck_as_gcmc = new wxCheckBox(this, ID_AS_GCMC_CODE, _("Insert as GCMC"));
-		pcheck_as_gcmc->SetValue(m_as_gcmc);
-		textinfos->Add(pcheck_as_gcmc);
-			   
-		textinfos->Add(Info);	
-		inputpane->Add(textinfos);
-
-		// add picture
-		if (!mdesc->imgfile.empty())
-		{
-			// check in lang directory
-			std::filesystem::path imagepath = StandartPaths::Get()->GetMacrosPath(mdesc->imgfile.c_str(), true);
-			if (!std::filesystem::exists(imagepath) )
-				imagepath = StandartPaths::Get()->GetMacrosPath(mdesc->imgfile.c_str(), false);
-			wxImage image;
-			if (image.LoadFile(imagepath.c_str()) )
+			int select = 0, i = 0;
+			wxChoice *plist = new wxChoice(this, id_input);
+			for (auto itl = it->vars.begin(); itl != it->vars.end(); ++itl, ++i)
 			{
-				wxBitmap bmp(image);
-				wxStaticBitmap *pbmpctrl = new wxStaticBitmap(this, wxID_ANY, bmp);
-				inputpane->Add(pbmpctrl);
+				plist->Append(itl->second, (void *)itl->first.c_str());
+				if (it->defval == itl->first)
+					select = i;
 			}
+			plist->SetSelection(select);
+			sizer->Add(plist, 0, wxEXPAND);
 		}
-		
+		else
+		{
+			wxTextCtrl *pedit = new wxTextCtrl(this, id_input, it->defval);
+			sizer->Add(pedit, 0, wxEXPAND);
+		}
+		id_input++;
+		//textinfos->Add(0, 6);
+	}
 
-		// total pane
-		wxBoxSizer *totalpane = new wxBoxSizer(wxVERTICAL);
-		totalpane->Add(inputpane, 0, wxEXPAND | wxLEFT | wxRIGHT, 10);
-		totalpane->Add(0, 10);
-		totalpane->Add(CreateStdDialogButtonSizer(wxOK | wxCANCEL), 0, wxALL | wxALIGN_RIGHT, 2);
+	wxBoxSizer *leftColumn = new wxBoxSizer(wxVERTICAL);
+	leftColumn->Add(new wxStaticText(this, wxID_ANY, pm->desc), 0, wxEXPAND);
+	leftColumn->AddSpacer(MARGIN_VERT);
+	leftColumn->Add(new FlatStaticLine(this, wxLI_HORIZONTAL), 0, wxGROW | wxLEFT | wxRIGHT);
+	leftColumn->AddSpacer(MARGIN_VERT);
+	leftColumn->Add(new wxStaticText(this, wxID_ANY, _("Fill parameters:")), 0, wxEXPAND);
+	leftColumn->Add(sizer, 0, wxALL | wxEXPAND);
+	//
+	leftColumn->AddStretchSpacer();
+	leftColumn->AddSpacer(MARGIN_VERT);
+	leftColumn->Add(new FlatStaticLine(this, wxLI_HORIZONTAL), 0, wxGROW | wxLEFT | wxRIGHT);
 
-		
-		SetSizerAndFit(totalpane);
+
+	wxBoxSizer *rightColumn = new wxBoxSizer(wxVERTICAL);
+	// add picture
+	if (!mdesc->imgfile.empty())
+	{
+		// check in lang directory
+		std::filesystem::path imagepath = StandartPaths::Get()->GetMacrosPath(mdesc->imgfile.c_str(), true);
+		if (!std::filesystem::exists(imagepath))
+			imagepath = StandartPaths::Get()->GetMacrosPath(mdesc->imgfile.c_str(), false);
+		wxImage image;
+		if (image.LoadFile(imagepath.c_str()))
+		{
+			wxBitmap bmp(image);
+			wxStaticBitmap *pbmpctrl = new wxStaticBitmap(this, wxID_ANY, bmp);
+			rightColumn->Add(pbmpctrl);
+			rightColumn->AddSpacer(MARGIN_VERT);
+		}
+	}
+	wxCheckBox *pcheck_newwnd = new wxCheckBox(this, ID_IN_NEW_WINDOW, _("Create new window"));
+	if (curfiletype == FILETYPE_UNKNOW)
+	{
+		m_new_window = true;
+		pcheck_newwnd->Enable(false);
+	}
+	pcheck_newwnd->SetValue(m_new_window);
+	rightColumn->Add(pcheck_newwnd);
+	rightColumn->AddSpacer(MARGIN_VERT);
+
+	wxCheckBox *pcheck_as_gcmc = new wxCheckBox(this, ID_AS_GCMC_CODE, _("Insert as GCMC"));
+	pcheck_as_gcmc->SetValue(m_as_gcmc);
+	rightColumn->Add(pcheck_as_gcmc);
+
+	wxBoxSizer *inputpane = new wxBoxSizer(wxHORIZONTAL);
+	inputpane->AddSpacer(MARGIN_HOR);
+	inputpane->Add(leftColumn, 1, wxALL | wxEXPAND);
+	inputpane->AddSpacer(MARGIN_HOR);
+	inputpane->Add(rightColumn);
+	inputpane->AddSpacer(MARGIN_HOR);
+	// total pane
+	wxBoxSizer *totalpane = new wxBoxSizer(wxVERTICAL);
+	totalpane->AddSpacer(MARGIN_VERT);
+	totalpane->Add(inputpane, 0, wxEXPAND | wxLEFT | wxRIGHT);
+	//totalpane->AddSpacer(MARGIN_VERT);
+	/*
+	wxBoxSizer *buttons = new wxBoxSizer(wxHORIZONTAL);
+
+	talpane->Add(CreateDialogButtons(), 0, wxALL | wxALIGN_RIGHT, 2);
+
+	buttons->Add(new FlatButton(this, wxID_OK, _("&Ok")));
+	buttons->Add(new FlatButton(this, wxID_CANCEL, _("&Cancel")));
+	totalpane->Add(buttons, 0, wxALL | wxALIGN_RIGHT, 2);
+	*/
+
+	totalpane->Add(CreateStdDialogButtonSizer(wxOK | wxCANCEL), 0, wxALL | wxALIGN_RIGHT, 2);
+	SetSizerAndFit(totalpane);
+	//UpdateThemeColor();
+
+}
+
+
+
+void MacrosParamDlg::UpdateThemeColor()
+{
+
+	ColourScheme *clrs = Preferences::Get()->GetColorScheme();
+	wxColor bgColor = clrs->Get(ColourScheme::WINDOW);
+	wxColor fgColor = clrs->Get(ColourScheme::WINDOW_TEXT);
+
+	SetBackgroundColour(bgColor);
+	SetForegroundColour(fgColor);
+
+	wxWindowList::compatibility_iterator node = GetChildren().GetFirst();
+	while (node)
+	{
+		wxWindow* child = node->GetData();
+		child->SetBackgroundColour(bgColor);
+		child->SetForegroundColour(fgColor);
+		node = node->GetNext();
+	}
 }
 
 
@@ -124,7 +191,7 @@ bool MacrosParamDlg::GetAndValidateInput()
 		{
 			if (mdesc->args[i].type == "list")
 			{
-				wxComboBox *plist = dynamic_cast<wxComboBox *>(pwnd);
+				wxChoice *plist = dynamic_cast<wxChoice *>(pwnd);
 				int select = plist->GetSelection();
 				if (select >= 0)
 				{

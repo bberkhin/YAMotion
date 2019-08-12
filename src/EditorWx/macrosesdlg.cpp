@@ -22,7 +22,7 @@ MacrosesDlg::MacrosesDlg(Macroses *pm,wxWindow *parent)
 	
 	textinfos->Add(list, 0, 0); //wxEXPAND
 	textinfos->Add(0, 6);
-	ptext = new wxStaticText(this, wxID_ANY, "Just to define place fo this we need vore space ");
+	ptext = new wxStaticText(this, wxID_ANY, L"Just to define place for this we need vore space ");
 	textinfos->Add(ptext, 0, 0);
 	textinfos->Add(0, 6);
 

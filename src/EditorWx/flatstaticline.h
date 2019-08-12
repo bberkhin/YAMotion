@@ -27,6 +27,11 @@ public:
 		Create(parent, id, pos, size, style);
 	}
 
+	FlatStaticLine(wxWindow *parent, long style)
+	{
+		Create(parent, wxID_ANY, wxDefaultPosition, wxDefaultSize, style);
+	}
+
 	bool Create(wxWindow *parent,
 		wxWindowID id = wxID_ANY,
 		const wxPoint &pos = wxDefaultPosition,

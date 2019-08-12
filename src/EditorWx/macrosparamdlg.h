@@ -11,6 +11,7 @@ public:
 private:
 	void OnOk(wxCommandEvent& event);
 	bool GetAndValidateInput();
+	void UpdateThemeColor();
 private:
 	MacrosDesc *mdesc;
 	static bool m_new_window;

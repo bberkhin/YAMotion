@@ -31,10 +31,9 @@ CheckGCodeThread::CheckGCodeThread(Worker *woker, const wxString &fname_)
 
 	m_woker = woker;
 	Preferences *pref = Preferences::Get();	
-	pexec = new ExecutorLogWnd(m_woker, pref->Common().enableLogExecution);
 	plogger = new LoggerWnd(m_woker);
+	pexec = new ExecutorLogWnd(m_woker, pref->Common().enableLogExecution);
 	ppret = new GCodeInterpreter(wxGetApp().GetEnvironment(), pexec, plogger);
-
 }
 
 CheckGCodeThread::~CheckGCodeThread()

@@ -349,13 +349,30 @@ void View3D::clear()
 
 void View3D::setBox(const CoordsBox &bx)
 {
-//	box = bx; 	
-	camera.set_box(bx);
-	
-	// prepare axis 
-	//float len = camera.pix_to_mm(100.0f); // μμ for 100 pix len
-	
+	CoordsBox boxOk = CheckBox(bx);
+	camera.set_box(boxOk);
 	Refresh(false);
+}
+
+CoordsBox View3D::CheckBox(const CoordsBox &bx)
+{
+	CoordsBox boxOk = bx;
+	if (boxOk.Max.x == boxOk.Min.x)
+	{
+		boxOk.Min.x -= 0.5;
+		boxOk.Max.x += 0.5;
+	}
+	if (boxOk.Max.y == boxOk.Min.y)
+	{
+		boxOk.Min.y -= 0.5;
+		boxOk.Max.y += 0.5;
+	}
+	if (boxOk.Max.z == boxOk.Min.z)
+	{
+		boxOk.Min.z -= 0.5;
+		boxOk.Max.z += 0.5;
+	}
+	return boxOk;
 }
 
 void View3D::setTrack(TrackPoints &ptr)

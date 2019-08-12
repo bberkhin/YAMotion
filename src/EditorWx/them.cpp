@@ -487,5 +487,5 @@ void ColourScheme::InitDef()
 	m_colors[MSG_LOG_WARNING] = wxColour(0x44bbff);
 
 	// border
-	m_colors[BORDER] = wxColour(0xFF0000);
+	m_colors[BORDER] = wxColour(0x00FF00);
 }
