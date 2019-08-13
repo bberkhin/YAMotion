@@ -846,57 +846,6 @@ void AppFrame::DoRunMacros(int indx)
 }
 
 
-void AppFrame::DoMathCalc( DoMathBase &mth )
-{
-	Edit *pedit = 0;
-	wxWindow *wnd = m_notebook->GetCurrentPage();
-	FilePage *panel = dynamic_cast<FilePage *>(wnd);
-	if (panel)
-		pedit = panel->GetEdit();
-
-	if (!pedit)
-		return;
-
-	char strOut[MAX_GCODE_LINELEN];
-	int line_start;
-	int line_end;
-
-	long from, to;
-
-	if (mth.InSelected())
-	{
-		pedit->GetSelection(&from, &to);
-		if (from == to)
-		{
-			wxMessageBox(_("Uups there is no any selection"));
-			return;
-		}
-		line_start = pedit->LineFromPosition(from);
-		line_end = pedit->LineFromPosition(to);
-	}
-	else
-	{
-		line_start = 0;
-		line_end = pedit->GetLineCount() - 1;
-	}
-
-	for (int i = line_start; i <= line_end; i++)
-	{
-		wxString str = pedit->GetLine(i);
-		if (mth.Process(str.c_str(), strOut))
-		{
-			long from = pedit->PositionFromLine(i);
-			long to = from + str.length();
-			pedit->Replace(from, to, strOut);
-		}
-	}
-	if (mth.InSelected())
-	{
-		to = pedit->PositionFromLine(line_end + 1);
-		pedit->SetSelection(from, pedit->PositionBefore(to));
-	}
-
-}
 
 // properties event handlers
 void AppFrame::OnMathCalc(wxCommandEvent &WXUNUSED(event))
@@ -909,11 +858,11 @@ void AppFrame::OnMathCalc(wxCommandEvent &WXUNUSED(event))
 	else
 		return;
 	
-	DoMathSimple mth;
-	MathSimpleDlg dlg(&mth, this, pedit->HasSelection() );
+	std::shared_ptr<DoMathBase> mth( new DoMathSimple() );
+	MathSimpleDlg dlg(dynamic_cast<DoMathSimple *>(mth.get()), this, pedit->HasSelection() );
 	if (dlg.ShowModal() != wxID_OK)
 		return;
-	DoMathCalc(mth);
+	panel->DoMathCalc(mth);
 }
 
 
@@ -953,11 +902,12 @@ void AppFrame::OnMathExpression(wxCommandEvent &WXUNUSED(event))
 
 	try
 	{
-		DoMathExpression mth;
-		MathExpressionDlg dlg(&mth, this, pedit->HasSelection());
+		
+		std::shared_ptr<DoMathBase> mth(new DoMathExpression());
+		MathExpressionDlg dlg(dynamic_cast<DoMathExpression *>(mth.get()), this, pedit->HasSelection());
 		if (dlg.ShowModal() != wxID_OK)
 			return;
-		DoMathCalc(mth);
+		panel->DoMathCalc(mth);
 	}
 	catch (mu::Parser::exception_type &e)
 	{

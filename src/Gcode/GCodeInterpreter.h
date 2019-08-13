@@ -47,7 +47,7 @@ namespace Interpreter
 	class GCodeInterpreter  //несомненно, это интерпретатор г-кода )
 	{
 	public:
-		GCodeInterpreter(IEnvironment *penv, IExecutor *ix, ILogger *logger);
+		GCodeInterpreter(IEnvironment *penv, IExecutor *ix, ILogger *logger,  int maxerrors_ = -1);
 		~GCodeInterpreter(void);
 
 		bool open_nc_file(const wchar_t *name = 0);             //запоминает строки текстового файла
@@ -167,6 +167,7 @@ namespace Interpreter
 		IExecutor *executor; //устройство, которое исполняет команды   
 		long fpos;
 		int motion_to_be;
+		int maxerrors; // max errors befor stop -1 - never stop
 	};
 
 

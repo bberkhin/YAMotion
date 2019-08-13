@@ -1,5 +1,6 @@
 #include "wx/wx.h"
 #include "editorpanel.h"
+
 #include "wx/artprov.h"
 #include "prefs.h"
 #include "wx/aui/framemanager.h"
@@ -856,6 +857,9 @@ LogPane::LogPane(wxWindow *parent, FilePage *fb)
 	totalpane->AddSpacer(7);
 	totalpane->Add(header, 0, wxEXPAND);
 	totalpane->Add(body, wxEXPAND, wxEXPAND); //wxEXPAND
+	m_gauge = new wxGauge(this, wxID_ADD,61000,wxDefaultPosition,wxDefaultSize, wxGA_HORIZONTAL| wxGA_SMOOTH | wxGA_PROGRESS);
+	wxSizerItem *item = totalpane->Add(m_gauge, 0, wxEXPAND); //wxEXPAND
+	item->Show(false);
 	
 	SetSashVisible(wxSASH_TOP, true);
 	SetAutoLayout(true);
@@ -888,6 +892,23 @@ void LogPane::UpdateThemeColor()
 void LogPane::OnClose(wxCommandEvent& WXUNUSED(ev))
 {
 	m_fb->HideLog();
+}
+
+void LogPane::StartPulse()
+{
+	wxSizerItem *item = GetSizer()->GetItem(m_gauge);
+	item->Show(true);
+	//Layout();
+}
+void LogPane::Pulse()
+{
+	m_gauge->Pulse();
+}
+void LogPane::StopPulse()
+{
+	wxSizerItem *item = GetSizer()->GetItem(m_gauge);
+	item->Show(false);
+	//Layout();
 }
 
 
@@ -1205,4 +1226,11 @@ bool FilePage::DoFileSave(bool askToSave, bool bSaveAs)
 	wxGetApp().GetFrame()->UpdateTitle(this);
 
 	return true;
+}
+
+
+void FilePage::DoMathCalc(std::shared_ptr<DoMathBase> mth)
+{
+	ShowLog();
+	m_worker->RunMath(mth);
 }

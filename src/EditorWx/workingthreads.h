@@ -7,7 +7,9 @@
 #include <wx/thread.h>
 #include <wx/process.h>
 #include "wx/event.h"
+#include "wx/filename.h"
 #include "View3D.h"
+#include "domath.h"
 
 struct ConvertGCMCInfo
 {
@@ -55,7 +57,7 @@ protected:
 	LoggerWnd *plogger;
 	ExecutorLogWnd *pexec;
 	GCodeInterpreter *ppret;
-	wxString fname;
+	wxFileName fname;
 };
 
 
@@ -77,7 +79,7 @@ protected:
 	LoggerWnd *plogger;
 	ExecutorView *pexec;
 	GCodeInterpreter *ppret;
-	wxString fname;
+	wxFileName fname;
 	bool m_runsimulation;
 	bool isOk;
 	//View3D *m_3Dview;
@@ -125,7 +127,20 @@ protected:
 	virtual wxThread::ExitCode Entry();
 	int m_speedk;
 	Worker *m_worker;
+};
 
+class Edit;
+class MathTransform : public wxThread
+{
+public:
+	MathTransform(Worker *worker, Edit *edit, std::shared_ptr<DoMathBase> mth);
+	~MathTransform();
+protected:
+	virtual wxThread::ExitCode Entry();
+	Worker *m_worker;
+	std::shared_ptr<DoMathBase> m_mth;
+	Edit *m_edit;
+	LoggerWnd *plogger;
 };
 
 
@@ -156,7 +171,7 @@ private:
 
 
 class FilePage;
-class LogWindow;
+class LogPane;
 
 class Worker : public wxEvtHandler
 {
@@ -164,15 +179,16 @@ class Worker : public wxEvtHandler
 	friend class Draw3DThread;
 	friend class GcmcProcess;
 	friend class SimulateCutting;
+	friend class MathTransform;
 public:
 	Worker(FilePage *fp);
 	~Worker();
 	void StopAll();
-	bool IsRunning() { 	return (m_checkThread || m_drawThread); 	}
+	bool IsRunning() { 	return (m_checkThread || m_drawThread || m_mathThread ); }
 	void  Check();
 	void  Draw3D( bool runsimulation );
 	int DoConvertGcmc(DoAfterConvertGcmc what_to_do);
-	LogWindow *GetLogWnd();
+	LogPane *GetLogWnd();
 	int RunGcmc(const wchar_t *src_fname, const  wchar_t *dst_fname, const wchar_t *args, DoAfterConvertGcmc what_to_do, bool addprologepilog = true);
 	void SemulateStart();
 	void SemulatePause();
@@ -183,6 +199,7 @@ public:
 	void SetSimulationPos(int percent);
 	void SetSimulationSpeed(int times );
 	int GetSimulationSpeed() {	return m_speedk;}
+	void RunMath(std::shared_ptr<DoMathBase> mth);
 
 protected:
 	//proccessing messages
@@ -204,15 +221,17 @@ private:
 	void SendEvnToFrame(wxEventType commandType, const wchar_t *str,int i = - 1);
 private:
 
-	FilePage *m_fp;	
+	FilePage *m_fp;
 	wxCriticalSection m_critsect;
 	CheckGCodeThread *m_checkThread;
 	Draw3DThread *m_drawThread;
 	SimulateCutting *m_simulateThread;
+	MathTransform *m_mathThread;
 	wxTimer m_timer;
 	GcmcProcess *m_gcmcProcess;
 	unsigned int m_gcmc_running_in_sec;
 	int m_speedk; // simuleation speed koefficient
+	
 
 	wxDECLARE_EVENT_TABLE();
 };

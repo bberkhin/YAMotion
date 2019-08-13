@@ -12,8 +12,8 @@ using namespace Interpreter;
 #pragma warning(disable:4996)
 
 //====================================================================================================
-GCodeInterpreter::GCodeInterpreter(IEnvironment *penv, IExecutor *ix, ILogger *log) :
-	env(penv), executor(ix), logger(log), gfile(0), cq(ix,&runner)
+GCodeInterpreter::GCodeInterpreter(IEnvironment *penv, IExecutor *ix, ILogger *log, int maxerrors_) :
+	env(penv), executor(ix), logger(log), maxerrors(maxerrors_), gfile(0), cq(ix,&runner)
 {
 	init();
 }
@@ -123,7 +123,7 @@ bool GCodeInterpreter::execute_file_int( long pos, ExecFunction fun, int &lineNu
 		fpos = ftell(gfile); 
 		cpy_close_and_downcase( line, line, lineNumber);
 	
-		if (executor)		
+		if (executor)
 			executor->set_current_line(lineNumber);
 
 		state.clear();
@@ -133,8 +133,16 @@ bool GCodeInterpreter::execute_file_int( long pos, ExecFunction fun, int &lineNu
 		if (state.code == PRAGRAMM_END || state.code == PRAGRAMM_ENDCLEAR || state.code == SUBROTINE_END )
 			break;
 
-		else if (state.code )
+		else if (state.code)
+		{
 			logger->log(LOG_ERROR, lineNumber, state.description.c_str());
+			if (maxerrors != -1 && logger->errors_count() >= maxerrors)
+			{
+				logger->log(LOG_INFORMATION, _("More than %d errors. Executing is stopped!"), maxerrors);
+				break;
+			}
+		}
+
 
 	}
 

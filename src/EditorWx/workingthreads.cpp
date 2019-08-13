@@ -32,8 +32,8 @@ CheckGCodeThread::CheckGCodeThread(Worker *woker, const wxString &fname_)
 	m_woker = woker;
 	Preferences *pref = Preferences::Get();	
 	plogger = new LoggerWnd(m_woker);
-	pexec = new ExecutorLogWnd(m_woker, pref->Common().enableLogExecution);
-	ppret = new GCodeInterpreter(wxGetApp().GetEnvironment(), pexec, plogger);
+	pexec = new ExecutorLogWnd(plogger, pref->Common().enableLogExecution);
+	ppret = new GCodeInterpreter(wxGetApp().GetEnvironment(), pexec, plogger, 100 );
 }
 
 CheckGCodeThread::~CheckGCodeThread()
@@ -52,11 +52,12 @@ wxThread::ExitCode CheckGCodeThread::Entry()
 {
 	if (ppret)
 	{
-		if (!ppret->open_nc_file(fname.c_str()))
+		if (!ppret->open_nc_file(fname.GetFullPath().wc_str()))
 		{
-			plogger->log(LOG_ERROR, _("Can not open file: %s"), fname.c_str());
+			plogger->log(LOG_ERROR, wxString::Format(_("Can not open file: %s ..."), fname.GetFullPath()).c_str() );
 			return NULL;
 		}
+		plogger->log(LOG_INFORMATION, wxString::Format(_("Start checking: %s"), fname.GetFullName()).c_str());
 		ppret->execute_file();
 	}
 
@@ -82,7 +83,7 @@ Draw3DThread::Draw3DThread(Worker *worker, const wchar_t *fname_, bool runsimula
 	m_worker = worker;
 	plogger = new LoggerWnd(m_worker);
 	pexec = new ExecutorView(plogger, wxGetApp().GetEnvironment() );
-	ppret = new GCodeInterpreter(wxGetApp().GetEnvironment(), pexec, plogger);
+	ppret = new GCodeInterpreter(wxGetApp().GetEnvironment(), pexec, plogger, 100);
 }
 
 void Draw3DThread::Update3DView()
@@ -113,14 +114,15 @@ Draw3DThread::~Draw3DThread()
 
 wxThread::ExitCode Draw3DThread::Entry()
 {
-	if (!ppret->open_nc_file(fname.c_str()))
+	if (!ppret->open_nc_file(fname.GetFullPath().c_str()))
 	{
-		plogger->log(LOG_ERROR, _("Can not open file: %s"), fname.c_str());
+		plogger->log(LOG_ERROR, wxString::Format(_("Can not open file: %s ..."), fname.GetFullPath()).c_str());
 		return NULL;
 	}
-	ppret->execute_file();
+	plogger->log(LOG_INFORMATION, wxString::Format(_("Start checking & drawing: %s"), fname.GetFullName()).c_str());
 
-		
+	ppret->execute_file();
+	
 	//output stat
 	ConvertGCMCInfo dt;
 	dt.num_errors = plogger->errors_count();
@@ -324,6 +326,7 @@ Worker::Worker(FilePage *fp) : m_timer(this), m_fp(fp)
 	m_drawThread = NULL;
 	m_gcmcProcess = NULL;
 	m_simulateThread = NULL;
+	m_mathThread = NULL;
 	m_gcmc_running_in_sec = 0;
 	m_speedk = 1;
 }
@@ -355,6 +358,10 @@ void Worker::StopAll()
 				m_simulateThread->Resume();
 			m_simulateThread->Kill();
 		}
+		if (m_mathThread)
+		{
+			m_mathThread->Kill();
+		}
 	}
 
 	while (1)
@@ -370,6 +377,7 @@ void Worker::StopAll()
 	m_checkThread = NULL;
 	m_drawThread = NULL;
 	m_simulateThread = NULL;
+	m_mathThread = NULL;
 }
 
 
@@ -383,7 +391,7 @@ void  Worker::Check()
 	if (fname.empty())
 		return;
 
-	Edit *pedit = m_fp->GetEdit();	
+	Edit *pedit = m_fp->GetEdit();
 	m_fp->GetLogWnd()->Clear();
 
 	if (pedit->GetFileType() == FILETYPE_NC)
@@ -442,7 +450,7 @@ void Worker::Do3DDraw(const wchar_t *fname, bool runsimulation)
 }
 
 
-LogWindow *Worker::GetLogWnd()
+LogPane *Worker::GetLogWnd()
 { 
 	return m_fp->GetLogWnd(); 
 }
@@ -893,4 +901,91 @@ void  Worker::SetSimulationSpeed( int times )
 	//int mm_in_sec = mm_in_min / 60;
 //	view->setSimulationSpeed(mm_in_sec);	
 	
+}
+
+
+MathTransform::MathTransform(Worker *worker, Edit *edit, std::shared_ptr<DoMathBase> mth)
+	: m_worker(worker), m_edit(edit), m_mth(mth), wxThread(wxTHREAD_DETACHED)
+{
+	plogger = new LoggerWnd(m_worker);
+}
+
+MathTransform::~MathTransform()
+{
+
+	wxCriticalSectionLocker enter(m_worker->m_critsect);
+	m_worker->m_mathThread = NULL;
+	delete plogger;
+}
+
+
+wxThread::ExitCode MathTransform::Entry()
+{
+	if (!m_edit)
+		return NULL;
+
+	char strOut[MAX_GCODE_LINELEN];
+	int line_start;
+	int line_end;
+	long from, to;
+
+	if (m_mth->InSelected())
+	{
+		m_edit->GetSelection(&from, &to);
+		if (from == to)
+		{
+			plogger->log(LOG_ERROR, _("Uups there is no any selection"));
+			return NULL;
+		}
+		line_start = m_edit->LineFromPosition(from);
+		line_end = m_edit->LineFromPosition(to);
+	}
+	else
+	{
+		line_start = 0;
+		line_end = m_edit->GetLineCount() - 1;		
+	}
+
+	m_worker->m_fp->GetLogWnd()->StartPulse();
+	plogger->log(LOG_INFORMATION, _("Start transforming: %d lines..."), line_end- line_start);
+	for (int i = line_start; i <= line_end; i++)
+	{
+		wxString str = m_edit->GetLine(i);
+		if (m_mth->Process(str.c_str(), strOut))
+		{
+			long from = m_edit->PositionFromLine(i);
+			long to = from + str.length();
+			m_edit->Replace(from, to, strOut);
+		}
+		m_worker->m_fp->GetLogWnd()->Pulse();
+	}
+	if (m_mth->InSelected())
+	{
+		to = m_edit->PositionFromLine(line_end + 1);
+		m_edit->SetSelection(from, m_edit->PositionBefore(to));
+	}
+	plogger->log(LOG_INFORMATION, _("Transforming completed."));
+	m_worker->m_fp->GetLogWnd()->StopPulse();
+	return NULL;
+}
+
+
+void  Worker::RunMath(std::shared_ptr<DoMathBase> mth)
+{
+	if (IsRunning())
+		return;
+	
+	Edit *pedit = m_fp->GetEdit();
+	if (pedit->GetFileType() != FILETYPE_NC)
+		return;
+
+	m_fp->GetLogWnd()->Clear();
+
+	m_mathThread = new MathTransform(this, pedit, mth);
+	if (m_mathThread->Run() != wxTHREAD_NO_ERROR)
+	{
+		wxLogError("Can't create the thread!");
+		delete m_mathThread;
+		m_mathThread = NULL;
+	}
 }

@@ -13,8 +13,7 @@ class LogWindow : public BaseLogClass
 public:
 	LogWindow(wxEvtHandler *_handler);
 	LogWindow(wxWindow *parent, wxEvtHandler *_handler, wxWindowID id);
-	~LogWindow();
-	void Append(MsgStatusLevel lvl, const wchar_t *str, int linen = 0, bool update = false);
+	~LogWindow();	
 	void SetVScrollBar(wxScrollBar *bar);
 	void SetHScrollBar(wxScrollBar *bar);
 
@@ -23,6 +22,7 @@ public:
 	void OnKeyDown(wxKeyEvent &event);
 	void OnScroll(wxScrollEvent& evt);
 	void Clear();
+	void Append(MsgStatusLevel lvl, const wchar_t *str, int linen = 0, bool update = false);
 
 	virtual bool CanScroll(int orient) const { return true; }
 	// configure the window scrollbars

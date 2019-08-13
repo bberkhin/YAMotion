@@ -2,6 +2,8 @@
 
 #include "workingthreads.h"
 #include "flatsash.h"
+#include "domath.h"
+#include "logwindow.h"
 
 class FilePage;
 class Edit;
@@ -66,7 +68,7 @@ private:
 };
 
 
-class LogWindow;
+//class LogWindow;
 class  LogPane : public FlatSashWindow
 {
 	wxDECLARE_ABSTRACT_CLASS(LogPane);
@@ -75,10 +77,18 @@ public:
 	~LogPane() { }
 	void UpdateThemeColor();
 	void OnClose(wxCommandEvent &ev);
-	LogWindow *GetLogWnd() {	return m_plog;	}
+	//LogWindow *GetLogWnd() {	return m_plog;	}
+	void StartPulse();
+	void Pulse();
+	void StopPulse();
+	void Clear() { m_plog->Clear(); }
+	void Append(MsgStatusLevel lvl, const wchar_t *str, int linen = 0, bool update = false)
+			{ m_plog->Append(lvl, str,linen,update ); }
+
 private:
 	LogWindow *m_plog;
 	FilePage *m_fb;
+	wxGauge *m_gauge;
 	wxDECLARE_EVENT_TABLE();
 };
 
@@ -96,7 +106,7 @@ public:
 	void UpdateThemeColor();
 	Edit *GetEdit() { return m_editor->GetEdit(); }
 	View3D *Get3D() { return m_view3d ? m_view3d->Get3D() : NULL; }
-	LogWindow *GetLogWnd() { return m_logwn ? m_logwn->GetLogWnd() : NULL; }
+	LogPane *GetLogWnd() { return m_logwn; }// ? m_logwn->GetLogWnd() : NULL; }
 	Worker * GetWorker() { return m_worker; }
 	bool IsModified();
 	void Check();
@@ -105,6 +115,7 @@ public:
 	void ConvertGcmc(const wchar_t *src_fname, const  wchar_t *dst_fname, const wchar_t *args, bool addprologepilog);
 	void UpdateStatistics(const ConvertGCMCInfo &dt);
 	void UpdateSimulationPos(int index, int dist, const TrackPointGL &pt);
+	void DoMathCalc(std::shared_ptr<DoMathBase> mth);
 
 	wxString GetSavedFileName();
 	bool DoFileSave(bool askToSave, bool bSaveAs);		
@@ -117,7 +128,7 @@ public:
 	void DoLayout(const wxSize &sz = wxDefaultSize, bool from3dview = false);
 	void OnSize(wxSizeEvent& event);
 	void OnSashDrag(wxSashEvent& event);
-private:	
+private:
 	EditorPanel *m_editor;
 	View3DPanel *m_view3d;
 	LogPane *m_logwn;

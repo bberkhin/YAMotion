@@ -8,13 +8,13 @@ class wxEvtHandler;
 class ExecutorLogWnd : public  ExecutorLog
 {
 public:
-	ExecutorLogWnd(wxEvtHandler *lbox, bool needprint = false)
-		: handler(lbox), num_outputs(0), ExecutorLog(needprint) { }
+	ExecutorLogWnd(ILogger *_logger, bool needprint = false)
+		: logger(_logger), num_outputs(0), ExecutorLog(needprint) { }
 protected:
 	virtual void output(const std::string &str);
 	virtual void output(const std::string &str, const Coords &position);
 private:
-	wxEvtHandler *handler;	
+	ILogger *logger;
 	int num_outputs;
 };
 

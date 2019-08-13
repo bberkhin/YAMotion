@@ -30,14 +30,7 @@ ExecutorView::~ExecutorView()
 void ExecutorView::output(const std::string &str)
 {
 	if (!logger)
-		return;
-
-	//wxString label = wxString::Format("LINE: %d <font color=#FF00FF>"
-		//"%s</font>", nline, str.c_str());
-
-//	wxThreadEvent *ev = new wxThreadEvent(wxEVT_THREAD, DRAW_GCODE_UPDATE);
-//	ev->SetString(label);
-	//wxQueueEvent(logger, ev);
+	return;
 }
 
 void ExecutorView::output(const std::string &str, const Coords &position)

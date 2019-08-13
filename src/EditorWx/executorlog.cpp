@@ -12,33 +12,25 @@ using namespace std;
 
 void ExecutorLogWnd::output(const std::string &str)
 {
-	if (!handler || !doprint)
+	if (!logger || !doprint)
 		return;
 
 	if (num_outputs >= 100)
 		return;
 	num_outputs++;
-
-	wxThreadEvent *ev = new wxThreadEvent(wxEVT_THREAD, CHECK_GCODE_UPDATE);
 	if (num_outputs == 100)
 	{
-		ev->SetInt(LOG_INFORMATIONSUM);
-		ev->SetString(_("More then 100 outputs"));
-		ev->SetExtraLong(-1);
+		logger->log(LOG_INFORMATIONSUM, _("More then 100 outputs"));
 	}
 	else
 	{
-		ev->SetInt(LOG_INFORMATION);
-		ev->SetExtraLong(nline);
-		ev->SetString(str.c_str());
+		logger->log(LOG_INFORMATION, nline, str.c_str() );
 	}
-	wxQueueEvent(handler, ev);
-
 }
 
 void ExecutorLogWnd::output(const std::string &str, const Coords &position)
 {
-	if (!handler || !doprint)
+	if (!logger || !doprint)
 		return;
 
 	std::string strn(str);
