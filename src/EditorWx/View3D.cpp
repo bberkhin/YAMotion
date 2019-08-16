@@ -110,7 +110,7 @@ View3D::View3D( wxWindow *parent,wxWindowID id, int* gl_attrib)
 View3D::~View3D()
 {
 	delete m_glRC;
-	//save_config();
+	save_config();
 }
 
 
@@ -131,7 +131,7 @@ void View3D::save_config()
 	wxASSERT(config);
 	wxString strOldPath = config->GetPath();
 	config->SetPath(L"/GLView");
-	config->Write("L3DStyle", m_viewstyle);
+	config->Write(L"3DStyle", m_viewstyle);
 	config->SetPath(strOldPath);
 }
 

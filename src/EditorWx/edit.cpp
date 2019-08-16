@@ -289,7 +289,10 @@ void Edit::OnEditSelectLine (wxCommandEvent &event )
 	LogClientData *data = dynamic_cast<LogClientData *>(event.GetClientObject());
 	if (data && data->GetLine() >= 0)
 	{
-		DoSelectLine(data->GetLine() - 1);
+		//DoSelectLine(data->GetLine());
+		int n = data->GetLine() - 1;
+		if (n <= 0) n = 0;
+		GotoLine(n);
 		SetFocus();
 	}
 }
@@ -300,8 +303,8 @@ void Edit::DoSelectLine(int line)
 	if (n <= 0) n = 0;
 	int lineStart = PositionFromLine(n);
 	int lineEnd = PositionFromLine(n + 1);
-	EnsureVisibleEnforcePolicy(n);	
-	SetSelection(lineStart, lineEnd);
+	EnsureVisibleEnforcePolicy(n);
+	SetSelection(lineStart, lineEnd - 2);
 }
 
 void Edit::OnDisplayEOL (wxCommandEvent &WXUNUSED(event)) {

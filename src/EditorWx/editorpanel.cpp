@@ -7,6 +7,9 @@
 #include "wx/aui/dockart.h"
 #include "wx/splitter.h"
 #include <wx/popupwin.h>
+#include <wx/animate.h>
+#include <wx/mstream.h>
+
 #include "flatstaticline.h"
 
 #include "flatbuttom.h"
@@ -805,6 +808,14 @@ void View3DPanel::OnIdle(wxIdleEvent& event)
 	if (win)
 		win->Enable(m_fp->GetWorker()->CanSimulatePaused());
 
+
+	FlatButton *fb = dynamic_cast<FlatButton *>(FindWindowById(ID_BTN_SHOWAXIS, this));
+	if (fb)
+		fb->SetChecked((m_pview->GetStyleFlag() & VSTYLE_SHOWAXIS) != 0);
+	fb = dynamic_cast<FlatButton *>(FindWindowById(ID_BTN_SHOWBOX, this));
+	if (fb)
+		fb->SetChecked((m_pview->GetStyleFlag() & VSTYLE_SHOWBOX) != 0);
+
 }
 
 
@@ -818,8 +829,8 @@ LogPane::LogPane(wxWindow *parent, FilePage *fb)
 	: m_fb(fb), FlatSashWindow(parent, ID_LOGWINDOW, wxDefaultPosition, wxDefaultSize, wxCLIP_CHILDREN | wxNO_BORDER)
 	//wxPanel(parent,-1,wxDefaultPosition,wxDefaultSize, wxTAB_TRAVERSAL | wxNO_BORDER | wxCAPTION)
 {
-	wxBoxSizer *header = new wxBoxSizer(wxHORIZONTAL);
-	
+	m_workingAnim = NULL;
+	wxBoxSizer *header = new wxBoxSizer(wxHORIZONTAL);	
 	wxStaticText *txt = new wxStaticText(this, wxID_ANY, _("Output"));
 	txt->SetFont(wxFontInfo(10).Bold());
 	
@@ -856,11 +867,27 @@ LogPane::LogPane(wxWindow *parent, FilePage *fb)
 	wxBoxSizer *totalpane = new wxBoxSizer(wxVERTICAL);
 	totalpane->AddSpacer(7);
 	totalpane->Add(header, 0, wxEXPAND);
+	const void* data = NULL;
+	size_t outLen = 0;
+	if( wxLoadUserResource(&data, &outLen, "ID_THROBER", RT_RCDATA) )
+	{
+		wxMemoryInputStream is(data, outLen);
+		m_workingAnim = new wxAnimationCtrl(this, wxID_ANY);
+		if ( !m_workingAnim->Load(is) )
+		{
+			delete m_workingAnim;
+				m_workingAnim = 0;
+		}
+		else
+		{
+			wxSizerItem *item = totalpane->Add(m_workingAnim, wxSizerFlags().Centre().Border());
+			m_workingAnim->SetUseWindowBackgroundColour(true);
+			m_workingAnim->Show(false);
+		}
+		
+	}
+
 	totalpane->Add(body, wxEXPAND, wxEXPAND); //wxEXPAND
-	m_gauge = new wxGauge(this, wxID_ADD,61000,wxDefaultPosition,wxDefaultSize, wxGA_HORIZONTAL| wxGA_SMOOTH | wxGA_PROGRESS);
-	wxSizerItem *item = totalpane->Add(m_gauge, 0, wxEXPAND); //wxEXPAND
-	item->Show(false);
-	
 	SetSashVisible(wxSASH_TOP, true);
 	SetAutoLayout(true);
 	Show(false);
@@ -887,6 +914,10 @@ void LogPane::UpdateThemeColor()
 		child->SetForegroundColour(fgColor);
 		node = node->GetNext();
 	}
+	if (m_workingAnim)
+	{
+		m_workingAnim->SetUseWindowBackgroundColour(true);
+	}
 }
 
 void LogPane::OnClose(wxCommandEvent& WXUNUSED(ev))
@@ -896,19 +927,31 @@ void LogPane::OnClose(wxCommandEvent& WXUNUSED(ev))
 
 void LogPane::StartPulse()
 {
-	wxSizerItem *item = GetSizer()->GetItem(m_gauge);
+	if (!m_workingAnim)
+		return;
+	wxSizerItem *item = GetSizer()->GetItem(m_workingAnim);
+	if (!item || m_workingAnim->IsShown())
+		return;
 	item->Show(true);
-	//Layout();
+	Layout();
+	m_workingAnim->Play();
+	
 }
+
 void LogPane::Pulse()
 {
-	m_gauge->Pulse();
+	
 }
 void LogPane::StopPulse()
 {
-	wxSizerItem *item = GetSizer()->GetItem(m_gauge);
+	if (!m_workingAnim)
+		return;
+
+	wxSizerItem *item = GetSizer()->GetItem(m_workingAnim);
+	if (!item || !m_workingAnim->IsShown())
+		return;
 	item->Show(false);
-	//Layout();
+	Layout();
 }
 
 

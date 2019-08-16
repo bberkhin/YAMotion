@@ -335,6 +335,8 @@ void AppFrame::ShowWelcome()
 		m_notebook->SetSelection(welcome_page);
 	}	
 	m_notebook->Thaw();
+
+
 }
 
 
@@ -399,9 +401,6 @@ void AppFrame::OnClose (wxCloseEvent &event)
 		return;
 	}
 	
-//	wxAuiPaneInfo& pinfo = m_mgr.GetPane(m_dirtree);
-//	bool visibleDir  = pinfo.IsShown();
-
 	wxString strPerspective = m_mgr.SavePerspective();
 	ConfigData *config = dynamic_cast<ConfigData *>(wxConfigBase::Get());
 	if (config != NULL)

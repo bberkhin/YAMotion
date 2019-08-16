@@ -325,5 +325,8 @@
     <Image Include="bitmap1.bmp">
       <Filter>Файлы ресурсов</Filter>
     </Image>
+    <Image Include="bitmaps\throbber.gif">
+      <Filter>Файлы ресурсов</Filter>
+    </Image>
   </ItemGroup>
 </Project>

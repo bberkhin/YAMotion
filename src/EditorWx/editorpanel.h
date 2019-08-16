@@ -68,7 +68,8 @@ private:
 };
 
 
-//class LogWindow;
+class wxAnimationCtrl;
+
 class  LogPane : public FlatSashWindow
 {
 	wxDECLARE_ABSTRACT_CLASS(LogPane);
@@ -77,7 +78,6 @@ public:
 	~LogPane() { }
 	void UpdateThemeColor();
 	void OnClose(wxCommandEvent &ev);
-	//LogWindow *GetLogWnd() {	return m_plog;	}
 	void StartPulse();
 	void Pulse();
 	void StopPulse();
@@ -88,7 +88,7 @@ public:
 private:
 	LogWindow *m_plog;
 	FilePage *m_fb;
-	wxGauge *m_gauge;
+	wxAnimationCtrl  *m_workingAnim;
 	wxDECLARE_EVENT_TABLE();
 };
 

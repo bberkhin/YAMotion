@@ -34,6 +34,7 @@ CheckGCodeThread::CheckGCodeThread(Worker *woker, const wxString &fname_)
 	plogger = new LoggerWnd(m_woker);
 	pexec = new ExecutorLogWnd(plogger, pref->Common().enableLogExecution);
 	ppret = new GCodeInterpreter(wxGetApp().GetEnvironment(), pexec, plogger, 100 );
+	m_woker->m_fp->GetLogWnd()->StartPulse();
 }
 
 CheckGCodeThread::~CheckGCodeThread()
@@ -45,6 +46,7 @@ CheckGCodeThread::~CheckGCodeThread()
 	if (pexec) delete pexec;
 	if (plogger) delete plogger;
 	if (ppret) delete ppret;
+	m_woker->m_fp->GetLogWnd()->StopPulse();
 }
 
 
@@ -84,6 +86,18 @@ Draw3DThread::Draw3DThread(Worker *worker, const wchar_t *fname_, bool runsimula
 	plogger = new LoggerWnd(m_worker);
 	pexec = new ExecutorView(plogger, wxGetApp().GetEnvironment() );
 	ppret = new GCodeInterpreter(wxGetApp().GetEnvironment(), pexec, plogger, 100);
+	m_worker->m_fp->GetLogWnd()->StartPulse();
+}
+
+Draw3DThread::~Draw3DThread()
+{
+	wxCriticalSectionLocker enter(m_worker->m_critsect);
+	Update3DView();
+	m_worker->m_drawThread = NULL;
+	if (pexec) delete pexec;
+	if (plogger) delete plogger;
+	if (ppret) delete ppret;
+	m_worker->m_fp->GetLogWnd()->StopPulse();
 }
 
 void Draw3DThread::Update3DView()
@@ -100,17 +114,6 @@ void Draw3DThread::Update3DView()
 			p3Dview->clear();
 	}
 }
-
-Draw3DThread::~Draw3DThread()
-{
-	wxCriticalSectionLocker enter(m_worker->m_critsect);
-	Update3DView();
-	m_worker->m_drawThread = NULL;
-	if (pexec) delete pexec;
-	if (plogger) delete plogger;
-	if (ppret) delete ppret;
-}
-
 
 wxThread::ExitCode Draw3DThread::Entry()
 {
@@ -262,6 +265,7 @@ GcmcProcess::GcmcProcess(Worker *worker, const wchar_t *dstfn, DoAfterConvertGcm
 : m_worker(worker) ,dst_file(dstfn), what_to_do(todo), wxProcess( wxGetApp().GetFrame() )
 {
 	Redirect();
+	m_worker->m_fp->GetLogWnd()->StartPulse();
 }
 
 
@@ -272,6 +276,7 @@ void GcmcProcess::OnTerminate(int pid, int status)
 		;
 
 	//this call will kill this GcmcProcess instance
+	m_worker->m_fp->GetLogWnd()->StopPulse();
 	m_worker->GcmcProcessTerminated(status, dst_file.c_str(), what_to_do);
 }
 
@@ -908,6 +913,7 @@ MathTransform::MathTransform(Worker *worker, Edit *edit, std::shared_ptr<DoMathB
 	: m_worker(worker), m_edit(edit), m_mth(mth), wxThread(wxTHREAD_DETACHED)
 {
 	plogger = new LoggerWnd(m_worker);
+	m_worker->m_fp->GetLogWnd()->StartPulse();
 }
 
 MathTransform::~MathTransform()
@@ -916,6 +922,7 @@ MathTransform::~MathTransform()
 	wxCriticalSectionLocker enter(m_worker->m_critsect);
 	m_worker->m_mathThread = NULL;
 	delete plogger;
+	m_worker->m_fp->GetLogWnd()->StopPulse();
 }
 
 
@@ -946,7 +953,6 @@ wxThread::ExitCode MathTransform::Entry()
 		line_end = m_edit->GetLineCount() - 1;		
 	}
 
-	m_worker->m_fp->GetLogWnd()->StartPulse();
 	plogger->log(LOG_INFORMATION, _("Start transforming: %d lines..."), line_end- line_start);
 	for (int i = line_start; i <= line_end; i++)
 	{
@@ -957,7 +963,6 @@ wxThread::ExitCode MathTransform::Entry()
 			long to = from + str.length();
 			m_edit->Replace(from, to, strOut);
 		}
-		m_worker->m_fp->GetLogWnd()->Pulse();
 	}
 	if (m_mth->InSelected())
 	{
@@ -965,7 +970,6 @@ wxThread::ExitCode MathTransform::Entry()
 		m_edit->SetSelection(from, m_edit->PositionBefore(to));
 	}
 	plogger->log(LOG_INFORMATION, _("Transforming completed."));
-	m_worker->m_fp->GetLogWnd()->StopPulse();
 	return NULL;
 }
 

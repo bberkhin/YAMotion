@@ -403,9 +403,11 @@ void FlatButton::DoClick()
 
 void FlatButton::SetChecked(bool checked)
 {
+	int oldStyle = m_style;
 	if ( checked )
 		m_style |= FB_CHECKED; 
 	else
 		m_style &= ~FB_CHECKED;
-		
+	if (oldStyle != m_style )
+		Refresh();
 }

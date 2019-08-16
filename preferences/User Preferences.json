@@ -1,5 +1,6 @@
 {
   "tabWidth": 4,
   "whiteSpace": false,
-   "enableLogExecution": false
+   "enableLogExecution": false,
+   "displayEOL": false
 }

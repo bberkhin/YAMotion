@@ -215,7 +215,7 @@ void LogWindow::OnDrawItem(wxDC& dc, const wxRect& rect, size_t n) const
 
 	ColourScheme *clrs = Preferences::Get()->GetColorScheme();
 	dc.SetTextForeground(clrs->Get(color_index));
-	dc.DrawLabel(label, rect);
+	dc.DrawLabel(label, rect, wxALIGN_LEFT | wxALIGN_CENTER_VERTICAL);
 
 }
 
