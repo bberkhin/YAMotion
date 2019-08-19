@@ -12,9 +12,9 @@ zDelta=1; //Step Z:
 zFull=1; //Thikness:
 ccw=0; //Direction:
 message( "Hello");
- DoCirculePocket(xCenter,yCenter,zSave,r,d,rate,zRate,per_stepover,RampDist,zDelta,zFull,ccw);
-
-fixpos_restore
+ DoCircu lePocket(xCenter,yCenter,zSave,r,d,rate,zRate,per_stepover,RampDist,zDelta,zFull,ccw);
+ 
+  fixpos_restore
 relocate
 abs acos asin atan atan_xy atan_xz atan_yz ceil comment cos count delete error exp fixpos_restore fixpos_set fixpos_store floor head 
 insert isangle isconst isdefined isdeg isdistance isdxf isfloat isgcode isinch isint ismm ismodemm isnone israd isrelative isscalar isstring issvg 

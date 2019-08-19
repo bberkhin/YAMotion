@@ -1,4 +1,4 @@
-G90 G80 G21 G 49
+G90G80G21G49
 G0 Z5
 M3
 (Center point:60,80)

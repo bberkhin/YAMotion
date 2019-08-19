@@ -21,6 +21,7 @@ public:
 	virtual void set_end_programm() = 0;
 	virtual void set_dwell(long millseconds) = 0;
 	virtual void process_probe(const Coords &position) = 0;
+	virtual bool stop_parsing() { return false; }
 };
 
 

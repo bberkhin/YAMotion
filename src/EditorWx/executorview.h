@@ -5,6 +5,7 @@
 //#include "CoordMotion.h"
 #include <glm/glm.hpp>
 #include "ienvironment.h"
+#include "executorlog.h"
 
 struct TrackPointGL
 {
@@ -16,10 +17,10 @@ struct TrackPointGL
 
 typedef std::vector<TrackPointGL> TrackPoints;
 
-class ExecutorView : public ExecutorLog
+class ExecutorView : public ExecutorLogWnd
 {
 public:
-	ExecutorView(ILogger *_logger, IEnvironment *penv);
+	ExecutorView(ILogger *_logger, IEnvironment *penv, wxThread *thr = 0);
 	~ExecutorView();
 
 	void arc_feed(RunnerData *rd, double &end1, double &end2, double &center1, double &center2, int turn, double &end3, double &AA_end, double &BB_end, double &CC_end, double &u, double &v);
@@ -34,7 +35,6 @@ protected:
 		double first_axis, double second_axis, int rotation,
 		double axis_end_point, double a, double b, double c);
 private:
-	ILogger *logger;
 	TrackPoints m_points;
 	double m_current_feed;
 	double m_fast_speed;

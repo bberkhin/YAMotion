@@ -1,5 +1,5 @@
 #include "wx/wx.h"
-
+#include <wx/thread.h>
 #include "executorlog.h"
 #include <iostream>
 #include <string>
@@ -9,6 +9,13 @@
 
 
 using namespace std;
+
+bool ExecutorLogWnd::stop_parsing()
+{
+	if (m_thread)
+		return m_thread->TestDestroy();
+	return ExecutorLog::stop_parsing();
+}
 
 void ExecutorLogWnd::output(const std::string &str)
 {

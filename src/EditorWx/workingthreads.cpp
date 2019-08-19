@@ -32,7 +32,7 @@ CheckGCodeThread::CheckGCodeThread(Worker *woker, const wxString &fname_)
 	m_woker = woker;
 	Preferences *pref = Preferences::Get();	
 	plogger = new LoggerWnd(m_woker);
-	pexec = new ExecutorLogWnd(plogger, pref->Common().enableLogExecution);
+	pexec = new ExecutorLogWnd(plogger,this, pref->Common().enableLogExecution);
 	ppret = new GCodeInterpreter(wxGetApp().GetEnvironment(), pexec, plogger, 100 );
 	m_woker->m_fp->GetLogWnd()->StartPulse();
 }
@@ -84,7 +84,7 @@ Draw3DThread::Draw3DThread(Worker *worker, const wchar_t *fname_, bool runsimula
 
 	m_worker = worker;
 	plogger = new LoggerWnd(m_worker);
-	pexec = new ExecutorView(plogger, wxGetApp().GetEnvironment() );
+	pexec = new ExecutorView(plogger, wxGetApp().GetEnvironment(), this );
 	ppret = new GCodeInterpreter(wxGetApp().GetEnvironment(), pexec, plogger, 100);
 	m_worker->m_fp->GetLogWnd()->StartPulse();
 }
@@ -268,6 +268,11 @@ GcmcProcess::GcmcProcess(Worker *worker, const wchar_t *dstfn, DoAfterConvertGcm
 	m_worker->m_fp->GetLogWnd()->StartPulse();
 }
 
+GcmcProcess::~GcmcProcess()
+{
+
+}
+
 
 void GcmcProcess::OnTerminate(int pid, int status)
 {
@@ -361,11 +366,16 @@ void Worker::StopAll()
 		{
 			if (!m_simulateThread->IsRunning())
 				m_simulateThread->Resume();
-			m_simulateThread->Kill();
+			//m_simulateThread->Kill();
+			m_simulateThread->Delete(); //Kill();
 		}
 		if (m_mathThread)
 		{
-			m_mathThread->Kill();
+			m_mathThread->Delete(); //Kill();
+		}
+		if (m_gcmcProcess)
+		{
+			wxKill(m_gcmcProcess->GetPid(), wxSIGKILL, NULL, wxKILL_CHILDREN);
 		}
 	}
 
@@ -373,7 +383,7 @@ void Worker::StopAll()
 	{
 		{ // was the ~MyThread() function executed?
 			wxCriticalSectionLocker enter(m_critsect);
-			if (!m_checkThread && !m_drawThread && !m_simulateThread )
+			if (!m_checkThread && !m_drawThread && !m_simulateThread && !m_mathThread)
 				break;
 		}
 		// wait for thread completion
@@ -383,6 +393,7 @@ void Worker::StopAll()
 	m_drawThread = NULL;
 	m_simulateThread = NULL;
 	m_mathThread = NULL;
+	//m_gcmcProcess = NULL;
 }
 
 
@@ -664,7 +675,7 @@ int Worker::RunGcmc(const wchar_t *src_fname, const  wchar_t *dst_fname, const w
 		m_timer.Stop();
 
 	m_gcmc_running_in_sec = 0;
-	m_timer.Start(1000);
+	m_timer.Start(100);
 
 	m_gcmcProcess = new GcmcProcess(this, dst_fname, what_to_do);
 	int code = wxExecute(arg, wxEXEC_ASYNC | wxEXEC_HIDE_CONSOLE | wxEXEC_NODISABLE, m_gcmcProcess, &env);
@@ -742,22 +753,30 @@ int Worker::DoConvertGcmc(DoAfterConvertGcmc what_to_do)
 
 void Worker::OnTimer(wxTimerEvent &event)
 {
-	static bool needToAsk = true;
-	if (m_gcmc_running_in_sec == 0)
-		needToAsk = true;
-
 	wxTimer &tm = event.GetTimer();
 	m_gcmc_running_in_sec++;
 
 	//SetTitle(wxString::Format(L"Process gcmc %d sec.", m_gcmc_running_in_sec));
-	if (m_gcmcProcess && needToAsk && (m_gcmc_running_in_sec % 60) == 0)
+	if (!m_gcmcProcess)
+		return;
+
+	while (m_gcmcProcess->HasInput()) 
+		;
+
+	
+	if (m_gcmc_running_in_sec == 600 )
 	{
+		m_gcmc_running_in_sec = 0;
 		int rez = wxMessageBox(_("GCMC is running very long time/ Would you like to kill the process?"), wxMessageBoxCaptionStr,
 			wxYES_NO | wxICON_QUESTION);
 		if (rez == wxYES)
 			wxKill(m_gcmcProcess->GetPid(), wxSIGKILL, NULL, wxKILL_CHILDREN);
 	}
+	
+	
 }
+
+
 
 bool  Worker::CanSimulateStart()
 {
@@ -936,6 +955,8 @@ wxThread::ExitCode MathTransform::Entry()
 	int line_end;
 	long from, to;
 
+	
+
 	if (m_mth->InSelected())
 	{
 		m_edit->GetSelection(&from, &to);
@@ -945,25 +966,41 @@ wxThread::ExitCode MathTransform::Entry()
 			return NULL;
 		}
 		line_start = m_edit->LineFromPosition(from);
-		line_end = m_edit->LineFromPosition(to);
+		line_end = m_edit->LineFromPosition(to-1);
+
 	}
 	else
 	{
 		line_start = 0;
-		line_end = m_edit->GetLineCount() - 1;		
+		line_end = m_edit->GetLineCount() - 1;
 	}
+	from = m_edit->PositionFromLine(line_start);
+	if ( line_end == m_edit->GetLineCount() - 1 )
+		to = m_edit->GetLastPosition();
+	else
+		to = m_edit->PositionFromLine(line_end + 1);
 
+	m_edit->SetTargetRange(from, to);
+	wxString cs;
 	plogger->log(LOG_INFORMATION, _("Start transforming: %d lines..."), line_end- line_start);
 	for (int i = line_start; i <= line_end; i++)
 	{
+		if (TestDestroy())
+		{
+			plogger->log(LOG_INFORMATION, _("Transforming cancelled"));
+			return NULL;
+		}
+		
 		wxString str = m_edit->GetLine(i);
 		if (m_mth->Process(str.c_str(), strOut))
 		{
-			long from = m_edit->PositionFromLine(i);
-			long to = from + str.length();
-			m_edit->Replace(from, to, strOut);
+			cs += strOut;
 		}
+		else
+			cs += str;
 	}
+	m_edit->ReplaceTarget(cs);
+	
 	if (m_mth->InSelected())
 	{
 		to = m_edit->PositionFromLine(line_end + 1);

@@ -11,8 +11,8 @@
 using namespace std;
 using namespace Interpreter;
 
-ExecutorView::ExecutorView(ILogger *_logger, IEnvironment *penv ) :
-	ExecutorLog(false),  logger(_logger)//, pcm(0)
+ExecutorView::ExecutorView(ILogger *_logger, IEnvironment *penv, wxThread *thr) :
+	ExecutorLogWnd(_logger, thr, false)
 {
 	//pcm = new CCoordMotion( logger, 0 );
 	//pcm->m_DisableSoftLimits = true;

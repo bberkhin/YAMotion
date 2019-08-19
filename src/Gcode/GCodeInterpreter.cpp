@@ -111,6 +111,8 @@ bool GCodeInterpreter::execute_file_int( long pos, ExecFunction fun, int &lineNu
 
 	for (; true ; ++lineNumber)
 	{
+		//if (stop_parsing() )
+		IF_T_RET_F_SETSTATE(executor->stop_parsing(), INTERNAL_ERROR, _("Parsing cancelled"), pos);
 		if (fgets(line, MAX_GCODE_LINELEN, gfile) == NULL)
 			break;
 		length = strlen(line);

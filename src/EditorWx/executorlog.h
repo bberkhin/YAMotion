@@ -5,17 +5,21 @@
 
 
 class wxEvtHandler;
+class wxThread;
+
 class ExecutorLogWnd : public  ExecutorLog
 {
 public:
-	ExecutorLogWnd(ILogger *_logger, bool needprint = false)
-		: logger(_logger), num_outputs(0), ExecutorLog(needprint) { }
+	ExecutorLogWnd(ILogger *_logger, wxThread *thr = 0, bool needprint = false)
+		: logger(_logger), num_outputs(0), ExecutorLog(needprint), m_thread(thr) { }
+	virtual bool stop_parsing();
 protected:
 	virtual void output(const std::string &str);
 	virtual void output(const std::string &str, const Coords &position);
-private:
+protected:
 	ILogger *logger;
 	int num_outputs;
+	wxThread *m_thread;
 };
 
 class LoggerWnd : public ILogger

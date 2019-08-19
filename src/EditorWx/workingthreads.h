@@ -158,6 +158,7 @@ class GcmcProcess : public wxProcess
 {
 public:
 	GcmcProcess(Worker *worker, const wchar_t *dstfn, DoAfterConvertGcmc todo);
+	~GcmcProcess();
 	virtual void OnTerminate(int pid, int status) wxOVERRIDE;
 	virtual bool HasInput();
 

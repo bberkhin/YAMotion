@@ -38,6 +38,7 @@ enum
 	ID_TOGCODEBUTTON,
 	ID_CHECKBUTTON,
 	ID_CLOSEOUTPUT,
+	ID_STOPPROCESS,
 	ID_CLOSE3DVIEW,
 	ID_SAVEBUTTON,
 	ID_BTN_TOP,
@@ -823,6 +824,7 @@ wxIMPLEMENT_ABSTRACT_CLASS(LogPane, FlatSashWindow);
 
 wxBEGIN_EVENT_TABLE(LogPane, FlatSashWindow)
 EVT_BUTTON(ID_CLOSEOUTPUT, LogPane::OnClose)
+EVT_BUTTON(ID_STOPPROCESS, LogPane::OnStop)
 wxEND_EVENT_TABLE()
 
 LogPane::LogPane(wxWindow *parent, FilePage *fb)
@@ -830,20 +832,23 @@ LogPane::LogPane(wxWindow *parent, FilePage *fb)
 	//wxPanel(parent,-1,wxDefaultPosition,wxDefaultSize, wxTAB_TRAVERSAL | wxNO_BORDER | wxCAPTION)
 {
 	m_workingAnim = NULL;
-	wxBoxSizer *header = new wxBoxSizer(wxHORIZONTAL);	
+	wxBoxSizer *header = new wxBoxSizer(wxHORIZONTAL);
 	wxStaticText *txt = new wxStaticText(this, wxID_ANY, _("Output"));
 	txt->SetFont(wxFontInfo(10).Bold());
-	
 	header->AddSpacer(MARGIN_LEFT);
 	header->Add(txt, 1, wxALIGN_CENTRE_VERTICAL);
+
+	m_stop = new FlatButton(this, ID_STOPPROCESS, _("Stop"));
+	//header->Add(m_stop, 0, wxRIGHT);
+	header->Add(m_stop);
+	//m_stop->Show(false);
+	header->AddSpacer(10);
+
 	
 	FlatButton *padd = new FlatButton(this, ID_CLOSEOUTPUT, wxEmptyString, FB_TRANSPARENT, ART_CLOSE);
 	header->Add(padd, 0, wxRIGHT);
 	header->AddSpacer(MARGIN_LEFT);
 
-
-
-	
 	m_plog = new LogWindow(this, m_fb, wxID_ANY);
 	m_plog->SetWindowStyle(m_plog->GetWindowStyle() | wxNO_BORDER);
 	FlatScrollBar *barv = new FlatScrollBar(this, m_plog, wxID_ANY);
@@ -876,7 +881,7 @@ LogPane::LogPane(wxWindow *parent, FilePage *fb)
 		if ( !m_workingAnim->Load(is) )
 		{
 			delete m_workingAnim;
-				m_workingAnim = 0;
+			m_workingAnim = 0;
 		}
 		else
 		{
@@ -925,17 +930,33 @@ void LogPane::OnClose(wxCommandEvent& WXUNUSED(ev))
 	m_fb->HideLog();
 }
 
+
+void LogPane::OnStop(wxCommandEvent& WXUNUSED(ev))
+{
+	m_fb->GetWorker()->StopAll();
+}
+
 void LogPane::StartPulse()
 {
-	if (!m_workingAnim)
+	if (!m_workingAnim || !m_stop )
 		return;
+	bool needlayout = false;
 	wxSizerItem *item = GetSizer()->GetItem(m_workingAnim);
-	if (!item || m_workingAnim->IsShown())
-		return;
-	item->Show(true);
-	Layout();
-	m_workingAnim->Play();
+	if (item && !m_workingAnim->IsShown() )
+	{ 
+		item->Show(true);
+		needlayout = true;
+	}
+	item = GetSizer()->GetItem(m_stop,true);
+	if (item && !m_stop->IsShown())
+	{
+		item->Show(true);
+		needlayout = true;
+	}	
+	if ( needlayout )
+		Layout();
 	
+	m_workingAnim->Play();
 }
 
 void LogPane::Pulse()
@@ -944,14 +965,25 @@ void LogPane::Pulse()
 }
 void LogPane::StopPulse()
 {
-	if (!m_workingAnim)
+	if (!m_workingAnim || !m_stop)
 		return;
-
+	
+	bool needlayout = false;
 	wxSizerItem *item = GetSizer()->GetItem(m_workingAnim);
-	if (!item || !m_workingAnim->IsShown())
-		return;
-	item->Show(false);
-	Layout();
+	if (item && m_workingAnim->IsShown())
+	{
+		item->Show(false);
+		needlayout = true;
+	}
+	item = GetSizer()->GetItem(m_stop,true);
+	if (item && m_stop->IsShown())
+	{
+		item->Show(false);
+		needlayout = true;
+	}
+	m_workingAnim->Stop();
+	if (needlayout)
+		Layout();
 }
 
 
@@ -1101,6 +1133,7 @@ void FilePage::Draw3D()
 	if (!DoFileSave(false, false))
 		return;
 	// we don't show log here it will be shown automatically if error occure
+	ShowLog();
 	m_worker->Draw3D(false);
 	Show3D();
 }
