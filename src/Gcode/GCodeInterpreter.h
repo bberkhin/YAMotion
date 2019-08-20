@@ -52,6 +52,7 @@ namespace Interpreter
 
 		bool open_nc_file(const wchar_t *name = 0);             //запоминает строки текстового файла
 		void execute_file();
+		const InterError &get_state() const { return state; }
 	//	void execute_file(const char *data);
 	//	void execute_line(const  char *line, int lineNumber = 1);    //исполняет одну строку
 
@@ -63,7 +64,6 @@ namespace Interpreter
 		InterError execute_frame(const char *frame);    //выполнение строки
 		bool check_frame(const CmdParser &parser);
 		bool enhance_frame(const CmdParser &parser);
-		InterError get_state() { return state; }
 
 		InterError is_subrotin_start(const char *str);    //выполнение строки при поиске
 		bool execute_subrotinue(const  CmdParser parser);

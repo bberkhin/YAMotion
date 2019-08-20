@@ -42,7 +42,6 @@ CheckGCodeThread::~CheckGCodeThread()
 	
 	wxCriticalSectionLocker enter(m_woker->m_critsect);
 	m_woker->m_checkThread = NULL;
-
 	if (pexec) delete pexec;
 	if (plogger) delete plogger;
 	if (ppret) delete ppret;
@@ -64,6 +63,7 @@ wxThread::ExitCode CheckGCodeThread::Entry()
 	}
 
 	ConvertGCMCInfo dt;
+	dt.exit_code = ppret->get_state().code;
 	dt.num_errors = plogger->errors_count();
 	dt.feed_len = pexec->get_feed_len();
 	dt.traverce_len = pexec->get_traverce_len();
@@ -128,6 +128,7 @@ wxThread::ExitCode Draw3DThread::Entry()
 	
 	//output stat
 	ConvertGCMCInfo dt;
+	dt.exit_code = ppret->get_state().code;
 	dt.num_errors = plogger->errors_count();
 	dt.feed_len = pexec->get_feed_len();
 	dt.traverce_len = pexec->get_traverce_len();
@@ -355,12 +356,13 @@ void Worker::StopAll()
 		wxCriticalSectionLocker enter(m_critsect);
 		if (m_checkThread)         // does the thread still exist?
 		{
-			m_checkThread->Kill();
+			//m_checkThread->Kill();
+			m_checkThread->Delete(); //Kill();
 		}
 
 		if (m_drawThread)
 		{
-			m_drawThread->Kill();
+			m_drawThread->Delete(); //->Kill();
 		}
 		if (m_simulateThread)
 		{
@@ -474,10 +476,13 @@ LogPane *Worker::GetLogWnd()
 
 void Worker::OnCheckGCodeCompletion(GCMCConversionEvent &ev)
 {
-	if ( ev.GetCIData().num_errors == 0)
+	if (ev.GetCIData().exit_code == PROGRAMM_ABORTED)
+		GetLogWnd()->Append(MSLInfo, _("Checking aborted"));
+	else if ( ev.GetCIData().num_errors == 0)
 		GetLogWnd()->Append(MSLInfo, _("Checking completed with no error"));
 	else
 		GetLogWnd()->Append(MSLError, wxString::Format(_("Checking completed with %d error(s)"), ev.GetCIData().num_errors));
+	
 	m_fp->UpdateStatistics(ev.GetCIData());
 
 }
@@ -499,7 +504,9 @@ void Worker::OnDraw3DUpdate(wxThreadEvent &ev)
 
 void Worker::OnDraw3DCompletion(GCMCConversionEvent &ev)
 {
-	if (ev.GetCIData().num_errors == 0)
+	if (ev.GetCIData().exit_code == PROGRAMM_ABORTED)
+		GetLogWnd()->Append(MSLInfo, _("Drawing aborted"));
+	else if (ev.GetCIData().num_errors == 0)
 	{
 		GetLogWnd()->Append(MSLInfo, _("Drawing completed"));
 		m_fp->UpdateStatistics(ev.GetCIData());
@@ -987,7 +994,7 @@ wxThread::ExitCode MathTransform::Entry()
 	{
 		if (TestDestroy())
 		{
-			plogger->log(LOG_INFORMATION, _("Transforming cancelled"));
+			plogger->log(LOG_INFORMATION, _("Transforming aborted"));
 			return NULL;
 		}
 		

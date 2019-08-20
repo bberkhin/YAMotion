@@ -18,6 +18,7 @@ struct ConvertGCMCInfo
 	CoordsBox box;
 	bool runsimulaion;
 	int num_errors;
+	int exit_code;
 };
 
 class GCMCConversionEvent : public wxThreadEvent
