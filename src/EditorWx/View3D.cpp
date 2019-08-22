@@ -85,7 +85,7 @@ View3D::View3D( wxWindow *parent,wxWindowID id, int* gl_attrib)
 	:  wxGLCanvas(parent, id, gl_attrib, wxDefaultPosition, wxDefaultSize, wxWANTS_CHARS | wxFULL_REPAINT_ON_RESIZE)	
 {	
 	
-	m_viewstyle = 0;
+	m_viewstyle = VSTYLE_SHOWFASTMOVE|VSTYLE_SHOWAXIS;
 	simulateLastIndex = wxNOT_FOUND;
 	// Explicitly create a new rendering context instance for this canvas.
 	m_glRC = new wxGLContext(this);	
@@ -400,6 +400,9 @@ void View3D::draw_track()
 			glVertex3f(end_simulate_point.position.x, end_simulate_point.position.y, end_simulate_point.position.z);
 			break;
 		}
+		
+		if (track[i].isFast && !(m_viewstyle&VSTYLE_SHOWFASTMOVE))
+			continue;
 
 		if (track[i].isFast)
 		{

@@ -722,7 +722,7 @@ void Worker::GcmcProcessTerminated(int status, const wchar_t *dst_fname, DoAfter
 			switch (what_to_do)
 			{
 				case ConvertGcmcOpenFile:
-					wxGetApp().GetFrame()->FileOpen(wxdstfile);
+					wxGetApp().GetFrame()->FileOpen(wxdstfile, true);
 					break;
 				case ConvertGcmcPasteFile:
 					pedit = m_fp->GetEdit();

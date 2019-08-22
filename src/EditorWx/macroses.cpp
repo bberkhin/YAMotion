@@ -17,6 +17,9 @@ static bool toWstring(const char *s, std::wstring & out)
 {
 	int n = MultiByteToWideChar(CP_UTF8, 0, s, -1, 0, 0);
 	out.resize(n-1);
+	if ( n <= 1 ) // empty string
+		return true;
+
 	if (MultiByteToWideChar(CP_UTF8, 0, s, -1, &(out.front()), n) != n)
 		return false;
 	return true;
@@ -26,6 +29,8 @@ static bool toMBstring(const wchar_t *s, std::string & out)
 {
 	int n = WideCharToMultiByte(CP_OEMCP, 0, s, -1, 0, 0, 0, 0);
 	out.resize(n-1);
+	if (n <= 1) // empty string
+		return true;
 	if (WideCharToMultiByte(CP_OEMCP, 0, s, -1, &(out.front()), n, 0, 0) != n)
 		return false;
 	return true;
@@ -240,8 +245,11 @@ std::wstring Macroses::BuildGCMCCode(int indx, std::wstring &include_file, bool 
 		else
 			toWstring(it->val.c_str(), tmp);
 		arg += tmp;
-		arg += L"; //";
-		arg += it->name; // add comment
+		arg += L"; //";  // add comment
+		if ( it->desc.empty() )
+			arg += it->name; 
+		else
+			arg += it->desc;
 		arg += L"\n";
 	}
 	arg += L"\n";
@@ -275,7 +283,7 @@ std::wstring Macroses::BuildCommandLine(int indx)
 			toWstring(it->defval.c_str(), tmp);
 		else
 			toWstring(it->val.c_str(), tmp);
-		arg += tmp;	
+		arg += tmp;
 		arg += L";";
 	}
 	arg += L"\"";

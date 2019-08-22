@@ -78,9 +78,10 @@ public:
 	void UpdateTitle(FilePage *page);
 	void UpdateTitle(size_t npage = wxNOT_FOUND);
 	FilePage *DoNewFile(int file_type, const wxString &defpath, bool closeWelcome, const wxString &contextFile = wxEmptyString);
-	void FileOpen(const wxString &fn);
+	bool FileOpen(const wxString &fn,bool reloadifopen = false);
 	void AddPath(const wxString &path);
 	void AddFileToHisotyList(const wxFileName &path);
+	void UpdateLastFilesList();
 
 
 	void OnUpdateNCIsOpen(wxUpdateUIEvent& event);

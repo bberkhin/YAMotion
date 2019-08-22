@@ -55,10 +55,14 @@ void ConfigData::ReadFindAndReplase(wxFindReplaceData *find_data)
 
 void ConfigData::AddFileNameToSaveList(const wxFileName &fname)
 {
+	RemoveFileNameFromSaveList(fname);
+	files.push_front(fname);
+}
+void ConfigData::RemoveFileNameFromSaveList(const wxFileName &fname)
+{
 	auto it = std::find(files.begin(), files.end(), fname);
 	if (it != files.end())
 		files.erase(it);
-	files.push_front(fname);
 }
 
 

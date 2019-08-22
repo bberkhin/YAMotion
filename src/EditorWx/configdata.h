@@ -15,6 +15,7 @@ public:
 	void WriteFindAndReplase(wxFindReplaceData *find_data);
 	void ReadFindAndReplase(wxFindReplaceData *find_data);
 	void AddFileNameToSaveList(const wxFileName &fname);
+	void RemoveFileNameFromSaveList(const wxFileName &fname);
 	void ReadFileNames();
 	void WriteFileNames();
 	const FileNamesList &GetFiles() { return files; }

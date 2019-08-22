@@ -1,22 +1,22 @@
-﻿<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <macroses>
   <macros>
     <name>Cutting circle</name>
-    <desc>
-      Cut circle by center; and circle raius
-    </desc>
+    <desc>Cut circle via center point and circle radius</desc>
     <image>cut_circle.jpg</image>
     <gcmc>cut_circle.gcmc</gcmc>
+    <include>cut_circle.inc.gcmc</include>
+    <function>DoCutCircle(xCenter,yCenter,zSave,r,d,zDelta,rate,zRate,trc,ccw)</function>
     <arguments>
       <argument defvalue ="2" type="scalar" ref="zSave">
         <name>Save Z:</name>
       </argument>
       <argument defvalue ="0" type="scalar" ref="xCenter">
-        <name>Specify Xc of the circle:</name>
+        <name>Center X:</name>
         <desc>Specify center of the circle in mm</desc>
       </argument>
       <argument defvalue ="0" type="scalar" ref="yCenter">
-        <name>Specify Yc of the circle:</name>
+        <name>Center Y:</name>
         <desc>Specify center of the circle in mm</desc>
       </argument>
       <argument defvalue ="20" type="scalar" ref="r">
@@ -43,12 +43,14 @@
       </argument>
       <argument defvalue ="1" type="list" ref="trc">
         <name>Thraektory:</name>
+        <desc>Tool correction:  1 - by contur, 2 inside, 3 ouside</desc>
         <list value ="1" name="By contour"/>
         <list value ="2" name="Inside"/>
         <list value ="3" name="Outside"/>
       </argument>
       <argument defvalue ="0" type="list" ref="ccw">
         <name>Direction:</name>
+        <desc>Direction: 0 - clockwise, 2- counter clockwise</desc>
         <list value ="0" name="Clockwise"/>
         <list value ="1" name="Counter Clockwise"/>
       </argument>

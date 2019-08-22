@@ -1,29 +1,3 @@
-// input parameters 
-// rate - feed rate
-// xMin, yMin - start poiunt
-// xD, yD - width and height
-// d  - mill diameter 
-// ccw - clockwise  0 - clockwise, 2- counter clockwise 
-// zSave -  save z
-// zFull - deep
-
-
-//Default Value
-/*
-xMin = 0;
-yMin = 0;
-xD = 100;
-yD = 140;
-d = 6;
-zSave = 1;
-zFull = 6;
-zDelta = 2;
-ccw = 0;
-per_stepover = 30;
-zRate = 50;
-rate = 200;
-radius = 20;
-*/
 function millroundrect(xMin_trc, yMin_trc, xMax_trc, yMax_trc, zCurrent, cur_rad )
 {
 
@@ -55,7 +29,8 @@ function millroundrect(xMin_trc, yMin_trc, xMax_trc, yMax_trc, zCurrent, cur_rad
 }
 
 
-
+function DoRoundRectPocket(xMin, yMin, xD, yD, radius, zSave, d, zDelta,zFull,per_stepover,rate,zRate,ccw) 
+{
 if( d <= 0 ) { error("Tool diametr can not be zero or negitive"); }
 if( (per_stepover < 0) || (per_stepover >= 95) ) { error("Stepover is wrong"); }
 if( rate <= 0 ) { error("Feed rate can not be zero or negitive"); }
@@ -77,29 +52,6 @@ Stepover = d * (abs(100-per_stepover)/100.);
 rtool = d/2;
 xMax = xMin + xD; 
 yMax = yMin + yD; 
-
-/*
-goto([xMin,yMin,zSave]);
-goto([xMax,yMin,zSave]);
-goto([xMax,yMax,zSave]);
-goto([xMin,yMax,zSave]);
-goto([xMin,yMin,zSave]);
-*/
-xStart = xMin + rtool;
-yStart = yMin + rtool ;
-xEnd = xMax  - rtool;
-yEnd = yMax  - rtool;
-dy = Stepover;
-
-function init_start()
-{
-    xStart = xMin + rtool;
-    yStart = yMin + rtool ;
-    xEnd = xMax  - rtool;
-    yEnd = yMax  - rtool;
-    dy = Stepover;
-}
-
 zCur = 0;
 zFull = -1*zFull;
 
@@ -111,7 +63,12 @@ while(zFull < zCur)
     zCur = zFull;
     } 
     
-    init_start();
+    xStart = xMin + rtool;
+    yStart = yMin + rtool ;
+    xEnd = xMax  - rtool;
+    yEnd = yMax  - rtool;
+    dy = Stepover;
+    
     radd = radius;
     
     goto([-,-,zSave]);
@@ -130,7 +87,4 @@ while(zFull < zCur)
     }        
 }
  
- 
-
-
-
+}

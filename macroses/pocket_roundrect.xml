@@ -2,49 +2,48 @@
 <macroses>
   <macros>
     <name>Round Rect Pocket</name>
-    <desc>
-      Mill round rect pocket
-    </desc>
-    <image>round_rect_pocket.jpg</image>
-    <gcmc>round_rect_pocket.gcmc</gcmc>
+    <desc>Millng round rect pocket</desc>
+    <image>pocket_roundrect.jpg</image>
+    <gcmc>pocket_roundrect.gcmc</gcmc>
+    <include>pocket_roundrect.inc.gcmc</include>
+    <function>DoRoundRectPocket(xMin, yMin, xD, yD, radius, zSave, d, zDelta,zFull,per_stepover,rate,zRate,ccw)</function>
     <arguments>
       <argument defvalue ="2" type="scalar" ref="zSave">
         <name>Save Z:</name>
       </argument>
       <argument defvalue ="0" type="scalar" ref="xMin">
-        <name>Specify xMin:</name>
-        <desc>Specify xMin of the rect in mm</desc>
+        <name>X Min:</name>
+        <desc>X Min of the rect in mm</desc>
       </argument>
       <argument defvalue ="0" type="scalar" ref="yMin">
-        <name>Specify yMin:</name>
-        <desc>Specify yMin of the rect in mm</desc>
+        <name>Y Min:</name>
+        <desc>Y Min of the rect in mm</desc>
       </argument>
       <argument defvalue ="200" type="scalar" ref="xD">
         <name>Width (dX):</name>
-        <desc>Specify width of the rect in mm</desc>
+        <desc>Width of the rect in mm</desc>
       </argument>
       <argument defvalue ="100" type="scalar" ref="yD">
         <name>Height (dY):</name>
-        <desc>Specify height of the rect in mm</desc>
+        <desc>Height of the rect in mm</desc>
       </argument>
       <argument defvalue ="20" type="scalar" ref="radius">
         <name>Radius:</name>
-        <desc>Specify round rect radius in mm</desc>
+        <desc>Round rect radius in mm</desc>
       </argument>
       <argument defvalue ="6" type="scalar" ref="d">
         <name>Mill diameter</name>
       </argument>
       <argument defvalue ="200" type="scalar" ref="rate">
         <name>Feed rate:</name>
-        <desc>Specify feed rate of cutting</desc>
+        <desc>Feed rate of cutting</desc>
       </argument>
       <argument defvalue ="50" type="scalar" ref="zRate">
         <name>Z feed rate:</name>
-        <desc>Specify Z feed rate of cutting</desc>
+        <desc>Z feed rate of cutting</desc>
       </argument>
       <argument defvalue ="30" type="scalar" ref="per_stepover">
         <name>Step over(%):</name>
-        <desc>Specify step over</desc>
       </argument>    
       <argument defvalue ="1" type="scalar" ref="zDelta">
         <name>Step Z:</name>
@@ -54,6 +53,7 @@
       </argument>
       <argument defvalue ="1" type="list" ref="ccw">
         <name>Direction:</name>
+        <desc>Direction: 0 - clockwise, 2- counter clockwise</desc>
         <list value ="0" name="Clockwise"/>
         <list value ="1" name="Counter Clockwise"/>
       </argument>

@@ -102,14 +102,14 @@ public:
     //! load/save file
 	bool NewFile(int filetype, const wxString &filename);
     bool LoadFile (const wxString &filename);
+	bool ReLoadFile();
     bool SaveFile ();
     bool SaveFile (const wxString &filename);
     bool Modified ();
     wxString GetFileName () {return m_filename;}
 	void SetFileName(const wxString &filename) { m_filename = filename; }
 	void PasteFile(const wxString &fname, bool toend = false);
-	bool IsNew() { return m_newfile; }
-
+	bool IsNew() { return m_newfile; }	
 	//find
 	void DoFind(wxEventType type, int flag, const wxString &strfind);
 	void DoReplace(wxEventType type, int flag, const wxString &strfind, const wxString &strReplace);

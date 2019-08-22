@@ -47,7 +47,7 @@ function shear_x(vl)
 /* - - - - - - - - - - - - - - - - - - - */
 feedrate(400.0mm);
 
-text = "Привет World! All your Glyphs are belong to us.";
+text = "Привет Hello 1 2 3 4 5 6 7 8 9 0 .";
 sf = 2.5mm;	/* Scaling factor */
 
 /*
@@ -61,7 +61,7 @@ sf = 2.5mm;	/* Scaling factor */
  */
 
 /* Typeset the text */
-vl = typeset(text, FONT_HTIMES);
+vl = typeset(text, FONT_HSANS_1);
 
 /* Scale XY to real world coordinates */
 /* Do not touch the Z-coordinate, the engrave() function needs the original */

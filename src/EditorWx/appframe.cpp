@@ -95,7 +95,7 @@ wxBEGIN_EVENT_TABLE (AppFrame, wxFrame)
     EVT_MENU (wxID_SAVE,             AppFrame::OnFileSave)
     EVT_MENU (wxID_SAVEAS,           AppFrame::OnFileSaveAs)
     EVT_MENU (ID_CLOSEACTIVETAB,            AppFrame::OnFileClose)
-	EVT_MENU_RANGE(wxID_FILE, wxID_FILE9, AppFrame::OnOpenLastFile)	
+	EVT_MENU_RANGE(wxID_FILE, wxID_FILE9, AppFrame::OnOpenLastFile)
 	EVT_MENU_RANGE(ID_MACROSFIRST, ID_MACROSLAST, AppFrame::OnMacros)
 	EVT_MENU (ID_MACROSES,			 AppFrame::OnMacroses)
 	EVT_MENU(ID_MATHCALC,			 AppFrame::OnMathCalc)
@@ -660,23 +660,25 @@ void AppFrame::OnFileRemoveEvent(wxCommandEvent &event)
 void AppFrame::OnOpenLastFile(wxCommandEvent &event)
 {
 	ConfigData *config = dynamic_cast<ConfigData *>(wxConfigBase::Get());
-	if (config)
+	int n = event.GetId() - wxID_FILE;
+	const FileNamesList &files = config->GetFiles();
+	if (n >= 0 && n < static_cast<int>(files.size()) )
 	{
-		int n = event.GetId() - wxID_FILE;
-		const FileNamesList &files = config->GetFiles();
-		if (n >= 0 && n < static_cast<int>(files.size()) )
+		auto it = files.begin();
+		for (int i = 0; i < n; i++, it++) ;
+		if (!FileOpen(it->GetFullPath()))
 		{
-			auto it = files.begin();
-			for (int i = 0; i < n; i++, it++) ;
-			FileOpen( it->GetFullPath() );
-			if (event.GetClientData() != NULL)
-				HideWelcome();
-			return;
+			// Ask to remove from 
+			if (wxMessageBox(wxString::Format(_("Would you like to remove file %s from history list?"), it->GetFullName()), _("Error opening file"),
+				wxYES | wxNO | wxCENTRE) == wxYES)
+			{
+				config->RemoveFileNameFromSaveList(it->GetFullPath() );
+				UpdateLastFilesList();
+			}
 		}
-
+		else if (event.GetClientData() != NULL)
+			HideWelcome();
 	}
-// if somthing wrong call standart file open dialog;
-	OnFileOpen(event);
 }
 
 void AppFrame::OnFileSave (wxCommandEvent &WXUNUSED(event)) 
@@ -968,15 +970,16 @@ void AppFrame::AddFileToHisotyList(const wxFileName &filename)
 	if (!config)
 		return;
 	config->AddFileNameToSaveList(filename);
+	UpdateLastFilesList();
+}
+
+void AppFrame::UpdateLastFilesList()
+{
 	AddLastFilesToMenu();
 	WelcomeWnd *welcome = FindWelcomePage();
 	if (welcome)
 		welcome->AddLastFilesToMenu();
-
 }
-
-
-
 
 void AppFrame::AddLastFilesToMenu()
 {
@@ -1174,20 +1177,27 @@ void AppFrame::AddPath(const wxString &path)
 	}
 }
 
-void AppFrame::FileOpen (const wxString &fn)
+bool AppFrame::FileOpen (const wxString &fn,bool reloadifopen)
 {
     wxFileName w(fn); 
 	w.Normalize(); 
 	wxString fname = w.GetFullPath();
 	
 	// first try  to find the file in the opened tabs
-	size_t nPage = 0;
+	size_t nPage = 0; 
+	bool bOk = true;
 	if (FindPageByFileName(fname, &nPage) )
 	{
 		m_notebook->SetSelection(nPage);
-		return;
+		if (reloadifopen)
+		{
+			FilePage *fp = dynamic_cast<FilePage *>(m_notebook->GetPage(nPage));
+			if (fp && fp->GetEdit() )
+				fp->GetEdit()->ReLoadFile();
+		}
+		return bOk;
 	}
-
+	
 	m_notebook->Freeze();
 	try
 	{
@@ -1195,23 +1205,24 @@ void AppFrame::FileOpen (const wxString &fn)
 		if (fsize >= MAX_EDITOR_FILE_SIZE)
 		{
 			wxMessageBox(wxString::Format(_("File %s is very lage for the editor"), fname));
+			bOk = false;
 		}
 		else
-		{						
-			
+		{
 			FilePage *pedit = new FilePage(m_notebook, FILETYPE_UNKNOW, fname, false );
 			//pedit->LoadFile(fname);
 			m_notebook->AddPage(pedit, w.GetFullName(), true);
 			UpdateTitle();
 			AddFileToHisotyList(w);		
-
 		}
 	}
 	catch (...)
 	{
 		wxMessageBox(wxString::Format(_("Can not open file %s!"), fname ), _("Error opening file") );
+		bOk = false;
 	}
 	m_notebook->Thaw();
+	return bOk;
 }
 
 

@@ -39,6 +39,7 @@ enum View
 #define VSTYLE_SHOWBOX		0x0004
 #define VSTYLE_SHOWTOOL		0x0008
 #define VSTYLE_SHOWGRID3D	0x0010
+#define VSTYLE_SHOWFASTMOVE	0x0020
 
 class Camera
 {

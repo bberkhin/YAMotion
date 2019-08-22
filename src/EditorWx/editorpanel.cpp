@@ -55,6 +55,7 @@ enum
 	ID_BTN_SHOWAXIS,
 	ID_BTN_SHOWGRID,
 	ID_BTN_SHOWBOX,
+	ID_BTN_SHOWFAST,
 	ID_SETSIMULATIONSPEED,
 	ID_LOGWINDOW,
 	ID_3DVIEWWINDOW
@@ -238,6 +239,7 @@ EVT_BUTTON(ID_SETSIMULATIONSPEED, View3DPanel::OnSetSimulateSpeed)
 EVT_BUTTON(ID_BTN_SHOWAXIS, View3DPanel::OnTune3DView)
 EVT_BUTTON(ID_BTN_SHOWGRID, View3DPanel::OnTune3DView)
 EVT_BUTTON(ID_BTN_SHOWBOX, View3DPanel::OnTune3DView)
+EVT_BUTTON(ID_BTN_SHOWFAST, View3DPanel::OnTune3DView)
 
 EVT_COMMAND_SCROLL(ID_SIMULATED_SLIDER, View3DPanel::OnSimulateProgress)
 EVT_COMMAND_SCROLL(ID_SIMULATEDSPEED_SLIDER, View3DPanel::OnSpeedChanged)
@@ -503,16 +505,17 @@ wxSizer *View3DPanel::CreateSimulationPanel()
 	pguage->SetMargin(MARGIN_LEFT);
 	panel->Add(pguage, 0, wxEXPAND);
 
-	// 
+
 	btns = new wxBoxSizer(wxHORIZONTAL);
 	FlatButton *btv = new FlatButton(this, ID_BTN_SHOWAXIS, _("AXIS"));
 	btns->Add(btv, 0, wxALIGN_CENTRE_VERTICAL);	
 	btns->AddSpacer(5);
-	//btv = new FlatButton(this, ID_BTN_SHOWGRID, _("GRID"));
-	//btns->Add(btv, 0, wxALIGN_CENTRE_VERTICAL);
-	//btns->AddSpacer(5);
 	btv = new FlatButton(this, ID_BTN_SHOWBOX, _("BOX"));
 	btns->Add(btv, 0, wxALIGN_CENTRE_VERTICAL);
+	btns->AddSpacer(5);
+	btv = new FlatButton(this, ID_BTN_SHOWFAST, _("G0"));
+	btns->Add(btv, 0, wxALIGN_CENTRE_VERTICAL);
+	
 	panel->AddSpacer(5);
 	panel->Add(btns, 0, wxALIGN_CENTRE_HORIZONTAL);
 
@@ -786,14 +789,20 @@ void View3DPanel::OnTune3DView(wxCommandEvent& event)
 		case ID_BTN_SHOWAXIS: style = VSTYLE_SHOWAXIS;  break;
 		case ID_BTN_SHOWGRID: style = VSTYLE_SHOWGRID;  break;
 		case ID_BTN_SHOWBOX : style = VSTYLE_SHOWBOX;  break;
+		case ID_BTN_SHOWFAST: style = VSTYLE_SHOWFASTMOVE;  break;
 	}
 
 	m_pview->ToggleStyle(style);
 
 	FlatButton *fb = dynamic_cast<FlatButton *>(FindWindowById(event.GetId(), this));
-	fb->SetChecked((m_pview->GetStyleFlag() & style) != 0);
+	if ( fb )
+		fb->SetChecked((m_pview->GetStyleFlag() & style) != 0);
 }
 
+
+#define UPDATE_SHOW3D_BUTTON(id, Style)  fb = dynamic_cast<FlatButton *>(FindWindowById(id, this));\
+		if (fb)\
+			fb->SetChecked((m_pview->GetStyleFlag() & Style) != 0);
 
 void View3DPanel::OnIdle(wxIdleEvent& event)
 {
@@ -809,14 +818,10 @@ void View3DPanel::OnIdle(wxIdleEvent& event)
 	if (win)
 		win->Enable(m_fp->GetWorker()->CanSimulatePaused());
 
-
-	FlatButton *fb = dynamic_cast<FlatButton *>(FindWindowById(ID_BTN_SHOWAXIS, this));
-	if (fb)
-		fb->SetChecked((m_pview->GetStyleFlag() & VSTYLE_SHOWAXIS) != 0);
-	fb = dynamic_cast<FlatButton *>(FindWindowById(ID_BTN_SHOWBOX, this));
-	if (fb)
-		fb->SetChecked((m_pview->GetStyleFlag() & VSTYLE_SHOWBOX) != 0);
-
+	FlatButton *fb;
+	UPDATE_SHOW3D_BUTTON(ID_BTN_SHOWAXIS, VSTYLE_SHOWAXIS);
+	UPDATE_SHOW3D_BUTTON(ID_BTN_SHOWBOX, VSTYLE_SHOWBOX);
+	UPDATE_SHOW3D_BUTTON(ID_BTN_SHOWFAST, VSTYLE_SHOWFASTMOVE);
 }
 
 

@@ -749,6 +749,10 @@ bool Edit::NewFile (int filetype, const wxString &filename)
 	return true;
 }
 
+bool Edit::ReLoadFile()
+{
+	return LoadFile(wxEmptyString);
+}
 
 bool Edit::LoadFile (const wxString &filename) {
 
@@ -790,8 +794,8 @@ bool Edit::SaveFile (const wxString &filename)
 
 }
 
-bool Edit::Modified () {
-
+bool Edit::Modified() 
+{
     // return modified state
     return (GetModify() && !GetReadOnly());
 }

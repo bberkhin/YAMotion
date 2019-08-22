@@ -1,0 +1,105 @@
+include("engrave.inc.gcmc");	
+
+function DrawTick(xs,ys,hs)
+{
+    vl += {[-,-,1]};
+    vl += {[xs,ys,-]};
+    vl += {[-,-,-1]};
+    vl += {[-,ys+hs,-]};    
+}
+
+function GetMaxX( vecl )
+{
+    local xmax = 0;
+    foreach(vecl; v) 
+    {
+		if( !isundef(v.x)  && v.x > xmax)
+        {
+			xmax = v.x;
+		}
+	}
+	return xmax;    
+}
+
+function DrawLegend(xs,ys, step, hs, text)
+{
+        /* Typeset the text */
+        local vlt = { };
+        local sf = 4;
+        
+        DrawTick(xs,ys,hs);
+        DrawTick(xs+step,ys,hs);
+        vlt = typeset(to_string(text), FONT_HSANS_1);
+
+        /* Scale XY to real world coordinates */
+        /* Do not touch the Z-coordinate, the engrave() function needs the original */
+        vlt = scale(vlt, [sf, sf]);
+
+        /* Place somewhere in XY space */
+        /* Again without touching the Z-coordinate */
+        vlt += [xs + step + 3, ys ];
+        vl += vlt;
+}
+
+
+function DrawLabel(xs,ys, text)
+{
+        /* Typeset the text */
+        local vlt = { };
+        local sf = 5;
+        vlt = typeset(to_string(text), FONT_HSANS_1);
+
+        /* Scale XY to real world coordinates */
+        /* Do not touch the Z-coordinate, the engrave() function needs the original */
+        vlt = scale(vlt, [sf, sf]);
+
+        /* Place somewhere in XY space */
+        /* Again without touching the Z-coordinate */
+        vlt += [xs - GetMaxX(vlt)/2, ys-8];
+        vl += vlt;
+}
+
+function MakeRule( Len, Step, n1, n2, h )
+{
+    local x = StartX;
+    local EndX= StartX + Len;
+    local y = StartY;
+    local h1 = h/4;
+    local h2 = h/2;
+    local valtxt = 0;
+    while(  x <= EndX )
+    {
+        DrawTick(x,y,h);
+        DrawLabel(x,y, to_none(valtxt) );
+        valtxt++;
+        x+=Step;
+        for( i2 = 0; i2 < n2 && x < EndX; i2++ )
+        {
+            for( i1 = 0; i1 < n1 && x < EndX; i1++ )
+            {
+                DrawTick(x,y,h1);
+                x+=Step;
+            }
+            if ( x <= EndX  && i2 < (n2-1) )  // do not draw last
+            { 
+                DrawTick(x,y,h2);
+                x+=Step;
+            }
+        }
+    }
+    
+    DrawLegend(StartX,StartY + h + 5, Step, h1, Step);
+    engrave(vl, 5mm, 1mm);
+}
+feedrate(200);
+
+vl = {};
+StartX = 10mm;
+StartY = 0mm;
+
+MakeRule(100mm,1mm,4, 2,12mm);
+
+StartX = 10mm;
+StartY = 40mm;
+vl = {};
+MakeRule(5in,0.25in,3, 1,12mm);

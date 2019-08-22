@@ -36,8 +36,8 @@ Stepover = d * (abs(100-per_stepover)/100.);
 
 RampDis = 10;
 rhole = (r - d / 2);
-message( "rhole = ", rhole);
-message( "Stepover = ", Stepover);
+//message( "rhole = ", rhole);
+//message( "Stepover = ", Stepover);
 
 
 zCur = 0;
@@ -67,12 +67,9 @@ while(zFull < zCur)
 	{
 	   nc1=1;
 	   do_arc( [xEnd,yCenter,-],RADCIRCLE );		
-	   //literal("Y",yCenter, " X",  xEnd, " R", RADCIRCLE, "\n");
-      // CODE "Y" & YPOS & " X" & XENDPOINT & " R" & RADCIRCLE
 	 }
      xEnd =  xCenter - RAD;
-     //Clean out the other side of the cut
-	 //literal("Y",yCenter, " X",  xEnd, " R", RAD, "\n");
+     //Clean out the other side of the cut	 
 	 do_arc( [xEnd,yCenter,-],RAD );
 
      RAD = RAD + Stepover;

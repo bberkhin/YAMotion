@@ -1,27 +1,29 @@
-﻿<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <macroses>
   <macros>
     <name>Cutting rect</name>
-    <desc>
-      Cut rect
-    </desc>
+    <desc></desc>
     <image>cut_rect.jpg</image>
     <gcmc>cut_rect.gcmc</gcmc>
-    <arguments>
+    <include>cut_rect.inc.gcmc</include>
+    <function>DoCutRect(xMin, yMin, xD, yD, zSave, d, zDelta,rate,zRate,trc,ccw)</function>
+      <arguments>
       <argument defvalue ="2" type="scalar" ref="zSave">
         <name>Save Z:</name>
       </argument>
       <argument defvalue ="0" type="scalar" ref="xMin">
-        <name>Specify Xmin of the rect:</name>
+        <name>X min:</name>
+        <desc>Specify X min of the rect</desc>
       </argument>
       <argument defvalue ="0" type="scalar" ref="yMin">
-        <name>Specify Ymin of the rect:</name>
+        <name>Y min:</name>
+        <desc>Specify Y min of the rect</desc>
       </argument>
       <argument defvalue ="80" type="scalar" ref="xD">
         <name>Width (delta X):</name>
       </argument>
       <argument defvalue ="100" type="scalar" ref="yD">
-        <name>Width (delta Y):</name>
+        <name>Height (delta Y):</name>
       </argument>
       <argument defvalue ="6" type="scalar" ref="d">
         <name>Mill diameter</name>
@@ -42,12 +44,14 @@
       </argument>
       <argument defvalue ="1" type="list" ref="trc">
         <name>Thraektory:</name>
+        <desc>Tool correction: 1 - by contur, 2 inside, 3 ouside</desc>
         <list value ="1" name="By contour"/>
         <list value ="2" name="Inside"/>
         <list value ="3" name="Outside"/>
       </argument>
       <argument defvalue ="0" type="list" ref="ccw">
         <name>Direction:</name>
+        <desc>Direction: 0 - clockwise, 2- counter clockwise</desc>
         <list value ="0" name="Clockwise"/>
         <list value ="1" name="Counter Clockwise"/>
       </argument>

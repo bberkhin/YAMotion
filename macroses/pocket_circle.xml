@@ -1,22 +1,22 @@
-﻿<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <macroses>
   <macros>
-    <name>Mill circular pocket</name>
-    <desc>Mill circular pocket; and circle raius</desc>
-    <image>circular_pocket.jpg</image>
-    <gcmc>circular_pocket.gcmc</gcmc>
-    <include>circular_pocket.inc.gcmc</include>
-    <function> DoCirculePocket(xCenter,yCenter,zSave,r,d,rate,zRate,per_stepover,RampDist,zDelta,zFull,ccw)</function>
+    <name>Circle pocket</name>
+    <desc>Millng circular pocket via center point and radius</desc>
+    <image>pocket_circle.jpg</image>
+    <gcmc>pocket_circle.gcmc</gcmc>
+    <include>pocket_circle.inc.gcmc</include>
+    <function>DoCirculePocket(xCenter,yCenter,zSave,r,d,rate,zRate,per_stepover,RampDist,zDelta,zFull,ccw)</function>
     <arguments>
       <argument defvalue ="2" type="scalar" ref="zSave">
         <name>Save Z:</name>
       </argument>
       <argument defvalue ="30" type="scalar" ref="xCenter">
-        <name>Specify Xc of the circle:</name>
+        <name>Center X:</name>
         <desc>Specify center of the circle in mm</desc>
       </argument>
       <argument defvalue ="50" type="scalar" ref="yCenter">
-        <name>Specify Yc of the circle:</name>
+        <name>Center Y:</name>
         <desc>Specify center of the circle in mm</desc>
       </argument>
       <argument defvalue ="20" type="scalar" ref="r">
@@ -50,6 +50,7 @@
       </argument>
       <argument defvalue ="0" type="list" ref="ccw">
         <name>Direction:</name>
+        <desc>Direction: 0 - clockwise, 2- counter clockwise</desc>
         <list value ="0" name="Clockwise"/>
         <list value ="1" name="Counter Clockwise"/>
       </argument>
