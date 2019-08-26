@@ -786,13 +786,19 @@ void DirTreeCtrl::OnFileDelete(wxCommandEvent &WXUNUSED(event))
 	try
 	{
 		wxString path = item->GetPath();
+		bool bOk = false;
+		if (wxYES != wxMessageBox(wxString::Format(_("Do you really want to remove file  %s"), item->GetPath()), _("Removing file(s)"), wxYES | wxNO | wxNO_DEFAULT | wxICON_QUESTION))
+			return;
 		if( item->isFile() )
-			std::filesystem::remove( item->GetPath().wc_str());
+			bOk = std::filesystem::remove( item->GetPath().wc_str());
 		else
 		{
-			std::filesystem::remove_all(item->GetPath().wc_str());
+			bOk = std::filesystem::remove_all(item->GetPath().wc_str());
 		}
 		
+		if (!bOk)
+			throw;
+		this->Delete(id);
 		if ( !path.empty() )
 		{
 			wxCommandEvent event(FILE_REMOVE_EVENT, GetId());
@@ -1215,8 +1221,9 @@ void DirPane::Save()
 	wxString strOldPath = config->GetPath();
 	config->SetPath(L"/DIRPANE");
 	config->Write(L"DirVisible", visibleDir);
+	config->DeleteGroup(L"/DIRPANE/PATHS");
 	config->SetPath(L"/DIRPANE/PATHS");
-
+	
 // write dirs
 	int n = 0;
 	wxTreeItemIdValue cookie;

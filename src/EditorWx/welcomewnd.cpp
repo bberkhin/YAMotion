@@ -21,8 +21,7 @@
 wxIMPLEMENT_ABSTRACT_CLASS(WelcomeWnd, wxPanel);
 
 wxBEGIN_EVENT_TABLE(WelcomeWnd, wxPanel)
-//EVT_BUTTON(ID_TO3DBUTTON, EditorPanel::OnTo3DButton)
-EVT_SIZE(WelcomeWnd::OnSize)
+
 wxEND_EVENT_TABLE()
 
 
@@ -84,11 +83,6 @@ WelcomeWnd::WelcomeWnd(wxWindow *parent) : wxPanel(parent)
 }
 
 
-void WelcomeWnd::OnSize(wxSizeEvent& event)
-{
-	Layout();
-	Refresh(); 
-}
 
 void WelcomeWnd::UpdateThemeColor()
 {

@@ -29,8 +29,12 @@ function DrawLegend(xs,ys, step, hs, text)
         
         DrawTick(xs,ys,hs);
         DrawTick(xs+step,ys,hs);
-        vlt = typeset(to_string(text), FONT_HSANS_1);
-
+        local lbltext;
+        if ( isfloat( text ) )        {    lbltext = float_to_string(text,2);  }
+        else                            {    lbltext = to_string(text) ;        }
+        
+        vlt = typeset(lbltext , FONT_HSANS_1);
+        
         /* Scale XY to real world coordinates */
         /* Do not touch the Z-coordinate, the engrave() function needs the original */
         vlt = scale(vlt, [sf, sf]);
@@ -97,9 +101,14 @@ vl = {};
 StartX = 10mm;
 StartY = 0mm;
 
-MakeRule(100mm,1mm,4, 2,12mm);
+MakeRule(100mm,1mm,4, 2,10mm);
 
 StartX = 10mm;
 StartY = 40mm;
 vl = {};
 MakeRule(5in,0.25in,3, 1,12mm);
+
+StartX = 10mm;
+StartY = 80mm;
+vl = {};
+//MakeRule(7in,1in,6, 1,12mm);

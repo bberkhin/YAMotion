@@ -327,7 +327,7 @@ void AppFrame::ShowWelcome()
 	FindWelcomePage(&welcome_page);
 	if (welcome_page == wxNOT_FOUND)
 	{
-		m_notebook->InsertPage(0, new WelcomeWnd(this), _("Welcome"), true);
+		m_notebook->InsertPage(0, new WelcomeWnd(m_notebook), _("Welcome") , true);
 		m_notebook->SetPageToolTip(0, _("Welcome screen"));
 	}
 	else
@@ -639,8 +639,8 @@ void AppFrame::OnFileOpenEvent(wxCommandEvent &event)
 			fname = abs_fname;
 	}
 	
-	FileOpen( fname.GetFullPath() );	
-	HideWelcome();
+	if ( FileOpen( fname.GetFullPath() ) )
+		HideWelcome();
 }
 
 

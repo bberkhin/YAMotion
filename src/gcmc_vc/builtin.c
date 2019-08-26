@@ -1103,6 +1103,28 @@ static value_t *bi_to_string(const node_t *ref, int argc)
 	return tostrfunc(ref, argc, NULL, 0);
 }
 
+static value_t *bi_float_to_string(const node_t *ref, int argc)
+{
+	check_arg_two(ref, "float_to_string", argc);
+	const value_t *arg0 = value_get(argc, 0);
+	const value_t *arg1 = value_get(argc, 1);
+	check_arg_scalar(ref, "float_to_string", arg0, 0);
+	check_arg_scalar(ref, "float_to_string", arg1, 1);
+	double d0 = value_to_double(arg0);
+	int local_decimals = value_to_int(arg1);
+
+	wchar_t *s = wcsdup(L"");
+	size_t ns = 0;
+	assert(s != NULL);
+
+	mysprintf(&s, &ns, L"%.*f%s", local_decimals, d0, unitshortnameL(arg0->unit));
+
+	value_t *rv = value_new(VAL_STRING);
+	rv->str.n = ns;
+	rv->str.na = ns + 1;
+	rv->str.chs = s;
+	return rv;
+}
 /*
  * Function:	normalize(vector:v)
  * Input:	vector:v - input vector
@@ -2542,6 +2564,7 @@ const builtins_t builtins_gcmc[] = {
 	{ L"fixpos_restore",	bi_fixpos_restore },
 	{ L"fixpos_set",	bi_fixpos_set },
 	{ L"fixpos_store",	bi_fixpos_store },
+	{ L"float_to_string",		bi_float_to_string },
 	{ L"floor",		bi_floor },
 	{ L"head",		bi_head },
 	{ L"insert",		bi_insert },

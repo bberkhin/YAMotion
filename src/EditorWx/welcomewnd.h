@@ -7,7 +7,6 @@ class WelcomeWnd : public wxPanel
 public:
 	WelcomeWnd(wxWindow *parent);
 	virtual ~WelcomeWnd();
-	void OnSize(wxSizeEvent& event);
 	void AddLastFilesToMenu(bool update = true);
 	
 private:
