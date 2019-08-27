@@ -1,0 +1,111 @@
+// drill plate
+include("cut_circle.inc.gcmc");
+include("engrave.inc.gcmc");	
+include("cut_roundrect.inc.gcmc");
+
+zSave=2; //Save Z:
+xCenter=0; //Specify center of the circle in mm
+yCenter=0; //Specify center of the circle in mm
+d=3; //Mill diameter
+rate=200; //Specify feed rate of cutting
+zRate=50; //Specify Z feed rate of cutting
+zDelta=2; //Step Z:
+zFull=8; //Thikness:
+trc=2; //Tool correction:  1 - by contur, 2 inside, 3 ouside
+ccw=0; //Direction: 0 - clockwise, 2- counter clockwise
+
+borderX = 20;
+borderY = 20;
+minD = 3;
+maxD = 16;
+dx = 10;
+dy = 10;
+
+function GetMaxX( vecl )
+{
+    local xmax = 0;
+    foreach(vecl; v) 
+    {
+		if( !isundef(v.x)  && v.x > xmax)
+        {
+			xmax = v.x;
+		}
+	}
+	return xmax;    
+}
+
+function DrawLabel(xs,ys, text,centerhor)
+{
+        /* Typeset the text */
+        local vlt = { };
+        local sf = 5;
+        vlt = typeset(to_string(text), FONT_HSANS_1);
+
+        /* Scale XY to real world coordinates */
+        /* Do not touch the Z-coordinate, the engrave() function needs the original */
+        vlt = scale(vlt, [sf, sf]);
+
+        /* Place somewhere in XY space */
+        /* Again without touching the Z-coordinate */
+        if ( centerhor )
+        {
+            vlt += [xs - GetMaxX(vlt)/2, ys-8];
+        }
+        else
+        {
+           vlt += [xs, ys-8];
+        }
+        vl += vlt;
+}
+
+
+feedrate(rate);
+x = borderX  +  maxD/2 ;
+vl = {};
+for( i = 0; i <= 9; i++ )
+{
+    DrawLabel(x,borderY-2 , i,1);
+    x += ( maxD + dx ) ;    
+}
+engrave(vl, 5mm, 1mm);
+
+y = borderY + (maxD/2);
+for( i = minD; i <= maxD; i++ )
+{
+    x = borderX  +  maxD/2;  
+    vl = {};
+    DrawLabel(5,y+4 , i, 0);
+    engrave(vl, 5mm, 1mm);
+    for( j = 0; j <= 9; j++ )
+    {
+        r = (i + to_float(j)/10.0)/2;
+       // message( "x=" ,x," y=" ,y," r =", r );
+        DoCutCircle(x,y, r + 0.2, zSave,d,zDelta,10, rate,zRate,trc,ccw);
+        x += ( maxD+ dx) ;  
+    }
+    
+    vl = {};
+    DrawLabel(x-maxD/2-dx+5,y+4 , i, 0);
+    engrave(vl, 5mm, 1mm);
+
+    y += (i+dy);
+}
+
+xMin=0; //Specify X min of the rect:
+yMin=0; //Specify Y min of the rect:
+xD=290; //Width (delta X):
+yD=270; //Width (delta Y):
+radius=10; //Round radius:
+d=4; //Mill diameter
+rate=200; //Specify feed rate of cutting
+zRate=50; //Specify Z feed rate of cutting
+zDelta=2; //Step Z:
+zFull=10; //Thikness:
+
+DoCutCircle(10,10, 3, zSave,d,zDelta,10, rate,zRate,trc,ccw);
+DoCutCircle(xD-10,10, 3, zSave,d,zDelta,10, rate,zRate,trc,ccw);
+DoCutCircle(xD-10,yD-10, 3, zSave,d,zDelta,10, rate,zRate,trc,ccw);
+DoCutCircle(10,yD-10, 3, zSave,d,zDelta,10, rate,zRate,trc,ccw);
+
+DoCutRoundRect(xMin, yMin, xD, yD, radius, zSave, d, zDelta,rate,zRate,trc,ccw);
+
