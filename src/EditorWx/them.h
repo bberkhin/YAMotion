@@ -123,10 +123,7 @@ public:
 		// the background and text colour for the highlighted item
 		HIGHLIGHT,
 		HIGHLIGHT_TEXT,
-				
-		// the titlebar background colours for the normal and focused states
-		TITLEBAR,
-		TITLEBAR_ACTIVE,
+
 		// the titlebar text colours
 		TITLEBAR_TEXT,
 		TITLEBAR_ACTIVE_TEXT,		

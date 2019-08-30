@@ -23,28 +23,28 @@
         {
             "nameid": 0,
             "name": "default",
-            "fclr": "#999999"
+            "fclr": "GRAY"
         },
       {
         "nameid": 1,
         "name": "comment",
-        "fclr": "#736557"
+        "fclr": "#84e484"
       },
       {
         "nameid": 2,
         "name": "comment_ml",
-        "fclr": "#e6dda1"
+        "fclr": "#84e484"
       },
       {
         "nameid": 3,
         "name": "G",
-        "fclr": "#84e484",
+        "fclr": "#ffbb44",
         "bold": true
       },
       {
         "nameid": 4,
         "name": "M",
-        "fclr": "#84e484",
+        "fclr": "#ff0044",
         "bold": true
       },
       {
@@ -62,31 +62,31 @@
       {
         "nameid": 7,
         "name": "number",
-        "fclr": "#bbbbbb",
+        "fclr": "#ee6677",
         "bold": true
       },
       {
         "nameid": 8,
         "name": "coordinate",
-        "fclr": "#55aadd",
+        "fclr": "#00FFFF",
         "bold": true
       },
         {
             "nameid": 9,
             "name": "word",
-            "fclr": "#ee6677",
+            "fclr": "RED",
             "bold": true
         },
       {
         "nameid": 10,
         "name": "operators",
-        "fclr": "#999999",
+        "fclr": "#ffffff",
         "bold": true
       },
         {
             "nameid": 11,
             "name": "identifiers",
-            "fclr": "#999999"
+            "fclr": "#ffffff"
         }
     ]
 }

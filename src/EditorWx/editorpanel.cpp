@@ -455,9 +455,7 @@ wxString View3DPanel::GetSpeedBtLabel()
 
 wxSizer *View3DPanel::CreateSimulationPanel()
 {
-	FlatButton *btv;
 	wxBoxSizer *panel = new wxBoxSizer(wxVERTICAL);
-	
 	// Create view button
 	wxBoxSizer *btns = new wxBoxSizer(wxHORIZONTAL);
 	FlatButton *btv1 = new FlatButton(this, ID_BTN_SHOWAXIS, _(" AXIS "), FB_LABEL_CENTER);

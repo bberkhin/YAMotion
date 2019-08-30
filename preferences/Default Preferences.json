@@ -11,7 +11,7 @@
   "tabWidth": 4,
   "visibleHSB": true,
   "enableLogExecution": false,
-  "theme_syntax": "them_black.json",
+  "theme_syntax": "them_white.json",
   "postpocessing": "wincnc.con",
   "files": [
     {

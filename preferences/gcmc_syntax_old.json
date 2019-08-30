@@ -22,35 +22,35 @@
     {
       "nameid": 0,
       "name": "default",
-      "fclr": "#999999"
+      "fclr": "WHITE"
     },
     {
       "nameid": 1,
       "name": "comment",
-      "fclr": "#e6dda1",
+      "fclr": "#84e484",
       "italic": false
     },
     {
       "nameid": 2,
       "name": "comment_ml",
-      "fclr": "#736557"
+      "fclr": "#84e484"
     },
     {
       "nameid": 3,
       "name": "var",
-      "fclr": "#999999",
+      "fclr": "WHITE",
       "bold": true
     },
     {
       "nameid": 4,
       "name": "number",
-      "fclr": "#bbbbbb",
+      "fclr": "#ee6677",
       "bold": true
     },
     {
       "nameid": 5,
       "name": "operators",
-      "fclr": "#999999",
+      "fclr": "#ffffff",
       "bold": true
     },
     {
@@ -61,7 +61,7 @@
     {
       "nameid": 7,
       "name": "functions",
-      "fclr": "#84e484",
+      "fclr": "#ff0044",
       "bold": true
     },
     {
@@ -73,13 +73,13 @@
     {
       "nameid": 9,
       "name": "units",
-      "fclr": "#999999",
+      "fclr": "#ffffff",
       "bold": true
     },
     {
       "nameid": 10,
       "name": "strings",
-      "fclr": "#ee6677",
+      "fclr": "#238e23",
       "bold": true,
       "italic": true
     }

@@ -169,8 +169,8 @@ void ThemArtProvider::UpdateColoursFromSystem()
 	//wxColor darker4Colour = baseColour.ChangeLightness(50);
 	wxColor darker5Colour = baseColour.ChangeLightness(40);
 
-	m_activeCaptionColour = clrs->Get(ColourScheme::WINDOW);// TITLEBAR_ACTIVE);
-	m_activeCaptionGradientColour = clrs->Get(ColourScheme::WINDOW);// TITLEBAR_ACTIVE);
+	m_activeCaptionColour = clrs->Get(ColourScheme::WINDOW);
+	m_activeCaptionGradientColour = clrs->Get(ColourScheme::WINDOW);
 	m_activeCaptionTextColour = clrs->Get(ColourScheme::WINDOW_TEXT);// TITLEBAR_ACTIVE_TEXT);
 	m_inactiveCaptionColour = clrs->Get(ColourScheme::FRAME);// TITLEBAR);
 	m_inactiveCaptionGradientColour = clrs->Get(ColourScheme::FRAME);
@@ -397,7 +397,7 @@ void ColourScheme::Read()
 	ReadColor(root["ctrl_pressed"],m_colors[CONTROL_PRESSED]);
 	ReadColor(root["ctrl_hover"],m_colors[CONTROL_HOVER]);
 	ReadColor(root["ctrl_text"],m_colors[CONTROL_TEXT]);
-	ReadColor(root["control_text_hover"], m_colors[CONTROL_TEXT_HOVER]);	
+	ReadColor(root["ctrl_text_hover"], m_colors[CONTROL_TEXT_HOVER]);
 	ReadColor(root["ctrl_text_dis"], m_colors[CONTROL_TEXT_DISABLED]);
 	ReadColor(root["ctrl_active"], m_colors[CONTROL_ACTIVE]);
 	ReadColor(root["ctrl_active_pressed"], m_colors[CONTROL_ACTIVE_PRESSED]);
@@ -411,8 +411,6 @@ void ColourScheme::Read()
 	ReadColor(root["scrollbar_tumb_hvr"], m_colors[SCROLLBAR_TUMB_HOVER]);	
 	ReadColor(root["highlight"],m_colors[HIGHLIGHT]);
 	ReadColor(root["highlight_txt"],m_colors[HIGHLIGHT_TEXT]);
-	ReadColor(root["titlebar"],m_colors[TITLEBAR]);
-	ReadColor(root["titlebar_active"],m_colors[TITLEBAR_ACTIVE]);
 	ReadColor(root["titlebar_txt"],m_colors[TITLEBAR_TEXT]);
 	ReadColor(root["titlebar_txt_active"],m_colors[TITLEBAR_ACTIVE_TEXT]);
 	ReadColor(root["slider_shaft"], m_colors[SLIDER_SHAFT]);
@@ -456,7 +454,7 @@ void ColourScheme::InitDef()
 
 	// the label text for the normal and the disabled state
 	m_colors[CONTROL_TEXT] = wxColour(0x999999);
-	m_colors[CONTROL_TEXT_HOVER] = wxColour(0xFFFFFF);
+	m_colors[CONTROL_TEXT_HOVER] = wxColour(0xFF000);//wxColour(0xFFFFFF);
 	m_colors[CONTROL_TEXT_DISABLED] = m_colors[CONTROL_TEXT].MakeDisabled();	
 	m_colors[CONTROL_ACTIVE_TEXT] = wxColour(0,0,0);
 	m_colors[CONTROL_ACTIVE_TEXT_HOVER] = wxColour(0,0,0);
@@ -470,9 +468,6 @@ void ColourScheme::InitDef()
 	m_colors[HIGHLIGHT] = m_colors[WINDOW].ChangeLightness(25);;
 	m_colors[HIGHLIGHT_TEXT] = m_colors[CONTROL_TEXT];
 
-		// the titlebar background colours for the normal and focused states
-	m_colors[TITLEBAR] = wxColour(0xe0e0e0); 
-	m_colors[TITLEBAR_ACTIVE] = wxColour(0xe00000);
 		// the titlebar text colours
 	m_colors[TITLEBAR_TEXT] = m_colors[CONTROL_TEXT];
 	m_colors[TITLEBAR_ACTIVE_TEXT] = m_colors[CONTROL_TEXT];
