@@ -23,7 +23,7 @@
 
 void make_cylinder(Object3d& edge, int divs); //из границы в плоскости XZ создаЄт объект вращени¤ вокруг z
 void make_tool_simple(Object3d& tool); //создаeт объект сверло
-void make_axis(const glm::vec4 &color, const glm::vec3 &rot, float len, Object3d& axis);
+void make_axis(const glm::vec3 &color, const glm::vec3 &rot, float len, Object3d& axis);
 
 GLubyte space[] =
 { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
@@ -81,6 +81,11 @@ wxBEGIN_EVENT_TABLE(View3D, wxGLCanvas)
 	EVT_MOUSE_EVENTS(View3D::OnMouseEvent)
 wxEND_EVENT_TABLE()
 
+#define SET_COLOR(clr,index) color_ = clrs->Get(index); \
+	clr.r = color_.Red() / 255.f;\
+	clr.g = color_.Green() / 255.f;\
+	clr.b = color_.Blue() / 255.f
+
 View3D::View3D( wxWindow *parent,wxWindowID id, int* gl_attrib)
 	:  wxGLCanvas(parent, id, gl_attrib, wxDefaultPosition, wxDefaultSize, wxWANTS_CHARS | wxFULL_REPAINT_ON_RESIZE)	
 {	
@@ -93,18 +98,21 @@ View3D::View3D( wxWindow *parent,wxWindowID id, int* gl_attrib)
 	m_gridStep = 100;
 	load_config();
 
-	make_tool_simple(tool); //делаем квадратное сверло )
-	make_axis(glm::vec4(1, 0, 0, 1), glm::vec3(0, 1, 0), 1.0f, axisX);
-	make_axis(glm::vec4(0, 1, 0, 1), glm::vec3(-1, 0, 0), 1.0f, axisY);
-	make_axis(glm::vec4(0, 0, 1, 1), glm::vec3(0, 0, 1), 1.0f, axisZ);
-
 	ColourScheme *clrs = Preferences::Get()->GetColorScheme();
-	wxColor bgColor = clrs->Get(ColourScheme::WINDOW_3DVIEW);
-	m_bgcolor.r = bgColor.Red() / 255.f; 
-	m_bgcolor.g = bgColor.Green() / 255.f;
-	m_bgcolor.b = bgColor.Blue() / 255.f;
-	
-	
+	wxColor color_;
+	SET_COLOR(m_bgcolor, ColourScheme::WINDOW_3DVIEW);
+	SET_COLOR(m_boxcolor, ColourScheme::VIEW3D_BOX);
+	SET_COLOR(m_fastcolor, ColourScheme::VIEW3D_G0);
+	SET_COLOR(m_feedcolor, ColourScheme::VIEW3D_G1);
+	SET_COLOR(m_xaxiscolor, ColourScheme::VIEW3D_XAXIS);
+	SET_COLOR(m_yaxiscolor, ColourScheme::VIEW3D_YAXIS);
+	SET_COLOR(m_zaxiscolor, ColourScheme::VIEW3D_ZAXIS);
+
+	make_tool_simple(tool); //делаем квадратное сверло )
+	make_axis(m_xaxiscolor, glm::vec3(0, 1, 0), 1.0f, axisX);
+	make_axis(m_yaxiscolor, glm::vec3(-1, 0, 0), 1.0f, axisY);
+	make_axis(m_zaxiscolor, glm::vec3(0, 0, 1), 1.0f, axisZ);
+
 }
 
 View3D::~View3D()
@@ -139,11 +147,13 @@ void View3D::initializeGL()
 {
 	glClearColor(m_bgcolor.r, m_bgcolor.g, m_bgcolor.b, 0.0f);
 	
-
+	
 	glShadeModel(GL_FLAT);
 	glEnable(GL_CULL_FACE);
+	/*
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+	*/
 
 	// prepare font
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
@@ -204,7 +214,7 @@ void View3D::OnPaint(wxPaintEvent& WXUNUSED(event))
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 
-	glEnable(GL_DEPTH_TEST);
+	//glEnable(GL_DEPTH_TEST);
 	
 
 
@@ -392,9 +402,9 @@ void View3D::draw_track()
 		{
 			// end last
 			if ( end_simulate_point.isFast )
-				glColor3f(1.0f, 0.0f, 0.0f );
+				glColor3fv(&m_fastcolor.x);
 			else
-				glColor3f(1.0f, 1.0f, 1.0f);
+				glColor3fv(&m_feedcolor.x);
 
 			glVertex3f(track[i - 1].position.x, track[i - 1].position.y, track[i - 1].position.z);
 			glVertex3f(end_simulate_point.position.x, end_simulate_point.position.y, end_simulate_point.position.z);
@@ -407,10 +417,12 @@ void View3D::draw_track()
 		if (track[i].isFast)
 		{
 			//continue;
-			glColor3f(1.0f, 0.0f, 0.0f );
+			glColor3fv(&m_fastcolor.x);
 		}
 		else
-			glColor3f(1.0f, 1.0f, 1.0f);
+		{
+			glColor3fv(&m_feedcolor.x);
+		}
 		glVertex3f(track[i - 1].position.x, track[i - 1].position.y, track[i - 1].position.z);
 		glVertex3f(track[i].position.x, track[i].position.y, track[i].position.z);
 	}
@@ -420,7 +432,7 @@ void View3D::draw_track()
 
 //--------------------------------------------------------------------
 //создаёт объект стрлеку
-void make_axis(const glm::vec4 &color, const glm::vec3 &rot, float len, Object3d& axis)
+void make_axis(const glm::vec3 &color, const glm::vec3 &rot, float len, Object3d& axis)
 {
 	axis.indices.clear();
 	axis.verts.clear();
@@ -470,7 +482,7 @@ void View3D::draw_axis()
 //--------------------------------------------------------------------
 void View3D::draw_bounds()
 {
-	glColor3f(0.0f, 1.0f, 0.0f);
+	glColor3fv(&m_boxcolor.x);
 
 	CoordsBox &box = camera.get_box();
 
@@ -740,11 +752,11 @@ void View3D::draw_grid()
 }
 
 
-void View3D::print_string(const glm::vec4 &color, int x, int y, char *s, int len )
+void View3D::print_string(const glm::vec3 &color, int x, int y, char *s, int len )
 {
 	glPushAttrib(GL_LIST_BIT);
 	//glColor3fv(&color.x);
-	glColor3f(color.x, color.y, color.z);
+	glColor3fv(&color.x);
 	glRasterPos2i(x, y);	
 	glListBase(fontOffset);
 	glCallLists(len, GL_UNSIGNED_BYTE, (GLubyte *)s);
@@ -915,7 +927,7 @@ void make_cylinder(Object3d& edge, int divs)
 			pos.x = from.position.x * cosPhi - from.position.y * sinPhi;
 			pos.y = from.position.y * cosPhi + from.position.x * sinPhi;
 			pos.z = from.position.z;
-			glm::vec4 color(0.8, 0, 0, 1);
+			glm::vec3 color(0.8, 0, 0 );
 			Vertex to(pos, from.color);
 
 			edge.verts.push_back(to);
@@ -948,7 +960,7 @@ void make_tool_simple(Object3d& tool)
 	//glm::vec3 color(1,0,0);
 	for (int i = 0; i < _countof(simple); ++i)
 	{
-		glm::vec4 color(i % 2 * 0.2 + 0.4, 0, 0, 0.1f);
+		glm::vec3 color(i % 2 * 0.2 + 0.4, 0, 0/*, 0.1f*/);
 		Vertex vert(simple[i], color);
 		tool.verts.push_back(vert);
 	}

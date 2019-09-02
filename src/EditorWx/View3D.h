@@ -86,9 +86,9 @@ private:
 struct Vertex
 {
 	glm::vec3 position;
-	glm::vec4 color;
+	glm::vec3 color;
 
-	Vertex(glm::vec3 _position, glm::vec4 _color) :
+	Vertex(glm::vec3 _position, glm::vec3 _color) :
 		position(_position), color(_color) {};
 };
 
@@ -149,7 +149,7 @@ private:
 	void draw_axis();
 	void draw_axis_letters();
 	void update_tool_coords(float x, float y, float z);
-	void print_string(const glm::vec4 &color, int x, int y, char *s, int len);
+	void print_string(const glm::vec3 &color, int x, int y, char *s, int len);
 	CoordsBox CheckBox(const CoordsBox &bx);
 	
 private:
@@ -171,6 +171,12 @@ private:
 	TrackPointGL end_simulate_point;
 	GLuint fontOffset;
 	glm::vec3 m_bgcolor;
+	glm::vec3 m_boxcolor;
+	glm::vec3 m_fastcolor;
+	glm::vec3 m_feedcolor;
+	glm::vec3 m_xaxiscolor;
+	glm::vec3 m_yaxiscolor;
+	glm::vec3 m_zaxiscolor;
 
 	wxDECLARE_NO_COPY_CLASS(View3D);
 	wxDECLARE_EVENT_TABLE();

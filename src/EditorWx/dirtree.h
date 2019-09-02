@@ -1,22 +1,11 @@
 
 #pragma once
-#define USE_GENERIC_TREECTRL 1
-
 #include "wx/treectrl.h"
+#include "generictreectlg.h"
 
-
-#if USE_GENERIC_TREECTRL
-#include "wx/generic/treectlg.h"
-#ifndef wxTreeCtrl
 #define wxTreeCtrl wxGenericTreeCtrl
-#define sm_classwxTreeCtrl sm_classwxGenericTreeCtrl
-#endif
-#endif
+//#define sm_classwxTreeCtrl sm_classwxGenericTreeCtrl
 
-
-
-//C:\wxWidgets\include\wx\treectrl.h
-//#include "C:/wxWidgets/include/wx/generic/treectlg.h"
 #include "wx/fswatcher.h"
 #include "wx/dnd.h"
 

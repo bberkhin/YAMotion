@@ -105,6 +105,7 @@ DirTreeCtrl::DirTreeCtrl(wxWindow *parent, const wxWindowID id )
 	wxColor clrSelected = clrs->Get(ColourScheme::WINDOW);
 	m_hilightBrush = new wxBrush(clrSelected, wxBRUSHSTYLE_SOLID);
 	m_hilightUnfocusedBrush = new wxBrush(clrSelected, wxBRUSHSTYLE_SOLID);
+	m_colorHlightText = clrs->Get(ColourScheme::WINDOW_TEXT_HOVER);
 	m_vScrollBar = 0;
 	m_hScrollBar = 0;
 
@@ -1059,7 +1060,6 @@ void DirTreeCtrl::ScrollWindow(int dx, int dy, const wxRect* rect)
 {
 	wxTreeCtrl::ScrollWindow(dx, dy, rect);
 }
-
 
 
 

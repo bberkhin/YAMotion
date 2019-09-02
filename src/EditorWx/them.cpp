@@ -116,6 +116,15 @@ wxBitmap ExArtProvider::CreateBitmap(const wxArtID& id, const wxArtClient& clien
 		else
 			return wxBitmap(file_new_xpm);
 	}
+	else if(id == wxART_FOLDER)
+	{
+		clr = clrs->Get(ColourScheme::BITMAP_FOLDER_LIST);
+		if (clr.IsOk())
+			return wxBitmap(GetBitmapColor(folder_xpm, clr));
+		else
+			return wxBitmap(folder_xpm);
+	}
+
 	CHECK_ART_ID(ART_SAVE, client, file_save_xpm)
 	CHECK_ART_ID(wxART_FILE_OPEN, client, file_open_xpm)
 	CHECK_ART_ID(ART_PREFERENCES, client, preferences_xpm)
@@ -128,7 +137,6 @@ wxBitmap ExArtProvider::CreateBitmap(const wxArtID& id, const wxArtClient& clien
 	CHECK_ART_ID(ART_CONVERT, client, convert_xpm)
 	CHECK_ART_ID(ART_DRAW3D, client, view3d_xpm)
 	CHECK_ART_ID(ART_ADD, client, add_xpm)
-	CHECK_ART_ID0(wxART_FOLDER, folder_xpm)
 	CHECK_ART_ID0(ART_MAIL, mail_xpm)
 	else
 		return wxArtProvider::CreateBitmap(id, client, size);
@@ -416,12 +424,19 @@ void ColourScheme::Read()
 	ReadColor(root["slider_shaft"], m_colors[SLIDER_SHAFT]);
 	ReadColor(root["slider_shaft_colored"],m_colors[SLIDER_SHAFT_COLORED]);	
 	ReadColor(root["bitmap_new_list"], m_colors[BITMAP_NEW_LIST]);
+	ReadColor(root["bitmap_folder_list"], m_colors[BITMAP_FOLDER_LIST]);
 	ReadColor(root["static_line"], m_colors[STATIC_LINE]);
 	ReadColor(root["msg_log_error"], m_colors[MSG_LOG_ERROR]);
 	ReadColor(root["msg_log_info"], m_colors[MSG_LOG_INFO]);
-	ReadColor(root["msg_log_warning"], m_colors[MSG_LOG_WARNING]);
-	
+	ReadColor(root["msg_log_warning"], m_colors[MSG_LOG_WARNING]);	
 	ReadColor(root["border"],m_colors[BORDER]);
+
+	ReadColor(root["view3d_box"], m_colors[VIEW3D_BOX]);
+	ReadColor(root["view3d_g0"], m_colors[VIEW3D_G0]);
+	ReadColor(root["view3d_g1"], m_colors[VIEW3D_G1]);
+	ReadColor(root["view3d_xaxis"], m_colors[VIEW3D_XAXIS]);
+	ReadColor(root["view3d_yaxis"], m_colors[VIEW3D_YAXIS]);
+	ReadColor(root["view3d_zaxis"], m_colors[VIEW3D_ZAXIS]);
 }
 
 
@@ -475,6 +490,8 @@ void ColourScheme::InitDef()
 	m_colors[SLIDER_SHAFT] = wxColour(0xdddddd);
 	m_colors[SLIDER_SHAFT_COLORED] = wxColour(0xcc8830);
 	m_colors[BITMAP_NEW_LIST] = wxColour(0xddaa55);
+	m_colors[BITMAP_FOLDER_LIST] = wxColour(0x44bbff);
+
 	m_colors[STATIC_LINE] = wxColour(0x4d4d4d);
 
 	m_colors[MSG_LOG_ERROR] = wxColour(0x7766ee);
@@ -483,4 +500,11 @@ void ColourScheme::InitDef()
 
 	// border
 	m_colors[BORDER] = wxColour(0x00FF00);
+
+	m_colors[VIEW3D_BOX] = wxColour(0x00FF00);
+	m_colors[VIEW3D_G0] = wxColour(0x0000FF);
+	m_colors[VIEW3D_G1] = wxColour(0xFFFFFF);
+	m_colors[VIEW3D_XAXIS] = wxColour(0x0000FF);
+	m_colors[VIEW3D_YAXIS] = wxColour(0x00FF00);
+	m_colors[VIEW3D_ZAXIS] = wxColour(0xFF0000);
 }

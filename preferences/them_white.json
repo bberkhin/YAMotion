@@ -3,18 +3,19 @@
   "frame": "#eeeeee",
   "window": "#FFFFFF",
   "window_3dview": "#f6f6f6",
-  "window_hover": "#f6f6f6",
+  "window_hover": "#dddddd",
   "window_txt": "#333333",
-  "window_txt_hover": "#000000",
+  "window_txt_hover": "#111111",
   "window_txt_disable": "#999999",
   "linenumber": "#FFFFFF",
   "linenumber_txt": "#999999",
   "calltip": "#f6f6f6",
   "calltip_txt": "#333333",
-  "bitmap_cmd": "#999999", //??
-  "bitmap_cmd_hover": "#e6e6e6", //??
-  "bitmap_cmd_disable": "#555555", //??
-  "bitmap_new_list": "#55aadd", //??
+  "bitmap_cmd": "#666666",
+  "bitmap_cmd_hover": "#333333",
+  "bitmap_cmd_disable": "#cccccc",
+  "bitmap_new_list": "#387585",
+  "bitmap_folder_list": "#cc8830",
   "ctrl": "#e6e6e6",
   "ctrl_pressed": "#999999",
   "ctrl_hover": "#dddddd",
@@ -31,16 +32,21 @@
   "scrollbar": "#FFFFFF",
   "scrollbar_tubm": "#dddddd",
   "scrollbar_tumb_hvr": "#999999",
-  "highlight": "#f6f6f6",
-  "highlight_txt": "#111111",
+  "highlight": "#999999", //  "#dddddd",
+  "highlight_txt": "#FF1111",
   "titlebar_txt": "#666666",
   "titlebar_txt_active": "#333333",
-  "slider_shaft": "#cc8830",
+  "slider_shaft": "#dddddd",
   "slider_shaft_colored": "#bb6600",
   "static_line": "#dddddd",
-  "msg_log_error": "#ee6677",
-  "msg_log_info": "#84e484",
-  "msg_log_warning": "#ffbb44",
-  "border": "#eeeeee"
-
+  "msg_log_error": "#990000",
+  "msg_log_info": "#009900",
+  "msg_log_warning": "#bb6600",
+  "border": "#eeeeee",
+  "view3d_box": "#008800",
+  "view3d_g0": "#ff0000",
+  "view3d_g1": "#000000",
+  "view3d_xaxis": "#BB0000", // red
+  "view3d_yaxis": "#00BB00", // green
+  "view3d_zaxis": "#0000BB" // blue
 }
