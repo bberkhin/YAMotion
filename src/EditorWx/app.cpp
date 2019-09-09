@@ -160,7 +160,7 @@ bool App::OnInit()
 	{
 		int lng = wxGetSingleChoiceIndex
 		(
-			_("Please choose language:"),
+			_("Please select language:"),
 			_("Language"),
 			g_lang_count,
 			g_langNames

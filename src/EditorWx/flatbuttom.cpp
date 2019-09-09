@@ -11,8 +11,9 @@ FlatButton::FlatButton(wxWindow *parent, int id, const wxString &text, int style
 {
 	SetLabel(text);
 	m_style = style;
+	m_idArt = idArt;
 	Init();
-	SetBitmap(idArt, m_spacer);
+	
 }
 
 #define DO_SET_COLOUR( index, indexClr)  m_colors[index] = clrs->Get(indexClr)
@@ -26,8 +27,14 @@ void FlatButton::Init()
 	m_captured = false;
 	m_spacer = 0; // spacer between bmp and text
 	m_colors.resize(ColourNum);
-	ColourScheme *clrs = Preferences::Get()->GetColorScheme();
+	
+	UpdateThemeColor();
+	SetBestClientSize();
+}
 
+void FlatButton::UpdateThemeColor()
+{
+	ColourScheme *clrs = Preferences::Get()->GetColorScheme();
 	DO_SET_COLOUR(ForegroundColour, ColourScheme::CONTROL_TEXT);
 	DO_SET_COLOUR(HoverForegroundColour, ColourScheme::CONTROL_TEXT_HOVER);
 	DO_SET_COLOUR(PressForegroundColour, ColourScheme::CONTROL_TEXT_HOVER);
@@ -43,10 +50,8 @@ void FlatButton::Init()
 	DO_SET_COLOUR(ForegroundColourActive, ColourScheme::CONTROL_ACTIVE_TEXT);
 	DO_SET_COLOUR(HoverForegroundColourActive, ColourScheme::CONTROL_ACTIVE_TEXT_HOVER);
 	DO_SET_COLOUR(PressForegroundColourActive, ColourScheme::CONTROL_ACTIVE_TEXT_HOVER);
-
-	SetBestClientSize();
+	SetBitmap(m_idArt, m_spacer);
 }
-
 
 void FlatButton::SetBitmap(const wxBitmap& bitmap, int spacer)
 {

@@ -15,13 +15,14 @@ public:
 	EditorPanel(wxWindow *parent, FilePage *fp,int filetype, const wxString &filename, bool isnew);
 	virtual ~EditorPanel();
 	Edit *GetEdit() { return m_pedit; }
-	void UpdateThemeColor();
 	void OnTo3DButton(wxCommandEvent& ev);
 	void OnToGcodeButton(wxCommandEvent& ev);
 	void OnCheckButton(wxCommandEvent& ev);
+	void UpdatePreferences();
 
 protected:
 	wxBoxSizer *CreateHeaderPanel();
+	void UpdateThemeColor();
 private:
 	Edit *m_pedit;
 	FilePage *m_fp;
@@ -36,13 +37,14 @@ class View3DPanel : public View3DPanelBase//wxSashWindow//wxPanel
 	wxDECLARE_ABSTRACT_CLASS(View3DPanel);
 public:
 	View3DPanel(wxWindow *parent, FilePage *fb);
-	virtual ~View3DPanel();	
-	void UpdateThemeColor();	
+	virtual ~View3DPanel();
 	View3D *Get3D() { return m_pview; }
 	void UpdateStatistics(const ConvertGCMCInfo &dt);
 	void UpdateSimulationPos(int index, int dist, const TrackPointGL &pt);
 	void OnSpeedChanged(wxScrollEvent& event);
+	void UpdatePreferences();
 protected:
+	void UpdateThemeColor();
 	wxBoxSizer *CreateHeaderPanel();
 	wxSizer *CreateFooterPanel();
 	wxSizer *CreateSimulationPanel();
@@ -77,7 +79,6 @@ class  LogPane : public FlatSashWindow
 public:
 	LogPane(wxWindow *parent, FilePage *fb);
 	~LogPane() { }
-	void UpdateThemeColor();
 	void OnClose(wxCommandEvent &ev);
 	void OnStop(wxCommandEvent &ev);
 	void StartPulse();
@@ -86,7 +87,9 @@ public:
 	void Clear() { m_plog->Clear(); }
 	void Append(MsgStatusLevel lvl, const wchar_t *str, int linen = 0, bool update = false)
 			{ m_plog->Append(lvl, str,linen,update ); }
-
+	void UpdatePreferences();
+private:
+	void UpdateThemeColor();
 private:
 	LogWindow *m_plog;
 	FilePage *m_fb;
@@ -106,7 +109,6 @@ class FilePage : public wxPanel
 public:
 	FilePage(wxWindow *parent, int filetype, const wxString &filename, bool isnew);
 	virtual ~FilePage();
-	void UpdateThemeColor();
 	Edit *GetEdit() { return m_editor->GetEdit(); }
 	View3D *Get3D() { return m_view3d ? m_view3d->Get3D() : NULL; }
 	LogPane *GetLogWnd() { return m_logwn; }// ? m_logwn->GetLogWnd() : NULL; }
@@ -131,6 +133,9 @@ public:
 	void DoLayout(const wxSize &sz = wxDefaultSize, bool from3dview = false);
 	void OnSize(wxSizeEvent& event);
 	void OnSashDrag(wxSashEvent& event);
+	void UpdatePreferences();
+private:
+	void UpdateThemeColor();
 private:
 	EditorPanel *m_editor;
 	View3DPanel *m_view3d;

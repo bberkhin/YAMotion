@@ -169,6 +169,7 @@ public:
 	void AddPath(const wxString &path);
 	void Save();
 	bool Load();
+	void UpdatePreferences();
 private:
 
 	DirTreeCtrl *m_ptree;

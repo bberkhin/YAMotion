@@ -87,7 +87,6 @@ wxIMPLEMENT_ABSTRACT_CLASS(EditorPanel, wxPanel);
 EditorPanel::EditorPanel(wxWindow *parent, FilePage *fp, int filetype, const wxString &filename, bool isnew) :
 	m_fp(fp), wxPanel(parent)
 {
-	ColourScheme *clrs = Preferences::Get()->GetColorScheme();
 	const CommonInfo &common_prefs = Preferences::Get()->Common();
 
     m_pedit = new Edit(this, wxID_ANY);
@@ -182,7 +181,11 @@ EditorPanel::~EditorPanel()
 {
 }
 
-
+void EditorPanel::UpdatePreferences()
+{
+	UpdateThemeColor();
+	m_pedit->UpdatePreferences();
+}
 
 void EditorPanel::UpdateThemeColor()
 {
@@ -197,10 +200,17 @@ void EditorPanel::UpdateThemeColor()
 	while (node)
 	{
 		wxWindow* child = node->GetData();
-		child->SetBackgroundColour(bgColor);
-	//	child->SetForegroundColour(fgColor);
+		FlatButton *fbt = dynamic_cast<FlatButton *>(child);
+		if (fbt)
+			fbt->UpdateThemeColor();
+		else
+		{
+			child->SetBackgroundColour(bgColor);
+			child->SetForegroundColour(fgColor);
+		}
 		node = node->GetNext();
 	}
+
 }
 
 void EditorPanel::OnTo3DButton(wxCommandEvent &ev)
@@ -302,6 +312,13 @@ View3DPanel::~View3DPanel()
 {
 }
 
+void View3DPanel::UpdatePreferences()
+{
+	UpdateThemeColor();
+	m_pview->UpdatePreferenses();
+	m_pview->Refresh();
+}
+
 void View3DPanel::UpdateThemeColor()
 {
 	ColourScheme *clrs = Preferences::Get()->GetColorScheme();
@@ -316,7 +333,11 @@ void View3DPanel::UpdateThemeColor()
 	{
 		wxWindow* child = node->GetData();
 		child->SetBackgroundColour(bgColor);
-	//	child->SetForegroundColour(fgColor);
+		//child->SetForegroundColour(fgColor);
+		FlatButton *fbt = dynamic_cast<FlatButton *>(child);
+		if (fbt)
+			fbt->UpdateThemeColor();
+		
 		node = node->GetNext();
 	}
 	
@@ -893,6 +914,11 @@ LogPane::LogPane(wxWindow *parent, FilePage *fb)
 	UpdateThemeColor();
 }
 
+void LogPane::UpdatePreferences()
+{
+	UpdateThemeColor();
+}
+
 void LogPane::UpdateThemeColor()
 {
 	
@@ -1180,6 +1206,18 @@ wxString FilePage::GetSavedFileName()
 
 
 
+void FilePage::UpdatePreferences()
+{
+	UpdateThemeColor();
+	if (m_editor)
+	{
+		m_editor->UpdatePreferences();
+	}
+	if (m_view3d)
+		m_view3d->UpdatePreferences();
+	if (m_logwn)
+		m_logwn->UpdatePreferences();
+}
 
 void FilePage::UpdateThemeColor()
 {
@@ -1257,8 +1295,10 @@ bool FilePage::DoFileSave(bool askToSave, bool bSaveAs)
 	if (askToSave)
 	{
 		wxFileName filename = pedit->GetFileName();
-		int rez = wxMessageBox(wxString::Format(_("File %s is not saved!\nSave file before closing?"), filename.GetFullName()),
-			_("Save file"),	wxYES_NO | wxCANCEL | wxICON_QUESTION);
+		//int rez = wxMessageBox(wxString::Format(_("File %s is not saved!\nSave file before closing?"), filename.GetFullName()),
+			//_("Save file"),	wxYES_NO | wxCANCEL | wxICON_QUESTION);
+		int rez = wxMessageBox("1?","S", wxYES_NO | wxCANCEL | wxICON_QUESTION);
+
 		if (rez == wxCANCEL)
 			return false;
 		else if (rez == wxNO)

@@ -185,8 +185,8 @@ Edit::Edit(wxWindow *parent, wxWindowID id)
 	dlg_find = NULL;
 	find_data.SetFlags(wxFR_DOWN);
 	ConfigData *config = dynamic_cast<ConfigData *>(wxConfigBase::Get());
-	if (config)
-		config->ReadFindAndReplase(&find_data);
+	wxASSERT(config);
+	config->GetFindAndReplase(&find_data);
 	Create(parent, id);
 	UpdatePreferences();
 
@@ -201,9 +201,6 @@ bool Edit::Create(wxWindow *parent, wxWindowID id)
 
 Edit::~Edit () 
 {
-	ConfigData *config = dynamic_cast<ConfigData *>(wxConfigBase::Get());
-	if (config)
-		config->WriteFindAndReplase(&find_data);
 }
 
 
@@ -981,23 +978,27 @@ void Edit::OnFind(wxCommandEvent& WXUNUSED(event))
 	}
 	else
 	{
-		dlg_find = new wxFindReplaceDialog(	this,&find_data, _("Find"),wxFR_NOWHOLEWORD );
+		dlg_find = new wxFindReplaceDialog(this, &find_data, _("Find"),wxFR_NOWHOLEWORD );
 		dlg_find->Show(true);
 	}
 }
 
 void Edit::OnFindDialog(wxFindDialogEvent& event)
 {
+	ConfigData *config = dynamic_cast<ConfigData *>(wxConfigBase::Get());
+	wxASSERT(config);
 	wxEventType type = event.GetEventType();
 	if (type == wxEVT_FIND || type == wxEVT_FIND_NEXT)
 	{
 		//flags & wxFR_DOWN wxFR_WHOLEWORD & wxFR_MATCHCASE
-		DoFind(type, event.GetFlags(), event.GetFindString() );		
+		config->SetFindAndReplase(&find_data);
+		DoFind(type, event.GetFlags(), event.GetFindString() );
 	}
 	else if (type == wxEVT_FIND_REPLACE ||
 		type == wxEVT_FIND_REPLACE_ALL)
 	{
-		DoReplace(type, event.GetFlags(), event.GetFindString(), event.GetReplaceString() );		
+		config->SetFindAndReplase(&find_data);
+		DoReplace(type, event.GetFlags(), event.GetFindString(), event.GetReplaceString() );
 	}
 	else if (type == wxEVT_FIND_CLOSE)
 	{

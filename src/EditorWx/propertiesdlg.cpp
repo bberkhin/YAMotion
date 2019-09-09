@@ -9,17 +9,17 @@
 
 
 PropertiesDlg::PropertiesDlg(wxWindow *parent)
-	: need_restart(false), wxDialog(parent, wxID_ANY, ("Properties"))
+	: need_restart(false), wxDialog(parent, wxID_ANY, ("Language"))
 {
 
 	//Select Lang
 	langlist = new wxListBox(this, wxID_ANY);
 	wxBoxSizer *totalpane = new wxBoxSizer(wxVERTICAL);
 
-	totalpane->Add(new wxStaticBox(this, wxID_ANY, _("Select language:")) );
+	//totalpane->Add(new wxStaticBox(this, wxID_ANY, _("Select language:")) );
 
-	totalpane->Add(langlist, 0, 0); //wxEXPAND
-	totalpane->Add(0, 10);
+	totalpane->Add(langlist, 0, wxEXPAND,20); //wxEXPAND
+	//totalpane->Add(0, 10);
 	totalpane->Add(CreateStdDialogButtonSizer(wxOK | wxCANCEL), 0, wxALL | wxALIGN_RIGHT, 2);
 	InitLangList();
 

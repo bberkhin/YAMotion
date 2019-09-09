@@ -67,7 +67,6 @@ public:
 		bool active, int closeButtonState, int* xExtent) wxOVERRIDE;
 //	int ShowDropDown( wxWindow* wnd, const wxAuiNotebookPageArray& items, int activeIdx) wxOVERRIDE;
 	int GetBestTabCtrlSize(wxWindow* wnd, const wxAuiNotebookPageArray& pages, const wxSize& requiredBmpSize) wxOVERRIDE;
-protected:
 	virtual void UpdateColoursFromSystem() wxOVERRIDE;
 private:
 	

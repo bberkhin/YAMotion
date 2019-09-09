@@ -180,11 +180,6 @@ AppFrame::AppFrame (const wxString &title)
 
     SetIcon(wxICON(sample));
     SetTitle (APP_NAME);
-    //SetBackgroundColour ("GREEN");
-	ConfigData *config = dynamic_cast<ConfigData *>(wxConfigBase::Get());
-	if (config != NULL)
-		config->ReadFileNames();
-
     // create menu
 	wxMenuBar *m_menuBar = CreateMenu();
 	SetMenuBar(m_menuBar);
@@ -274,11 +269,32 @@ public:
 	{
 		m_mgr.SetArtProvider(Preferences::Get()->GetArtProvider(true));
 	}
+	void UpdatePreferences();
 	wxDECLARE_EVENT_TABLE();
 };
 
 wxBEGIN_EVENT_TABLE(StubNotebook, wxAuiNotebook)
 wxEND_EVENT_TABLE()
+
+void StubNotebook::UpdatePreferences()
+{
+	SetBackgroundColour(Preferences::Get()->GetStdColor(ColourScheme::WINDOW));
+	GetArtProvider()->UpdateColoursFromSystem();
+	m_mgr.GetArtProvider()->UpdateColoursFromSystem();
+
+	size_t n = GetPageCount();
+	for (size_t i = 0; i < n; ++i)
+	{
+		if (GetPage(i)->IsKindOf(CLASSINFO(FilePage)))
+		{
+			FilePage *fp = dynamic_cast<FilePage *>(GetPage(i));
+			fp->UpdatePreferences();
+			if (GetSelection() == i)
+				fp->Refresh(false);
+		}
+	}
+}
+
 
 
 wxAuiNotebook* AppFrame::CreateNotebook()
@@ -294,7 +310,7 @@ wxAuiNotebook* AppFrame::CreateNotebook()
 		FromDIP(wxSize(330, 200)),
 		m_notebook_style);
 	ctrl->SetArtProvider(Preferences::Get()->GetTabArtProvider());
-	ctrl->SetBackgroundColour(Preferences::Get()->GetStdColor(ColourScheme::WINDOW));
+	ctrl->UpdatePreferences();
 	return ctrl;
 }
 
@@ -402,13 +418,7 @@ void AppFrame::OnClose (wxCloseEvent &event)
 	}
 	
 	wxString strPerspective = m_mgr.SavePerspective();
-	ConfigData *config = dynamic_cast<ConfigData *>(wxConfigBase::Get());
-	if (config != NULL)
-	{
-		config->WriteFileNames();
-		m_dirtree->Save();				
-	}
-	
+	m_dirtree->Save();
     Destroy();
 }
 
@@ -766,12 +776,35 @@ void AppFrame::OnAddFilePathToDirPane(wxCommandEvent &event)
 // properties event handlers
 void AppFrame::OnProperties(wxCommandEvent &WXUNUSED(event))
 {
+	ConfigData *config = dynamic_cast<ConfigData *>(wxConfigBase::Get());
+	if (!config)
+		return;
+
+	int oldlang = config->GetLanguage(-1);
+	int lng = wxGetSingleChoiceIndex
+	(
+		_("Please select language:"),
+		_("Language"),
+		g_lang_count,
+		g_langNames
+	);
+
+	int newlang = lng == -1 ? wxLANGUAGE_DEFAULT : g_langIds[lng];
+	if (oldlang != newlang)
+	{
+		config->SetLanguage(newlang);
+		if (DoSaveAllFiles())
+			wxGetApp().Restart();
+	}
+
+	/*
 	PropertiesDlg dlg(this);
 	if (dlg.NeedRestart())
 	{
 		if ( DoSaveAllFiles() )
 			wxGetApp().Restart();
 	}
+	*/
 }
 
 void AppFrame::OnDefaultPreferences(wxCommandEvent &WXUNUSED(event))
@@ -1133,9 +1166,9 @@ wxMenuBar *AppFrame::CreateMenu ()
 */	
 	// Pregerences menu
 	wxMenu *menuPref = new wxMenu;
-	menuPref->Append(ID_PROPERTIES, _("Proper&ties ..\tCtrl+I"));
-	menuPref->Append(ID_GLOBALPREFS, _("Defauult Preferences"));
+	menuPref->Append(ID_GLOBALPREFS, _("Default Preferences"));
 	menuPref->Append(ID_USERPREFS, _("User Preferences"));
+	menuPref->Append(ID_PROPERTIES, _("Language ..."));
 
      // Help menu
     wxMenu *menuHelp = new wxMenu;
@@ -1304,19 +1337,14 @@ void AppFrame::CreateWatcher()
 void AppFrame::UpdatePreferences()
 {
 	Preferences::Get()->Read();
+	dynamic_cast<StubNotebook *>(m_notebook)->UpdatePreferences();
+	if ( m_dirtree )
+		m_dirtree->UpdatePreferences();
+	
+	m_mgr.GetArtProvider()->UpdateColoursFromSystem();
 
-	size_t n = m_notebook->GetPageCount();
-	for (size_t i = 0; i < n; ++i)
-	{
-		if (m_notebook->GetPage(i)->IsKindOf(CLASSINFO(FilePage)))
-		{
-			FilePage *pEdit = dynamic_cast<FilePage *>(m_notebook->GetPage(i));
-			pEdit->GetEdit()->UpdatePreferences();	
-			if ( m_notebook->GetSelection() == i )
-				pEdit->Refresh(false);
-		}
-	}
-	return;
+	Refresh();
+	Layout();
 }
 void AppFrame::UpdateMacroses()
 {	

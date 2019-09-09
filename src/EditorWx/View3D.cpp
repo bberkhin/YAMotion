@@ -90,14 +90,27 @@ View3D::View3D( wxWindow *parent,wxWindowID id, int* gl_attrib)
 	:  wxGLCanvas(parent, id, gl_attrib, wxDefaultPosition, wxDefaultSize, wxWANTS_CHARS | wxFULL_REPAINT_ON_RESIZE)	
 {	
 	
-	m_viewstyle = VSTYLE_SHOWFASTMOVE|VSTYLE_SHOWAXIS;
 	simulateLastIndex = wxNOT_FOUND;
 	// Explicitly create a new rendering context instance for this canvas.
 	m_glRC = new wxGLContext(this);	
 
 	m_gridStep = 100;
-	load_config();
 
+	
+	ConfigData *config = dynamic_cast<ConfigData *>(wxConfigBase::Get());
+	wxASSERT(config);
+	m_viewstyle = config->GetViewStyle();
+	make_tool_simple(tool); //делаем квадратное сверло )
+	UpdatePreferenses();
+}
+
+View3D::~View3D()
+{
+	delete m_glRC;
+}
+
+void View3D::UpdatePreferenses()
+{
 	ColourScheme *clrs = Preferences::Get()->GetColorScheme();
 	wxColor color_;
 	SET_COLOR(m_bgcolor, ColourScheme::WINDOW_3DVIEW);
@@ -108,39 +121,10 @@ View3D::View3D( wxWindow *parent,wxWindowID id, int* gl_attrib)
 	SET_COLOR(m_yaxiscolor, ColourScheme::VIEW3D_YAXIS);
 	SET_COLOR(m_zaxiscolor, ColourScheme::VIEW3D_ZAXIS);
 
-	make_tool_simple(tool); //делаем квадратное сверло )
+
 	make_axis(m_xaxiscolor, glm::vec3(0, 1, 0), 1.0f, axisX);
 	make_axis(m_yaxiscolor, glm::vec3(-1, 0, 0), 1.0f, axisY);
 	make_axis(m_zaxiscolor, glm::vec3(0, 0, 1), 1.0f, axisZ);
-
-}
-
-View3D::~View3D()
-{
-	delete m_glRC;
-	save_config();
-}
-
-
-void View3D::load_config()
-{
-	ConfigData *config = dynamic_cast<ConfigData *>(wxConfigBase::Get());
-	wxASSERT(config);
-
-	wxString strOldPath = config->GetPath();
-	config->SetPath(L"/GLView");
-	config->Read(L"3DStyle", &m_viewstyle, m_viewstyle);
-	config->SetPath(strOldPath);
-}
-
-void View3D::save_config()
-{
-	ConfigData *config = dynamic_cast<ConfigData *>(wxConfigBase::Get());
-	wxASSERT(config);
-	wxString strOldPath = config->GetPath();
-	config->SetPath(L"/GLView");
-	config->Write(L"3DStyle", m_viewstyle);
-	config->SetPath(strOldPath);
 }
 
 void View3D::initializeGL()
@@ -861,6 +845,10 @@ void View3D::ToggleStyle( int style)
 		m_viewstyle &= (~style);
 	else
 		m_viewstyle |= style;
+
+	ConfigData *config = dynamic_cast<ConfigData *>(wxConfigBase::Get());
+	if(config)
+		config->SetViewStyle( m_viewstyle );
 
 	Refresh(false);
 }

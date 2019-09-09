@@ -51,6 +51,7 @@ public:
 	void SetMargins(int marginX, int marginY);
 	void UpdateSize() { SetBestClientSize(); }
 	void SetChecked(bool checked);
+	void UpdateThemeColor();
 	
 private:
 	void Init();
@@ -72,6 +73,7 @@ private:
 	int m_cmd;
 	int m_spacer;
 	int m_style;
+	wxString m_idArt;
 
 	bool m_captured;
 	std::vector<wxColor>  m_colors;

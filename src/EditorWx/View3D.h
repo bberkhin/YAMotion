@@ -135,11 +135,9 @@ public:
 	void DoSetView(View stdview);
 	void ToggleStyle( int style); 
 	 int GetStyleFlag() const { return m_viewstyle; }
-
+	 void UpdatePreferenses();
 
 private:
-	void load_config();
-	void save_config();
 	void resizeGL(int nWidth, int nHeight);
 	void draw_bounds();
 	void draw_3d_grid();

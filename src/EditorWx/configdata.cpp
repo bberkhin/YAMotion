@@ -1,15 +1,44 @@
 #include "configdata.h"
 #include "appdefs.h"
+//#include "view3d.h" // for VSTYLE_XXXXXXXXXX
+
 #include <wx/fdrepdlg.h>
 
 
 ConfigData::ConfigData() : wxFileConfig(APP_NAME)
 {
+	m_viewstyle = 0x0010 | 0x0020; //VSTYLE_SHOWFASTMOVE | VSTYLE_SHOWAXIS;
+	m_find_data = new wxFindReplaceData();
+	DoLoadOptions();
 }
 
 
 ConfigData::~ConfigData()
 {
+	DoSaveOptions();
+	delete m_find_data;
+}
+
+void ConfigData::DoSaveOptions()
+{
+	WriteFindAndReplase(m_find_data);
+	WriteFileNames();
+	// Save view 3d
+	wxString strOldPath = GetPath();
+	SetPath(L"/GLView");
+	Write(L"3DStyle", m_viewstyle);
+	SetPath(strOldPath);	
+}
+
+void ConfigData::DoLoadOptions()
+{
+	ReadFindAndReplase(m_find_data);
+	ReadFileNames();
+	// load view 3d
+	wxString strOldPath = GetPath();
+	SetPath(L"/GLView");
+	Read(L"3DStyle", &m_viewstyle, m_viewstyle);
+	SetPath(strOldPath);
 }
 
 bool ConfigData::IsFirstTimeRun()
@@ -99,5 +128,13 @@ void ConfigData::ReadFileNames()
 	SetPath(strOldPath);
 }
 
+void ConfigData::GetFindAndReplase(wxFindReplaceData *find_data)
+{
+	*find_data = *m_find_data;
+}
+void ConfigData::SetFindAndReplase(wxFindReplaceData *find_data)
+{
+	 *m_find_data = *find_data;
+}
 
 

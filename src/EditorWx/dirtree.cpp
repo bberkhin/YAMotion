@@ -98,26 +98,15 @@ wxIMPLEMENT_DYNAMIC_CLASS(DirTreeCtrl, wxTreeCtrl);
 DirTreeCtrl::DirTreeCtrl(wxWindow *parent, const wxWindowID id )
           : wxTreeCtrl(), m_watcher(NULL)
 {
-
-	if (m_hilightBrush) delete m_hilightBrush;
-	if (m_hilightUnfocusedBrush)delete m_hilightUnfocusedBrush;
-	ColourScheme *clrs = Preferences::Get()->GetColorScheme();
-	wxColor clrSelected = clrs->Get(ColourScheme::WINDOW);
-	m_hilightBrush = new wxBrush(clrSelected, wxBRUSHSTYLE_SOLID);
-	m_hilightUnfocusedBrush = new wxBrush(clrSelected, wxBRUSHSTYLE_SOLID);
-	m_colorHlightText = clrs->Get(ColourScheme::WINDOW_TEXT_HOVER);
 	m_vScrollBar = 0;
 	m_hScrollBar = 0;
 
 	Create(parent, id);
-
 	m_reverseSort = false;
-    CreateImageList();
 	wxString initPath = StandartPaths::Get()->GetRootPath().c_str();
 	m_rootId = AddRoot("Root",-1, -1, new DirTreeItemData("Root item"));
-	//AddPath(initPath);
 	Bind(wxEVT_FSWATCHER, &DirTreeCtrl::OnFileSystemEvent, this);
-	SetDropTarget(new DnDFile(this));	
+	SetDropTarget(new DnDFile(this));
 }
 
 
@@ -173,53 +162,37 @@ wxSize DirTreeCtrl::DoGetBestSize() const
 
 void DirTreeCtrl::CreateImageList()
 {
-	
+
 	// Make an image list containing small icons
 	int size = 12; // SHIT :(
-    wxImageList *images = new wxImageList(size, size, true);
+	wxImageList *images = new wxImageList(size, size, true);
 
-    // should correspond to TreeCtrlIcon_xxx enum
-    wxBusyCursor wait;
-    wxIcon icons[5];
-    wxSize iconSize(size, size); 
+	// should correspond to TreeCtrlIcon_xxx enum
+	wxBusyCursor wait;
+	wxIcon icons[5];
+	wxSize iconSize(size, size);
 
-    icons[TreeCtrlIcon_File] =
-    icons[TreeCtrlIcon_FileSelected] = wxArtProvider::GetIcon(wxART_NEW, wxART_LIST, iconSize);
-    icons[TreeCtrlIcon_Folder] =
-    icons[TreeCtrlIcon_FolderSelected] =
-    icons[TreeCtrlIcon_FolderOpened] = wxArtProvider::GetIcon(wxART_FOLDER, wxART_LIST, iconSize);
+	icons[TreeCtrlIcon_File] =
+		icons[TreeCtrlIcon_FileSelected] = wxArtProvider::GetIcon(wxART_NEW, wxART_LIST, iconSize);
+	icons[TreeCtrlIcon_Folder] =
+		icons[TreeCtrlIcon_FolderSelected] =
+		icons[TreeCtrlIcon_FolderOpened] = wxArtProvider::GetIcon(wxART_FOLDER, wxART_LIST, iconSize);
 
 
-	for ( size_t i = 0; i < WXSIZEOF(icons); i++ )
-    {
-        int sizeOrig = icons[0].GetWidth();
-        if ( size == sizeOrig )
-        {
-            images->Add(icons[i]);
-        }
-        else
-        {
-            images->Add(wxBitmap(wxBitmap(icons[i]).ConvertToImage().Rescale(size, size)));
-        }
-    }
-
-    AssignImageList(images);
-
-	/*
-	images = new wxImageList(size, size, true);
-	wxIcon iconsb[5];
-	iconsb[0] =                                                                 // closed
-		iconsb[1] = wxArtProvider::GetIcon(ART_UPDATE, wxART_LIST, iconSize);     // closed, selected
-	iconsb[2] =                                                                 // open
-		iconsb[3] = wxArtProvider::GetIcon(wxART_FOLDER_OPEN, wxART_LIST, iconSize);// open, selected
-	
-	for (size_t i = 0; i < WXSIZEOF(iconsb); i++)
+	for (size_t i = 0; i < WXSIZEOF(icons); i++)
 	{
-		images->Add(iconsb[i]);
+		int sizeOrig = icons[0].GetWidth();
+		if (size == sizeOrig)
+		{
+			images->Add(icons[i]);
+		}
+		else
+		{
+			images->Add(wxBitmap(wxBitmap(icons[i]).ConvertToImage().Rescale(size, size)));
+		}
 	}
-	*/
-	//AssignButtonsImageList(images);
 
+	AssignImageList(images);
 }
 
 
@@ -967,8 +940,19 @@ void DirTreeCtrl::UpdateThemeColor(const wxTreeItemId& idParent, const wxColor &
 void DirTreeCtrl::UpdateThemeColor()
 {
 	ColourScheme *clrs = Preferences::Get()->GetColorScheme();
+	
+	if (m_hilightBrush) delete m_hilightBrush;
+	if (m_hilightUnfocusedBrush)delete m_hilightUnfocusedBrush;
+	wxColor clrSelected = clrs->Get(ColourScheme::WINDOW);
+	m_hilightBrush = new wxBrush(clrSelected, wxBRUSHSTYLE_SOLID);
+	m_hilightUnfocusedBrush = new wxBrush(clrSelected, wxBRUSHSTYLE_SOLID);
+	m_colorHlightText = clrs->Get(ColourScheme::WINDOW_TEXT_HOVER);
+
+	CreateImageList();
+
 	wxColor fgColor = clrs->Get(ColourScheme::WINDOW_TEXT);
 	UpdateThemeColor(m_rootId, fgColor);
+
 }
 
 
@@ -1098,8 +1082,6 @@ DirPane::DirPane(wxWindow *parent)
 	: wxPanel(parent)
 {
 
-	ColourScheme *clrs = Preferences::Get()->GetColorScheme();
-
 	m_ptree = new DirTreeCtrl(this, wxID_ANY);
 
 	wxBoxSizer *totalpane = new wxBoxSizer(wxVERTICAL);
@@ -1139,13 +1121,6 @@ DirPane::DirPane(wxWindow *parent)
 
 	
 	FlatButton *padd = new FlatButton(this, ID_ADDFILEBT, _("Add folders"), FB_BITMAP_RIGHT | FB_LABEL_LEFT, ART_ADD);//| wxBORDER_NONE); 
-	padd->SetColour(FlatButton::BackgroundColour, clrs->Get(ColourScheme::WINDOW));
-	padd->SetColour(FlatButton::HoverBackgroundColour, clrs->Get(ColourScheme::WINDOW_HOVER));
-	padd->SetColour(FlatButton::PressBackgroundColour, clrs->Get(ColourScheme::WINDOW_HOVER));
-	padd->SetColour(FlatButton::ForegroundColour, clrs->Get(ColourScheme::WINDOW_TEXT));
-	padd->SetColour(FlatButton::HoverForegroundColour, clrs->Get(ColourScheme::WINDOW_TEXT_HOVER));
-	padd->SetColour(FlatButton::PressForegroundColour, clrs->Get(ColourScheme::WINDOW_TEXT_HOVER));
-	
 	wxBoxSizer *marginedright = new wxBoxSizer(wxHORIZONTAL);
 	marginedright->Add(padd, 1, wxEXPAND);
 	marginedright->AddSpacer(MARGIN_RIGHT);
@@ -1158,6 +1133,11 @@ DirPane::DirPane(wxWindow *parent)
 	totalmargined->Add(totalpane, wxEXPAND, wxEXPAND);
 	
 	SetSizerAndFit(totalmargined);
+	UpdateThemeColor();
+}
+
+void DirPane::UpdatePreferences()
+{
 	UpdateThemeColor();
 }
 
@@ -1179,6 +1159,16 @@ void DirPane::UpdateThemeColor()
 		child->SetForegroundColour(fgColor);
 		node = node->GetNext();
 	}
+
+	FlatButton *padd = dynamic_cast<FlatButton *>(FindWindow(ID_ADDFILEBT));
+	wxASSERT(padd);
+	padd->SetColour(FlatButton::BackgroundColour, clrs->Get(ColourScheme::WINDOW));
+	padd->SetColour(FlatButton::HoverBackgroundColour, clrs->Get(ColourScheme::WINDOW_HOVER));
+	padd->SetColour(FlatButton::PressBackgroundColour, clrs->Get(ColourScheme::WINDOW_HOVER));
+	padd->SetColour(FlatButton::ForegroundColour, clrs->Get(ColourScheme::WINDOW_TEXT));
+	padd->SetColour(FlatButton::HoverForegroundColour, clrs->Get(ColourScheme::WINDOW_TEXT_HOVER));
+	padd->SetColour(FlatButton::PressForegroundColour, clrs->Get(ColourScheme::WINDOW_TEXT_HOVER));
+	
 	m_ptree->UpdateThemeColor();
 }
 
