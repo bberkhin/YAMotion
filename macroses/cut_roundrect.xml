@@ -3,7 +3,7 @@
   <macros>
     <name>Cutting round rect</name>
     <desc>Cut round rect</desc>
-    <image>cut_roundrect.jpg</image>
+    <image>cutting-round-rect.png</image>
     <gcmc>cut_roundrect.gcmc</gcmc>
     <include>cut_roundrect.inc.gcmc</include>
     <function>DoCutRoundRect(xMin, yMin, xD, yD, radius, zSave, d, zDelta,rate,zRate,trc,ccw)</function>

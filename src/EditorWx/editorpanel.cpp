@@ -34,7 +34,9 @@
 
 enum
 {
-	ID_TO3DBUTTON = 100,
+	ID_STATICTEXTFG = 100,
+	ID_STATICTEXTDISABLE,
+	ID_TO3DBUTTON,
 	ID_TOGCODEBUTTON,
 	ID_CHECKBUTTON,
 	ID_CLOSEOUTPUT,
@@ -138,8 +140,6 @@ EditorPanel::EditorPanel(wxWindow *parent, FilePage *fp, int filetype, const wxS
 
 wxBoxSizer *EditorPanel::CreateHeaderPanel()
 {
-	ColourScheme *clrs = Preferences::Get()->GetColorScheme();
-
 	wxBoxSizer *totalpane = new wxBoxSizer(wxHORIZONTAL);	
 	wxString label;
 	int ftype = m_pedit->GetFileType();
@@ -152,8 +152,7 @@ wxBoxSizer *EditorPanel::CreateHeaderPanel()
 	}
 	if ( !label.empty() )
 	{
-		wxStaticText *txt = new wxStaticText(this, wxID_ANY, label);
-		txt->SetForegroundColour(clrs->Get(ColourScheme::WINDOW_TEXT));
+		wxStaticText *txt = new wxStaticText(this, ID_STATICTEXTFG, label);
 		totalpane->AddSpacer(MARGIN_LEFT);
 		totalpane->Add(txt, 1, wxALIGN_CENTRE_VERTICAL);// wxEXPAND);
 	}
@@ -263,11 +262,6 @@ wxIMPLEMENT_ABSTRACT_CLASS(View3DPanel, View3DPanelBase);
 View3DPanel::View3DPanel(wxWindow *parent, FilePage *fp) :	
 	m_fp(fp), View3DPanelBase(parent, ID_3DVIEWWINDOW, wxDefaultPosition,wxDefaultSize,wxCLIP_CHILDREN|wxNO_BORDER )//| wxSW_BORDER)wxCLIP_CHILDREN | 
 {
-	
-	ColourScheme *clrs = Preferences::Get()->GetColorScheme();
-	const CommonInfo &common_prefs = Preferences::Get()->Common();
-
-	
 	m_pview = new View3D(this, wxID_ANY);
 	wxBoxSizer *totalpane = new wxBoxSizer(wxVERTICAL);
 	wxBoxSizer *pHeader = CreateHeaderPanel();
@@ -316,6 +310,7 @@ void View3DPanel::UpdatePreferences()
 {
 	UpdateThemeColor();
 	m_pview->UpdatePreferenses();
+	InitColours();
 	m_pview->Refresh();
 }
 
@@ -324,6 +319,7 @@ void View3DPanel::UpdateThemeColor()
 	ColourScheme *clrs = Preferences::Get()->GetColorScheme();
 	wxColor bgColor = clrs->Get(ColourScheme::WINDOW_3DVIEW);
 	wxColor fgColor = clrs->Get(ColourScheme::WINDOW_TEXT);
+	wxColor fgdisableColor = clrs->Get(ColourScheme::WINDOW_TEXT_DISABLE);
 
 	SetBackgroundColour(bgColor);
 	SetForegroundColour(fgColor);
@@ -333,7 +329,13 @@ void View3DPanel::UpdateThemeColor()
 	{
 		wxWindow* child = node->GetData();
 		child->SetBackgroundColour(bgColor);
+		
 		//child->SetForegroundColour(fgColor);
+		if (child->GetId() == ID_STATICTEXTDISABLE )
+			child->SetForegroundColour(fgdisableColor);
+		else
+			child->SetForegroundColour(fgColor);
+
 		FlatButton *fbt = dynamic_cast<FlatButton *>(child);
 		if (fbt)
 			fbt->UpdateThemeColor();
@@ -442,11 +444,11 @@ void PriorityBoxSizer::RecalcSizes()
 								
 wxBoxSizer *View3DPanel::CreateHeaderPanel()
 {
-	ColourScheme *clrs = Preferences::Get()->GetColorScheme();
-	wxColor colorfg = clrs->Get(ColourScheme::WINDOW_TEXT);
+	//ColourScheme *clrs = Preferences::Get()->GetColorScheme();
+	//wxColor colorfg = clrs->Get(ColourScheme::WINDOW_TEXT);
 	PriorityBoxSizer *header = new PriorityBoxSizer();
-	wxStaticText *txt = new wxStaticText(this, wxID_ANY, _("3D View:"));
-	txt->SetForegroundColour(colorfg);
+	wxStaticText *txt = new wxStaticText(this, ID_STATICTEXTFG, _("3D View:"));
+	//txt->SetForegroundColour(colorfg);
 	header->AddSpacer(MARGIN_LEFT);
 	header->Add(txt, 0, wxALIGN_CENTRE_VERTICAL| wxLEFT);// wxEXPAND);
 
@@ -529,19 +531,19 @@ wxSizer *View3DPanel::CreateSimulationPanel()
 	return panel;
 }
 
-#define ADD_STATISTIC_TEXT(id, text, clr) pt = new wxStaticText(this, id, text); \
-									gd->Add(pt, 0, wxALIGN_LEFT); \
-									pt->SetForegroundColour(clr)
+#define ADD_STATISTIC_TEXT(id, text) pt = new wxStaticText(this, id, text); \
+									gd->Add(pt, 0, wxALIGN_LEFT); 
+									
 
-#define ADD_STATISTIC_TEXT0(text)  ADD_STATISTIC_TEXT( wxID_ANY, text, colorfgd) 
-#define ADD_STATISTIC_TEXT1(id)  ADD_STATISTIC_TEXT( id, L"     ", colorfg)
+#define ADD_STATISTIC_TEXT0(text)  ADD_STATISTIC_TEXT( ID_STATICTEXTDISABLE, text) 
+#define ADD_STATISTIC_TEXT1(id)  ADD_STATISTIC_TEXT( id, L"     ")
 
 wxSizer *View3DPanel::CreateFooterPanel()
 {
 
-	ColourScheme *clrs = Preferences::Get()->GetColorScheme();
-	wxColor colorfg = clrs->Get(ColourScheme::WINDOW_TEXT);
-	wxColor colorfgd = clrs->Get(ColourScheme::WINDOW_TEXT_DISABLE);
+	//ColourScheme *clrs = Preferences::Get()->GetColorScheme();
+	//wxColor colorfg = clrs->Get(ColourScheme::WINDOW_TEXT);
+	//wxColor colorfgd = clrs->Get(ColourScheme::WINDOW_TEXT_DISABLE);
 	
 	wxStaticText *pt;
 	wxFlexGridSizer  *gd = new wxFlexGridSizer(4,wxSize(10,5));// 2, 0, 0);	
@@ -917,6 +919,7 @@ LogPane::LogPane(wxWindow *parent, FilePage *fb)
 void LogPane::UpdatePreferences()
 {
 	UpdateThemeColor();
+	InitColours();
 }
 
 void LogPane::UpdateThemeColor()

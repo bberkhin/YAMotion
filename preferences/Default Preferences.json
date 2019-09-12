@@ -11,27 +11,46 @@
   "tabWidth": 4,
   "visibleHSB": true,
   "enableLogExecution": false,
-  "theme_syntax": "them_black.json",
+  "theme": "WHITE",
   "postpocessing": "wincnc.con",
-  "files": [
+  "themes": [
     {
-      "name": "GCODE",
-      "syntax": "nc_syntax_black.json",
-      "extensions": "*.ngc;*.nc;*.cnc;*.tap"
+      "id": "BLACK",
+      "name": "Black theme for real man",
+      "window_colors": "them_black.json",
+      "GCODE": "nc_syntax_black.json",
+      "GCMC": "gcmc_syntax_black.json",
+      "JSON": "json_syntax_black.json"
     },
     {
-      "name": "GCMC",
-      "syntax": "gcmc_syntax_white.json",
-      "extensions": "*.gcmc"
-    },
-    {
-      "name": "JSON",
-      "extensions": "*.json",
-      "syntax": "json_syntax_black.json"
-    },
-    {
-      "name": "ALL",
-      "extensions": "*.*"
+      "id": "WHITE",
+      "name": "White theme classic",
+      "window_colors": "them_white.json",
+      "GCODE": "nc_syntax_white.json",
+      "GCMC": "gcmc_syntax_white.json",
+      "JSON": "json_syntax_white.json"
     }
-  ]
-}
+  ],
+   "files":
+    [
+      {
+        "name": "GCODE",
+        //"syntax": "nc_syntax_black.json",
+        "extensions": "*.ngc;*.nc;*.cnc;*.tap"
+      },
+      {
+        "name": "GCMC",
+        //"syntax": "gcmc_syntax_white.json",
+        "extensions": "*.gcmc"
+      },
+      {
+        "name": "JSON",
+        "extensions": "*.json",
+        //"syntax": "json_syntax_black.json"
+      },
+      {
+        "name": "ALL",
+        "extensions": "*.*"
+      }
+    ]
+    }

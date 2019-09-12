@@ -266,15 +266,6 @@ int  EditorTabArt::GetBestTabCtrlSize(wxWindow* wnd, const wxAuiNotebookPageArra
 void EditorTabArt::DrawButton(wxDC& dc, wxWindow* wnd, const wxRect& inRect, int bitmapId, int buttonState, int orientation, wxRect* outRect)
 {
 	wxAuiGenericTabArt::DrawButton(dc, wnd, inRect, bitmapId, buttonState, orientation, outRect);	
-	/*
-	wxRect rc(inRect);
-	rc.width /= 2;
-	wxColor clr(*wxYELLOW);
-	//Draw background
-	dc.SetBrush(wxBrush(clr));
-	dc.SetPen(*wxTRANSPARENT_PEN);
-	dc.DrawRectangle(rc);
-	*/
 }
 
 
@@ -437,6 +428,7 @@ void ColourScheme::Read()
 	ReadColor(root["view3d_xaxis"], m_colors[VIEW3D_XAXIS]);
 	ReadColor(root["view3d_yaxis"], m_colors[VIEW3D_YAXIS]);
 	ReadColor(root["view3d_zaxis"], m_colors[VIEW3D_ZAXIS]);
+
 }
 
 

@@ -15,6 +15,12 @@
 #define MARGIN_BOTTOM 8
 #define MARGIN_LEFT_RIGHT 20
 
+enum
+{
+	ID_STATICTEXTFG = 5000,
+	ID_STATICTEXDISABLE
+};
+
 
 
 
@@ -28,22 +34,14 @@ wxEND_EVENT_TABLE()
 
 WelcomeWnd::WelcomeWnd(wxWindow *parent) : wxPanel(parent)
 {
-	ColourScheme *clrs = Preferences::Get()->GetColorScheme();
-	const CommonInfo &common_prefs = Preferences::Get()->Common();
-
-	
-	m_fgColor = clrs->Get(ColourScheme::WINDOW_TEXT);
-	m_fghColor = clrs->Get(ColourScheme::WINDOW_TEXT_HOVER);
-	m_bgColor = clrs->Get(ColourScheme::WINDOW);
-	m_bghColor = clrs->Get(ColourScheme::WINDOW_HOVER); //wxColor(0x4d4d4d); 
 
 
 	wxBoxSizer *totalpane = new wxBoxSizer(wxVERTICAL);
 	//Top Margin
 	totalpane->AddSpacer(MARGIN_TOP);	
 	// Header
-	wxStaticText *ptxt = new wxStaticText(this, wxID_ANY, APP_NAME );
-	ptxt->SetForegroundColour(m_fgColor);
+	wxStaticText *ptxt = new wxStaticText(this, ID_STATICTEXTFG, APP_NAME );
+	//ptxt->SetForegroundColour(m_fgColor);
 	ptxt->SetFont(wxFontInfo(28).Bold());
 	wxBoxSizer *phor = new wxBoxSizer(wxHORIZONTAL);
 	phor->AddSpacer(MARGIN_LEFT_RIGHT);
@@ -82,10 +80,19 @@ WelcomeWnd::WelcomeWnd(wxWindow *parent) : wxPanel(parent)
 	SetSizerAndFit(totalpane);
 }
 
-
-
 void WelcomeWnd::UpdateThemeColor()
 {
+	ColourScheme *clrs = Preferences::Get()->GetColorScheme();
+	
+	wxColor m_bgColor; //clrs->Get(ColourScheme::WINDOW);
+	wxColor m_bghColor; 
+	wxColor m_fgColor; //clrs->Get(ColourScheme::WINDOW_TEXT);
+	wxColor m_fghColor;
+
+	m_fgColor = clrs->Get(ColourScheme::WINDOW_TEXT);
+	m_fghColor = clrs->Get(ColourScheme::WINDOW_TEXT_HOVER);
+	m_bgColor = clrs->Get(ColourScheme::WINDOW);
+	m_bghColor = clrs->Get(ColourScheme::WINDOW_HOVER); //wxColor(0x4d4d4d); 
 
 	SetBackgroundColour(m_bgColor);
 	SetForegroundColour(m_fgColor);
@@ -95,7 +102,84 @@ void WelcomeWnd::UpdateThemeColor()
 	{
 		wxWindow* child = node->GetData();
 		child->SetBackgroundColour(m_bgColor);
-		//child->SetForegroundColour(m_fgColor);
+		FlatButton *ph = dynamic_cast<FlatButton *>(child);
+		wxWindowID id = child->GetId();
+		switch (id)
+		{
+		case ID_STATICTEXTFG: 
+			child->SetForegroundColour(m_fgColor); 
+			break;
+		case ID_STATICTEXDISABLE:
+			child->SetForegroundColour(clrs->Get(ColourScheme::WINDOW_TEXT_DISABLE)); 
+			break;
+		// main cmd
+		case ID_OPENFILE:
+		case ID_NEWNC:
+		case ID_NEWGCMC:
+			wxASSERT(ph);
+			ph->SetForegroundColour(m_fgColor);
+			ph->SetColour(FlatButton::BackgroundColour, m_bgColor);
+			ph->SetColour(FlatButton::HoverBackgroundColour, m_bghColor);
+			ph->SetColour(FlatButton::PressBackgroundColour, m_bghColor);
+			ph->SetColour(FlatButton::ForegroundColour, m_fgColor);
+			ph->SetColour(FlatButton::HoverForegroundColour, m_fghColor);
+			ph->SetColour(FlatButton::PressForegroundColour, m_fghColor);
+
+			break;
+		//footer cmd
+		case ID_GLOBALPREFS:
+		case ID_DOWNLOADUPDATE:
+			wxASSERT(ph);
+			ph->SetForegroundColour(m_fgColor);
+			ph->SetColour(FlatButton::BackgroundColour, m_bgColor);
+			ph->SetColour(FlatButton::HoverBackgroundColour, m_bghColor);
+			ph->SetColour(FlatButton::PressBackgroundColour, m_bghColor);
+			ph->SetColour(FlatButton::ForegroundColour, clrs->Get(ColourScheme::CONTROL_TEXT));
+			ph->SetColour(FlatButton::HoverForegroundColour, clrs->Get(ColourScheme::CONTROL_TEXT_HOVER));
+			ph->SetColour(FlatButton::PressForegroundColour, clrs->Get(ColourScheme::CONTROL_TEXT_HOVER));
+			break;
+		// help linl
+		case ID_HELPGCMC:
+		case ID_HELPNC:
+		case ID_WHATNEWS:
+			wxASSERT(ph);
+			ph->SetForegroundColour(m_fgColor);
+			ph->SetColour(FlatButton::BackgroundColour, m_bgColor);
+			ph->SetColour(FlatButton::HoverBackgroundColour, m_bghColor);
+			ph->SetColour(FlatButton::PressBackgroundColour, m_bghColor);
+			ph->SetColour(FlatButton::ForegroundColour, m_fgColor);
+			ph->SetColour(FlatButton::HoverForegroundColour, m_fghColor);
+			ph->SetColour(FlatButton::PressForegroundColour, m_fghColor);
+			break;
+		case ID_WRITEFEEDBACK:
+		{
+			wxASSERT(ph);
+			wxColor clrbg = clrs->Get(ColourScheme::BUTTON_FEEDBACK);// ("#cc8830");
+			wxColor clrbghv = clrs->Get(ColourScheme::BUTTON_FEEDBACK_HOVER);//("#bb6600");
+			ph->SetForegroundColour(m_fgColor);
+			ph->SetColour(FlatButton::BackgroundColour, clrbg);
+			ph->SetColour(FlatButton::HoverBackgroundColour, clrbghv);
+			ph->SetColour(FlatButton::PressBackgroundColour, clrbghv);
+			ph->SetColour(FlatButton::ForegroundColour, m_fgColor);
+			ph->SetColour(FlatButton::HoverForegroundColour, m_fgColor);
+			ph->SetColour(FlatButton::PressForegroundColour, m_fgColor);
+		}
+			break;
+
+		default:
+			if (ph && id >= 100 && id <= 110) //recenrt files
+			{
+				ph->SetForegroundColour(m_fgColor);
+				ph->SetColour(FlatButton::BackgroundColour, m_bgColor);
+				ph->SetColour(FlatButton::HoverBackgroundColour, m_bghColor);
+				ph->SetColour(FlatButton::PressBackgroundColour, m_bghColor);
+				ph->SetColour(FlatButton::ForegroundColour, m_fgColor);
+				ph->SetColour(FlatButton::HoverForegroundColour, m_fghColor);
+				ph->SetColour(FlatButton::PressForegroundColour, m_fghColor);
+			}
+			break;
+
+		};
 		node = node->GetNext();
 	}
 	
@@ -103,35 +187,18 @@ void WelcomeWnd::UpdateThemeColor()
 
 void WelcomeWnd::AddColumnHeader(wxBoxSizer *pane, const wxString &text)
 {
-	wxStaticText *ph = new wxStaticText(this, wxID_ANY, text);
+	wxStaticText *ph = new wxStaticText(this, ID_STATICTEXTFG, text);
 	ph->SetFont(wxFontInfo(10).Bold()); 
-	ph->SetForegroundColour(m_fgColor);
 	pane->Add(ph, 0, 0); 
 	pane->AddSpacer(WELCOME_MARGIN );
 }
 
 void WelcomeWnd::AddCommand(wxBoxSizer *pane, const wxString &text, int cmd, bool footer)
 {
-	//wxStaticText *ph = new wxStaticText(this, cmd, text);	
-	FlatButton *ph = new FlatButton(this, cmd, text, footer ? (FB_BITMAP_LEFT | FB_LABEL_LEFT) : (FB_BITMAP_RIGHT | FB_LABEL_LEFT));
-	ph->SetForegroundColour(m_fgColor);
+	FlatButton *ph = new FlatButton(this, cmd, text, footer ? (FB_BITMAP_LEFT | FB_LABEL_LEFT) : (FB_BITMAP_RIGHT | FB_LABEL_LEFT));	
 	ph->SetCommand(cmd);
 	ph->SetFont(wxFontInfo(10));
-	ph->SetColour(FlatButton::BackgroundColour, m_bgColor);
-	ph->SetColour(FlatButton::HoverBackgroundColour, m_bghColor);
-	ph->SetColour(FlatButton::PressBackgroundColour, m_bghColor);
-	wxColor fgColor = m_fgColor;
-	wxColor fghColor = m_fghColor;
-	if (footer)
-	{
-		ColourScheme *clrs = Preferences::Get()->GetColorScheme();
-		fgColor = clrs->Get(ColourScheme::CONTROL_TEXT);
-		fghColor = clrs->Get(ColourScheme::CONTROL_TEXT_HOVER);
-	}
-	ph->SetColour(FlatButton::ForegroundColour, fgColor);
-	ph->SetColour(FlatButton::HoverForegroundColour, fghColor);
-	ph->SetColour(FlatButton::PressForegroundColour, fghColor);
-
+	
 	wxArtID idArt;
 	switch (cmd)
 	{
@@ -161,15 +228,8 @@ void WelcomeWnd::AddRecentFile(wxBoxSizer *pane, const wxFileName &p, int n)
 {	
 	int cmd = wxID_FILE + n;
 	FlatButton *ph = new FlatButton(this,100+n, p.GetFullName(), FB_BITMAP_LEFT);
-	ph->SetForegroundColour(m_fgColor);
 	ph->SetCommand(cmd);
 	ph->SetFont(wxFontInfo(10));
-	ph->SetColour(FlatButton::BackgroundColour, m_bgColor);
-	ph->SetColour(FlatButton::HoverBackgroundColour, m_bghColor);
-	ph->SetColour(FlatButton::PressBackgroundColour, m_bghColor);
-	ph->SetColour(FlatButton::ForegroundColour, m_fgColor);
-	ph->SetColour(FlatButton::HoverForegroundColour, m_fghColor);
-	ph->SetColour(FlatButton::PressForegroundColour, m_fghColor);
 
 	wxBitmap bmp = wxArtProvider::GetBitmap(wxART_NEW, wxART_LIST);
 	ph->SetBitmap(bmp, 10 );
@@ -191,18 +251,9 @@ wxBoxSizer *WelcomeWnd::CreateCommand()
 
 void WelcomeWnd::AddHelpLink(wxBoxSizer *pane, const wxString &text, int cmd )
 {
-	//wxStaticText *ph = new wxStaticText(this, cmd, text);
 	FlatButton *ph = new FlatButton(this, cmd, text, FB_LABEL_LEFT);
-	ph->SetForegroundColour(m_fgColor);
 	ph->SetCommand(cmd);
 	ph->SetFont(wxFontInfo(10));
-	ph->SetColour(FlatButton::BackgroundColour, m_bgColor);	
-	ph->SetColour(FlatButton::HoverBackgroundColour, m_bghColor);
-	ph->SetColour(FlatButton::PressBackgroundColour, m_bghColor);
-	ph->SetColour(FlatButton::ForegroundColour, m_fgColor);
-	ph->SetColour(FlatButton::HoverForegroundColour, m_fghColor);
-	ph->SetColour(FlatButton::PressForegroundColour, m_fghColor);
-
 	ph->UpdateSize();
 	pane->Add(ph, 0, wxEXPAND);
 
@@ -286,56 +337,35 @@ wxBoxSizer *WelcomeWnd::CreateFooter()
 	ver += APP_COPYRIGTH;
 
 	wxBoxSizer *paneCmd = new wxBoxSizer(wxHORIZONTAL);
-	wxStaticText *pTxt = new wxStaticText(this, wxID_ANY, ver);
+	wxStaticText *pTxt = new wxStaticText(this, ID_STATICTEXDISABLE, ver);
 	pTxt->SetFont(wxFontInfo(10));
-	pTxt->SetForegroundColour(clrs->Get(ColourScheme::WINDOW_TEXT_DISABLE) );
 	
-	//pane->Add(pTxt , 0, wxALIGN_BOTTOM);
+	
 	paneCmd->Add(pTxt, 0, wxALIGN_CENTER_VERTICAL);
 	paneCmd->AddSpacer(WELCOME_MARGIN);
 	
-	//AddCommand(pane, _("Preference"), ID_GLOBALPREFS, true);
 	AddCommand(paneCmd, _("Preference"), ID_GLOBALPREFS, true);
 
-	//pane->Add(new wxStaticText(this, wxID_ANY, ), 0, wxALIGN_BOTTOM);
 	paneCmd->AddSpacer(WELCOME_MARGIN);
-	//AddCommand(pane, _("Check for Update"), ID_DOWNLOADUPDATE, true);
 	AddCommand(paneCmd, _("Check for Update"), ID_DOWNLOADUPDATE, true);
 	pane->Add( paneCmd, 0, wxALIGN_BOTTOM);
 	pane->AddStretchSpacer();
 	wxBoxSizer *pane1 = new wxBoxSizer(wxVERTICAL);
 
-	pTxt = new wxStaticText(this, wxID_ANY, _("Help us become better."));
-	pTxt->SetForegroundColour(m_fgColor);
+	pTxt = new wxStaticText(this, ID_STATICTEXTFG, _("Help us become better."));
 	pTxt->SetFont(wxFontInfo(10).Bold());
 	pane1->Add(pTxt, 0, wxALIGN_CENTER_HORIZONTAL);
 	
-	pTxt = new wxStaticText(this, wxID_ANY, _(" Tell us what you liked or what you lack in our application"));
+	pTxt = new wxStaticText(this, ID_STATICTEXTFG, _(" Tell us what you liked or what you lack in our application"));
 	pTxt->SetFont(wxFontInfo(10));
-	pTxt->SetForegroundColour(m_fgColor);
 	pane1->Add(pTxt, 0, wxALIGN_CENTER_HORIZONTAL);
 
-	FlatButton *ph = new FlatButton(this, wxID_ANY, _("WRITE TO US"), FB_LABEL_CENTER);
-	ph->SetForegroundColour(m_fgColor);
+	FlatButton *ph = new FlatButton(this, ID_WRITEFEEDBACK, _("WRITE TO US"), FB_LABEL_CENTER);
 	ph->SetCommand(ID_WRITEFEEDBACK);
 	ph->SetFont(wxFontInfo(11).Bold() );
 	ph->SetMargins(-1, 8);
-
-	
-
 	wxBitmap bmp = wxArtProvider::GetBitmap(ART_MAIL, wxART_OTHER);
 	ph->SetBitmap(bmp, 2);
-	
-	wxColor clrbg = clrs->Get(ColourScheme::BUTTON_FEEDBACK);// ("#cc8830");
-	wxColor clrbghv = clrs->Get(ColourScheme::BUTTON_FEEDBACK_HOVER);//("#bb6600");
-
-	ph->SetColour(FlatButton::BackgroundColour, clrbg);
-	ph->SetColour(FlatButton::HoverBackgroundColour, clrbghv);
-	ph->SetColour(FlatButton::PressBackgroundColour, clrbghv);
-	ph->SetColour(FlatButton::ForegroundColour, m_fgColor);
-	ph->SetColour(FlatButton::HoverForegroundColour, m_fgColor);
-	ph->SetColour(FlatButton::PressForegroundColour, m_fgColor);
-
 	pane1->Add(ph, 0, wxEXPAND );
 	pane->Add(pane1, 0, wxRIGHT | wxALIGN_BOTTOM);
 	return pane;

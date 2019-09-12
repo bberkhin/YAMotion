@@ -282,6 +282,9 @@ void StubNotebook::UpdatePreferences()
 	GetArtProvider()->UpdateColoursFromSystem();
 	m_mgr.GetArtProvider()->UpdateColoursFromSystem();
 
+	wxAuiTabCtrl* tabCtrl = GetActiveTabCtrl();
+	tabCtrl->GetArtProvider()->UpdateColoursFromSystem();
+
 	size_t n = GetPageCount();
 	for (size_t i = 0; i < n; ++i)
 	{
@@ -1340,6 +1343,10 @@ void AppFrame::UpdatePreferences()
 	dynamic_cast<StubNotebook *>(m_notebook)->UpdatePreferences();
 	if ( m_dirtree )
 		m_dirtree->UpdatePreferences();
+	
+	WelcomeWnd *welcome = FindWelcomePage();
+	if (welcome)
+		welcome->UpdateThemeColor();
 	
 	m_mgr.GetArtProvider()->UpdateColoursFromSystem();
 

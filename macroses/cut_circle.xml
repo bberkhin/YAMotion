@@ -3,7 +3,8 @@
   <macros>
     <name>Cutting circle</name>
     <desc>Cut circle via center point and circle radius</desc>
-    <image>cut_circle.jpg</image>
+    <image1>cut_circle.jpg</image1>
+    <image>cutting-circle.png</image>
     <gcmc>cut_circle.gcmc</gcmc>
     <include>cut_circle.inc.gcmc</include>
     <function>DoCutCircle(xCenter,yCenter,zSave,r,d,zDelta,rate,zRate,trc,ccw)</function>

@@ -3,7 +3,7 @@
   <macros>
     <name>Milling rect serface</name>
     <desc>Mill rect serface</desc>
-    <image>mill_rect.jpg</image>
+    <image>rectangular-surface.png</image>
     <gcmc>mill_rect.gcmc</gcmc>
     <include>mill_rect.inc.gcmc</include>
     <function>MillRect(xMin, yMin, xD, yD, zSave, d, zFull, per_stepover,rate,zRate,ccw)</function>

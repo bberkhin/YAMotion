@@ -48,10 +48,11 @@ struct CommonInfo
     bool whiteSpaceEnable;
 	bool visibleHSB;
 	bool enableLogExecution;
-	int tabWidth;	
-	wxString gcmc_syntax;
-	wxString nc_syntax;
-	wxString theme_color;
+	int tabWidth;
+//wxString gcmc_syntax;
+//wxString nc_syntax;
+	wxString theme_id;
+	wxString theme_Name;
 	wxString postprocessing_fn;
 };
 
@@ -94,7 +95,7 @@ public:
 	int  Lexer() const { return m_lexer; }
 	int  Fold() const { return m_fold; }
 	void Init();
-	void SetFileName(const wxString &filename) { m_filename = filename; }
+	void SetFileName(const wxString &filename);
 	void SetFilePattern(const wxString &filename) { m_filepattern = filename; }
 	void Clear();
 	const StyleInfo *GetById(int id) const;

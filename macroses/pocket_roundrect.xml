@@ -3,7 +3,8 @@
   <macros>
     <name>Round Rect Pocket</name>
     <desc>Millng round rect pocket</desc>
-    <image>pocket_roundrect.jpg</image>
+    <image1>pocket_roundrect.jpg</image1>
+    <image>rounded-rectangular-pocket.png</image>
     <gcmc>pocket_roundrect.gcmc</gcmc>
     <include>pocket_roundrect.inc.gcmc</include>
     <function>DoRoundRectPocket(xMin, yMin, xD, yD, radius, zSave, d, zDelta,zFull,per_stepover,rate,zRate,ccw)</function>

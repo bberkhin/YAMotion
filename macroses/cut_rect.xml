@@ -3,7 +3,8 @@
   <macros>
     <name>Cutting rect</name>
     <desc></desc>
-    <image>cut_rect.jpg</image>
+    <image1>cut_rect.jpg</image1>
+    <image>cutting-rect.png</image>
     <gcmc>cut_rect.gcmc</gcmc>
     <include>cut_rect.inc.gcmc</include>
     <function>DoCutRect(xMin, yMin, xD, yD, zSave, d, zDelta,rate,zRate,trc,ccw)</function>

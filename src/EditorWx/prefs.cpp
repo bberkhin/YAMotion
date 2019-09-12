@@ -49,9 +49,10 @@ Preferences::Preferences() : m_artprovider(0), m_tabartprovider(0)
 		false, // visibleHSB
 		false, // enableLogExecution
 		4,//tabWidth
-		"", // gcmc_sybatx;
-		"", //nc_syntax
-		"", //them_color
+//		"", // gcmc_sybatx;
+//		"", //nc_syntax
+		"", //them_id
+		"", //theme_Name
 		"" //postprocessing_fn
 	};
 
@@ -202,26 +203,60 @@ bool Preferences::DoRead(const wxString& fileName, bool errifnoexist )
 
 	root["tabWidth"].AsInt(m_common.tabWidth);
 	
-	root["theme_syntax"].AsString(m_common.theme_color);	
-	m_colors->SetFileName(m_common.theme_color);
+	root["theme"].AsString(m_common.theme_id);
 	root["postpocessing"].AsString(m_common.postprocessing_fn);
-	
 
 	wxJSONValue &files = root["files"];
-	
-	for (unsigned int i = 0; i < static_cast<unsigned int>(files.Size()); ++i)
+	if (files.IsArray())
 	{
-		wxJSONValue &val = files.Item(i);
-		wxString name = val["name"].AsString();
-		wxString filename, filepattern;
-		val["syntax"].AsString(filename);
-		val["extensions"].AsString(filepattern);
-		LanguageInfo *lang = FindByName(name,false);
-		if (lang && !filename.empty())
-			lang->SetFileName(filename );
-		if (lang && !filepattern.empty())
-			lang->SetFilePattern(filepattern);
-			
+
+		for (unsigned int i = 0; i < static_cast<unsigned int>(files.Size()); ++i)
+		{
+			wxJSONValue &val = files.Item(i);
+			wxString name = val["name"].AsString();
+			wxString filename, filepattern;
+			val["syntax"].AsString(filename);
+			val["extensions"].AsString(filepattern);
+			LanguageInfo *lang = FindByName(name, false);
+			if (lang && !filename.empty())
+				lang->SetFileName(filename);
+			if (lang && !filepattern.empty())
+				lang->SetFilePattern(filepattern);
+
+		}
+	}
+
+	/*
+	{
+		"id": "BLACK",
+		"name" : "Black theme for real man",
+		"window_colors" : "them_black.json",
+		"GCODE" : "nc_syntax_black.json",
+		}
+	*/
+
+	wxJSONValue &themes = root["themes"];
+	if (themes.IsArray())
+	{
+
+		for (unsigned int i = 0; i < static_cast<unsigned int>(themes.Size()); ++i)
+		{
+			wxJSONValue &val = themes.Item(i);
+			wxString id = val["id"].AsString();
+			if (id != m_common.theme_id)
+				continue;
+
+			wxString name = val["name"].AsString();
+			wxString wndcolor = val["window_colors"].AsString();
+			m_colors->SetFileName(wndcolor);
+			// for all lang
+			for (auto itlan = m_languages.begin(); itlan != m_languages.end(); ++itlan)
+			{
+				wxString filename = val[itlan->GetName()].AsString();
+				if (!filename.empty())
+					itlan->SetFileName(filename);
+			}
+		}
 	}
 	return true;
 }
@@ -282,6 +317,12 @@ void LanguageInfo::Init()
 
 	m_inited = true;
 	return;
+}
+
+void LanguageInfo::SetFileName(const wxString &filename)
+{ 
+	Clear();
+	m_filename = filename; 
 }
 
 void LanguageInfo::AddStyle(int id, const char *clr, const char *clrb, const char *fn, int fsize, bool bold, bool italic, const char *words)
@@ -370,7 +411,6 @@ const StyleInfo *LanguageInfo::GetById(int id) const
 
 bool LanguageInfo::Read()
 {
-	
 	wxLogNull logNo;
 	std::filesystem::path dirpath = StandartPaths::Get()->GetPreferencesPath(m_filename);
 	wxFFileInputStream  file_stream(dirpath.c_str());
@@ -412,8 +452,9 @@ bool LanguageInfo::Read()
 	root["bold"].AsBool(defbold);
 
 	wxJSONValue &styles = root["styles"];
+	unsigned int num_styles = static_cast<unsigned int>(styles.Size());
 
-	for (unsigned int i = 0; i < static_cast<unsigned int>(styles.Size()); ++i)
+	for (unsigned int i = 0; i < num_styles ; ++i)
 	{
 		wxJSONValue &val = styles.Item(i);
 		int id = -1;
@@ -438,8 +479,8 @@ bool LanguageInfo::Read()
 			st->italic = defitalic;
 		if (!val["bold"].AsBool(st->bold))
 			st->bold = defbold;
-
 	}
+
 	return false;
 }
 

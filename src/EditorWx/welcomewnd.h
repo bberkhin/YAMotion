@@ -8,23 +8,22 @@ public:
 	WelcomeWnd(wxWindow *parent);
 	virtual ~WelcomeWnd();
 	void AddLastFilesToMenu(bool update = true);
-	
+	void UpdateThemeColor();
 private:
 	wxBoxSizer *CreateRecentFilesList();
 	wxBoxSizer *CreateFooter();
 	wxBoxSizer *CreateCommand();
 	wxBoxSizer *CreateDoc();
-	void UpdateThemeColor();
 	void AddColumnHeader(wxBoxSizer *pane, const wxString &text);
 	void AddCommand(wxBoxSizer *pane, const wxString &text, int cmd, bool right = false);
 	void AddRecentFile(wxBoxSizer *pane, const wxFileName &p, int n); 
 	void AddHelpLink(wxBoxSizer *pane, const wxString &text, int cmd);
 
 private:
-	wxColor m_bgColor; //clrs->Get(ColourScheme::WINDOW);
-	wxColor m_bghColor; 
-	wxColor m_fgColor; //clrs->Get(ColourScheme::WINDOW_TEXT);
-	wxColor m_fghColor;
+	//wxColor m_bgColor; //clrs->Get(ColourScheme::WINDOW);
+	//wxColor m_bghColor; 
+	//wxColor m_fgColor; //clrs->Get(ColourScheme::WINDOW_TEXT);
+	//wxColor m_fghColor;
 	wxBoxSizer *m_LastFiles;
 
 	wxDECLARE_EVENT_TABLE();
