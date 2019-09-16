@@ -126,16 +126,16 @@ wxBEGIN_EVENT_TABLE (AppFrame, wxFrame)
 	// Preferences
 	EVT_MENU(ID_PROPERTIES, AppFrame::OnProperties)
 	EVT_MENU(ID_GLOBALPREFS, AppFrame::OnDefaultPreferences)
-	EVT_MENU(ID_USERPREFS, AppFrame::OnUserPreferences)
-
-
+	//EVT_MENU(ID_USERPREFS, AppFrame::OnUserPreferences)
+	EVT_MENU_RANGE(ID_CHANGETHEME1, ID_CHANGETHEMELAST, AppFrame::OnChangeTheme)
+	EVT_UPDATE_UI_RANGE(ID_CHANGETHEME1, ID_CHANGETHEMELAST, AppFrame::OnUpdateChangeTheme)
+	
 	// help
 	EVT_MENU(wxID_ABOUT, AppFrame::OnAbout)
 	EVT_MENU(ID_DOWNLOADUPDATE, AppFrame::OnDownloadUpdate)
 	EVT_MENU(ID_SHOWWELCOME, AppFrame::OnShowWelcome)
 	EVT_MENU(ID_SHOWDIRPANE, AppFrame::OnShowDirPane)
 	EVT_UPDATE_UI(ID_SHOWDIRPANE, AppFrame::OnUpdateUIShowDirPane)
-	
 
     // help
     EVT_MENU(wxID_ABOUT,            AppFrame::OnAbout)	
@@ -179,6 +179,7 @@ AppFrame::AppFrame (const wxString &title)
 	m_macroses = new Macroses();
 
     SetIcon(wxICON(sample));
+
     SetTitle (APP_NAME);
     // create menu
 	wxMenuBar *m_menuBar = CreateMenu();
@@ -673,6 +674,7 @@ void AppFrame::OnFileRemoveEvent(wxCommandEvent &event)
 void AppFrame::OnOpenLastFile(wxCommandEvent &event)
 {
 	ConfigData *config = dynamic_cast<ConfigData *>(wxConfigBase::Get());
+	wxASSERT(config);
 	int n = event.GetId() - wxID_FILE;
 	const FileNamesList &files = config->GetFiles();
 	if (n >= 0 && n < static_cast<int>(files.size()) )
@@ -780,8 +782,7 @@ void AppFrame::OnAddFilePathToDirPane(wxCommandEvent &event)
 void AppFrame::OnProperties(wxCommandEvent &WXUNUSED(event))
 {
 	ConfigData *config = dynamic_cast<ConfigData *>(wxConfigBase::Get());
-	if (!config)
-		return;
+	wxASSERT(config);
 
 	int oldlang = config->GetLanguage(-1);
 	int lng = wxGetSingleChoiceIndex
@@ -1000,11 +1001,67 @@ void AppFrame::OnContextMenu(wxContextMenuEvent& evt)
     PopupMenu(&menu, point);
 }
 
+void AppFrame::OnChangeTheme(wxCommandEvent &event)
+{
+	ConfigData *config = dynamic_cast<ConfigData *>(wxConfigBase::Get());
+	wxASSERT(config);
+
+	size_t n = event.GetId() - ID_CHANGETHEME1;
+	const ThemeInfos &themes = Preferences::Get()->GetThemes();
+	wxASSERT(n >= 0 && n < themes.size());
+	config->SetTheme(themes[n].id );
+	UpdatePreferences();
+}
+
+void AppFrame::OnUpdateChangeTheme(wxUpdateUIEvent& event)
+{
+	size_t n = event.GetId() - ID_CHANGETHEME1;
+	const ThemeInfos &themes = Preferences::Get()->GetThemes();
+	wxASSERT(n >= 0 && n < themes.size() );
+	const ThemeInfo &ti = themes[n];
+
+		//add two theme
+	ConfigData * config = dynamic_cast<ConfigData *>(wxConfigBase::Get());
+	wxASSERT(config);
+	
+	if (config->GetTheme() == ti.id )
+		event.Check(true);
+	else
+		event.Check(false);
+}
+
+void AppFrame::AddThemesToMenu()
+{
+	//clesr all 
+	while (true)
+	{
+		auto nodeLast = m_menuThemes->GetMenuItems().GetLast();
+		if (nodeLast)
+		{
+			wxMenuItem * const lastMenuItem = nodeLast->GetData();
+			m_menuThemes->Destroy(lastMenuItem);
+		}
+		else
+			break;
+	}
+	//add two theme
+	const ThemeInfos &themes = Preferences::Get()->GetThemes();
+
+	int n = 0;
+	for (auto it = themes.begin(); it != themes.end(); ++it, ++n)
+	{
+		if (n >= 10)
+			break;
+		m_menuThemes->Append(ID_CHANGETHEME1 + n, it->name, wxEmptyString, wxITEM_CHECK);
+	}
+}
+
+
 void AppFrame::AddFileToHisotyList(const wxFileName &filename)
 {
 	ConfigData *config = dynamic_cast<ConfigData *>(wxConfigBase::Get());
-	if (!config)
-		return;
+	wxASSERT(config);
+
 	config->AddFileNameToSaveList(filename);
 	UpdateLastFilesList();
 }
@@ -1017,12 +1074,13 @@ void AppFrame::UpdateLastFilesList()
 		welcome->AddLastFilesToMenu();
 }
 
+
+
 void AppFrame::AddLastFilesToMenu()
 {
 	
 	ConfigData *config = dynamic_cast<ConfigData *>(wxConfigBase::Get());
-	if ( !config )
-		return;
+	wxASSERT( config );
 	size_t n;
 	wxMenu *menuFiles = m_menuLastFiles;
 	const FileNamesList &files = config->GetFiles();
@@ -1037,7 +1095,7 @@ void AppFrame::AddLastFilesToMenu()
 			if (nodeLast)
 			{
 				wxMenuItem * const lastMenuItem = nodeLast->GetData();
-				menuFiles->Delete(lastMenuItem);
+				menuFiles->Destroy(lastMenuItem);
 				menuitem_count--;
 			}
 		}
@@ -1166,11 +1224,14 @@ wxMenuBar *AppFrame::CreateMenu ()
 	menu3D->Append(ID_SEMULATE_START, _("&Start Simulate"));
 	menu3D->Append(ID_SEMULATE_PAUSE,_("Sto&p Simulate"));
 	menu3D->Append(ID_SEMULATE_STOP, _("Pause"));
-*/	
+*/
 	// Pregerences menu
 	wxMenu *menuPref = new wxMenu;
 	menuPref->Append(ID_GLOBALPREFS, _("Default Preferences"));
-	menuPref->Append(ID_USERPREFS, _("User Preferences"));
+	//menuPref->Append(ID_USERPREFS, _("User Preferences"));
+	m_menuThemes = new wxMenu;
+	AddThemesToMenu();
+	menuPref->Append(ID_CHANGETHEME, _("Themes"), m_menuThemes);
 	menuPref->Append(ID_PROPERTIES, _("Language ..."));
 
      // Help menu
@@ -1339,7 +1400,9 @@ void AppFrame::CreateWatcher()
 
 void AppFrame::UpdatePreferences()
 {
-	Preferences::Get()->Read();
+	ConfigData *config = dynamic_cast<ConfigData *>(wxConfigBase::Get());
+	wxASSERT(config);
+	Preferences::Get()->UpdateAll( config->GetTheme() );
 	dynamic_cast<StubNotebook *>(m_notebook)->UpdatePreferences();
 	if ( m_dirtree )
 		m_dirtree->UpdatePreferences();
@@ -1350,6 +1413,7 @@ void AppFrame::UpdatePreferences()
 	
 	m_mgr.GetArtProvider()->UpdateColoursFromSystem();
 
+	AddThemesToMenu();
 	Refresh();
 	Layout();
 }

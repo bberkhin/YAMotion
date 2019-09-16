@@ -848,23 +848,51 @@ LogPane::LogPane(wxWindow *parent, FilePage *fb)
 	//wxPanel(parent,-1,wxDefaultPosition,wxDefaultSize, wxTAB_TRAVERSAL | wxNO_BORDER | wxCAPTION)
 {
 	m_workingAnim = NULL;
+	// Create header
 	wxBoxSizer *header = new wxBoxSizer(wxHORIZONTAL);
 	wxStaticText *txt = new wxStaticText(this, wxID_ANY, _("Output"));
 	txt->SetFont(wxFontInfo(10).Bold());
 	header->AddSpacer(MARGIN_LEFT);
-	header->Add(txt, 1, wxALIGN_CENTRE_VERTICAL);
+	header->Add(txt, 0, wxALIGN_LEFT | wxALIGN_CENTRE_VERTICAL);
 
+//crate progress contrl
+	
+	const void* data = NULL;
+	size_t outLen = 0;
+	ConfigData *config = dynamic_cast<ConfigData *>(wxConfigBase::Get());
+	wxASSERT(config);
+	wxString resname = wxString::Format("ID_THROBER_%s", config->GetTheme());
+	if (wxLoadUserResource(&data, &outLen, resname, RT_RCDATA))
+	{
+		wxMemoryInputStream is(data, outLen);
+		m_workingAnim = new wxAnimationCtrl(this, wxID_ANY);
+		if (!m_workingAnim->Load(is))
+		{
+			delete m_workingAnim;
+			m_workingAnim = 0;
+		}
+		else
+		{
+			header->AddStretchSpacer();
+			header->Add(m_workingAnim, 0, wxALIGN_CENTER | wxALIGN_CENTER_VERTICAL);
+			m_workingAnim->SetUseWindowBackgroundColour(true);
+			m_workingAnim->Show(false);
+		}
+
+	}
+	
+	header->AddStretchSpacer();
 	m_stop = new FlatButton(this, ID_STOPPROCESS, _("Stop"));
-	//header->Add(m_stop, 0, wxRIGHT);
-	header->Add(m_stop);
-	//m_stop->Show(false);
+	header->Add(m_stop, 0, wxRIGHT | wxALIGN_CENTER_VERTICAL);
+	m_stop->Show(false);
 	header->AddSpacer(10);
 
 	
 	FlatButton *padd = new FlatButton(this, ID_CLOSEOUTPUT, wxEmptyString, FB_TRANSPARENT, ART_CLOSE);
-	header->Add(padd, 0, wxRIGHT);
+	header->Add(padd, 0, wxRIGHT | wxALIGN_CENTER_VERTICAL);
 	header->AddSpacer(MARGIN_LEFT);
 
+	// Create body
 	m_plog = new LogWindow(this, m_fb, wxID_ANY);
 	m_plog->SetWindowStyle(m_plog->GetWindowStyle() | wxNO_BORDER);
 	FlatScrollBar *barv = new FlatScrollBar(this, m_plog, wxID_ANY);
@@ -888,25 +916,7 @@ LogPane::LogPane(wxWindow *parent, FilePage *fb)
 	wxBoxSizer *totalpane = new wxBoxSizer(wxVERTICAL);
 	totalpane->AddSpacer(7);
 	totalpane->Add(header, 0, wxEXPAND);
-	const void* data = NULL;
-	size_t outLen = 0;
-	if( wxLoadUserResource(&data, &outLen, "ID_THROBER", RT_RCDATA) )
-	{
-		wxMemoryInputStream is(data, outLen);
-		m_workingAnim = new wxAnimationCtrl(this, wxID_ANY);
-		if ( !m_workingAnim->Load(is) )
-		{
-			delete m_workingAnim;
-			m_workingAnim = 0;
-		}
-		else
-		{
-			wxSizerItem *item = totalpane->Add(m_workingAnim, wxSizerFlags().Centre().Border());
-			m_workingAnim->SetUseWindowBackgroundColour(true);
-			m_workingAnim->Show(false);
-		}
-		
-	}
+
 
 	totalpane->Add(body, wxEXPAND, wxEXPAND); //wxEXPAND
 	SetSashVisible(wxSASH_TOP, true);
@@ -960,25 +970,30 @@ void LogPane::OnStop(wxCommandEvent& WXUNUSED(ev))
 
 void LogPane::StartPulse()
 {
-	if (!m_workingAnim || !m_stop )
-		return;
 	bool needlayout = false;
-	wxSizerItem *item = GetSizer()->GetItem(m_workingAnim);
-	if (item && !m_workingAnim->IsShown() )
-	{ 
-		item->Show(true);
-		needlayout = true;
-	}
-	item = GetSizer()->GetItem(m_stop,true);
-	if (item && !m_stop->IsShown())
+	if (m_workingAnim)
 	{
-		item->Show(true);
-		needlayout = true;
-	}	
+		wxSizerItem *item = GetSizer()->GetItem(m_workingAnim, true);
+		if (item && !m_workingAnim->IsShown())
+		{
+			item->Show(true);
+			needlayout = true;
+		}
+	}
+	if (m_stop)
+	{
+		wxSizerItem *item = GetSizer()->GetItem(m_stop, true);
+		if (item && !m_stop->IsShown())
+		{
+			item->Show(true);
+			needlayout = true;
+		}
+	}
 	if ( needlayout )
 		Layout();
 	
-	m_workingAnim->Play();
+	if (m_workingAnim)
+		m_workingAnim->Play();
 }
 
 void LogPane::Pulse()
@@ -987,23 +1002,29 @@ void LogPane::Pulse()
 }
 void LogPane::StopPulse()
 {
-	if (!m_workingAnim || !m_stop)
-		return;
-	
 	bool needlayout = false;
-	wxSizerItem *item = GetSizer()->GetItem(m_workingAnim);
-	if (item && m_workingAnim->IsShown())
+	if (m_workingAnim)
 	{
-		item->Show(false);
-		needlayout = true;
+		wxSizerItem *item = GetSizer()->GetItem(m_workingAnim, true);
+		if (item && m_workingAnim->IsShown())
+		{
+			item->Show(false);
+			needlayout = true;
+		}
 	}
-	item = GetSizer()->GetItem(m_stop,true);
-	if (item && m_stop->IsShown())
+	if (m_stop)
 	{
-		item->Show(false);
-		needlayout = true;
+		wxSizerItem *item = GetSizer()->GetItem(m_stop, true);
+		if (item && m_stop->IsShown())
+		{
+			item->Show(false);
+			needlayout = true;
+		}
 	}
-	m_workingAnim->Stop();
+
+	if (m_workingAnim)
+		m_workingAnim->Stop();
+	
 	if (needlayout)
 		Layout();
 }

@@ -201,8 +201,8 @@ bool App::OnInit()
 		}
 	}
 	
-	Preferences::Get()->Read();
-
+	Preferences::Get()->UpdateAll(config->GetTheme());
+	
 	//delete wxTheme::Get();
 	//wxTheme::Set(new YATheme());
 

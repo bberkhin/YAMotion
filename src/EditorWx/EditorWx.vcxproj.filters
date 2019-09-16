@@ -328,10 +328,10 @@
     <None Include="..\..\resources\welcome.htm" />
   </ItemGroup>
   <ItemGroup>
-    <Image Include="bitmap1.bmp">
+    <Image Include="bitmaps\loader_dark.gif">
       <Filter>Файлы ресурсов</Filter>
     </Image>
-    <Image Include="bitmaps\throbber.gif">
+    <Image Include="icon1.ico">
       <Filter>Файлы ресурсов</Filter>
     </Image>
   </ItemGroup>

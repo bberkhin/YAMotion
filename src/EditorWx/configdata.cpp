@@ -4,11 +4,13 @@
 
 #include <wx/fdrepdlg.h>
 
+#define DEFAULT_THEME_ID "BLACK"
 
 ConfigData::ConfigData() : wxFileConfig(APP_NAME)
 {
 	m_viewstyle = 0x0010 | 0x0020; //VSTYLE_SHOWFASTMOVE | VSTYLE_SHOWAXIS;
 	m_find_data = new wxFindReplaceData();
+	m_themeid = DEFAULT_THEME_ID;
 	DoLoadOptions();
 }
 
@@ -32,6 +34,9 @@ void ConfigData::DoSaveOptions()
 
 void ConfigData::DoLoadOptions()
 {
+	SetPath("/YAMOTION");
+	m_themeid = Read("Theme", DEFAULT_THEME_ID);
+
 	ReadFindAndReplase(m_find_data);
 	ReadFileNames();
 	// load view 3d
@@ -56,6 +61,17 @@ void ConfigData::SetLanguage(int lang)
 {
 	SetPath("/YAMOTION");
 	Write("Language", lang);
+}
+
+void ConfigData::SetTheme(const wxString &theme)
+{
+	SetPath("/YAMOTION");
+	if (theme.empty())
+		m_themeid = DEFAULT_THEME_ID;
+	else
+		m_themeid = theme;
+
+	Write("Theme", m_themeid);
 }
 
 

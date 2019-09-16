@@ -55,6 +55,8 @@ public:
 	void OnProperties(wxCommandEvent &event);
 	void OnDefaultPreferences(wxCommandEvent &event);
 	void OnUserPreferences(wxCommandEvent &event);
+	void OnChangeTheme(wxCommandEvent &event);
+	void OnUpdateChangeTheme(wxUpdateUIEvent& event);
 	//! dialogs
 	void OnMacroses(wxCommandEvent &event);
 	void OnMacros(wxCommandEvent &event);
@@ -83,7 +85,6 @@ public:
 	void AddFileToHisotyList(const wxFileName &path);
 	void UpdateLastFilesList();
 
-
 	void OnUpdateNCIsOpen(wxUpdateUIEvent& event);
 	void OnUpdateAnyFileIsOpen(wxUpdateUIEvent& event);
 	void OnTabRightUp(wxAuiNotebookEvent& evt);
@@ -104,6 +105,7 @@ private:
 	wxRect DeterminePrintSize();
 	void DoRunMacros(int idx);
 	void AddLastFilesToMenu();
+	void AddThemesToMenu();
 	WelcomeWnd *FindWelcomePage(size_t *welcome_page = 0);
 	
 private:
@@ -116,6 +118,7 @@ private:
 	long m_notebook_theme;
 	Macroses *m_macroses;
 	wxMenu *m_menuLastFiles;
+	wxMenu *m_menuThemes;
 	
 	wxDECLARE_EVENT_TABLE();
 };

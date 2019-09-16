@@ -11,6 +11,7 @@
 #define _PREFS_H_
 
 #include "them.h"
+#include <map>
 
 #define mySTC_FOLD_COMMENT 1
 #define mySTC_FOLD_COMPACT 2
@@ -113,9 +114,6 @@ private:
 	int		 m_file_type;
 	int      m_lexer;
 	int      m_fold;
-	
-
-
 	bool	m_inited;
 };
 
@@ -147,6 +145,16 @@ private:
 };
 
 
+// StyleInfo
+struct ThemeInfo
+{
+	wxString id;
+	wxString name;
+	wxString wndcolorsfn;
+	std::map<wxString, wxString> files_syntax_color;
+};
+typedef std::vector<ThemeInfo>  ThemeInfos;
+
 //class Preferences;
 extern class Preferences global_pprefs;
 
@@ -162,7 +170,6 @@ class Preferences
 public:
 	Preferences();
 	~Preferences();
-	bool Read();
 	static Preferences *Get() { return &global_pprefs; }
 	const CommonInfo &Common() const { return m_common;  }
 	const PostProcessing &PostPocessing(); 
@@ -174,12 +181,17 @@ public:
 	const LanguageInfo *FindByFileName(const wxString &name, bool init = true);
 	LanguageInfo *FindByName(const wxString &name, bool init = true);
 	wxString CreateWildCard() const;
+	const ThemeInfos &GetThemes() { return m_themes; }
+	void UpdateAll(const wxString &themeid);
 	
 private:
+	bool Read();
 	bool DoRead(const wxString& fileName, bool errifnoexist);
+	void SetTheme(const ThemeInfo &ti);
 private:
 	CommonInfo m_common;
 	std::vector<LanguageInfo>  m_languages;
+	ThemeInfos m_themes;
 	wxAuiDockArt *m_artprovider;
 	wxAuiTabArt *m_tabartprovider;
 	ColourScheme *m_colors;

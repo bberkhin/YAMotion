@@ -12,6 +12,8 @@ class ConfigData :	public wxFileConfig
 public:
 	ConfigData();
 	~ConfigData();
+	const wxString &GetTheme() { return m_themeid; }
+	void SetTheme(const wxString &theme);
 	void AddFileNameToSaveList(const wxFileName &fname);
 	void RemoveFileNameFromSaveList(const wxFileName &fname);
 	const FileNamesList &GetFiles() { return files; }
@@ -34,5 +36,6 @@ private:
 	FileNamesList files;
 	int m_viewstyle;
 	wxFindReplaceData *m_find_data;
+	wxString m_themeid; // Dark or White 
 };
 

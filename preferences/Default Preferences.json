@@ -16,7 +16,7 @@
   "themes": [
     {
       "id": "BLACK",
-      "name": "Black theme for real man",
+      "name": "Black theme для настоящих чуваков",
       "window_colors": "them_black.json",
       "GCODE": "nc_syntax_black.json",
       "GCMC": "gcmc_syntax_black.json",
@@ -24,8 +24,16 @@
     },
     {
       "id": "WHITE",
-      "name": "White theme classic",
+      "name": "White theme classic для лузеров",
       "window_colors": "them_white.json",
+      "GCODE": "nc_syntax_white.json",
+      "GCMC": "gcmc_syntax_white.json",
+      "JSON": "json_syntax_white.json"
+    },
+     {
+      "id": "BLUE",
+      "name": "For nobody",
+      "window_colors": "them_black.json",
       "GCODE": "nc_syntax_white.json",
       "GCMC": "gcmc_syntax_white.json",
       "JSON": "json_syntax_white.json"
@@ -35,18 +43,15 @@
     [
       {
         "name": "GCODE",
-        //"syntax": "nc_syntax_black.json",
         "extensions": "*.ngc;*.nc;*.cnc;*.tap"
       },
       {
         "name": "GCMC",
-        //"syntax": "gcmc_syntax_white.json",
         "extensions": "*.gcmc"
       },
       {
         "name": "JSON",
         "extensions": "*.json",
-        //"syntax": "json_syntax_black.json"
       },
       {
         "name": "ALL",

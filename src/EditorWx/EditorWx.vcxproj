@@ -134,8 +134,8 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <Image Include="bitmap1.bmp" />
-    <Image Include="bitmaps\throbber.gif" />
+    <Image Include="bitmaps\loader_dark.gif" />
+    <Image Include="icon1.ico" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>

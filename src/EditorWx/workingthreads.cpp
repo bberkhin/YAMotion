@@ -675,7 +675,12 @@ int Worker::RunGcmc(const wchar_t *src_fname, const  wchar_t *dst_fname, const w
 		GetLogWnd()->Append(MSLInfo, _("gcmc_vc.exe already running"));
 		return 1;
 	}
-	GetLogWnd()->Append(MSLInfo, _("Start converting..."));
+
+	if (what_to_do == ConvertGcmcNothing || what_to_do == ConvertGcmc3DDraw )
+		GetLogWnd()->Append(MSLInfo, _("Start checking..."));
+	else
+		GetLogWnd()->Append(MSLInfo, _("Start converting..."));
+		
 	GetLogWnd()->Append(MSLInfo, arg.c_str());
 
 	if (m_timer.IsRunning())
@@ -713,8 +718,22 @@ void Worker::GcmcProcessTerminated(int status, const wchar_t *dst_fname, DoAfter
 		m_timer.Stop();
 		delete m_gcmcProcess;
 		m_gcmcProcess = NULL;
-
-		wxString inf = wxString::Format(_("Process terminated with exit code %d"), status);
+		wxString inf;
+		if (what_to_do == ConvertGcmcNothing || what_to_do == ConvertGcmc3DDraw)
+		{
+			if (status == 0)
+				inf = _("Checking completed with no error");
+			else
+				inf = _("Checking completed with errors");
+		}
+		else
+		{
+			if (status == 0)
+				inf = _("Converting completed with no error");
+			else
+				inf = _("Converting completed with errors");
+		}
+		
 		GetLogWnd()->Append(status == 0 ? MSLInfo : MSLError, inf);
 		Edit *pedit;
 		if (status == 0)

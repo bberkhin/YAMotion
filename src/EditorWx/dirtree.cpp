@@ -1204,8 +1204,7 @@ DirPane::~DirPane()
 void DirPane::Save()
 {
 	ConfigData *config = dynamic_cast<ConfigData *>(wxConfigBase::Get());
-	if (config == NULL)
-		return;
+	wxASSERT(config);
 
 	bool visibleDir  = IsShown();
 	wxString strOldPath = config->GetPath();

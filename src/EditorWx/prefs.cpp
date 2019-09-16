@@ -51,7 +51,7 @@ Preferences::Preferences() : m_artprovider(0), m_tabartprovider(0)
 		4,//tabWidth
 //		"", // gcmc_sybatx;
 //		"", //nc_syntax
-		"", //them_id
+	//	"", //them_id
 		"", //theme_Name
 		"" //postprocessing_fn
 	};
@@ -137,6 +137,15 @@ wxString Preferences::CreateWildCard() const
 	return wldCrd;
 }
 
+void Preferences::UpdateAll(const wxString &themeid)
+{
+	Read();
+	for (auto it = m_themes.begin(); it != m_themes.end(); ++it)
+	{
+		if ( it->id == themeid)
+			SetTheme(*it);
+	}
+}
 
 bool Preferences::Read()
 {
@@ -144,6 +153,7 @@ bool Preferences::Read()
 	std::for_each(m_languages.begin(), m_languages.end(), [](LanguageInfo &p)
 	{  return p.Clear(); });
 
+	m_themes.clear();
 
 	// read default Preferences
 	std::filesystem::path dirpath = StandartPaths::Get()->GetPreferencesPath(L"Default Preferences.json");
@@ -152,6 +162,7 @@ bool Preferences::Read()
 	// Now Read user setting which overrite default
 	dirpath = StandartPaths::Get()->GetPreferencesPath(L"User Preferences.json");
 	DoRead(dirpath.c_str(), false);
+	
 	return true;
 
 }
@@ -203,7 +214,7 @@ bool Preferences::DoRead(const wxString& fileName, bool errifnoexist )
 
 	root["tabWidth"].AsInt(m_common.tabWidth);
 	
-	root["theme"].AsString(m_common.theme_id);
+	//root["theme"].AsString(m_common.theme_id);
 	root["postpocessing"].AsString(m_common.postprocessing_fn);
 
 	wxJSONValue &files = root["files"];
@@ -235,32 +246,49 @@ bool Preferences::DoRead(const wxString& fileName, bool errifnoexist )
 		}
 	*/
 
+	
 	wxJSONValue &themes = root["themes"];
 	if (themes.IsArray())
 	{
-
 		for (unsigned int i = 0; i < static_cast<unsigned int>(themes.Size()); ++i)
 		{
+			m_themes.push_back(ThemeInfo());
+			ThemeInfo &ti = m_themes.back();
 			wxJSONValue &val = themes.Item(i);
-			wxString id = val["id"].AsString();
-			if (id != m_common.theme_id)
-				continue;
+			ti.id = val["id"].AsString();
+			ti.name = val["name"].AsString();
+			ti.wndcolorsfn = val["window_colors"].AsString();
 
-			wxString name = val["name"].AsString();
-			wxString wndcolor = val["window_colors"].AsString();
-			m_colors->SetFileName(wndcolor);
+			//m_colors->SetFileName(wndcolor);
 			// for all lang
 			for (auto itlan = m_languages.begin(); itlan != m_languages.end(); ++itlan)
 			{
 				wxString filename = val[itlan->GetName()].AsString();
 				if (!filename.empty())
-					itlan->SetFileName(filename);
+					ti.files_syntax_color.insert(std::make_pair(itlan->GetName(), filename));
+					//itlan->SetFileName(filename);
 			}
 		}
 	}
 	return true;
 }
 
+void Preferences::SetTheme(const ThemeInfo &ti)
+{
+	m_colors->SetFileName(ti.wndcolorsfn);
+		// for all lang
+	for (auto itlan = m_languages.begin(); itlan != m_languages.end(); ++itlan)
+	{
+
+		auto itfsi = ti.files_syntax_color.find(itlan->GetName());
+		if ( itfsi != ti.files_syntax_color.end() )
+		{
+			wxString filename = itfsi->second;
+			if( !filename.empty() )
+				itlan->SetFileName(filename);
+		}
+	}
+}
 
 wxAuiDockArt *Preferences::GetArtProvider(bool createnew)
 {
