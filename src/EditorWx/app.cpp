@@ -105,11 +105,11 @@ const int g_lang_count = WXSIZEOF(g_langNames);
 App::App() 
 	: m_restart(false), m_frame(NULL)
 { 
+	global_paths = new StandartPaths();
 }
 
 App::~App()
 {
-
 	if (m_restart)
 	{
 		// argv[0] contains the full path to the executable
@@ -118,7 +118,8 @@ App::~App()
 		env.cwd = StandartPaths::Get()->GetRootPath().c_str();
 		wxExecute(argv[0], wxEXEC_ASYNC, NULL, &env);
 	}
-
+	
+	delete global_paths;
 }
 
 wxAppTraits *App::CreateTraits()

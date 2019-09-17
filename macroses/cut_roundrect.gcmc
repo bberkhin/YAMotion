@@ -1,2 +1,2 @@
 include ("cut_roundrect.inc.gcmc");
-DoCutRoundRect(xMin, yMin, xD, yD, radius, zSave, d, zDelta,rate,zRate,trc,ccw);
+DoCutRoundRect(xMin, yMin, xD, yD, radius, zFull, zSave, zDelta,d, rate,zRate,trc,ccw);

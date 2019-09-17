@@ -5,12 +5,9 @@
     <desc>Mill rect serface</desc>
     <image>rectangular-surface.png</image>
     <gcmc>mill_rect.gcmc</gcmc>
-    <include>mill_rect.inc.gcmc</include>
-    <function>MillRect(xMin, yMin, xD, yD, zSave, d, zFull, per_stepover,rate,zRate,ccw)</function>
+    <include1>mill_rect.inc.gcmc</include1>
+    <function1>MillRect(xMin, yMin, xD, yD,  zFull, zSave, zDelta,  per_stepover, d, rate, zRate,ccw)</function1>
     <arguments>
-      <argument defvalue ="2" type="scalar" ref="zSave">
-        <name>Save Z:</name>
-      </argument>
       <argument defvalue ="0" type="scalar" ref="xMin">
         <name>X Min:</name>
         <desc>X Min of the rect in mm</desc>
@@ -27,6 +24,18 @@
         <name>Height (dY):</name>
         <desc>Height of the rect in mm</desc>
       </argument>
+      <argument defvalue ="1" type="scalar" ref="zFull">
+        <name>Thikness:</name>
+      </argument>
+      <argument defvalue ="1" type="scalar" ref="zDelta">
+        <name>Step Z:</name>
+      </argument>
+      <argument defvalue ="2" type="scalar" ref="zSave">
+        <name>Save Z:</name>
+      </argument>
+      <argument defvalue ="30" type="scalar" ref="per_stepover">
+        <name>Step over(%):</name>
+      </argument>
       <argument defvalue ="6" type="scalar" ref="d">
         <name>Mill diameter</name>
       </argument>
@@ -37,15 +46,6 @@
       <argument defvalue ="50" type="scalar" ref="zRate">
         <name>Z feed rate:</name>
         <desc>Z feed rate of cutting</desc>
-      </argument>
-      <argument defvalue ="30" type="scalar" ref="per_stepover">
-        <name>Step over(%):</name>
-      </argument>    
-      <argument defvalue ="1" type="scalar" ref="zDelta">
-        <name>Step Z:</name>
-      </argument>
-      <argument defvalue ="1" type="scalar" ref="zFull">
-        <name>Thikness:</name>
       </argument>
       <argument defvalue ="1" type="list" ref="ccw">
         <name>Direction:</name>

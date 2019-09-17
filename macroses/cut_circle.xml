@@ -7,12 +7,9 @@
     <image>cutting-circle.png</image>
     <gcmc>cut_circle.gcmc</gcmc>
     <include>cut_circle.inc.gcmc</include>
-    <function>DoCutCircle(xCenter,yCenter,zSave,r,d,zDelta,rate,zRate,trc,ccw)</function>
+    <function>DoCutCircle(xCenter,yCenter,r, zFull, zSave,  zDelta,d,rate,zRate,trc,ccw)</function>
     <arguments>
-      <argument defvalue ="2" type="scalar" ref="zSave">
-        <name>Save Z:</name>
-      </argument>
-      <argument defvalue ="0" type="scalar" ref="xCenter">
+        <argument defvalue ="0" type="scalar" ref="xCenter">
         <name>Center X:</name>
         <desc>Specify center of the circle in mm</desc>
       </argument>
@@ -24,6 +21,15 @@
         <name>Radius</name>
         <desc>Specify radius of the circle in mm</desc>
       </argument>
+      <argument defvalue ="4" type="scalar" ref="zFull">
+        <name>Thikness:</name>
+      </argument>
+      <argument defvalue ="1" type="scalar" ref="zDelta">
+        <name>Step Z:</name>
+      </argument>
+      <argument defvalue ="2" type="scalar" ref="zSave">
+        <name>Save Z:</name>
+      </argument>
       <argument defvalue ="6" type="scalar" ref="d">
         <name>Mill diameter</name>
       </argument>
@@ -34,13 +40,6 @@
       <argument defvalue ="50" type="scalar" ref="zRate">
         <name>Z feed rate:</name>
         <desc>Specify Z feed rate of cutting</desc>
-      </argument>
-      
-      <argument defvalue ="1" type="scalar" ref="zDelta">
-        <name>Step Z:</name>
-      </argument>
-      <argument defvalue ="4" type="scalar" ref="zFull">
-        <name>Thikness:</name>
       </argument>
       <argument defvalue ="1" type="list" ref="trc">
         <name>Thraektory:</name>

@@ -629,7 +629,7 @@ int Worker::RunGcmc(const wchar_t *src_fname, const  wchar_t *dst_fname, const w
 	
 	arg += L" -q"; // do not use prologue\epilogue
 	arg += L" --include=\"";
-	arg += StandartPaths::Get()->GetMacrosPath(L"library").c_str();
+	arg += StandartPaths::Get()->GetLibraryPath().c_str();
 	arg += L"\"";
 	arg += wxString::Format(L" --precision=%d ", Preferences::Get()->PostPocessing().Precision());
 	

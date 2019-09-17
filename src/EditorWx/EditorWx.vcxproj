@@ -135,7 +135,7 @@
   </ItemGroup>
   <ItemGroup>
     <Image Include="bitmaps\loader_dark.gif" />
-    <Image Include="icon1.ico" />
+    <Image Include="bitmaps\matildaapp.ico" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>

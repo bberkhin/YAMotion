@@ -178,7 +178,9 @@ AppFrame::AppFrame (const wxString &title)
 	m_watcher = 0;
 	m_macroses = new Macroses();
 
-    SetIcon(wxICON(sample));
+	//wxIcon ic = wxICON(app_icon);// wxICON(IDI_ICON1);
+    SetIcon(wxICON(app_icon));
+	//SetIcon();
 
     SetTitle (APP_NAME);
     // create menu
@@ -632,9 +634,9 @@ void AppFrame::OnFileOpenEvent(wxCommandEvent &event)
 			paths.Add( fn.GetPath() );
 		}
 		
-		paths.Add(StandartPaths::Get()->GetRootPath().c_str());
-		paths.Add(StandartPaths::Get()->GetMacrosPath().c_str());
-		paths.Add(StandartPaths::Get()->GetMacrosPath(L"library").c_str());
+		//paths.Add(StandartPaths::Get()->GetRootPath().c_str());
+		//paths.Add(StandartPaths::Get()->GetMacrosPath().c_str());
+		paths.Add(StandartPaths::Get()->GetLibraryPath().c_str());
 
 		wxString abs_fname  = paths.FindAbsoluteValidPath(fname.GetFullPath());
 		if (abs_fname.empty())

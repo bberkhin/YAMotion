@@ -2,4 +2,4 @@
 
 
 
-StandartPaths global_paths;
+StandartPaths *global_paths = 0;

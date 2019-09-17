@@ -1,2 +1,3 @@
 include ("cut_circle.inc.gcmc");
-DoCutCircle(xCenter,yCenter,r, zSave, d, zDelta,rate,zRate,trc,ccw);
+DoCutCircle(xCenter,yCenter,r, zFull, zSave,  zDelta,d,rate,zRate,trc,ccw);
+//DoCutCircle(l_xCenter,l_yCenter,l_rad,l_depth, l_zSave,l_zDelta,l_dMill,l_xyRate,l_zRate,l_trc,l_ccw)

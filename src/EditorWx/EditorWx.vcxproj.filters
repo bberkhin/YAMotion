@@ -331,7 +331,7 @@
     <Image Include="bitmaps\loader_dark.gif">
       <Filter>Файлы ресурсов</Filter>
     </Image>
-    <Image Include="icon1.ico">
+    <Image Include="bitmaps\matildaapp.ico">
       <Filter>Файлы ресурсов</Filter>
     </Image>
   </ItemGroup>

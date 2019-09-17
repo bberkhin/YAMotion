@@ -7,11 +7,8 @@
     <image>cutting-rect.png</image>
     <gcmc>cut_rect.gcmc</gcmc>
     <include>cut_rect.inc.gcmc</include>
-    <function>DoCutRect(xMin, yMin, xD, yD, zSave, d, zDelta,rate,zRate,trc,ccw)</function>
+    <function>DoCutRect(xMin, yMin, xD, yD,zFull, zSave, zDelta,d, rate,zRate,trc,ccw)</function>
       <arguments>
-      <argument defvalue ="2" type="scalar" ref="zSave">
-        <name>Save Z:</name>
-      </argument>
       <argument defvalue ="0" type="scalar" ref="xMin">
         <name>X min:</name>
         <desc>Specify X min of the rect</desc>
@@ -26,6 +23,15 @@
       <argument defvalue ="100" type="scalar" ref="yD">
         <name>Height (delta Y):</name>
       </argument>
+      <argument defvalue ="4" type="scalar" ref="zFull">
+        <name>Thikness:</name>
+      </argument>
+      <argument defvalue ="1" type="scalar" ref="zDelta">
+        <name>Step Z:</name>
+      </argument>
+      <argument defvalue ="2" type="scalar" ref="zSave">
+        <name>Save Z:</name>
+      </argument>
       <argument defvalue ="6" type="scalar" ref="d">
         <name>Mill diameter</name>
       </argument>
@@ -37,12 +43,7 @@
         <name>Z feed rate:</name>
         <desc>Specify Z feed rate of cutting</desc>
       </argument>    
-      <argument defvalue ="1" type="scalar" ref="zDelta">
-        <name>Step Z:</name>
-      </argument>
-      <argument defvalue ="4" type="scalar" ref="zFull">
-        <name>Thikness:</name>
-      </argument>
+
       <argument defvalue ="1" type="list" ref="trc">
         <name>Thraektory:</name>
         <desc>Tool correction: 1 - by contur, 2 inside, 3 ouside</desc>

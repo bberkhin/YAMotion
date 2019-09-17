@@ -1319,10 +1319,8 @@ bool FilePage::DoFileSave(bool askToSave, bool bSaveAs)
 	if (askToSave)
 	{
 		wxFileName filename = pedit->GetFileName();
-		//int rez = wxMessageBox(wxString::Format(_("File %s is not saved!\nSave file before closing?"), filename.GetFullName()),
-			//_("Save file"),	wxYES_NO | wxCANCEL | wxICON_QUESTION);
-		int rez = wxMessageBox("1?","S", wxYES_NO | wxCANCEL | wxICON_QUESTION);
-
+		int rez = wxMessageBox(wxString::Format(_("File %s is not saved!\nSave file before closing?"), filename.GetFullName()),
+			_("Save file"),	wxYES_NO | wxCANCEL | wxICON_QUESTION);
 		if (rez == wxCANCEL)
 			return false;
 		else if (rez == wxNO)

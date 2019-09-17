@@ -22,13 +22,13 @@
     {
       "nameid": 0,
       "name": "default",
-      "fclr": "#999999"
+      "fclr": "#FFFFFF",
+      "bold": true
     },
     {
       "nameid": 1,
       "name": "comment",
       "fclr": "#85a57c",
-      "italic": false
     },
     {
       "nameid": 2,
@@ -79,7 +79,7 @@
     {
       "nameid": 10,
       "name": "strings",
-      "fclr": "#ee6677",
+      "fclr": "#00AA00",
       "bold": true,
       "italic": true
     }

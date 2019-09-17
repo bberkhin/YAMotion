@@ -71,12 +71,12 @@
         "fclr": "#ee6677",
         "bold": true
       },
-        {
-            "nameid": 9,
-            "name": "word",
-            "fclr": "#ee6677",
-            "bold": true
-        },
+      {
+        "nameid": 9,
+        "name": "word",
+        "fclr": "#ee6677",
+        "bold": true
+      },
       {
         "nameid": 10,
         "name": "operators",
@@ -84,9 +84,9 @@
         "bold": true
       },
         {
-            "nameid": 11,
-            "name": "identifiers",
-            "fclr": "#999999"
+          "nameid": 11,
+          "name": "identifiers",
+          "fclr": "#999999"
         }
     ]
 }

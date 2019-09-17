@@ -378,7 +378,7 @@ void ColourScheme::Read()
 		return;
 	}
 
-	ReadColor( root["frame"], m_colors[FRAME]);
+	ReadColor(root["frame"], m_colors[FRAME]);
 	ReadColor(root["window"],m_colors[WINDOW]);
 	ReadColor(root["window_3dview"], m_colors[WINDOW_3DVIEW]);	
 	ReadColor(root["window_hover"], m_colors[WINDOW_HOVER]);
@@ -435,52 +435,52 @@ void ColourScheme::Read()
 void ColourScheme::InitDef()
 {
 	m_colors.resize(StdColour::MAX);
-	m_colors[FRAME] = wxColor(0,0,0);
+	m_colors[FRAME] = wxColor(0x3d3d3d);
 	// the background colour for a window
-	m_colors[WINDOW] = wxColor(0, 0, 0);
+	m_colors[WINDOW] = wxColor(0x111111);
 	m_colors[WINDOW_3DVIEW] = wxColor(0x222222);
 	m_colors[WINDOW_HOVER] = wxColor(0x4d4d4d); 
-	m_colors[WINDOW_TEXT] = wxColor(0xFFFFFF);
+	m_colors[WINDOW_TEXT] = wxColor(0xeeeeee);
 	m_colors[WINDOW_TEXT_HOVER] = wxColor(0xFFFFFF);
 	m_colors[WINDOW_TEXT_DISABLE] = wxColor(0x666666);
 	m_colors[BITMAP_CMD] = wxColor(0x999999);
 	m_colors[BITMAP_CMD_HOVER] = wxColor(0xe6e6e6);
 	m_colors[BITMAP_CMD_DISABLED] = wxColor(0x555555);
 	
-	m_colors[LINENUMBER] = wxColor(32, 32, 32);
-	m_colors[LINENUMBER_TEXT] = wxColor(192, 192, 192);
-	m_colors[CALLTIP] = wxColor(0, 255, 255);
-	m_colors[CALLTIP_TEXT]= wxColor(192, 192, 192);
+	m_colors[LINENUMBER] = wxColor(0x111111);
+	m_colors[LINENUMBER_TEXT] = wxColor(0x666666);
+	m_colors[CALLTIP] = wxColor(0x333333);
+	m_colors[CALLTIP_TEXT]= wxColor(0xeeeeee);
 		// the different background and text colours for the control
-	m_colors[CONTROL] = wxColour(0xe0e0e0);
-	m_colors[CONTROL_PRESSED] = wxColour(0xe0e000);
-	m_colors[CONTROL_HOVER] = wxColour(0x00e000);
+	m_colors[CONTROL] = wxColour(0x3d3d3d);
+	m_colors[CONTROL_PRESSED] = wxColour(0x4d4d4d);
+	m_colors[CONTROL_HOVER] = wxColour(0x4d4d4d);
 	m_colors[CONTROL_ACTIVE] = wxColour(0xbbbbbb);
 	m_colors[CONTROL_ACTIVE_PRESSED] = wxColour(0x999999);
 	m_colors[CONTROL_ACTIVE_HOVER] = wxColour(0x999999);
 
 	// the label text for the normal and the disabled state
-	m_colors[CONTROL_TEXT] = wxColour(0x999999);
-	m_colors[CONTROL_TEXT_HOVER] = wxColour(0xFF000);//wxColour(0xFFFFFF);
-	m_colors[CONTROL_TEXT_DISABLED] = m_colors[CONTROL_TEXT].MakeDisabled();	
+	m_colors[CONTROL_TEXT] = wxColour(0xeeeeee);
+	m_colors[CONTROL_TEXT_HOVER] = wxColour(0xFFFFFF);//wxColour(0xFFFFFF);
+	m_colors[CONTROL_TEXT_DISABLED] = wxColour(0x3C3C3C);
 	m_colors[CONTROL_ACTIVE_TEXT] = wxColour(0,0,0);
 	m_colors[CONTROL_ACTIVE_TEXT_HOVER] = wxColour(0,0,0);
 	m_colors[BUTTON_FEEDBACK] = wxColour(0x3088cc);
 	m_colors[BUTTON_FEEDBACK_HOVER] = wxColour(0x0066bb);
 		// the scrollbar background colour for the normal and pressed states
-	m_colors[SCROLLBAR] = m_colors[WINDOW].ChangeLightness(25);
-	m_colors[SCROLLBAR_TUMB] = m_colors[WINDOW].ChangeLightness(50);
-	m_colors[SCROLLBAR_TUMB_HOVER] = m_colors[WINDOW].ChangeLightness(80);
+	m_colors[SCROLLBAR] = wxColour(0x111111);
+	m_colors[SCROLLBAR_TUMB] = wxColour(0x4d4d4d);
+	m_colors[SCROLLBAR_TUMB_HOVER] = wxColour(0x3d3d3d);
 	// the background and text colour for the highlighted item
-	m_colors[HIGHLIGHT] = m_colors[WINDOW].ChangeLightness(25);;
-	m_colors[HIGHLIGHT_TEXT] = m_colors[CONTROL_TEXT];
+	m_colors[HIGHLIGHT] = wxColour(0x576573);
+	m_colors[HIGHLIGHT_TEXT] = wxColour(0xffffff);
 
 		// the titlebar text colours
-	m_colors[TITLEBAR_TEXT] = m_colors[CONTROL_TEXT];
-	m_colors[TITLEBAR_ACTIVE_TEXT] = m_colors[CONTROL_TEXT];
+	m_colors[TITLEBAR_TEXT] = wxColour(0xFFFFFF);
+	m_colors[TITLEBAR_ACTIVE_TEXT] = wxColour(0xFFFFFF);
 
-	m_colors[SLIDER_SHAFT] = wxColour(0xdddddd);
-	m_colors[SLIDER_SHAFT_COLORED] = wxColour(0xcc8830);
+	m_colors[SLIDER_SHAFT] = wxColour(0x4d4d4d);
+	m_colors[SLIDER_SHAFT_COLORED] = wxColour(0x44bbff);
 	m_colors[BITMAP_NEW_LIST] = wxColour(0xddaa55);
 	m_colors[BITMAP_FOLDER_LIST] = wxColour(0x44bbff);
 
@@ -491,7 +491,7 @@ void ColourScheme::InitDef()
 	m_colors[MSG_LOG_WARNING] = wxColour(0x44bbff);
 
 	// border
-	m_colors[BORDER] = wxColour(0x00FF00);
+	m_colors[BORDER] = wxColour(0x3C3C3C);
 
 	m_colors[VIEW3D_BOX] = wxColour(0x00FF00);
 	m_colors[VIEW3D_G0] = wxColour(0x0000FF);

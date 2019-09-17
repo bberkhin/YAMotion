@@ -1,32 +1,14 @@
-include("circular_pocket.inc.gcmc");
+include("cut_circle.inc.gcmc");
 zSave=2; //Save Z:
-xCenter=60; //Specify Xc of the circle:
-yCenter=80; //Specify Yc of the circle:
-r=20; //Radius
+xCenter=0; //Specify center of the circle in mm
+yCenter=0; //Specify center of the circle in mm
+r=20; //Specify radius of the circle in mm
 d=6; //Mill diameter
-rate=200; //Feed rate:
-zRate=50; //Z feed rate:
-per_stepover=70; //Step over(%):
-RampDist=10; //Ramp distance:
+rate=200; //Specify feed rate of cutting
+zRate=50; //Specify Z feed rate of cutting
 zDelta=1; //Step Z:
-zFull=1; //Thikness:
-ccw=0; //Direction:
+zFull=4; //Thikness:
+trc=1; //Tool correction:  1 - by contur, 2 inside, 3 ouside
+ccw=0; //Direction: 0 - clockwise, 2- counter clockwise
 
- DoCirculePocket(xCenter,yCenter,zSave,r,d,rate,zRate,per_stepover,RampDist,zDelta,zFull,ccw);
- 
- 
- 
-zSave=2; //Save Z:
-xCenter=0; //Specify Xc of the circle:
-yCenter=0; //Specify Yc of the circle:
-r=35; //Radius
-d=6; //Mill diameter
-rate=200; //Feed rate:
-zRate=50; //Z feed rate:
-per_stepover=70; //Step over(%):
-RampDist=10; //Ramp distance:
-zDelta=1; //Step Z:
-zFull=1; //Thikness:
-ccw=0; //Direction:
-
- DoCirculePocket(xCenter,yCenter,zSave,r,d,rate,zRate,per_stepover,RampDist,zDelta,zFull,ccw);
+DoCutCircle(xCenter,yCenter,zSave,r,d,zDelta,rate,zRate,trc,ccw);

@@ -31,18 +31,47 @@ AppAbout::AppAbout(wxWindow *parent,
 
 	// about info
 	wxGridSizer *aboutinfo = new wxGridSizer(2, 0, 2);
-	aboutinfo->Add(new wxStaticText(this, wxID_ANY, _("Written by: ")),
+	aboutinfo->Add(new wxStaticText(this, wxID_ANY, _("Version: ")),
+		0, wxALIGN_LEFT);
+	aboutinfo->Add(new wxStaticText(this, wxID_ANY, APP_VERSION),
+		1, wxEXPAND | wxALIGN_LEFT);
+
+	aboutinfo->Add(new wxStaticText(this, wxID_ANY, _("Build date: ")),
+		0, wxALIGN_LEFT);
+	aboutinfo->Add(new wxStaticText(this, wxID_ANY, APP_BUILD),
+		1, wxEXPAND | wxALIGN_LEFT);
+
+	aboutinfo->Add(new wxStaticText(this, wxID_ANY, _("Author: ")),
 		0, wxALIGN_LEFT);
 	aboutinfo->Add(new wxStaticText(this, wxID_ANY, APP_MAINT),
 		1, wxEXPAND | wxALIGN_LEFT);
-	aboutinfo->Add(new wxStaticText(this, wxID_ANY, _("Version: ")),
+
+	aboutinfo->Add(new wxStaticText(this, wxID_ANY, _("Home Page: ")),
 		0, wxALIGN_LEFT);
-	aboutinfo->Add(new wxStaticText(this, wxID_ANY,  APP_VERSION),
+	aboutinfo->Add(new wxStaticText(this, wxID_ANY, APP_WEBSITE),
 		1, wxEXPAND | wxALIGN_LEFT);
+	
+	aboutinfo->Add(new wxStaticText(this, wxID_ANY, _("E-mail: ")),
+		0, wxALIGN_LEFT);
+	aboutinfo->Add(new wxStaticText(this, wxID_ANY, APP_EMAILTEXT),
+		1, wxEXPAND | wxALIGN_LEFT);
+	
 	aboutinfo->Add(new wxStaticText(this, wxID_ANY, _("Licence type: ")),
 		0, wxALIGN_LEFT);
 	aboutinfo->Add(new wxStaticText(this, wxID_ANY, APP_LICENCE),
 		1, wxEXPAND | wxALIGN_LEFT);
+
+	aboutinfo->Add(new wxStaticText(this, wxID_ANY, _("G-Code Meta Compiler Author: ")),
+		0, wxALIGN_LEFT);
+	aboutinfo->Add(new wxStaticText(this, wxID_ANY, APP_GCMCAUTHOR),
+		1, wxEXPAND | wxALIGN_LEFT);
+
+	aboutinfo->Add(new wxStaticText(this, wxID_ANY, _("G-Code Meta Compiler Home Page: ")),
+		0, wxALIGN_LEFT);
+	aboutinfo->Add(new wxStaticText(this, wxID_ANY, APP_GCMCHOMEPAGE),
+		1, wxEXPAND | wxALIGN_LEFT);
+
+
 	aboutinfo->Add(new wxStaticText(this, wxID_ANY, _("Copyright: ")),
 		0, wxALIGN_LEFT);
 	aboutinfo->Add(new wxStaticText(this, wxID_ANY, APP_COPYRIGTH),
@@ -50,7 +79,7 @@ AppAbout::AppAbout(wxWindow *parent,
 
 	// about icontitle//info
 	wxBoxSizer *aboutpane = new wxBoxSizer(wxHORIZONTAL);
-	wxBitmap bitmap = wxBitmap(wxICON(sample));
+	wxBitmap bitmap = wxBitmap(wxICON(app_icon));
 	aboutpane->Add(new wxStaticBitmap(this, wxID_ANY, bitmap),
 		0, wxALIGN_LEFT | wxALIGN_CENTER_VERTICAL | wxLEFT | wxRIGHT, 20);
 	aboutpane->Add(aboutinfo, 1, wxEXPAND);
@@ -64,8 +93,8 @@ AppAbout::AppAbout(wxWindow *parent,
 	totalpane->Add(appname, 0, wxALIGN_CENTER | wxLEFT | wxRIGHT, 40);
 	totalpane->Add(0, 10);
 	totalpane->Add(aboutpane, 0, wxEXPAND | wxALL, 4);
-	totalpane->Add(new wxStaticText(this, wxID_ANY, APP_DESCR),
-		0, wxALIGN_CENTER | wxALL, 10);
+//	totalpane->Add(new wxStaticText(this, wxID_ANY, APP_MAIL),
+	//	0, wxALIGN_CENTER | wxALL, 10);
 	wxButton *okButton = new wxButton(this, wxID_OK, _("OK"));
 	okButton->SetDefault();
 	totalpane->Add(okButton, 0, wxALIGN_CENTER | wxLEFT | wxRIGHT | wxBOTTOM, 10);

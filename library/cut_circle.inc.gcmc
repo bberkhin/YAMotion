@@ -1,0 +1,51 @@
+/*
+ Cutting Circle function 
+ 
+ Input parameters 
+ l_xCenter,l_yCenter - center of the circle
+ l_rad - circle radius 
+ l_depth - deep of cutting
+ l_zSave - save z
+ l_zDelta - z step
+ l_dMill - mill diameter 
+ l_xyRate - feed rate
+ l_zRate - feed rate by Z
+ l_trc- tool correction  1 - by contur, 2 inside, 3 ouside
+ l_ccw- clockwise  0 - clockwise, 2- counter clockwise 
+*/
+
+function DoCutCircle(l_xCenter,l_yCenter,l_rad,l_depth, l_zSave,l_zDelta,l_dMill,l_xyRate,l_zRate,l_trc,l_ccw)
+{
+comment("Cutting Circle");
+comment("Center point: [",l_xCenter,"," , l_yCenter,",-] Radius: ", l_rad );
+comment("Mill dianetr: ",l_dMill, "; Z save: " ,l_zSave, "; Z Full : ", -1*l_depth, "; Z Step: ",  l_zDelta );
+local xStartpos;
+local zCur;
+local zDepth;
+xStartpos = l_xCenter - l_rad; 
+if( l_trc == 2 ) 
+{ 	xStartpos += (l_dMill/2) ; 
+}
+elif( l_trc == 3 ) 
+{ 	xStartpos -= (l_dMill/2); 
+}
+
+goto([-,-,l_zSave]);
+goto([xStartpos,l_yCenter,-]);
+zCur = 0;
+zDepth = -1*l_depth;
+while(zDepth < zCur) 
+{
+ zCur = zCur - zDelta;
+ if ( zCur < zDepth){
+	zCur = zDepth;
+ }
+ move([-,-,zCur ], l_zRate);
+ if ( ccw ){
+	circle_ccw( [l_xCenter,l_yCenter,-], l_xyRate );
+ }
+ else {
+	circle_cw( [l_xCenter,l_yCenter,-], l_xyRate );
+ }
+}
+}

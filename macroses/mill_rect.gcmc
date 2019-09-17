@@ -1,2 +1,2 @@
 include("mill_rect.inc.gcmc");
-MillRect(xMin, yMin, xD, yD, zSave, d, zFull, per_stepover,rate,zRate,ccw);
+MillRect(xMin, yMin, xD, yD,  zFull, zSave, zDelta,  per_stepover, d, rate, zRate,ccw);

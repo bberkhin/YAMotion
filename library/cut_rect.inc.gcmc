@@ -1,0 +1,71 @@
+/*
+ Cutting Rect function 
+ 
+ Input parameters 
+ l_xMin, l_yMin - start poiunt
+ l_xD, l_yD - width and height
+ l_depth - deep of cutting
+ l_zSave - save z
+ l_zDelta - z step
+ l_dMill - mill diameter 
+ l_xyRate - feed rate
+ l_zRate - feed rate by Z
+ l_trc- tool correction  1 - by contur, 2 inside, 3 ouside
+ l_ccw- clockwise  0 - clockwise, 2- counter clockwise 
+*/
+
+
+function DoCutRect(l_xMin, l_yMin, l_xD, l_yD, l_depth, l_zSave, l_zDelta,l_dMill,l_xyRate,l_zRate,l_trc,l_ccw)
+{
+comment("Cutting Rect");
+comment("Starting point: [",l_xMin,"," , l_yMin,",-] ; Width: ", l_xD , "; Height: ", l_yD);
+comment("Mill dianetr: ",l_dMill, "; Z save: " ,l_zSave, "; Z Full : ", -1*l_depth, "; Z Step: ",  l_zDelta );
+
+
+local xMin_trc = l_xMin; 
+local yMin_trc = l_yMin; 
+local xMax_trc = l_xMin + l_xD; 
+local yMax_trc = l_yMin + l_yD; 
+local r = l_dMill/2;
+if( l_trc == 2 ) 
+{ 	
+	xMin_trc += r; 
+ 	yMin_trc += r; 
+	xMax_trc -= r;
+	yMax_trc -= r;
+}
+elif( l_trc == 3 ) 
+{ 	
+	xMin_trc -= r; 
+ 	yMin_trc -= r; 
+	xMax_trc += r;
+	yMax_trc += r;
+}
+
+goto([-,-,l_zSave]);
+goto([xMin_trc,yMin_trc,-]);
+local zCur = 0;
+local zFull = -1*l_depth;
+while(zFull < zCur) 
+{
+ zCur = zCur - l_zDelta;
+ if ( zCur < zFull){
+	zCur = zFull;
+ } 
+ move([-,-,zCur ], l_zRate);  
+ if ( l_ccw )
+ {
+	move([xMax_trc, -,-],l_xyRate);
+	move([-,yMax_trc,-]);
+	move([xMin_trc,-,-]);
+	move([-,yMin_trc,-]);
+ }
+ else 
+ {
+	move([-,yMax_trc,-],l_xyRate);
+	move([xMax_trc, -,-]);
+	move([-,yMin_trc,-]);
+	move([xMin_trc,-,-]);
+ }
+}
+}
