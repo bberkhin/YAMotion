@@ -201,6 +201,7 @@ bool Edit::Create(wxWindow *parent, wxWindowID id)
 
 Edit::~Edit () 
 {
+	wxDELETE(dlg_find);
 }
 
 
@@ -236,6 +237,7 @@ void Edit::OnMouseLeave(wxMouseEvent &event)
 	event.Skip();
 }
 
+
 void Edit::OnKillFocus(wxFocusEvent& event)
 {
 	//if (FlatTipActive())
@@ -243,6 +245,14 @@ void Edit::OnKillFocus(wxFocusEvent& event)
 	event.Skip();
 }
 
+void Edit::OnShowHideWnd(wxShowEvent& event)
+{	
+	if (dlg_find)
+	{
+		bool needshow = event.IsShown();
+		dlg_find->Show(needshow);
+	}
+}
 
 void Edit::OnKeyDown (wxKeyEvent &event)
 {
@@ -964,7 +974,7 @@ void Edit::OnReplace(wxCommandEvent& WXUNUSED(event))
 	}
 	else
 	{
-		dlg_find = new wxFindReplaceDialog(	this,&find_data,_("Find and replace"),	wxFR_REPLACEDIALOG);
+		dlg_find = new wxFindReplaceDialog(this, &find_data,_("Find and replace"),	wxFR_REPLACEDIALOG);
 
 		dlg_find->Show(true);
 	}

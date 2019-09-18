@@ -95,6 +95,7 @@ public:
     void OnKeyDown(wxKeyEvent &event);
 	void OnKillFocus(wxFocusEvent &event);
 	void OnMouseLeave(wxMouseEvent &event);
+	void OnShowHideWnd(wxShowEvent& event);
 
     //! language/lexer
 	int GetFileType() {	return ((m_language != 0 ) ? m_language->GetFileType() : FILETYPE_UNKNOW); }

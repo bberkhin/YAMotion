@@ -55,13 +55,13 @@ if ( l_ccw == 0 )
 
 
 local zCur = 0;
-local zFull = -1*l_depth;
-while(zFull < zCur) 
+local zDepth = -1*l_depth;
+while(zDepth < zCur) 
 {
     zCur = zCur - zDelta;
-    if ( zCur < zFull)
+    if ( zCur < zDepth)
     {
-    zCur = zFull;
+    zCur = zDepth;
     } 
     goto([-,-,l_zSave]);
     goto([xStart,yStart,-]);

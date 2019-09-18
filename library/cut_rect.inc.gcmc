@@ -45,12 +45,12 @@ elif( l_trc == 3 )
 goto([-,-,l_zSave]);
 goto([xMin_trc,yMin_trc,-]);
 local zCur = 0;
-local zFull = -1*l_depth;
-while(zFull < zCur) 
+local zDepth = -1*l_depth;
+while(zDepth < zCur) 
 {
  zCur = zCur - l_zDelta;
- if ( zCur < zFull){
-	zCur = zFull;
+ if ( zCur < zDepth){
+	zCur = zDepth;
  } 
  move([-,-,zCur ], l_zRate);  
  if ( l_ccw )

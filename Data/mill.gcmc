@@ -1,16 +1,15 @@
-include("pocket_roundrect.inc.gcmc");
 xMin=0; //X Min of the rect in mm
 yMin=0; //Y Min of the rect in mm
 xD=200; //Width of the rect in mm
 yD=100; //Height of the rect in mm
-radius=20; //Round rect radius in mm
 zFull=1; //Thikness:
-zSave=2; //Save Z:
-d=6; //Mill diameter
 zDelta=1; //Step Z:
+zSave=2; //Save Z:
 per_stepover=30; //Step over(%):
+d=6; //Mill diameter
 rate=200; //Feed rate of cutting
 zRate=50; //Z feed rate of cutting
 ccw=1; //Direction: 0 - clockwise, 2- counter clockwise
 
-DoRoundRectPocket(xMin, yMin, xD, yD, radius, zFull, zSave, d, zDelta, per_stepover,rate,zRate,ccw);
+include("mill_rect.inc.gcmc");
+MillRect(xMin, yMin, xD, yD,  zFull, zSave, zDelta,  per_stepover, d, rate, zRate,ccw);

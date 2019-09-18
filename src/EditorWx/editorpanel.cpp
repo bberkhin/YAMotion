@@ -1034,6 +1034,7 @@ wxBEGIN_EVENT_TABLE(FilePage, wxPanel)
 EVT_SIZE(FilePage::OnSize)
 EVT_SASH_DRAGGED(ID_LOGWINDOW, FilePage::OnSashDrag)
 EVT_SASH_DRAGGED(ID_3DVIEWWINDOW, FilePage::OnSashDrag)
+EVT_SHOW(FilePage::OnShowHideWnd)
 wxEND_EVENT_TABLE()
 
 wxIMPLEMENT_ABSTRACT_CLASS(FilePage, wxPanel);
@@ -1364,4 +1365,11 @@ void FilePage::DoMathCalc(std::shared_ptr<DoMathBase> mth)
 {
 	ShowLog();
 	m_worker->RunMath(mth);
+}
+
+void FilePage::OnShowHideWnd(wxShowEvent& event)
+{
+	Edit *pedit = GetEdit();
+	if (pedit)
+		pedit->OnShowHideWnd(event);
 }

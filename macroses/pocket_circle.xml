@@ -1,52 +1,51 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <macroses>
   <macros>
-    <name>Circle pocket</name>
-    <desc>Millng circular pocket via center point and radius</desc>
+    <name>Circular pocket</name>
+    <desc>Milling circular pocket via center point and radius</desc>
     <image>circular-pocket.png</image>
     <gcmc>pocket_circle.gcmc</gcmc>
-    <include>pocket_circle.inc.gcmc</include>
-    <function>DoCirculePocket(xCenter,yCenter,zSave,r,d,rate,zRate,per_stepover,RampDist,zDelta,zFull,ccw)</function>
+    <include>pocket_circle.inc.gcmc</include>    
+    <function>DoCirculePocket(xCenter,yCenter,r,zFull, zSave,zDelta,d,per_stepover,RampDist,rate,zRate,ccw)</function>
     <arguments>
-      <argument defvalue ="2" type="scalar" ref="zSave">
-        <name>Save Z:</name>
-      </argument>
-      <argument defvalue ="30" type="scalar" ref="xCenter">
+        <argument defvalue ="30" type="scalar" ref="xCenter">
         <name>Center X:</name>
-        <desc>Specify center of the circle in mm</desc>
+        <desc>Center of the circle in mm</desc>
       </argument>
       <argument defvalue ="50" type="scalar" ref="yCenter">
         <name>Center Y:</name>
-        <desc>Specify center of the circle in mm</desc>
+        <desc>Center of the circle in mm</desc>
       </argument>
       <argument defvalue ="20" type="scalar" ref="r">
         <name>Radius</name>
-        <desc>Specify radius of the circle in mm</desc>
+        <desc>Radius of the circle in mm</desc>
+      </argument>
+      <argument defvalue ="1" type="scalar" ref="zFull">
+        <name>Thikness:</name>
+      </argument>
+      <argument defvalue ="2" type="scalar" ref="zSave">
+        <name>Save Z:</name>
+      </argument>
+      <argument defvalue ="1" type="scalar" ref="zDelta">
+        <name>Step Z:</name>
       </argument>
       <argument defvalue ="6" type="scalar" ref="d">
         <name>Mill diameter</name>
       </argument>
-      <argument defvalue ="200" type="scalar" ref="rate">
-        <name>Feed rate:</name>
-        <desc>Specify feed rate of cutting</desc>
-      </argument>
-      <argument defvalue ="50" type="scalar" ref="zRate">
-        <name>Z feed rate:</name>
-        <desc>Specify Z feed rate of cutting</desc>
-      </argument>
       <argument defvalue ="70" type="scalar" ref="per_stepover">
         <name>Step over(%):</name>
-        <desc>Specify step over</desc>
+        <desc>Step over in percents</desc>
       </argument>
       <argument defvalue ="10" type="scalar" ref="RampDist">
         <name>Ramp distance:</name>
       </argument>
-      
-      <argument defvalue ="1" type="scalar" ref="zDelta">
-        <name>Step Z:</name>
+      <argument defvalue ="200" type="scalar" ref="rate">
+        <name>Feed rate:</name>
+        <desc>Feed rate of cutting</desc>
       </argument>
-      <argument defvalue ="1" type="scalar" ref="zFull">
-        <name>Thikness:</name>
+      <argument defvalue ="50" type="scalar" ref="zRate">
+        <name>Z feed rate:</name>
+        <desc>Z feed rate of cutting</desc>
       </argument>
       <argument defvalue ="0" type="list" ref="ccw">
         <name>Direction:</name>

@@ -32,7 +32,7 @@
   "scrollbar": "#FFFFFF",
   "scrollbar_tubm": "#dddddd",
   "scrollbar_tumb_hvr": "#999999",
-  "highlight": "#999999", //  "#dddddd",
+  "highlight": "#999999",
   "highlight_txt": "#FF1111",
   "titlebar_txt": "#666666",
   "titlebar_txt_active": "#333333",
@@ -46,7 +46,7 @@
   "view3d_box": "#008800",
   "view3d_g0": "#ff0000",
   "view3d_g1": "#000000",
-  "view3d_xaxis": "#BB0000", // red
-  "view3d_yaxis": "#00BB00", // green
-  "view3d_zaxis": "#0000BB" // blue
+  "view3d_xaxis": "#bb0000",
+  "view3d_yaxis": "#00bb00",
+  "view3d_zaxis": "#0000bb" 
 }

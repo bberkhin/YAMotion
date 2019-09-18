@@ -53,13 +53,13 @@ elif( l_trc == 3 )
 goto([-,-,l_zSave]);
 goto([xMin_trc,yMin_trc+l_radius,-]);
 local zCur = 0;
-local zFull = -1*l_depth;
+local zDepth = -1*l_depth;
 
-while(zFull < zCur) 
+while(zDepth < zCur) 
 {
  zCur = zCur - zDelta;
- if ( zCur < zFull){
-	zCur = zFull;
+ if ( zCur < zDepth){
+	zCur = zDepth;
  } 
  move([-,-,zCur ], l_zRate); 
  if ( l_ccw )

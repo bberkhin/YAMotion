@@ -789,8 +789,8 @@ void AppFrame::OnProperties(wxCommandEvent &WXUNUSED(event))
 	int oldlang = config->GetLanguage(-1);
 	int lng = wxGetSingleChoiceIndex
 	(
-		_("Please select language:"),
-		_("Language"),
+		_("Select language:"),
+		_("Languages"),
 		g_lang_count,
 		g_langNames
 	);
@@ -802,15 +802,6 @@ void AppFrame::OnProperties(wxCommandEvent &WXUNUSED(event))
 		if (DoSaveAllFiles())
 			wxGetApp().Restart();
 	}
-
-	/*
-	PropertiesDlg dlg(this);
-	if (dlg.NeedRestart())
-	{
-		if ( DoSaveAllFiles() )
-			wxGetApp().Restart();
-	}
-	*/
 }
 
 void AppFrame::OnDefaultPreferences(wxCommandEvent &WXUNUSED(event))
@@ -1126,26 +1117,27 @@ wxMenuBar *AppFrame::CreateMenu ()
 	//Open
 	wxMenuItem *mi = menuFile->Append(ID_OPENFILE, _("Open ..\tCtrl+O")); 
 	mi->SetBitmaps(wxArtProvider::GetBitmap(wxART_FILE_OPEN, wxART_MENU)); 
-
-
 	m_menuLastFiles = new wxMenu;
-	
 	AddLastFilesToMenu();
 
 
 	menuFile->Append(ID_OPENRECENT, _("Open recent"), m_menuLastFiles);
 	menuFile->AppendSeparator();
 	//New
-	menuFile->Append(ID_NEWNC, _("New GCODE"));
-	menuFile->Append(ID_NEWGCMC, _("New GCMC"));
+	mi = menuFile->Append(ID_NEWNC, _("New GCODE\tCtrl+N"));
+	mi->SetBitmaps(wxArtProvider::GetBitmap(wxART_NEW, wxART_MENU));
+	mi = menuFile->Append(ID_NEWGCMC, _("New GCMC\tCtrl+Shift+N"));
+	mi->SetBitmaps(wxArtProvider::GetBitmap(wxART_NEW, wxART_MENU));
 	menuFile->AppendSeparator();
-	menuFile->Append(ID_SHOWDIRPANE, _("Show Folders Pane"));
-	menuFile->Append(ID_SHOWWELCOME, _("Welcome window"));
+	menuFile->Append(ID_SHOWDIRPANE, _("Show Folders Pane\tCtrl+P"));
+	menuFile->Append(ID_SHOWWELCOME, _("Welcome window\tCtrl+W"));
 	menuFile->AppendSeparator();
 	//Save	
-	menuFile->Append(wxID_SAVE, _("Save\tCtrl+S"));
-	menuFile->Append(wxID_SAVEAS, _("Save  as ..\tCtrl+Shift+S"));
-	menuFile->Append(ID_CLOSEACTIVETAB, _("Close\tCtrl+W"));
+	mi = menuFile->Append(wxID_SAVE, _("Save\tCtrl+S"));
+	mi->SetBitmaps(wxArtProvider::GetBitmap(ART_SAVE, wxART_MENU));
+	mi = menuFile->Append(wxID_SAVEAS, _("Save  as ..\tCtrl+Shift+S"));
+	mi->SetBitmaps(wxArtProvider::GetBitmap(ART_SAVE, wxART_MENU));
+	mi = menuFile->Append(ID_CLOSEACTIVETAB, _("Close"));
 	menuFile->AppendSeparator();
 	
 	menuFile->AppendSeparator();
@@ -1156,30 +1148,35 @@ wxMenuBar *AppFrame::CreateMenu ()
 	   	
 	// change case submenu
 	wxMenu *menuChangeCase = new wxMenu;
-	menuChangeCase->Append(ID_CHANGEUPPER, _("&Upper case"));
-	menuChangeCase->Append(ID_CHANGELOWER, _("&Lower case"));
+	menuChangeCase->Append(ID_CHANGEUPPER, _("&Upper case\tCtrl+Shift+U"));
+	menuChangeCase->Append(ID_CHANGELOWER, _("&Lower case\tCtrl+U"));
 
-    wxMenu *menuEdit = new wxMenu;
-    menuEdit->Append (wxID_UNDO, _("&Undo\tCtrl+Z"));
-    menuEdit->Append (wxID_REDO, _("&Redo\tCtrl+Shift+Z"));
-    menuEdit->AppendSeparator();
-    menuEdit->Append (wxID_CUT, _("Cu&t\tCtrl+X"));
-    menuEdit->Append (wxID_COPY, _("&Copy\tCtrl+C"));
-    menuEdit->Append (wxID_PASTE, _("&Paste\tCtrl+V"));
-    menuEdit->Append (wxID_CLEAR, _("&Delete\tDel"));
-    menuEdit->AppendSeparator();
-    menuEdit->Append (wxID_FIND, _("&Find\tCtrl+F"));
-    menuEdit->Append (ID_FINDNEXT, _("Find &next\tF3"));
-    menuEdit->Append (ID_REPLACE, _("&Replace\tCtrl+H"));
-    menuEdit->Append (ID_REPLACENEXT, _("Replace &again\tShift+F4"));
-    menuEdit->AppendSeparator();
-	menuEdit->Append(ID_MATHCALC, _("Transform..."));
+	wxMenu *menuEdit = new wxMenu;
+	menuEdit->Append (wxID_UNDO, _("&Undo\tCtrl+Z"));
+	menuEdit->Append (wxID_REDO, _("&Redo\tCtrl+Shift+Z"));
+	menuEdit->AppendSeparator();
+	menuEdit->Append (wxID_CUT, _("Cu&t\tCtrl+X"));
+	menuEdit->Append (wxID_COPY, _("&Copy\tCtrl+C"));
+	menuEdit->Append (wxID_PASTE, _("&Paste\tCtrl+V"));
+	menuEdit->Append (wxID_CLEAR, _("&Delete\tDel"));
+	menuEdit->AppendSeparator();
+	menuEdit->Append (wxID_FIND, _("&Find\tCtrl+F"));
+	menuEdit->Append (ID_FINDNEXT, _("Find &next\tF3"));
+	menuEdit->Append (ID_REPLACE, _("&Replace\tCtrl+H"));
+	menuEdit->Append (ID_REPLACENEXT, _("Replace &again\tShift+F4"));
 	menuEdit->AppendSeparator();
 	menuEdit->Append(ID_INDENTINC, _("&Indent increase\tTab"));
 	menuEdit->Append(ID_INDENTRED, _("I&ndent reduce\tShift+Tab"));
 	menuEdit->AppendSeparator();
 	menuEdit->Append(ID_CHANGECASE, _("Change &case to .."), menuChangeCase);
-  	
+
+	
+	wxMenu *menuTools = new wxMenu;
+	mi = menuTools->Append(ID_MATHCALC, _("Transform..."));
+	mi->SetBitmaps(wxArtProvider::GetBitmap(ART_CONVERT, wxART_MENU));
+	menuTools->AppendSeparator();
+
+
 	// Macrosos
 	wxMenu *insertMenu = new wxMenu;
 	CreateMacrosesMenu(insertMenu);
@@ -1195,41 +1192,11 @@ wxMenuBar *AppFrame::CreateMenu ()
     menuView->AppendCheckItem (ID_WHITESPACE, _("Show white&space"));
     menuView->AppendSeparator();
 	menuView->FindChildItem(ID_LINENUMBER)->Check(true);
-
-	// GCode menu
-	wxMenu *menuGCode = new wxMenu;
-	menuGCode->Append(ID_GCODE_CHECK, _("&Check"));
-	menuGCode->Append(ID_GCODE_SIMULATE, _("&Simulate"));
-	
-	menuGCode->Append(ID_GCODE_KILLGCMCPROCESS, _("&Kill Gcmc process"));
-	
-	menuGCode->Append(ID_MACROSES, _("Run Macros"));
-	
-	menuGCode->Append(ID_MATHEXPRESSION, _("Calc by Expression"));
-
-	// 3dView menu
-	wxMenu *menu3D = new wxMenu;
-	menu3D->Append(ID_SETVIEWFIRST + 6, _("&Isometric"));
-	menu3D->Append(ID_SETVIEWFIRST,	  _("&Top"));
-	menu3D->Append(ID_SETVIEWFIRST+1,   _("&Bottom"));
-	menu3D->Append(ID_SETVIEWFIRST+2,   _("&Left"));
-	menu3D->Append(ID_SETVIEWFIRST+3,   _("&Right"));
-	menu3D->Append(ID_SETVIEWFIRST+4,   _("&Front"));
-	menu3D->Append(ID_SETVIEWFIRST+5,   _("&Back"));
-	menu3D->AppendSeparator();	
-	menu3D->AppendCheckItem(ID_SHOW2DGRID, _("Show/Hide 2d grid"));
-	menu3D->AppendCheckItem(ID_SHOWBOUNDS, _("Show/Hide bounds"));
-	menu3D->AppendCheckItem(ID_SHOW3DGRID, _("Show/Hide 3d grid"));
-	menu3D->AppendCheckItem(ID_SHOWTOOL, _("Show/Hide tool"));
-	menu3D->AppendCheckItem(ID_SHOWAXIS, _("Show/Hide Axis"));
-	menu3D->AppendSeparator();
-	menu3D->Append(ID_SEMULATE_START, _("&Start Simulate"));
-	menu3D->Append(ID_SEMULATE_PAUSE,_("Sto&p Simulate"));
-	menu3D->Append(ID_SEMULATE_STOP, _("Pause"));
 */
 	// Pregerences menu
 	wxMenu *menuPref = new wxMenu;
-	menuPref->Append(ID_GLOBALPREFS, _("Default Preferences"));
+	mi = menuPref->Append(ID_GLOBALPREFS, _("Default Preferences"));
+	mi->SetBitmaps(wxArtProvider::GetBitmap(ART_PREFERENCES, wxART_MENU));
 	//menuPref->Append(ID_USERPREFS, _("User Preferences"));
 	m_menuThemes = new wxMenu;
 	AddThemesToMenu();
@@ -1237,20 +1204,16 @@ wxMenuBar *AppFrame::CreateMenu ()
 	menuPref->Append(ID_PROPERTIES, _("Language ..."));
 
      // Help menu
-    wxMenu *menuHelp = new wxMenu;
-	menuHelp->Append(ID_DOWNLOADUPDATE, _("&Download ..\tCtrl+D"));
-    menuHelp->Append (wxID_ABOUT, _("&About ..\tCtrl+D"));
-		
-
-    // construct menu
-    m_menuBar->Append (menuFile, _("&File"));
-    m_menuBar->Append (menuEdit, _("&Edit"));
+	wxMenu *menuHelp = new wxMenu;
+	menuHelp->Append(ID_DOWNLOADUPDATE, _("&Download ..."));
+	menuHelp->Append (wxID_ABOUT, _("&About..."));
+	// construct menu
+	m_menuBar->Append(menuFile, _("&File"));
+	m_menuBar->Append(menuEdit, _("&Edit"));
+	m_menuBar->Append(menuTools, _("&Tools"));
 	m_menuBar->Append(insertMenu, _("&Insert"));
-  //  m_menuBar->Append (menuView, _("&View"));
-//	m_menuBar->Append(menuGCode, _("&GCode"));
-//	m_menuBar->Append(menu3D, _("&3DView"));
 	m_menuBar->Append(menuPref, _("Preferences"));
-    m_menuBar->Append (menuHelp, _("&Help"));    
+	m_menuBar->Append (menuHelp, _("&Help"));    
 	return m_menuBar;
 
 }

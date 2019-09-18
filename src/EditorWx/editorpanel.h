@@ -133,6 +133,7 @@ public:
 	void DoLayout(const wxSize &sz = wxDefaultSize, bool from3dview = false);
 	void OnSize(wxSizeEvent& event);
 	void OnSashDrag(wxSashEvent& event);
+	void OnShowHideWnd(wxShowEvent& event);
 	void UpdatePreferences();
 private:
 	void UpdateThemeColor();

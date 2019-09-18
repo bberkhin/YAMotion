@@ -7,11 +7,8 @@
     <image>rounded-rectangular-pocket.png</image>
     <gcmc>pocket_roundrect.gcmc</gcmc>
     <include>pocket_roundrect.inc.gcmc</include>
-    <function>DoRoundRectPocket(xMin, yMin, xD, yD, radius, zSave, d, zDelta,zFull,per_stepover,rate,zRate,ccw)</function>
+    <function>DoRoundRectPocket(xMin, yMin, xD, yD, radius, zFull, zSave, d, zDelta, per_stepover,rate,zRate,ccw)</function>
     <arguments>
-      <argument defvalue ="2" type="scalar" ref="zSave">
-        <name>Save Z:</name>
-      </argument>
       <argument defvalue ="0" type="scalar" ref="xMin">
         <name>X Min:</name>
         <desc>X Min of the rect in mm</desc>
@@ -32,8 +29,20 @@
         <name>Radius:</name>
         <desc>Round rect radius in mm</desc>
       </argument>
+      <argument defvalue ="1" type="scalar" ref="zFull">
+        <name>Thikness:</name>
+      </argument>
+      <argument defvalue ="2" type="scalar" ref="zSave">
+        <name>Save Z:</name>
+      </argument>
       <argument defvalue ="6" type="scalar" ref="d">
         <name>Mill diameter</name>
+      </argument>
+      <argument defvalue ="1" type="scalar" ref="zDelta">
+        <name>Step Z:</name>
+      </argument>
+      <argument defvalue ="30" type="scalar" ref="per_stepover">
+        <name>Step over(%):</name>
       </argument>
       <argument defvalue ="200" type="scalar" ref="rate">
         <name>Feed rate:</name>
@@ -42,15 +51,6 @@
       <argument defvalue ="50" type="scalar" ref="zRate">
         <name>Z feed rate:</name>
         <desc>Z feed rate of cutting</desc>
-      </argument>
-      <argument defvalue ="30" type="scalar" ref="per_stepover">
-        <name>Step over(%):</name>
-      </argument>    
-      <argument defvalue ="1" type="scalar" ref="zDelta">
-        <name>Step Z:</name>
-      </argument>
-      <argument defvalue ="1" type="scalar" ref="zFull">
-        <name>Thikness:</name>
       </argument>
       <argument defvalue ="1" type="list" ref="ccw">
         <name>Direction:</name>

@@ -1,13 +1,12 @@
-function millroundrect(xMin_trc, yMin_trc, xMax_trc, yMax_trc, zCurrent, cur_rad )
+function millroundrect(xMin_trc, yMin_trc, xMax_trc, yMax_trc, zCurrent, cur_rad,l_ccw )
 {
 
     if ( cur_rad  < 0 )  { cur_rad = 0; }  
     move([xMin_trc,yMin_trc+cur_rad,-]);
-    if ( ccw )
+    if ( l_ccw )
     {
-        feedrate(rate);
         if ( cur_rad ) {   arc_ccw ( [xMin_trc + cur_rad ,yMin_trc,-], cur_rad ); }
-        move([xMax_trc-cur_rad, -,-],rate);
+        move([xMax_trc-cur_rad, -,-]);
         if ( cur_rad ) {   arc_ccw ( [xMax_trc,yMin_trc+cur_rad,-], cur_rad ); }
         move([-,yMax_trc-cur_rad,-]);
         if ( cur_rad ) {   arc_ccw ( [xMax_trc-cur_rad,yMax_trc,-], cur_rad ); }
@@ -17,7 +16,7 @@ function millroundrect(xMin_trc, yMin_trc, xMax_trc, yMax_trc, zCurrent, cur_rad
     }
     else 
     {
-        move([-,yMax_trc-cur_rad,-],rate);
+        move([-,yMax_trc-cur_rad,-]);
         if ( cur_rad ) { arc_cw ( [xMin_trc+cur_rad,yMax_trc,-], cur_rad ); }
         move([xMax_trc-cur_rad, -,-]);
         if ( cur_rad ) { arc_cw ( [xMax_trc,yMax_trc-cur_rad,-], cur_rad ); }
@@ -29,61 +28,59 @@ function millroundrect(xMin_trc, yMin_trc, xMax_trc, yMax_trc, zCurrent, cur_rad
 }
 
 
-function DoRoundRectPocket(xMin, yMin, xD, yD, radius, zSave, d, zDelta,zFull,per_stepover,rate,zRate,ccw) 
+function DoRoundRectPocket(l_xMin, l_yMin, l_xD, l_yD, l_radius, l_depth, l_zSave, l_dMill, l_zDelta,l_stepover,l_xyRate,l_zRate,l_ccw) 
 {
-if( d <= 0 ) { error("Tool diametr can not be zero or negitive"); }
-if( (per_stepover < 0) || (per_stepover >= 95) ) { error("Stepover is wrong"); }
-if( rate <= 0 ) { error("Feed rate can not be zero or negitive"); }
-if( zRate <= 0 ) { error("Plunge feed rate can not be zero or negitive"); }
-if( zDelta == 0 ) { error("Step can not be zero"); }
-if( xD <= 0 ) { error("Width (dX) can not be zero or negitive"); }
-if( yD <= 0 ) { error("Height (dY) diametr can not be zero or negitive"); }
+if( l_dMill <= 0 ) { error("Tool diametr can not be zero or negitive"); }
+if( (l_stepover < 0) || (l_stepover >= 95) ) { error("Stepover is wrong"); }
+if( l_xyRate <= 0 ) { error("Feed l_xyRate can not be zero or negitive"); }
+if( l_zRate <= 0 ) { error("Plunge feed l_xyRate can not be zero or negitive"); }
+if( l_zDelta == 0 ) { error("Step can not be zero"); }
+if( l_xD <= 0 ) { error("Width (dX) can not be zero or negitive"); }
+if( l_yD <= 0 ) { error("Height (dY) diametr can not be zero or negitive"); }
 
-comment("Starting point:" + to_string(xMin) +"," + to_string(yMin));
-comment("Width:" + to_string(xD));
-comment("Height:" + to_string(yD));
-comment("Mill diameter:" + to_string(d));
-comment("Z save:" + to_string(zSave));
-comment("Z max:" + to_string(zFull));
+comment("Milling Round Rect Pocket");
+comment("Starting point: [",l_xMin,"," , l_yMin,",-] ; Width: ", l_xD , "; Height: ", l_yD, "; Radius: ", l_radius );
+comment("Mill dianetr: ",l_dMill, "; Z save: " ,l_zSave, "; Z Full : ", -1*l_depth, "; Z Step: ",  l_zDelta );
 
 
-Stepover = d * (abs(100-per_stepover)/100.);
+local Stepover = l_dMill * (abs(100-l_stepover)/100.);
 
-rtool = d/2;
-xMax = xMin + xD; 
-yMax = yMin + yD; 
-zCur = 0;
-zFull = -1*zFull;
+local rtool = l_dMill/2;
+local xMax = l_xMin + l_xD; 
+local yMax = l_yMin + l_yD; 
+local zCur = 0;
+local zDepth = -1*l_depth;
+local xStart, yStart, xEnd, yEnd;
+local radd;
 
-while(zFull < zCur) 
+while(zDepth < zCur) 
 {
-    zCur = zCur - zDelta;
-    if ( zCur < zFull)
+    zCur = zCur - l_zDelta;
+    if ( zCur < zDepth)
     {
-    zCur = zFull;
+        zCur = zDepth;
     } 
     
-    xStart = xMin + rtool;
-    yStart = yMin + rtool ;
+    xStart = l_xMin + rtool;
+    yStart = l_yMin + rtool ;
     xEnd = xMax  - rtool;
     yEnd = yMax  - rtool;
     dy = Stepover;
     
-    radd = radius;
+    radd = l_radius;
     
-    goto([-,-,zSave]);
+    goto([-,-,l_zSave]);
     goto([xStart, yStart+radd,-]);
-    move([-,-,zCur ], zRate);   
-    
-    
+    move([-,-,zCur ], l_zRate);   
+    feedrate(l_xyRate);
     for(; xStart <= xEnd && yStart <= yEnd; )  
     {
-        millroundrect( xStart, yStart, xEnd, yEnd, zCur, radd);
+        millroundrect( xStart, yStart, xEnd, yEnd, zCur, radd,l_ccw);
         xStart += dy;
         yStart += dy;
-        xEnd   -= dy;
-        yEnd   -= dy;
-        radd-=dy;            
+        xEnd  -= dy;
+        yEnd  -= dy;
+        radd -= dy; 
     }        
 }
  

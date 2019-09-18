@@ -20,30 +20,6 @@ bool MacrosParamDlg::m_new_window = true;
 bool MacrosParamDlg::m_as_gcmc = false;
 
 
-class FaltChoise : public wxChoice
-{
-public:
-	FaltChoise(wxWindow *parent, wxWindowID id)
-		: wxChoice(parent, id, wxDefaultPosition, wxDefaultSize) { }
-protected:
-virtual WXHBRUSH MSWControlColor(WXHDC hDC, WXHWND hWnd) wxOVERRIDE;
-};
-
-WXHBRUSH FaltChoise::MSWControlColor(WXHDC hDC, WXHWND hWnd)
-{
-	static HBRUSH hbr = 0;
-	if (!IsThisEnabled())
-		return MSWControlColorDisabled(hDC);
-
-	SetTextColor(hDC, RGB(255, 255, 0));
-	SetBkColor(hDC, RGB(0, 255, 0));
-	if (hbr == 0 )
-		hbr = CreateSolidBrush(RGB(0, 255, 255));
-	return hbr;
-	//return wxChoiceBase::MSWControlColor(hDC, hWnd);
-}
-
-
 MacrosParamDlg::MacrosParamDlg(MacrosDesc *pm, wxWindow *parent, int curfiletype)
 	: mdesc(pm), m_curfiletype(curfiletype),
 	wxDialog(parent, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxDEFAULT_DIALOG_STYLE)//| wxRESIZE_BORDER) 
