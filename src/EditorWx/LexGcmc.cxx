@@ -49,7 +49,7 @@ static void ColouriseGcmcDoc(Sci_PositionU startPos, Sci_Position length, int in
 	WordList &keywords2 = *keywordLists[1];
 	WordList &keywords3 = *keywordLists[2];
 	
-	CharacterSet operators(CharacterSet::setNone, "*/=+<>");
+	CharacterSet operators(CharacterSet::setNone, "{}*/=+<>");
 	StyleContext sctmp(startPos, length, initStyle, styler);
 
 	//char buf[256];
@@ -159,8 +159,50 @@ static void ColouriseGcmcDoc(Sci_PositionU startPos, Sci_Position length, int in
 	sc.Complete();
 }
 
-static void FoldGcmcDoc(Sci_PositionU, Sci_Position, int, WordList *[],
-						Accessor &) {
+static void FoldGcmcDoc(Sci_PositionU startPos, Sci_Position length, int , WordList *[], Accessor &pAccess)
+{
+	bool foldCompact = false;
+	LexAccessor styler(pAccess);
+	Sci_PositionU currLine = styler.GetLine(startPos);
+	Sci_PositionU endPos = startPos + length;
+	int currLevel = SC_FOLDLEVELBASE;
+	if (currLine > 0)
+		currLevel = styler.LevelAt(currLine - 1) >> 16;
+	int nextLevel = currLevel;
+	int visibleChars = 0;
+	for (Sci_PositionU i = startPos; i < endPos; i++) 
+	{
+		char curr = styler.SafeGetCharAt(i);
+		char next = styler.SafeGetCharAt(i + 1);
+		bool atEOL = (curr == '\r' && next != '\n') || (curr == '\n');
+		if (styler.StyleAt(i) == SCE_GCMC_OPERATORS) {
+			if (curr == '{' ) {
+				nextLevel++;
+			}
+			else if (curr == '}' ) {
+				nextLevel--;
+			}
+		}
+		if (atEOL || i == (endPos - 1)) {
+			int level = currLevel | nextLevel << 16;
+			if (!visibleChars && foldCompact) {
+				level |= SC_FOLDLEVELWHITEFLAG;
+			}
+			else if (nextLevel > currLevel) {
+				level |= SC_FOLDLEVELHEADERFLAG;
+			}
+			if (level != styler.LevelAt(currLine)) {
+				styler.SetLevel(currLine, level);
+			}
+			currLine++;
+			currLevel = nextLevel;
+			visibleChars = 0;
+		}
+		if (!isspacechar(curr)) {
+			visibleChars++;
+		}
+	}
+
 }
 
 static const char * const gcmcWordLists[] = {

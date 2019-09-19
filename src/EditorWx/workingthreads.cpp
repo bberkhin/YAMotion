@@ -105,6 +105,16 @@ void Draw3DThread::Update3DView()
 	View3D *p3Dview = m_worker->m_fp->Get3D();
 	if (p3Dview)
 	{
+		if (getTack().empty())
+		{
+			p3Dview->clear();
+		}
+		else
+		{
+			p3Dview->setTrack(getTack());
+			p3Dview->setBox(getBox());
+		}
+		/*
 		if ( plogger->errors_count() == 0)
 		{
 			p3Dview->setTrack(getTack());
@@ -112,6 +122,7 @@ void Draw3DThread::Update3DView()
 		}
 		else
 			p3Dview->clear();
+			*/
 	}
 }
 
@@ -520,7 +531,7 @@ void Worker::OnDraw3DCompletion(GCMCConversionEvent &ev)
 	}
 	else
 	{
-		GetLogWnd()->Append(MSLError, wxString::Format(_("There are %d error(s). Can not draw the path"), ev.GetCIData().num_errors));
+		GetLogWnd()->Append(MSLError, wxString::Format(_("There are %d error(s)."), ev.GetCIData().num_errors));
 	}
 }
 
@@ -550,7 +561,7 @@ void Worker::AppendGcmcError(wxString &src)
 	size_t colon1 = wxString::npos, colon2 = wxString::npos, colon3 = wxString::npos, colon4 = wxString::npos;
 	if ((colon1 = src.find(':', 0)) != wxString::npos)
 	{
-		if (colon1 == 1) // грязный костыль есди полное имя файла то : не раздалитель
+		if (colon1 == 1) // грязный костыль если полное имя файла то : не раздалитель
 		{
 			colon1 = src.find(':', 2);
 		}

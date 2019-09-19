@@ -212,15 +212,8 @@ bool GCodeDescription::get_description(const char *src, const char *word)
 		}
 	}
 
+	bool parsing_result = parser.parse(line);
 	
-	if (!parser.parse(line))
-	{
-
-		wxString desc( parser.get_state().description.c_str());		
-		m_results.push_back(std::make_pair(_("ERROR"), desc));		
-		return true;
-	}
-
 
 	if (!parser.neead_execute())
 	{
@@ -241,9 +234,8 @@ bool GCodeDescription::get_description(const char *src, const char *word)
 	for (auto iter = mcodes.begin(); iter != mcodes.end(); ++iter)
 	{
 		do_get_description(*iter, L'M');
-
 	}
-
+	
 	if (IsEmpty())
 	{
 
@@ -263,6 +255,13 @@ bool GCodeDescription::get_description(const char *src, const char *word)
 	else if (parser.hasParam(PARAM_F))
 	{
 		get_p_description(2003);
+	}
+
+
+	if (!parsing_result)
+	{
+		wxString desc(parser.get_state().description.c_str());
+		m_results.push_back(std::make_pair(_("ERROR"), desc));
 	}
 	return !IsEmpty();
 

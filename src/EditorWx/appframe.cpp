@@ -99,8 +99,11 @@ wxBEGIN_EVENT_TABLE (AppFrame, wxFrame)
 	EVT_MENU_RANGE(ID_MACROSFIRST, ID_MACROSLAST, AppFrame::OnMacros)
 	EVT_MENU (ID_MACROSES,			 AppFrame::OnMacroses)
 	EVT_MENU(ID_MATHCALC,			 AppFrame::OnMathCalc)
+	EVT_MENU(ID_MATHROTATE, AppFrame::OnMathRotate)
+	
 	EVT_MENU(ID_MATHEXPRESSION, AppFrame::OnMathExpression)
 	EVT_UPDATE_UI(ID_MATHCALC, AppFrame::OnUpdateNCIsOpen)
+	EVT_UPDATE_UI(ID_MATHROTATE, AppFrame::OnUpdateNCIsOpen)
 	EVT_UPDATE_UI(ID_MATHEXPRESSION, AppFrame::OnUpdateNCIsOpen)
 	EVT_MENU(ID_CLOSEALL, AppFrame::OnFileCloseAll)
 	EVT_MENU(ID_CLOSEALLBUTTHIS, AppFrame::OnFileCloseAllButThis)
@@ -896,6 +899,25 @@ void AppFrame::OnMathCalc(wxCommandEvent &WXUNUSED(event))
 	panel->DoMathCalc(mth);
 }
 
+// properties event handlers
+void AppFrame::OnMathRotate(wxCommandEvent &WXUNUSED(event))
+{
+
+	Edit *pedit = 0;
+	FilePage *panel = dynamic_cast<FilePage *>(m_notebook->GetCurrentPage());
+	if (panel)
+		pedit = panel->GetEdit();
+	else
+		return;
+
+	std::shared_ptr<DoMathBase> mth(new DoMathRotate());
+	
+	//MathSimpleDlg dlg(dynamic_cast<DoMathSimple *>(mth.get()), this, pedit->HasSelection());
+	//if (dlg.ShowModal() != wxID_OK)
+		//return;
+	panel->DoMathCalc(mth);
+}
+
 
 void AppFrame::OnUpdateNCIsOpen(wxUpdateUIEvent& event)
 {
@@ -1170,12 +1192,12 @@ wxMenuBar *AppFrame::CreateMenu ()
 	menuEdit->AppendSeparator();
 	menuEdit->Append(ID_CHANGECASE, _("Change &case to .."), menuChangeCase);
 
-	
+	// Tools
 	wxMenu *menuTools = new wxMenu;
 	mi = menuTools->Append(ID_MATHCALC, _("Transform..."));
 	mi->SetBitmaps(wxArtProvider::GetBitmap(ART_CONVERT, wxART_MENU));
+	menuTools->Append(ID_MATHROTATE, _("Rotate..."));
 	menuTools->AppendSeparator();
-
 
 	// Macrosos
 	wxMenu *insertMenu = new wxMenu;

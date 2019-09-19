@@ -32,7 +32,7 @@
       "nameid": 1,
       "name": "number",
       "fclr": "#ee6677",
-      "bold": true
+       "bold": true
     },
     {
       "nameid": 2,
@@ -61,13 +61,14 @@
     {
       "nameid": 6,
       "name": "comment",
-      "fclr": "#84e484",
-      "italic": false
+      "fclr": "#85a57c",
+      "italic": false,
+      "bold": true
     },
     {
       "nameid": 7,
       "name": "comment_ml",
-      "fclr": "#84e484"
+      "fclr": "#85a57c"
     },
 
     {

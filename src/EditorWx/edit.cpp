@@ -640,7 +640,11 @@ bool Edit::InitializePrefs (const LanguageInfo * language)
 	m_language = language;
     // set lexer and language
     SetLexer (m_language->Lexer());
-    
+	if (m_language->GetFileType() == FILETYPE_JSON)
+	{
+		SetProperty("lexer.json.allow.comments", "1");
+	}
+	
 
     // set margin for line numbers
     SetMarginType (m_LineNrID, wxSTC_MARGIN_NUMBER);
@@ -710,15 +714,16 @@ bool Edit::InitializePrefs (const LanguageInfo * language)
     SetMarginWidth (m_DividerID, 0);
     SetMarginSensitive (m_DividerID, false);
 
-	/*
+#if 0
     // folding
-    SetMarginType (m_FoldingID, wxSTC_MARGIN_SYMBOL);
-    SetMarginMask (m_FoldingID, wxSTC_MASK_FOLDERS);
-    StyleSetBackground (m_FoldingID, *wxWHITE);
-    SetMarginWidth (m_FoldingID, 0);
-    SetMarginSensitive (m_FoldingID, false);
-    if (common_prefs.foldEnable) 
+	if (common_prefs.foldEnable)
 	{
+		SetMarginType (m_FoldingID, wxSTC_MARGIN_SYMBOL);
+		SetMarginMask (m_FoldingID, wxSTC_MASK_FOLDERS);
+		StyleSetBackground (m_FoldingID, *wxWHITE);
+		SetMarginWidth (m_FoldingID, 0);
+		SetMarginSensitive (m_FoldingID, false);
+    
         SetMarginWidth (m_FoldingID, m_language->Fold() != 0 ? m_FoldingMargin: 0);
         SetMarginSensitive (m_FoldingID, m_language->Fold() != 0);
         SetProperty ("fold", m_language->Fold() != 0 ? "1": "0");
@@ -739,8 +744,7 @@ bool Edit::InitializePrefs (const LanguageInfo * language)
     }
     SetFoldFlags (wxSTC_FOLDFLAG_LINEBEFORE_CONTRACTED |
                   wxSTC_FOLDFLAG_LINEAFTER_CONTRACTED);
-
-   */
+#endif
     return true;
 }
 

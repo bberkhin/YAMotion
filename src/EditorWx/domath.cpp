@@ -3,6 +3,7 @@
 #include <iostream>
 #include <sstream>
 #include <stdio.h>
+#include <math.h>
 
 #pragma warning(disable:4996)
 #include "configdata.h"
@@ -468,4 +469,63 @@ void DoMathExpression::do_save_config(ConfigData *config)
 
 	std::for_each(params.begin(), params.end(), [config](auto &p)
 	{ config->Write(wxString::Format("%d", p.first), p.second.c_str() );  });
+}
+
+
+static double degree_to_rad(double degree)
+{
+	return degree * PI / 180.0;
+}
+
+DoMathRotate::DoMathRotate() :
+	m_plane(Plane_XY)
+{
+	m_angle = degree_to_rad(45);
+}
+
+DoMathRotate::~DoMathRotate()
+{
+
+}
+
+void DoMathRotate::do_load_config(ConfigData *config)
+{
+	m_angle = config->ReadDouble("Angle", m_angle);
+	m_plane = static_cast<Interpreter::Plane>( config->ReadLong("Plane", static_cast<long>(m_plane)));
+}
+
+void DoMathRotate::do_save_config(ConfigData *config)
+{
+	config->Write("Angle", m_angle);
+	config->Write("Plane", static_cast<int>(m_plane));
+}
+
+bool DoMathRotate::do_math()
+{
+	ORIGIN_PARAM *px = get_origin(PARAM_X);
+	ORIGIN_PARAM *py = get_origin(PARAM_Y);
+	if (px == 0 && py == 0)
+		return false;
+
+	double xpos = px ? px->val : m_curpos.x;
+	double ypos = py ? py->val : m_curpos.y;
+	// do rotation
+	
+	double xposnew = xpos  + (xpos - m_center.x) * cos(m_angle) + (m_center.y - ypos) * sin(m_angle);
+	double yposnew = ypos +  (xpos - m_center.x) * sin(m_angle) + (ypos - m_center.y) * sin(m_angle);
+
+	m_curpos.x = xposnew;
+	m_curpos.y = yposnew;
+
+	if (px)
+	{
+		px->val_new = xposnew;
+		px->changed = true;
+	}
+	if (py)
+	{
+		py->val_new = yposnew;
+		py->changed = true;
+	}
+	return true;
 }

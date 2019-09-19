@@ -113,3 +113,18 @@ private:
 
 };
 
+
+class DoMathRotate : public DoMathBase
+{
+public:
+	DoMathRotate();
+	~DoMathRotate();
+protected:
+	virtual void do_load_config(ConfigData *config);
+	virtual void do_save_config(ConfigData *config);
+	virtual bool do_math();
+	double m_angle;
+	Interpreter::Plane m_plane;
+	Interpreter::Coords m_center;
+	Interpreter::Coords m_curpos;
+};

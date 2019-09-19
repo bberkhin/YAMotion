@@ -61,7 +61,9 @@ public:
 	void OnMacroses(wxCommandEvent &event);
 	void OnMacros(wxCommandEvent &event);
 	
+	//tools
 	void OnMathCalc(wxCommandEvent &event);
+	void OnMathRotate(wxCommandEvent &event);
 	void OnMathExpression(wxCommandEvent &event);
 	//! edit events
 	void OnEdit(wxCommandEvent &event);

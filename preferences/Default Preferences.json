@@ -1,17 +1,23 @@
 {
+// Use (true) syntax color coding
   "syntax": true,
+// Use (true) folding (not implement yet)
   "fold": true,
-  "indent": true,
-  "wrapMode": false,
+  // Show (true) or hide end of line symbol
   "displayEOL": false,
-  "indentGuide": false,
+   // Show (true) or hide blocks line ( does not support yet)
+  "indentGuide": true,
+  // Show (true) or hide line numer
   "lineNumber": true,
-  "longLineOn": false,
+   // Show (true) or hide hidden symbols
   "whiteSpace": false,
+  // Number of space for tab
   "tabWidth": 4,
+  // Show (true) or hide (false) horixontal scroll for edit and pane window
   "visibleHSB": true,
+  // Enable  ( true)  logging of movement during checking the syntaxis 
   "enableLogExecution": false,
-  "theme": "WHITE",
+  // Postprocessing filename
   "postpocessing": "wincnc.con",
   "themes": [
     {

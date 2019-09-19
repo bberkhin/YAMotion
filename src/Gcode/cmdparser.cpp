@@ -87,8 +87,12 @@ bool  CmdParser::parse_codes(const char *frame )
 
 	for (; position < length;)
 	{
-		IF_F_RET_F( parse_code() );
+		// don't break in the first error fill as many as we can
+		//IF_F_RET_F( parse_code() ); 
+		parse_code();
 	}
+	if (state.code)
+		return false;
 	return true;
 }
 
@@ -520,7 +524,7 @@ bool CmdParser::read_g()
 	GModalGroup grp = get_gmodal_group( value );
 	IF_T_RET_F_SETSTATE( hasGCode(grp) , DOUBLE_DEFINITION, YA_TWO_G_CODES_USED_FROM_SAME_MODAL_GROUP, static_cast<int>(value / 10) );
 	g_mode[grp] = value;
-	return false;
+	return true;
 }
 
 
