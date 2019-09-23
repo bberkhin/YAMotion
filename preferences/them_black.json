@@ -46,7 +46,7 @@
   "view3d_box": "#00ff00",
   "view3d_g0": "#ff0000",
   "view3d_g1": "#ffffff",
-  "view3d_xaxis": "#ff0000", 
-  "view3d_yaxis": "#00ff00", 
-  "view3d_zaxis": "#0000ff" 
+  "view3d_xaxis": "#ff0000",
+  "view3d_yaxis": "#00ff00",
+  "view3d_zaxis": "#0000ff"
 }

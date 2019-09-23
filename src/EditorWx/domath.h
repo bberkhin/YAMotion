@@ -9,12 +9,13 @@
 
 struct ORIGIN_PARAM
 {
+	enum { ParamNonChanged = 0, ParamChanged, ParamNew };
 	Interpreter::IndexParam index;
 	double val;
 	double val_new;
 	int posstart;
 	int posend;
-	bool changed;
+	int status;
 };
 
 typedef std::vector<ORIGIN_PARAM>  OriginParamList;
@@ -44,12 +45,16 @@ protected:
 	bool is_param_letter(char c, Interpreter::IndexParam *index );
 	bool is_int_param(Interpreter::IndexParam index);
 	void write_result(char *strout, int &outpos, double valnew, bool isint);
+	bool write_param(char *strout, int &outpos, int index);
+	bool AddNewParam(Interpreter::IndexParam index, const double &val);
+	void SetAddParam(ORIGIN_PARAM *p, Interpreter::IndexParam param, const double &newval);
 	bool ScanParameters(const char *line);
 protected:
 	double minvalue;
 	double maxvalue;
 	bool in_selected;
 	OriginParamList origin_params;
+	OriginParamList new_params;
 };
 
 
@@ -76,7 +81,7 @@ public:
 	MathOperationType GetOperation() { return operation; }	
 	void ClearParams();
 	bool HasParemeter(Interpreter::IndexParam p);
-
+	
 protected:
 	virtual void do_load_config(ConfigData *config);
 	virtual void do_save_config(ConfigData *config);
@@ -123,8 +128,10 @@ protected:
 	virtual void do_load_config(ConfigData *config);
 	virtual void do_save_config(ConfigData *config);
 	virtual bool do_math();
+	const Interpreter::Coords rotate_point(const Interpreter::Coords &src) const;
 	double m_angle;
 	Interpreter::Plane m_plane;
 	Interpreter::Coords m_center;
-	Interpreter::Coords m_curpos;
+	Interpreter::Coords m_curposnew;
+	Interpreter::Coords m_curposold;
 };

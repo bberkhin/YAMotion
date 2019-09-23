@@ -531,11 +531,12 @@ bool CmdParser::read_g()
 bool CmdParser::read_real_param(IndexParam param)
 {
 	ParamType value;
-	if (params[param])
-		RET_F_SETSTATE(MUITYPLIE_PARAM, YA_MULTIPLE_WORDS_ON_ONE_LINE, line[position]);
-
+	// first read to move position
 	position++;
 	IF_F_RET_F(read_real_value(&(value.dval)));
+
+	if (params[param])
+		RET_F_SETSTATE(MUITYPLIE_PARAM, YA_MULTIPLE_WORDS_ON_ONE_LINE, line[position]);
 	params[param] = value;
 	return true;
 }
@@ -544,11 +545,10 @@ bool CmdParser::read_real_param(IndexParam param)
 bool CmdParser::read_int_param(IndexParam param)
 {
 	ParamType value;
-	if (params[param])
-		RET_F_SETSTATE(MUITYPLIE_PARAM, YA_MULTIPLE_WORDS_ON_ONE_LINE, line[position]);
-
 	position++;
 	IF_F_RET_F(read_int_value(&(value.ival)));
+	if (params[param])
+		RET_F_SETSTATE(MUITYPLIE_PARAM, YA_MULTIPLE_WORDS_ON_ONE_LINE, line[position]);
 	params[param] = value;
 	return true;
 }

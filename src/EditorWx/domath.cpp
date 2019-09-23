@@ -107,7 +107,7 @@ bool DoMathBase::ScanParameters(const char *line)
 				ORIGIN_PARAM param;
 				param.posstart = position;
 				param.index = index;
-				param.changed = false;
+				param.status = ORIGIN_PARAM::ParamNonChanged;
 				if (read_real(line, position, &val))
 				{
 
@@ -131,6 +131,8 @@ bool DoMathBase::Process(const char *strin, char *strout)
 	if (!ScanParameters(strin))
 		return false;
 	
+	new_params.clear();
+
 	if ( !do_math() )
 		return false;
 
@@ -141,18 +143,26 @@ bool DoMathBase::Process(const char *strin, char *strout)
 
 	for (auto it = origin_params.begin(); it != origin_params.end(); ++it)
 	{
-		if ( !it->changed )
-			continue;
-		// copy beforo
-		n = it->posstart - inpos;
-		strncpy(strout + outpos, strin + inpos, n);
-		outpos += n;
-		inpos += n;
-		//insert new result
-		n = it->posend - it->posstart;
-		write_result(strout, outpos, it->val_new, is_int_param(it->index));
-		inpos += n;
+		if(it->status == ORIGIN_PARAM::ParamChanged)
+		{ // copy beforo
+			n = it->posstart - inpos;
+			strncpy(strout + outpos, strin + inpos, n);
+			outpos += n;
+			inpos += n;
+			//insert new result
+			n = it->posend - it->posstart;
+			write_result(strout, outpos, it->val_new, is_int_param(it->index));
+			inpos += n;
+		}
 	}
+
+	// write down new param
+	for (auto it = new_params.begin(); it != new_params.end(); ++it)
+	{
+		if (write_param(strout, outpos, it->index))
+			write_result(strout, outpos, it->val_new, is_int_param(it->index));
+	}
+
 	// write down the end of string
 	strcat(strout, strin + inpos);
 	return true;
@@ -231,6 +241,50 @@ bool DoMathBase::is_param_letter(char c, IndexParam *index )
 	return true;
 }
 
+void DoMathBase::SetAddParam(ORIGIN_PARAM *p, Interpreter::IndexParam param, const double &newval)
+{
+	if (p)
+	{
+		p->val_new = newval;
+		p->status = ORIGIN_PARAM::ParamChanged;
+	}
+	else // we need add x coordinate
+	{
+		AddNewParam(param, newval);
+	}
+}
+
+bool DoMathBase::AddNewParam(Interpreter::IndexParam index, const double &val)
+{
+	
+	ORIGIN_PARAM param;
+	param.posstart = -1;
+	param.index = index;
+	param.status = ORIGIN_PARAM::ParamNew;
+	param.val = val;
+	param.val_new = val;
+	new_params.push_back(param);
+
+	return true;
+}
+
+bool DoMathBase::write_param(char *strout, int &outpos, int index)
+{
+	std::string st;
+	if (index == PARAM_X)
+		st = " X";
+	else if (index == PARAM_Y)
+		st = " Y";
+	else if (index == PARAM_Z)
+		st = " Z";
+
+	if ( st.empty())
+		return false;
+	
+	strcpy(strout + outpos, st.c_str());
+	outpos = static_cast<int>(outpos + st.length());
+	return true;
+}
 
 
 void DoMathBase::write_result(char *strout, int &outpos, double val, bool isint)
@@ -291,7 +345,7 @@ bool DoMathSimple::do_math()
 			result = std::max(result, minvalue);
 			result = std::min(result, maxvalue);
 			p->val_new = result;
-			p->changed = true;
+			p->status = ORIGIN_PARAM::ParamChanged;
 			did = true;
 		}
 	}
@@ -422,7 +476,7 @@ bool DoMathExpression::do_math()
 			result = std::min(result, maxvalue);
 			p->val_new = result;
 			(*sav)[p->index] = result;
-			p->changed = true;
+			p->status = ORIGIN_PARAM::ParamChanged;
 			did = true;
 		}
 	}	
@@ -481,6 +535,8 @@ DoMathRotate::DoMathRotate() :
 	m_plane(Plane_XY)
 {
 	m_angle = degree_to_rad(45);
+	m_center.x = 10;
+	m_center.y = 50;
 }
 
 DoMathRotate::~DoMathRotate()
@@ -499,6 +555,17 @@ void DoMathRotate::do_save_config(ConfigData *config)
 	config->Write("Angle", m_angle);
 	config->Write("Plane", static_cast<int>(m_plane));
 }
+const Interpreter::Coords DoMathRotate::rotate_point(const Interpreter::Coords &src) const
+{
+	Interpreter::Coords out;
+	out.x = m_center.x + (src.x - m_center.x) * cos(m_angle) + (m_center.y - src.y) * sin(m_angle);
+	//p'y = sin(theta) * (px-ox) + cos(theta) * (py-oy) + oy
+	out.y = m_center.y + (src.x - m_center.x) * cos(m_angle) + (src.y - m_center.y) * sin(m_angle);
+	return out;
+
+}
+
+
 
 bool DoMathRotate::do_math()
 {
@@ -507,25 +574,33 @@ bool DoMathRotate::do_math()
 	if (px == 0 && py == 0)
 		return false;
 
-	double xpos = px ? px->val : m_curpos.x;
-	double ypos = py ? py->val : m_curpos.y;
-	// do rotation
-	
-	double xposnew = xpos  + (xpos - m_center.x) * cos(m_angle) + (m_center.y - ypos) * sin(m_angle);
-	double yposnew = ypos +  (xpos - m_center.x) * sin(m_angle) + (ypos - m_center.y) * sin(m_angle);
+	ORIGIN_PARAM *pi = get_origin(PARAM_I);
+	ORIGIN_PARAM *pj = get_origin(PARAM_J);
+	if (pi != 0 || pj != 0)
+	{
+		Interpreter::Coords arcCenter = m_curposold;
+		if (pi)
+			arcCenter.x += pi->val;
+		if (pj)
+			arcCenter.y += pj->val;
 
-	m_curpos.x = xposnew;
-	m_curpos.y = yposnew;
+		Interpreter::Coords arcnewCenter = rotate_point(arcCenter);
+		double newi = arcnewCenter.x - m_curposnew.x;
+		double newj = arcnewCenter.y - m_curposnew.y;
+		SetAddParam(pi, PARAM_I, newi);
+		SetAddParam(pj, PARAM_J, newj);
+	}
+
 
 	if (px)
-	{
-		px->val_new = xposnew;
-		px->changed = true;
-	}
+		m_curposold.x = px->val;
 	if (py)
-	{
-		py->val_new = yposnew;
-		py->changed = true;
-	}
+		m_curposold.y = py->val;
+
+	// do rotation
+	m_curposnew = rotate_point(m_curposold);
+
+	SetAddParam(px, PARAM_X, m_curposnew.x);
+	SetAddParam(py, PARAM_Y, m_curposnew.y);
 	return true;
 }

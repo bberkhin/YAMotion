@@ -88,7 +88,7 @@ const char* const *GetBitmapColor(const char* const* xpm_data, const wxColor &cl
 #define CHECK_ART_ID0(idArt,filename) \
 	else if (id == idArt) \
 	{\
-			return wxBitmap(filename);\
+		return wxBitmap(filename);\
 	}
 
 wxBitmap ExArtProvider::CreateBitmap(const wxArtID& id, const wxArtClient& client, const wxSize& size)
