@@ -20,6 +20,7 @@
 #include "configdata.h"
 #include "mathsimpledlg.h"
 #include "mathexpressiondlg.h"
+#include "RotateDlg.h"
 
 #include "welcomewnd.h"
 #include "dirtree.h"
@@ -912,9 +913,9 @@ void AppFrame::OnMathRotate(wxCommandEvent &WXUNUSED(event))
 
 	std::shared_ptr<DoMathBase> mth(new DoMathRotate());
 	
-	//MathSimpleDlg dlg(dynamic_cast<DoMathSimple *>(mth.get()), this, pedit->HasSelection());
-	//if (dlg.ShowModal() != wxID_OK)
-		//return;
+	RotateDlg dlg(dynamic_cast<DoMathRotate *>(mth.get()), this, pedit->HasSelection());
+	if (dlg.ShowModal() != wxID_OK)
+		return;
 	panel->DoMathCalc(mth);
 }
 

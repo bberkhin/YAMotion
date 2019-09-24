@@ -527,11 +527,9 @@ void DoMathExpression::do_save_config(ConfigData *config)
 
 
 DoMathRotate::DoMathRotate() :
-	m_plane(Plane_XY)
+	m_plane(Plane_XY), m_angle_rad(0), m_angle_degree(0)
 {
-	SetAngle(0, true);
-	//m_center.x = 10;
-	//m_center.y = 50;
+	LoadConfig();
 }
 
 
@@ -543,21 +541,38 @@ DoMathRotate::~DoMathRotate()
 void DoMathRotate::SetAngle(const double &angle, bool degree)
 {
 	if (degree)
-		m_angle = angle*PI / 180.0;
+	{
+		m_angle_degree = angle;
+		m_angle_rad = m_angle_degree * PI / 180.0;
+	}
 	else
-		m_angle = angle;
+	{
+		m_angle_rad = angle;
+		m_angle_degree = m_angle_rad * 180.0/PI;
+	}
 }
 
 void DoMathRotate::do_load_config(ConfigData *config)
 {
-	m_angle = config->ReadDouble("Angle", m_angle);
+	double angle = config->ReadDouble("Angle", m_angle_degree);
+	SetAngle(angle, true);
 	m_plane = static_cast<Interpreter::Plane>( config->ReadLong("Plane", static_cast<long>(m_plane)));
+
+	m_center.x = config->ReadDouble("RotateX", m_center.x);
+	m_center.y = config->ReadDouble("RotateY", m_center.y);
+	m_center.z = config->ReadDouble("RotateZ", m_center.z);
+	
+
+	//SetAngle(0, true);
 }
 
 void DoMathRotate::do_save_config(ConfigData *config)
 {
-	config->Write("Angle", m_angle);
+	config->Write("Angle", m_angle_degree);
 	config->Write("Plane", static_cast<int>(m_plane));
+	config->Write("RotateX", m_center.x);
+	config->Write("RotateY", m_center.y);
+	config->Write("RotateZ", m_center.z);
 }
 
 static void DoRound(double &val)
@@ -567,9 +582,30 @@ static void DoRound(double &val)
 const Interpreter::Coords DoMathRotate::rotate_point(const Interpreter::Coords &src) const
 {
 	Interpreter::Coords out;
-	out.x = m_center.x + (src.x - m_center.x) * cos(m_angle) + (m_center.y - src.y) * sin(m_angle);
-	//p'y = sin(theta) * (px-ox) + cos(theta) * (py-oy) + oy
-	out.y = m_center.y + (src.x - m_center.x) * sin(m_angle) + (src.y - m_center.y) * cos(m_angle);
+	if (m_plane == Plane_XY)
+	{
+		out.x = m_center.x + (src.x - m_center.x) * cos(m_angle_rad) + (m_center.y - src.y) * sin(m_angle_rad);
+		//p'y = sin(theta) * (px-ox) + cos(theta) * (py-oy) + oy
+		out.y = m_center.y + (src.x - m_center.x) * sin(m_angle_rad) + (src.y - m_center.y) * cos(m_angle_rad);
+	}
+	else if (m_plane == Plane_XZ)
+	{
+		out.x = m_center.x + (src.x - m_center.x) * cos(m_angle_rad) + (m_center.z - src.z) * sin(m_angle_rad);
+		//p'y = sin(theta) * (px-ox) + cos(theta) * (py-oy) + oy
+		out.z = m_center.z + (src.x - m_center.x) * sin(m_angle_rad) + (src.z - m_center.z) * cos(m_angle_rad);
+	}
+	else if (m_plane == Plane_YZ)
+	{
+		out.z = m_center.z + (src.z - m_center.z) * cos(m_angle_rad) + (m_center.y - src.y) * sin(m_angle_rad);
+		//p'y = sin(theta) * (px-ox) + cos(theta) * (py-oy) + oy
+		out.y = m_center.y + (src.z - m_center.z) * sin(m_angle_rad) + (src.y - m_center.y) * cos(m_angle_rad);
+	}
+	else
+	{
+		// error!
+		wxASSERT_MSG(false,"UNKNOWN PLAN");
+	}
+
 
 	DoRound(out.x);
 	DoRound(out.y);
@@ -586,32 +622,34 @@ bool DoMathRotate::do_math()
 	ORIGIN_PARAM *px = get_origin(PARAM_X);
 	ORIGIN_PARAM *py = get_origin(PARAM_Y);
 	ORIGIN_PARAM *pz = get_origin(PARAM_Z);
-	if (px == 0 && py == 0 )// && pz == 0)
+	if (px == 0 && py == 0 && pz == 0)
 		return false;
 
 	ORIGIN_PARAM *pi = get_origin(PARAM_I);
 	ORIGIN_PARAM *pj = get_origin(PARAM_J);
 	ORIGIN_PARAM *pk = get_origin(PARAM_K);
-	if (pi != 0 || pj != 0 || pk != 0 )
+	if (pi != 0 || pj != 0 || pk != 0)
 	{
 		Interpreter::Coords arcCenter = m_curposold;
-		if (pi)
+		if ((m_plane == Plane_XY || m_plane == Plane_XZ) && pi )
 			arcCenter.x += pi->val;
-		if (pj)
+		if ((m_plane == Plane_XY || m_plane == Plane_YZ) && pj)
 			arcCenter.y += pj->val;
-		if (pk)
+		if ((m_plane == Plane_XZ || m_plane == Plane_YZ) && pk)
 			arcCenter.z += pk->val;
 
 		Interpreter::Coords arcnewCenter = rotate_point(arcCenter);
 		double newi = arcnewCenter.x - m_curposnew.x;
 		double newj = arcnewCenter.y - m_curposnew.y;
 		double newk = arcnewCenter.z - m_curposnew.z;
-		SetAddParam(pi, PARAM_I, newi);
-		SetAddParam(pj, PARAM_J, newj);
-		//SetAddParam(pk, PARAM_K, newk);
+		if (m_plane == Plane_XY || m_plane == Plane_XZ)
+			SetAddParam(pi, PARAM_I, newi);
+		if (m_plane == Plane_XY || m_plane == Plane_YZ)
+			SetAddParam(pj, PARAM_J, newj);
+		if (m_plane == Plane_XZ || m_plane == Plane_YZ)
+			SetAddParam(pk, PARAM_K, newk);
 	}
-
-
+	
 	if (px)
 		m_curposold.x = px->val;
 	if (py)
@@ -621,10 +659,11 @@ bool DoMathRotate::do_math()
 
 	// do rotation
 	m_curposnew = rotate_point(m_curposold);
-
-	SetAddParam(px, PARAM_X, m_curposnew.x);
-	SetAddParam(py, PARAM_Y, m_curposnew.y);
-	
-	//SetAddParam(pz, PARAM_Z, m_curposnew.y);
+	if (m_plane == Plane_XY || m_plane == Plane_XZ)
+		SetAddParam(px, PARAM_X, m_curposnew.x);
+	if (m_plane == Plane_XY || m_plane == Plane_YZ)
+		SetAddParam(py, PARAM_Y, m_curposnew.y);
+	if (m_plane == Plane_XZ || m_plane == Plane_YZ)
+		SetAddParam(pz, PARAM_Z, m_curposnew.y);
 	return true;
 }

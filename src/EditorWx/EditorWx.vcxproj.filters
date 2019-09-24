@@ -168,6 +168,9 @@
     <ClCompile Include="generictreectlg.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
+    <ClCompile Include="RotateDlg.cpp">
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h">
@@ -315,6 +318,9 @@
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
     <ClInclude Include="generictreectlg.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="RotateDlg.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
   </ItemGroup>

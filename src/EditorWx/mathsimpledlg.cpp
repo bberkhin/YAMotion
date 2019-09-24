@@ -172,6 +172,8 @@ int MathSimpleDlg::ShowModal()
 		wxCheckBox *pinsel = dynamic_cast<wxCheckBox *>(FindWindow(ID_INSELECTED));
 		if (pinsel && pinsel->IsEnabled() )
 			domath->SetSelected( pinsel->GetValue() );
+		else
+			domath->SetSelected(false);
 
 		domath->SaveConfig();
 	}

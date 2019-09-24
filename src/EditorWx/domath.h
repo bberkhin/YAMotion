@@ -124,7 +124,7 @@ class DoMathRotate : public DoMathBase
 public:
 	DoMathRotate();
 	~DoMathRotate();
-	const double &GetAngle()  const { return m_angle; }
+	const double &GetAngle()  const { return m_angle_degree; }
 	void SetAngle(const double &angle, bool degree = true);
 	void SetPlane(Interpreter::Plane plane) { m_plane = plane; }
 	Interpreter::Plane GetPlane()  const { return m_plane; }
@@ -136,7 +136,8 @@ protected:
 	virtual void do_save_config(ConfigData *config);
 	virtual bool do_math();
 	const Interpreter::Coords rotate_point(const Interpreter::Coords &src) const;
-	double m_angle;
+	double m_angle_rad;
+	double m_angle_degree;
 	Interpreter::Plane m_plane;
 	Interpreter::Coords m_center;
 	Interpreter::Coords m_curposnew;

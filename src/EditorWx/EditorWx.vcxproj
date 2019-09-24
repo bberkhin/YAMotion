@@ -65,6 +65,7 @@
     <ClCompile Include="prefs.cpp" />
     <ClCompile Include="propertiesdlg.cpp" />
     <ClCompile Include="appframe.cpp" />
+    <ClCompile Include="RotateDlg.cpp" />
     <ClCompile Include="standartpaths.cpp" />
     <ClCompile Include="them.cpp" />
     <ClCompile Include="View3D.cpp" />
@@ -116,6 +117,7 @@
     <ClInclude Include="prefs.h" />
     <ClInclude Include="propertiesdlg.h" />
     <ClInclude Include="resource.h" />
+    <ClInclude Include="RotateDlg.h" />
     <ClInclude Include="standartpaths.h" />
     <ClInclude Include="them.h" />
     <ClInclude Include="View3D.h" />
