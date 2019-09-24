@@ -526,22 +526,26 @@ void DoMathExpression::do_save_config(ConfigData *config)
 }
 
 
-static double degree_to_rad(double degree)
-{
-	return degree * PI / 180.0;
-}
-
 DoMathRotate::DoMathRotate() :
 	m_plane(Plane_XY)
 {
-	m_angle = degree_to_rad(45);
-	m_center.x = 10;
-	m_center.y = 50;
+	SetAngle(0, true);
+	//m_center.x = 10;
+	//m_center.y = 50;
 }
+
 
 DoMathRotate::~DoMathRotate()
 {
 
+}
+
+void DoMathRotate::SetAngle(const double &angle, bool degree)
+{
+	if (degree)
+		m_angle = angle*PI / 180.0;
+	else
+		m_angle = angle;
 }
 
 void DoMathRotate::do_load_config(ConfigData *config)
@@ -555,12 +559,22 @@ void DoMathRotate::do_save_config(ConfigData *config)
 	config->Write("Angle", m_angle);
 	config->Write("Plane", static_cast<int>(m_plane));
 }
+
+static void DoRound(double &val)
+{
+	val = round(val * 1000) / 1000.;
+}
 const Interpreter::Coords DoMathRotate::rotate_point(const Interpreter::Coords &src) const
 {
 	Interpreter::Coords out;
 	out.x = m_center.x + (src.x - m_center.x) * cos(m_angle) + (m_center.y - src.y) * sin(m_angle);
 	//p'y = sin(theta) * (px-ox) + cos(theta) * (py-oy) + oy
-	out.y = m_center.y + (src.x - m_center.x) * cos(m_angle) + (src.y - m_center.y) * sin(m_angle);
+	out.y = m_center.y + (src.x - m_center.x) * sin(m_angle) + (src.y - m_center.y) * cos(m_angle);
+
+	DoRound(out.x);
+	DoRound(out.y);
+	DoRound(out.z);
+
 	return out;
 
 }
@@ -571,24 +585,30 @@ bool DoMathRotate::do_math()
 {
 	ORIGIN_PARAM *px = get_origin(PARAM_X);
 	ORIGIN_PARAM *py = get_origin(PARAM_Y);
-	if (px == 0 && py == 0)
+	ORIGIN_PARAM *pz = get_origin(PARAM_Z);
+	if (px == 0 && py == 0 )// && pz == 0)
 		return false;
 
 	ORIGIN_PARAM *pi = get_origin(PARAM_I);
 	ORIGIN_PARAM *pj = get_origin(PARAM_J);
-	if (pi != 0 || pj != 0)
+	ORIGIN_PARAM *pk = get_origin(PARAM_K);
+	if (pi != 0 || pj != 0 || pk != 0 )
 	{
 		Interpreter::Coords arcCenter = m_curposold;
 		if (pi)
 			arcCenter.x += pi->val;
 		if (pj)
 			arcCenter.y += pj->val;
+		if (pk)
+			arcCenter.z += pk->val;
 
 		Interpreter::Coords arcnewCenter = rotate_point(arcCenter);
 		double newi = arcnewCenter.x - m_curposnew.x;
 		double newj = arcnewCenter.y - m_curposnew.y;
+		double newk = arcnewCenter.z - m_curposnew.z;
 		SetAddParam(pi, PARAM_I, newi);
 		SetAddParam(pj, PARAM_J, newj);
+		//SetAddParam(pk, PARAM_K, newk);
 	}
 
 
@@ -596,11 +616,15 @@ bool DoMathRotate::do_math()
 		m_curposold.x = px->val;
 	if (py)
 		m_curposold.y = py->val;
+	if (pz)
+		m_curposold.z = pz->val;
 
 	// do rotation
 	m_curposnew = rotate_point(m_curposold);
 
 	SetAddParam(px, PARAM_X, m_curposnew.x);
 	SetAddParam(py, PARAM_Y, m_curposnew.y);
+	
+	//SetAddParam(pz, PARAM_Z, m_curposnew.y);
 	return true;
 }
