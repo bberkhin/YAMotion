@@ -23,70 +23,70 @@
         {
             "nameid": 0,
             "name": "default",
-            "fclr": "GRAY"
+            "fclr": "#999999"
         },
       {
         "nameid": 1,
         "name": "comment",
-        "fclr": "#84e484"
+        "fclr": "#85a57c"
       },
       {
         "nameid": 2,
         "name": "comment_ml",
-        "fclr": "#84e484"
+        "fclr": "#85a57c"
       },
       {
         "nameid": 3,
         "name": "G",
-        "fclr": "#ffbb44",
+        "fclr": "#55aadd",
         "bold": true
       },
       {
         "nameid": 4,
         "name": "M",
-        "fclr": "#ff0044",
+        "fclr": "#55aadd",
         "bold": true
       },
       {
         "nameid": 5,
         "name": "PARAM",
-        "fclr": "#55aadd",
+        "fclr": "#ee6677",
         "bold": true
       },
       {
         "nameid": 6,
         "name": "var",
-        "fclr": "#55aadd",
+        "fclr": "#ee6677",
         "bold": true
       },
       {
         "nameid": 7,
         "name": "number",
-        "fclr": "#ee6677",
+        "fclr": "#bbbbbb",
         "bold": true
       },
       {
         "nameid": 8,
         "name": "coordinate",
-        "fclr": "#00FFFF",
+        "fclr": "#ee6677",
         "bold": true
       },
         {
             "nameid": 9,
             "name": "word",
-            "fclr": "RED",
+            "fclr": "#ee6677",
             "bold": true
         },
       {
         "nameid": 10,
         "name": "operators",
-        "fclr": "#ffffff",
+        "fclr": "#999999",
         "bold": true
       },
         {
             "nameid": 11,
             "name": "identifiers",
-            "fclr": "#ffffff"
+            "fclr": "#999999"
         }
     ]
 }

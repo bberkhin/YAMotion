@@ -15,7 +15,7 @@
     "type": "GCODE",
     "fontsize": 10,
     "fontname": "Comic",
-    "fclr": "WHITE",
+    "fclr": "#333333",
     "bclr": "",
     "italic": false,
     "bold": false,
@@ -28,53 +28,53 @@
       {
         "nameid": 1,
         "name": "comment",
-        "fclr": "#85a57c"
+        "fclr": "#6f9364"
       },
       {
         "nameid": 2,
         "name": "comment_ml",
-        "fclr": "#85a57c"
+        "fclr": "#6f9364"
       },
       {
         "nameid": 3,
         "name": "G",
-        "fclr": "#55aadd",
+        "fclr": "#307080",
         "bold": true
       },
       {
         "nameid": 4,
         "name": "M",
-        "fclr": "#55aadd",
+        "fclr": "#307080",
         "bold": true
       },
       {
         "nameid": 5,
         "name": "PARAM",
-        "fclr": "#ee6677",
+        "fclr": "#bb4070",
         "bold": true
       },
       {
         "nameid": 6,
         "name": "var",
-        "fclr": "#ee6677",
+        "fclr": "#bb4070",
         "bold": true
       },
       {
         "nameid": 7,
         "name": "number",
-        "fclr": "#bbbbbb",
+        "fclr": "#666666",
         "bold": true
       },
       {
         "nameid": 8,
         "name": "coordinate",
-        "fclr": "#ee6677",
+        "fclr": "#bb4070",
         "bold": true
       },
         {
             "nameid": 9,
             "name": "word",
-            "fclr": "#ee6677",
+            "fclr": "#bb4070",
             "bold": true
         },
       {

@@ -27,13 +27,13 @@
     {
       "nameid": 1,
       "name": "comment",
-      "fclr": "#e6dda1",
+      "fclr": "#85a57c",
       "italic": false
     },
     {
       "nameid": 2,
       "name": "comment_ml",
-      "fclr": "#736557"
+      "fclr": "#85a57c"
     },
     {
       "nameid": 3,
@@ -61,13 +61,14 @@
     {
       "nameid": 7,
       "name": "functions",
-      "fclr": "#84e484",
+      "fclr1": "#55aadd",
+      "fclr": "#880000",
       "bold": true
     },
     {
       "nameid": 8,
       "name": "syntaxwords",
-      "fclr": "#55aadd",
+      "fclr": "#5cd08d",
       "bold": true
     },
     {

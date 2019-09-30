@@ -14,7 +14,7 @@
   "fontsize": 10,
   "fontname" : "",
   "fontname1" : "Courier new",
-   "fclr": "WHITE",
+   "fclr": "#333333",
   "bclr": "",
   "italic": false,
   "bold": false,
@@ -27,13 +27,13 @@
     {
       "nameid": 1,
       "name": "comment",
-      "fclr": "#85a57c",
+      "fclr": "#6f9364",
       "italic": false
     },
     {
       "nameid": 2,
       "name": "comment_ml",
-      "fclr": "#85a57c"
+      "fclr": "#6f9364"
     },
     {
       "nameid": 3,
@@ -44,7 +44,7 @@
     {
       "nameid": 4,
       "name": "number",
-      "fclr": "#bbbbbb",
+      "fclr": "#666666",
       "bold": true
     },
     {
@@ -56,19 +56,19 @@
     {
       "nameid": 6,
       "name": "identifiers",
-      "fclr": "#ffbb44"
+      "fclr": "#bb6600"
     },
     {
       "nameid": 7,
       "name": "functions",
       "fclr1": "#55aadd",
-      "fclr": "#880000",
+      "fclr": "#307080",
       "bold": true
     },
     {
       "nameid": 8,
       "name": "syntaxwords",
-      "fclr": "#5cd08d",
+      "fclr": "#508040",
       "bold": true
     },
     {
@@ -80,7 +80,7 @@
     {
       "nameid": 10,
       "name": "strings",
-      "fclr": "#ee6677",
+      "fclr": "#bb4070",
       "bold": true,
       "italic": true
     }
