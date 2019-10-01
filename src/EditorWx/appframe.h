@@ -11,6 +11,7 @@ class DropFileOpen;
 class Macroses;
 class FilePage;
 class WelcomeWnd;
+class FileNewEvent;
 //----------------------------------------------------------------------------
 //! frame of the application APP_VENDOR-APP_NAME.
 class AppFrame : public wxFrame 
@@ -42,7 +43,7 @@ public:
 	void OnFileOpen(wxCommandEvent &event);
 	void OnFileOpenEvent(wxCommandEvent &event);
 	void OnFileRemoveEvent(wxCommandEvent &event);
-	void OnFileNewEvent(wxCommandEvent &event);
+	void OnFileNewEvent(FileNewEvent &event);
 	void OnFileSave(wxCommandEvent &event);
 	void OnFileSaveAs(wxCommandEvent &event);
 	void OnFileClose(wxCommandEvent &event);

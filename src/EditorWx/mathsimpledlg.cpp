@@ -15,7 +15,8 @@ ID_MULTISBT,
 ID_DEVIDEBT, 
 ID_MAXVALUE,
 ID_MINVALUE,
-ID_INSELECTED
+ID_INSELECTED,
+ID_INNEWFILE
 };
 
 using namespace Interpreter;
@@ -92,7 +93,15 @@ MathSimpleDlg::MathSimpleDlg(DoMathSimple *dm, wxWindow *parent, bool hasselecti
 	// total pane
 	wxBoxSizer *totalpane = new wxBoxSizer(wxVERTICAL);
 	totalpane->Add(clientarea, 0, wxEXPAND | wxLEFT | wxRIGHT, 10);
-	totalpane->Add(0, 10);
+	
+	totalpane->AddSpacer(10);
+
+	wxCheckBox *pinnefile = new wxCheckBox(this, ID_INNEWFILE, _("Create new file"));
+	pinnefile->SetValue(domath->InNewFile());
+	totalpane->Add(pinnefile, 0, wxEXPAND, 10);
+
+	totalpane->AddSpacer(10);
+
 	totalpane->Add(CreateStdDialogButtonSizer(wxOK | wxCANCEL), 0, wxALL | wxALIGN_RIGHT, 2);
 
 	SetSizerAndFit(totalpane);
@@ -174,6 +183,10 @@ int MathSimpleDlg::ShowModal()
 			domath->SetSelected( pinsel->GetValue() );
 		else
 			domath->SetSelected(false);
+
+		wxCheckBox *pnewfile = dynamic_cast<wxCheckBox *>(FindWindow(ID_INNEWFILE));
+		if (pnewfile)
+			domath->SetInNewFile(pnewfile->GetValue());
 
 		domath->SaveConfig();
 	}

@@ -599,9 +599,11 @@ void View3DPanel::UpdateStatistics(const ConvertGCMCInfo &dt)
 	if (slider)
 	{
 		int m_full_path = int(dt.feed_len + dt.traverce_len);
-		slider->SetRange(0, m_full_path);		
-		slider->SetTickFreq( m_full_path/10 );
-		
+		if (m_full_path > 0)
+		{
+			slider->SetRange(0, m_full_path);
+			slider->SetTickFreq(m_full_path / 10);
+		}
 	}
 
 	Layout();

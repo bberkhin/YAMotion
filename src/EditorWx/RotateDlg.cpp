@@ -12,7 +12,8 @@ enum
 	ID_PLANE_CHOISE,
 	ID_MAXVALUE,
 	ID_MINVALUE,
-	ID_INSELECTED
+	ID_INSELECTED,
+	ID_INNEWFILE
 };
 
 using namespace Interpreter;
@@ -82,7 +83,13 @@ RotateDlg::RotateDlg(DoMathRotate *dm, wxWindow *parent, bool hasselection)
 	// total pane
 	wxBoxSizer *totalpane = new wxBoxSizer(wxVERTICAL);
 	totalpane->Add(clientarea, 0, wxEXPAND | wxLEFT | wxRIGHT, 10);
-	totalpane->Add(0, 10);
+	totalpane->AddSpacer(10);
+	
+	wxCheckBox *pinnefile = new wxCheckBox(this, ID_INNEWFILE, _("Create new file"));
+	pinnefile->SetValue( dm->InNewFile() );
+	totalpane->Add(pinnefile, 0, wxEXPAND,10 );
+
+	totalpane->AddSpacer(10);
 	totalpane->Add(CreateStdDialogButtonSizer(wxOK | wxCANCEL), 0, wxALL | wxALIGN_RIGHT, 2);
 
 	SetSizerAndFit(totalpane);
@@ -147,6 +154,10 @@ int RotateDlg::ShowModal()
 			m_domath->SetSelected(pinsel->GetValue());
 		else
 			m_domath->SetSelected(false);
+
+		wxCheckBox *pnewfile = dynamic_cast<wxCheckBox *>(FindWindow(ID_INNEWFILE));
+		if (pnewfile)
+			m_domath->SetInNewFile(pnewfile->GetValue());
 
 		m_domath->SaveConfig();
 	}

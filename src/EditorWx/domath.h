@@ -32,6 +32,8 @@ public:
 	void GetMinMax(double *pminv, double *pmaxv) { *pminv = minvalue; *pmaxv = maxvalue; }	
 	bool InSelected() { return in_selected;  }
 	void SetSelected(bool insel) { in_selected = insel; }
+	bool InNewFile() { return m_in_new_file; }
+	void SetInNewFile(bool in_new_file) { m_in_new_file = in_new_file; }
 	bool Process(const char *strin, char *strout);
 	void LoadConfig();
 	void SaveConfig();
@@ -55,6 +57,8 @@ protected:
 	bool in_selected;
 	OriginParamList origin_params;
 	OriginParamList new_params;
+	bool m_in_new_file;
+	bool m_is_absolute_coordinates; //G90
 };
 
 
@@ -142,4 +146,5 @@ protected:
 	Interpreter::Coords m_center;
 	Interpreter::Coords m_curposnew;
 	Interpreter::Coords m_curposold;
+	
 };

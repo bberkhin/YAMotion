@@ -42,9 +42,6 @@ protected:
 private:
 	wxDECLARE_DYNAMIC_CLASS_NO_ASSIGN(GCMCConversionEvent);
 };
-
-
-
 class Worker;
 
 class CheckGCodeThread : public wxThread
@@ -142,6 +139,7 @@ protected:
 	std::shared_ptr<DoMathBase> m_mth;
 	Edit *m_edit;
 	LoggerWnd *plogger;
+	wxString m_new_file_content;
 };
 
 

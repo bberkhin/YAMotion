@@ -30,6 +30,9 @@
 //! application headers
 
 
+wxIMPLEMENT_DYNAMIC_CLASS(FileNewEvent, wxThreadEvent);
+wxDEFINE_EVENT(FILE_NEW_EVENT, FileNewEvent);
+
 
 using namespace Interpreter;
 
@@ -158,7 +161,7 @@ wxBEGIN_EVENT_TABLE (AppFrame, wxFrame)
 	EVT_COMMAND(wxID_ANY, FILE_OPEN_EVENT, AppFrame::OnFileOpenEvent)
 	EVT_COMMAND(wxID_ANY, FILE_RENAME_EVENT, AppFrame::OnFileRenamed)
 	EVT_COMMAND(wxID_ANY, FILE_REMOVE_EVENT, AppFrame::OnFileRemoveEvent)
-	EVT_COMMAND(wxID_ANY, FILE_NEW_EVENT, AppFrame::OnFileNewEvent)
+	EVT_FILENEW(FILE_NEW_EVENT, AppFrame::OnFileNewEvent)
 	
 	EVT_AUI_ANY(wxEVT_AUINOTEBOOK_TAB_RIGHT_UP,	AppFrame::OnTabRightUp)
 	
@@ -548,10 +551,11 @@ bool AppFrame::FindPageByFileName(const wxString &new_file_name, size_t *nPage)
 
 }
 
-void AppFrame::OnFileNewEvent(wxCommandEvent &event)
+void AppFrame::OnFileNewEvent(FileNewEvent &event)
 {
-	int file_type = (event.GetInt() == ID_NEWGCMC) ? FILETYPE_GCMC : FILETYPE_NC;
-	DoNewFile(file_type, event.GetString(), false );
+	int file_type = event.GetInt();
+	FilePage *fp = DoNewFile(file_type, event.GetString(), false );
+	fp->GetEdit()->SetText(event.GetFileContext());
 }
 
 void AppFrame::OnFileNew(wxCommandEvent &event)
@@ -916,7 +920,9 @@ void AppFrame::OnMathRotate(wxCommandEvent &WXUNUSED(event))
 	RotateDlg dlg(dynamic_cast<DoMathRotate *>(mth.get()), this, pedit->HasSelection());
 	if (dlg.ShowModal() != wxID_OK)
 		return;
+
 	panel->DoMathCalc(mth);
+
 }
 
 

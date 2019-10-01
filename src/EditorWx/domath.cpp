@@ -18,6 +18,8 @@ DoMathBase::DoMathBase()
 	minvalue = -1000000.0;
 	maxvalue = 1000000.0;
 	in_selected = false;
+	m_in_new_file = true;
+	m_is_absolute_coordinates = true;
 }
 
 
@@ -37,6 +39,7 @@ void DoMathBase::LoadConfig()
 	minvalue = config->ReadDouble("MinValue", minvalue);
 	maxvalue = config->ReadDouble("MaxValue", maxvalue);
 	in_selected = config->ReadBool ("InSelected", in_selected);
+	m_in_new_file = config->ReadBool("ToNewFile", m_in_new_file);
 	do_load_config(config);
 	config->SetPath(strOldPath);
 }
@@ -53,6 +56,7 @@ void DoMathBase::SaveConfig()
 	config->Write("MinValue", minvalue);
 	config->Write("MaxValue", maxvalue);
 	config->Write("InSelected", in_selected);
+	config->Write("ToNewFile", m_in_new_file);
 	do_save_config(config);
 	config->SetPath(strOldPath);
 }
@@ -73,6 +77,7 @@ bool DoMathBase::ScanParameters(const char *line)
 	int length = static_cast<int>(strlen(line));
 	bool comment = false;
 	double val;
+	int ival;
 	Interpreter::IndexParam index;
 	origin_params.clear();
 	for (int position = 0; position < length;)
@@ -101,21 +106,39 @@ bool DoMathBase::ScanParameters(const char *line)
 		else
 		{
 			// check letter
-			if ((position == 0 || !isalpha(line[position - 1])) && position + 1 < length && !isalpha(line[position + 1]) && is_param_letter(line[position], &index))
+			if ((position == 0 || !isalpha(line[position - 1])) && position + 1 < length && !isalpha(line[position + 1]))
 			{
-				position++; 
-				ORIGIN_PARAM param;
-				param.posstart = position;
-				param.index = index;
-				param.status = ORIGIN_PARAM::ParamNonChanged;
-				if (read_real(line, position, &val))
+				if (is_param_letter(line[position], &index))
 				{
+					position++;
+					ORIGIN_PARAM param;
+					param.posstart = position;
+					param.index = index;
+					param.status = ORIGIN_PARAM::ParamNonChanged;
+					if (read_real(line, position, &val))
+					{
 
-					param.val = val;
-					param.val_new = val;
-					param.posend = position;
-					origin_params.push_back(param);					
+						param.val = val;
+						param.val_new = val;
+						param.posend = position;
+						origin_params.push_back(param);
+					}
 				}
+				else if (line[position] == 'g' || line[position] == 'G') // GXXX
+				{
+					position++;
+					if (read_real(line, position, &val))
+					{
+						ival = static_cast<int>(val);
+						if ( ival  == 90 )
+							m_is_absolute_coordinates = true;
+						else if(ival == 91)
+							m_is_absolute_coordinates = false;
+					}
+				}
+				else
+					position++;
+
 			}
 			else //just move
 			{
@@ -131,6 +154,7 @@ bool DoMathBase::Process(const char *strin, char *strout)
 	if (!ScanParameters(strin))
 		return false;
 	
+
 	new_params.clear();
 
 	if ( !do_math() )
@@ -651,19 +675,22 @@ bool DoMathRotate::do_math()
 	}
 	
 	if (px)
-		m_curposold.x = px->val;
+		m_curposold.x = m_is_absolute_coordinates ? px->val : (m_curposold.x + px->val);
 	if (py)
-		m_curposold.y = py->val;
+		m_curposold.y = m_is_absolute_coordinates ? py->val : (m_curposold.y + py->val);
 	if (pz)
-		m_curposold.z = pz->val;
+		m_curposold.z = m_is_absolute_coordinates ? pz->val : (m_curposold.z + pz->val);
 
 	// do rotation
+	Interpreter::Coords curposnewprev = m_curposnew;
 	m_curposnew = rotate_point(m_curposold);
+	
 	if (m_plane == Plane_XY || m_plane == Plane_XZ)
-		SetAddParam(px, PARAM_X, m_curposnew.x);
+		SetAddParam(px, PARAM_X, m_is_absolute_coordinates ? m_curposnew.x : m_curposnew.x - curposnewprev.x);
 	if (m_plane == Plane_XY || m_plane == Plane_YZ)
-		SetAddParam(py, PARAM_Y, m_curposnew.y);
+		SetAddParam(py, PARAM_Y, m_is_absolute_coordinates ? m_curposnew.y : m_curposnew.y - curposnewprev.y);
 	if (m_plane == Plane_XZ || m_plane == Plane_YZ)
-		SetAddParam(pz, PARAM_Z, m_curposnew.y);
+		SetAddParam(pz, PARAM_Z, m_is_absolute_coordinates ? m_curposnew.z : m_curposnew.z - curposnewprev.z);
+
 	return true;
 }

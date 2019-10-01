@@ -31,7 +31,6 @@
 wxDEFINE_EVENT(FILE_OPEN_EVENT, wxCommandEvent);
 wxDEFINE_EVENT(FILE_REMOVE_EVENT, wxCommandEvent);
 wxDEFINE_EVENT(FILE_RENAME_EVENT, wxCommandEvent);
-wxDEFINE_EVENT(FILE_NEW_EVENT, wxCommandEvent);
 
 
 // verify that the item is ok and insult the user if it is not

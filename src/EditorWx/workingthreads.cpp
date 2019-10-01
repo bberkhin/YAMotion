@@ -991,8 +991,7 @@ wxThread::ExitCode MathTransform::Entry()
 	int line_start;
 	int line_end;
 	long from, to;
-
-	
+	wxString new_file_content;
 
 	if (m_mth->InSelected())
 	{
@@ -1017,8 +1016,16 @@ wxThread::ExitCode MathTransform::Entry()
 	else
 		to = m_edit->PositionFromLine(line_end + 1);
 
+	
+	// copy all lines befor target if needed
+	if (m_mth->InNewFile() && from != 0 )
+	{
+		m_edit->SetTargetRange(0, from);
+		new_file_content = m_edit->GetTargetText();
+	}
+
 	m_edit->SetTargetRange(from, to);
-	wxString cs;
+
 	plogger->log(LOG_INFORMATION, _("Start transforming: %d lines..."), line_end- line_start);
 	for (int i = line_start; i <= line_end; i++)
 	{
@@ -1031,13 +1038,30 @@ wxThread::ExitCode MathTransform::Entry()
 		wxString str = m_edit->GetLine(i);
 		if (m_mth->Process(str.c_str(), strOut))
 		{
-			cs += strOut;
+			new_file_content += strOut;
 		}
 		else
-			cs += str;
+			new_file_content += str;
 	}
-	m_edit->ReplaceTarget(cs);
-	
+	if (!m_mth->InNewFile())
+	{
+		m_edit->ReplaceTarget(new_file_content);
+	}
+	else
+	{
+		// copy end of file if needed
+		if (line_end != m_edit->GetLineCount() - 1)
+		{
+			m_edit->SetTargetRange(to, m_edit->GetLastPosition() );
+			new_file_content += m_edit->GetTargetText();
+		}
+		FileNewEvent *ev = new FileNewEvent(FILE_NEW_EVENT);
+		ev->TakeFileContext(new_file_content);
+		ev->SetInt(FILETYPE_NC);
+		ev->SetEventObject(m_worker);
+		wxQueueEvent(wxGetApp().GetFrame(), ev);
+	}
+
 	if (m_mth->InSelected())
 	{
 		to = m_edit->PositionFromLine(line_end + 1);

@@ -137,12 +137,43 @@ private:
 };
 
 
+
+class FileNewEvent : public wxThreadEvent
+{
+public:
+	FileNewEvent(wxEventType command_type = -1) : wxThreadEvent(command_type) {	}
+	FileNewEvent(const FileNewEvent& e) : wxThreadEvent(e)
+	{
+		m_filecontext = e.GetFileContext();
+	}
+
+	~FileNewEvent()
+	{
+		;
+	}
+
+	wxEvent *Clone() const wxOVERRIDE { return new FileNewEvent(*this); }
+	const wxString &GetFileContext() const { return m_filecontext; }
+	void TakeFileContext( wxString &data) { m_filecontext.swap(data); }
+protected:
+	wxString m_filecontext;
+private:
+	wxDECLARE_DYNAMIC_CLASS_NO_ASSIGN(FileNewEvent);
+};
+
 // this is typically in a header: it just declares MY_EVENT event type
 wxDECLARE_EVENT(FILE_MODIFYED_EVENT, wxCommandEvent);
 wxDECLARE_EVENT(FILE_OPEN_EVENT, wxCommandEvent);
 wxDECLARE_EVENT(FILE_REMOVE_EVENT, wxCommandEvent);
 wxDECLARE_EVENT(FILE_RENAME_EVENT, wxCommandEvent);
-wxDECLARE_EVENT(FILE_NEW_EVENT, wxCommandEvent);
+wxDECLARE_EVENT(FILE_NEW_EVENT, FileNewEvent);
+
+typedef void (wxEvtHandler::*FileNewEvntFunction)(FileNewEvent&);
+#define FileNewEvntHandler(func)  wxEVENT_HANDLER_CAST(FileNewEvntFunction, func)
+
+#define EVT_FILENEW(ex, fn) \
+    wx__DECLARE_EVT1(ex, -1, FileNewEvntHandler(fn))
+
 
 // this is a definition so can't be in a header
 #endif // _WX_DEFSEXT_H_

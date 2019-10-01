@@ -1,15 +1,14 @@
-xMin=0; //X Min of the rect in mm
-yMin=0; //Y Min of the rect in mm
-xD=200; //Width of the rect in mm
-yD=100; //Height of the rect in mm
-zFull=1; //Thikness:
-zDelta=1; //Step Z:
-zSave=2; //Save Z:
-per_stepover=30; //Step over(%):
-d=6; //Mill diameter
-rate=200; //Feed rate of cutting
-zRate=50; //Z feed rate of cutting
-ccw=1; //Direction: 0 - clockwise, 2- counter clockwise
-
-include("mill_rect.inc.gcmc");
-MillRect(xMin, yMin, xD, yD,  zFull, zSave, zDelta,  per_stepover, d, rate, zRate,ccw);
+SafeZ = [-, -, 10]; 
+CutZ = [-, -, -1]; 
+HomePos = [0, 0]; 
+Square = { [0, 0], [1, 0], [1, 1], [0, 1] }; 
+Offset = [-2, 5]; 
+Square = Square * 10 + Offset;	/* Scale and move the square */ 
+feedrate(100);	/* Set feed */ 
+goto(Square[-1]);	/* To last point */ 
+move(CutZ);	/* Goto cutting depth */ 
+foreach(Square; v) { 
+move(v);	/* Cut the square */ 
+} 
+goto(SafeZ);	/* Retract */ 
+goto(HomePos);	/* Back to home-base */ 
