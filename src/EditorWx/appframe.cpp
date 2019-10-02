@@ -456,14 +456,18 @@ void AppFrame::OnHelp(wxCommandEvent &event)
 	wxString topic;
 	switch(event.GetId())
 	{
-		case ID_HELPGCMC: topic = L"gcodehelp\\gcode.htm"; break;
-		case ID_HELPNC: topic = L"gcmchelp\\gcmc.htm"; break;
+		case ID_HELPGCMC: topic = L"/gcmchelp"; break;
+		case ID_HELPNC: topic = L"/gcodehelp"; break;
 		case ID_WHATNEWS: topic = "whatnews.htm"; break;
 		default: topic = "unknown cmd"; break;
 	}
 
-	std::filesystem::path name_topic = StandartPaths::Get()->GetResourcesPath( topic.wc_str() );	
-	wxLaunchDefaultApplication(name_topic.c_str());	
+	wxString url(APP_WEBSITE);
+	url += topic;
+	wxLaunchDefaultApplication(url);
+
+	//std::filesystem::path name_topic = StandartPaths::Get()->GetResourcesPath( topic.wc_str() );	
+	//wxLaunchDefaultApplication(name_topic.c_str());	
 }
 
 void AppFrame::OnAbout (wxCommandEvent &WXUNUSED(event)) {

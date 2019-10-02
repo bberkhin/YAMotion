@@ -17,7 +17,7 @@
 #define APP_VERSION "0.1.alpha"
 #define APP_BUILD __DATE__
 
-#define APP_WEBSITE "http://www.yamotion.org"
+#define APP_WEBSITE "http://matildacnc.com"
 #define APP_MAIL "mailto:berkhin@gmail.com"
 #define APP_EMAILTEXT  "berkhin@gmail.com"
 
