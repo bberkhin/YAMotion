@@ -3,6 +3,8 @@
 #include <wx/statline.h>
 #include "RotateDlg.h"
 
+wxString DoubleToString(const double &val);
+
 enum
 {
 	ID_ANGLE = wxID_HIGHEST,
@@ -17,7 +19,6 @@ enum
 };
 
 using namespace Interpreter;
-
 
 #define MARGIN_VERT 10
 #define MARGIN_HOR	4
@@ -35,17 +36,17 @@ RotateDlg::RotateDlg(DoMathRotate *dm, wxWindow *parent, bool hasselection)
 	wxFlexGridSizer *sizer = new wxFlexGridSizer(2, MARGIN_VERT, MARGIN_HOR);
 	sizer->AddGrowableCol(0);
 	sizer->Add(new wxStaticText(this, wxID_ANY, _("Angle (degree):")), 0, wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL);
-	wxTextCtrl *pedit = new wxTextCtrl(this, ID_ANGLE,wxString::FromDouble(m_domath->GetAngle()));
+	wxTextCtrl *pedit = new wxTextCtrl(this, ID_ANGLE, DoubleToString(m_domath->GetAngle()));
 	sizer->Add(pedit, 0, wxEXPAND);
 
 	sizer->Add(new wxStaticText(this, wxID_ANY, _("Center X:")), 0, wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL);
-	pedit = new wxTextCtrl(this, ID_CENTER_X, wxString::FromDouble(m_domath->GetCenter().x));
+	pedit = new wxTextCtrl(this, ID_CENTER_X, DoubleToString(m_domath->GetCenter().x));
 	sizer->Add(pedit, 0, wxEXPAND);
 	sizer->Add(new wxStaticText(this, wxID_ANY, _("Center Y:")), 0, wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL);
-	pedit = new wxTextCtrl(this, ID_CENTER_Y, wxString::FromDouble(m_domath->GetCenter().y));
+	pedit = new wxTextCtrl(this, ID_CENTER_Y, DoubleToString(m_domath->GetCenter().y));
 	sizer->Add(pedit, 0, wxEXPAND);
 	sizer->Add(new wxStaticText(this, wxID_ANY, _("Center Z:")), 0, wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL);
-	pedit = new wxTextCtrl(this, ID_CENTER_Z, wxString::FromDouble(m_domath->GetCenter().z));
+	pedit = new wxTextCtrl(this, ID_CENTER_Z, DoubleToString(m_domath->GetCenter().z));
 	sizer->Add(pedit, 0, wxEXPAND);
 
 	sizer->Add(new wxStaticText(this, wxID_ANY, _("Plane:")), 0, wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL);
@@ -63,9 +64,9 @@ RotateDlg::RotateDlg(DoMathRotate *dm, wxWindow *parent, bool hasselection)
 	double minv, maxv;
 	m_domath->GetMinMax(&minv, &maxv);
 	inputpane->Add(new wxStaticText(this, wxID_ANY, _("Min value:")));
-	inputpane->Add(new wxTextCtrl(this, ID_MINVALUE, wxString::FromDouble(minv)));
+	inputpane->Add(new wxTextCtrl(this, ID_MINVALUE, DoubleToString(minv)));
 	inputpane->Add(new wxStaticText(this, wxID_ANY, _("Max value:")));
-	inputpane->Add(new wxTextCtrl(this, ID_MAXVALUE, wxString::FromDouble(maxv)));
+	inputpane->Add(new wxTextCtrl(this, ID_MAXVALUE, DoubleToString(maxv)));
 
 	inputpane->Add(10, 10);
 	inputpane->Add(new wxStaticLine(this), wxSizerFlags().Expand());

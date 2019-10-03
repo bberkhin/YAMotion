@@ -17,6 +17,7 @@ public:
 
 	// event handlers
 	void OnTimerEvent(wxTimerEvent &event);
+	void UpdateThemeColor();
 
 private:
 	// timer

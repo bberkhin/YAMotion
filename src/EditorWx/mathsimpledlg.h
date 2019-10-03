@@ -9,6 +9,7 @@ public:
 	virtual int ShowModal();
 private:
 	bool GetEditDouble(int id, double *val);
+	void UpdateThemeColor();
 private:
 	DoMathSimple *domath;
 };

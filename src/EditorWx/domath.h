@@ -66,11 +66,12 @@ protected:
 typedef std::vector<Interpreter::IndexParam>  ParamList;
 enum MathOperationType
 {
-	MOT_PLUS,
+	MOT_PLUS = 0,
 	MOT_MINUS,
 	MOT_MULTIPLY,
 	MOT_DIVIDE,
-	MOT_ASSIGN
+	MOT_ASSIGN,
+	MOT_MAX
 };
 
 class DoMathSimple : public DoMathBase
