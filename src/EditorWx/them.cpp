@@ -410,6 +410,7 @@ void ColourScheme::Read()
 	ReadColor(root["scrollbar_tumb_hvr"], m_colors[SCROLLBAR_TUMB_HOVER]);	
 	ReadColor(root["highlight"],m_colors[HIGHLIGHT]);
 	ReadColor(root["highlight_txt"],m_colors[HIGHLIGHT_TEXT]);
+	ReadColor(root["hyperlink_txt"], m_colors[HYPERLINK_TEXT]);
 	ReadColor(root["titlebar_txt"],m_colors[TITLEBAR_TEXT]);
 	ReadColor(root["titlebar_txt_active"],m_colors[TITLEBAR_ACTIVE_TEXT]);
 	ReadColor(root["slider_shaft"], m_colors[SLIDER_SHAFT]);
@@ -474,6 +475,7 @@ void ColourScheme::InitDef()
 	// the background and text colour for the highlighted item
 	m_colors[HIGHLIGHT] = wxColour(0x576573);
 	m_colors[HIGHLIGHT_TEXT] = wxColour(0xffffff);
+	m_colors[HYPERLINK_TEXT] = wxColour(0xddaa55);
 
 		// the titlebar text colours
 	m_colors[TITLEBAR_TEXT] = wxColour(0xFFFFFF);

@@ -264,9 +264,10 @@ wxBoxSizer *WelcomeWnd::CreateDoc()
 {
 	wxBoxSizer *pane = new wxBoxSizer(wxVERTICAL);
 	AddColumnHeader(pane, _("Help"));
-	AddHelpLink(pane, _("Use GCMC to write easy"), ID_HELPGCMC);
-	AddHelpLink(pane, _("Use GCode directly"), ID_HELPNC);
-	AddHelpLink(pane, _("Whats News"), ID_WHATNEWS);
+	AddHelpLink(pane, _("Matilda website"), ID_WHATNEWS);
+	//AddHelpLink(pane, _("Editor documentation"), ID_HELPEDITOR);
+	AddHelpLink(pane, _("GCMC documentation"), ID_HELPGCMC);
+	AddHelpLink(pane, _("GCode reference"), ID_HELPNC);	
 	return pane;
 }
 
@@ -334,7 +335,7 @@ wxBoxSizer *WelcomeWnd::CreateFooter()
 	pane->AddSpacer(WELCOME_MARGIN);
 	wxString ver = APP_VERSION;
 	ver += L" ";
-	ver += APP_COPYRIGTH;
+	ver += WXSTRINGCOPYRIGHT;
 
 	wxBoxSizer *paneCmd = new wxBoxSizer(wxHORIZONTAL);
 	wxStaticText *pTxt = new wxStaticText(this, ID_STATICTEXDISABLE, ver);

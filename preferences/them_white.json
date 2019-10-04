@@ -34,6 +34,7 @@
   "scrollbar_tumb_hvr": "#999999",
   "highlight": "#999999",
   "highlight_txt": "#FF1111",
+  "hyperlink_txt": "#387585",
   "titlebar_txt": "#666666",
   "titlebar_txt_active": "#333333",
   "slider_shaft": "#dddddd",
@@ -48,5 +49,5 @@
   "view3d_g1": "#000000",
   "view3d_xaxis": "#bb0000",
   "view3d_yaxis": "#00bb00",
-  "view3d_zaxis": "#0000bb" 
+  "view3d_zaxis": "#0000bb"
 }

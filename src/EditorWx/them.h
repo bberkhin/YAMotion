@@ -117,11 +117,12 @@ public:
 		BUTTON_FEEDBACK,
 		BUTTON_FEEDBACK_HOVER,
 		SCROLLBAR,
-		SCROLLBAR_TUMB,		
+		SCROLLBAR_TUMB,
 		SCROLLBAR_TUMB_HOVER,
 		// the background and text colour for the highlighted item
 		HIGHLIGHT,
 		HIGHLIGHT_TEXT,
+		HYPERLINK_TEXT,
 
 		// the titlebar text colours
 		TITLEBAR_TEXT,

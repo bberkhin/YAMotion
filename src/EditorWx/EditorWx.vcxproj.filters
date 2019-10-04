@@ -340,7 +340,7 @@
     <Image Include="bitmaps\matildaapp.ico">
       <Filter>Файлы ресурсов</Filter>
     </Image>
-    <Image Include="bitmaps\logo-big.png">
+    <Image Include="bitmaps\logo-sign.png">
       <Filter>Файлы ресурсов</Filter>
     </Image>
   </ItemGroup>

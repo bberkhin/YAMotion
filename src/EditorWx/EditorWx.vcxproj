@@ -137,7 +137,7 @@
   </ItemGroup>
   <ItemGroup>
     <Image Include="bitmaps\loader_dark.gif" />
-    <Image Include="bitmaps\logo-big.png" />
+    <Image Include="bitmaps\logo-sign.png" />
     <Image Include="bitmaps\matildaapp.ico" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

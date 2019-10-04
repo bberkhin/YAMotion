@@ -26,6 +26,10 @@
 #include "dirtree.h"
 #include "them.h"
 
+#include <wx/sstream.h>
+#include <wx/protocol/http.h>
+
+
 /**/
 //! application headers
 
@@ -137,17 +141,15 @@ wxBEGIN_EVENT_TABLE (AppFrame, wxFrame)
 	EVT_MENU_RANGE(ID_CHANGETHEME1, ID_CHANGETHEMELAST, AppFrame::OnChangeTheme)
 	EVT_UPDATE_UI_RANGE(ID_CHANGETHEME1, ID_CHANGETHEMELAST, AppFrame::OnUpdateChangeTheme)
 	
-	// help
-	EVT_MENU(wxID_ABOUT, AppFrame::OnAbout)
 	EVT_MENU(ID_DOWNLOADUPDATE, AppFrame::OnDownloadUpdate)
 	EVT_MENU(ID_SHOWWELCOME, AppFrame::OnShowWelcome)
 	EVT_MENU(ID_SHOWDIRPANE, AppFrame::OnShowDirPane)
 	EVT_UPDATE_UI(ID_SHOWDIRPANE, AppFrame::OnUpdateUIShowDirPane)
 
     // help
-    EVT_MENU(wxID_ABOUT,            AppFrame::OnAbout)	
+    EVT_MENU(wxID_ABOUT,            AppFrame::OnAbout)
 	EVT_MENU(ID_WRITEFEEDBACK, AppFrame::OnWriteFeedback)
-	EVT_MENU(ID_HELPGCMC, AppFrame::OnHelp)
+	EVT_MENU(ID_HELPEDITOR, AppFrame::OnHelp)
 	EVT_MENU(ID_HELPGCMC, AppFrame::OnHelp)
 	EVT_MENU(ID_HELPNC, AppFrame::OnHelp)
 	EVT_MENU(ID_WHATNEWS, AppFrame::OnHelp)
@@ -438,12 +440,41 @@ void AppFrame::OnClose (wxCloseEvent &event)
 
 void AppFrame::OnDownloadUpdate(wxCommandEvent &WXUNUSED(event)) 
 {
-	wxMessageBox("Download update");
+	
+	wxHTTP get;
+	get.SetHeader(_T("Content-type"), _T("text/html; charset=utf-8"));
+	get.SetTimeout(10); // 10 seconds of timeout instead of 10 minutes ...
+
+	//wxString http://matildacnc.com/gcmchelp
+
+	while (!get.Connect(L"https://drive.google.com"))
+		wxSleep(5);
+
+	wxApp::IsMainLoopRunning();
+
+	wxInputStream *httpStream = get.GetInputStream(_T("/file/d/1TxMDgxT2HmrS4hwI5W3avQ2BRGP-S1aL/view"));
+
+	if (get.GetError() == wxPROTO_NOERR)
+	{
+		wxString res;
+		wxStringOutputStream out_stream(&res);
+		httpStream->Read(out_stream);
+
+		wxMessageBox(res);
+	}
+	else
+	{
+		wxMessageBox(_T("Unable to connect!"));
+	}
+
+	wxDELETE(httpStream);
+	get.Close();
+	//wxMessageBox("Download update");
 }
 
 void AppFrame::OnWriteFeedback( wxCommandEvent &WXUNUSED(event) )
 {
-	wxString sendTo = APP_MAIL;
+	wxString sendTo = APP_EMAILURL;
 	sendTo += L"?subject=";
 	sendTo += wxString::Format(L"%s%%20%s", wxString(APP_NAME), wxString(APP_VERSION));	
 	ShellExecute(NULL, L"open", sendTo.c_str(), L"", L"", 0);
@@ -456,13 +487,15 @@ void AppFrame::OnHelp(wxCommandEvent &event)
 	wxString topic;
 	switch(event.GetId())
 	{
-		case ID_HELPGCMC: topic = L"/gcmchelp"; break;
-		case ID_HELPNC: topic = L"/gcodehelp"; break;
-		case ID_WHATNEWS: topic = "whatnews.htm"; break;
-		default: topic = "unknown cmd"; break;
+		case ID_HELPGCMC: topic = HELP_GCMC; break;
+		case ID_HELPNC: topic = HELP_GCODE; break;
+		case ID_HELPEDITOR: topic = HELP_EDITOR; break;
+		//case ID_WHATNEWS: topic = "whatnews.htm"; break;
+		default: 
+			break;
 	}
 
-	wxString url(APP_WEBSITE);
+	wxString url(APP_WEBSITEURL);
 	url += topic;
 	wxLaunchDefaultApplication(url);
 
@@ -1238,8 +1271,16 @@ wxMenuBar *AppFrame::CreateMenu ()
 
      // Help menu
 	wxMenu *menuHelp = new wxMenu;
-	menuHelp->Append(ID_DOWNLOADUPDATE, _("&Download ..."));
+
+	menuHelp->Append(ID_WHATNEWS, _("Matilda website"));
+	//menuHelp->Append(ID_HELPEDITOR, _("Matilda Web site"));
+	menuHelp->Append(ID_HELPGCMC, _("GCMC documentation"));
+	menuHelp->Append(ID_HELPNC, _("GCodes reference"));
+	menuHelp->AppendSeparator();
+	menuHelp->Append(ID_DOWNLOADUPDATE, _("&Check Updates"));
+	menuHelp->AppendSeparator();
 	menuHelp->Append (wxID_ABOUT, _("&About..."));
+
 	// construct menu
 	m_menuBar->Append(menuFile, _("&File"));
 	m_menuBar->Append(menuEdit, _("&Edit"));
