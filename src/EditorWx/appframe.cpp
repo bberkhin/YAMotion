@@ -1,5 +1,6 @@
 #include "wx/wx.h" // filename support
 #include "wx/filename.h" // filename support
+
 #include "app.h"
 #include "appframe.h"       // Prefs
 
@@ -25,9 +26,15 @@
 #include "welcomewnd.h"
 #include "dirtree.h"
 #include "them.h"
+#include "rapidxml.hpp"
 
 #include <wx/sstream.h>
 #include <wx/protocol/http.h>
+#include <wx/mstream.h>
+
+#include <wx/url.h>
+
+#include <vector>
 
 
 /**/
@@ -437,30 +444,82 @@ void AppFrame::OnClose (wxCloseEvent &event)
     Destroy();
 }
 
+static wxString SubstructXmlValue(const wxString &text, const wxString &tag )
+{
+	wxString tagfull = wxString::Format("<%s>", tag);
+	int start = text.Find(tagfull);
+	int end = text.Find(wxString::Format("</%s>", tag));
+	if (start < end)
+	{
+		return text.SubString(start + tagfull.Length(), end-1);
+	}
+	else
+		return wxEmptyString;
+}
+
+
+bool AppFrame::CheckVersion(const wxString &version)
+{
+// return true if current version older then argument
+// formt: "%d.%d%s", APP_VERSION_MAJOR, APP_VERSION_MINOR, APP_VERSION_EXTSTR
+	wxString major = version.BeforeFirst('.');
+	wxString minor = version.AfterFirst('.');
+	minor = minor.BeforeFirst('.');
+	long imajor = 0;
+	major.ToLong(&imajor);
+	long iminor = 0;
+	minor.ToLong(&iminor);
+	if (imajor > APP_VERSION_MAJOR)
+		return true;
+	if (iminor > APP_VERSION_MINOR)
+		return true;
+	return false;
+}
 
 void AppFrame::OnDownloadUpdate(wxCommandEvent &WXUNUSED(event)) 
 {
 	
 	wxHTTP get;
-	get.SetHeader(_T("Content-type"), _T("text/html; charset=utf-8"));
+	wxString url(APP_WEBSITE);
+	wxString url_stream("/version");
+	get.SetHeader(_T("Content-type"), _T("xml"));
 	get.SetTimeout(10); // 10 seconds of timeout instead of 10 minutes ...
+	
+	// this will wait until the user connects to the internet. It is important in case of dialup (or ADSL) connections
+	int n = 0;
+	while (!get.Connect(url) && n < 3)  // only the server, no pages here yet ...
+	{
+		wxSleep(1);
+		n++;
+	}
 
-	//wxString http://matildacnc.com/gcmchelp
-
-	while (!get.Connect(L"https://drive.google.com"))
-		wxSleep(5);
-
-	wxApp::IsMainLoopRunning();
-
-	wxInputStream *httpStream = get.GetInputStream(_T("/file/d/1TxMDgxT2HmrS4hwI5W3avQ2BRGP-S1aL/view"));
-
+	wxApp::IsMainLoopRunning(); // should return true
+	wxInputStream *httpStream = get.GetInputStream(url_stream);
 	if (get.GetError() == wxPROTO_NOERR)
 	{
 		wxString res;
 		wxStringOutputStream out_stream(&res);
 		httpStream->Read(out_stream);
-
-		wxMessageBox(res);
+		wxString ver = SubstructXmlValue(res, "version");
+		wxString desc = SubstructXmlValue(res, wxString("description") + StandartPaths::Get()->GetLanguageCatalog());
+		if (desc.IsEmpty() )
+			desc = SubstructXmlValue(res, wxString("description"));
+		
+		if (!ver.IsEmpty())
+		{
+			if (CheckVersion(ver)) // there is new vesion
+			{
+				wxMessageBox(wxString::Format(_T("Version: %s is avalable\n %s"), ver, desc));
+			}
+			else
+			{
+				wxMessageBox(wxString::Format(_("You have the latest version of the application"), ver, desc));
+			}
+		}
+		else
+		{
+			wxMessageBox(_T("Somthing goes wrong :( Version Info not found"));
+		}
 	}
 	else
 	{
@@ -469,7 +528,7 @@ void AppFrame::OnDownloadUpdate(wxCommandEvent &WXUNUSED(event))
 
 	wxDELETE(httpStream);
 	get.Close();
-	//wxMessageBox("Download update");
+
 }
 
 void AppFrame::OnWriteFeedback( wxCommandEvent &WXUNUSED(event) )

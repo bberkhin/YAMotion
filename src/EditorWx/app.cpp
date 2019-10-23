@@ -197,7 +197,7 @@ bool App::OnInit()
 		}
 		else // language changed
 		{
-			wxString loc_name = pInfo->GetLocaleName();			
+			wxString loc_name = pInfo->GetLocaleName();
 			StandartPaths::Get()->SetLanguageCatalog( loc_name.BeforeFirst('-').c_str() );
 		}
 	}

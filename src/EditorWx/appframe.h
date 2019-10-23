@@ -110,6 +110,7 @@ private:
 	void AddLastFilesToMenu();
 	void AddThemesToMenu();
 	WelcomeWnd *FindWelcomePage(size_t *welcome_page = 0);
+	bool CheckVersion(const wxString &version); // return true if current version older then argument
 	
 private:
 	// edit object

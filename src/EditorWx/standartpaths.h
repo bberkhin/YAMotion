@@ -33,6 +33,7 @@ public:
 	~StandartPathsTm() { }
 	static StandartPathsTm<Ch> *Get() { return global_paths; }
 	void SetLanguageCatalog(const Ch *lang) { lang_cat = lang;  }
+	std::basic_string<Ch> GetLanguageCatalog() { return lang_cat; }
 	std::filesystem::path GetRootPath(const Ch *finame = 0) {	return root_path;	}
 	std::filesystem::path GetLibraryPath()
 	{
