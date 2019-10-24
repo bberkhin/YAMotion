@@ -34,7 +34,7 @@ public:
 	void OnShowWelcome(wxCommandEvent &event);
 	void OnShowDirPane(wxCommandEvent &event);
 	void OnUpdateUIShowDirPane(wxUpdateUIEvent& event);
-	void OnDownloadUpdate(wxCommandEvent &event);
+	void OnCheckUpdate(wxCommandEvent &event);
 	void OnExit(wxCommandEvent &event);
 	void OnWriteFeedback(wxCommandEvent &event);
 	void OnHelp(wxCommandEvent &event);
@@ -110,7 +110,7 @@ private:
 	void AddLastFilesToMenu();
 	void AddThemesToMenu();
 	WelcomeWnd *FindWelcomePage(size_t *welcome_page = 0);
-	bool CheckVersion(const wxString &version); // return true if current version older then argument
+	bool CheckForNewVersion(const wxString &version); // return true if current version older then argument
 	
 private:
 	// edit object

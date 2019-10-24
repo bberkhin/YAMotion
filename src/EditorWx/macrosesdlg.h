@@ -2,7 +2,7 @@
 #include <wx/listbox.h>
 #include "macroses.h"
 
-class MacrosesDlg :	public wxDialog
+class MacrosesDlg : public wxDialog
 {
 public:
 	MacrosesDlg(Macroses *pm, wxWindow *parent);

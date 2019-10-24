@@ -7,8 +7,8 @@
 
 #include "wx/event.h"
 #include "wx/artprov.h"
-#include "appdefs.h"      
-#include "defsext.h"     
+#include "appdefs.h"
+#include "defsext.h"
 #include "prefs.h"
 #include "editorpanel.h"
 #include "edit.h"
@@ -26,13 +26,13 @@
 #include "welcomewnd.h"
 #include "dirtree.h"
 #include "them.h"
-#include "rapidxml.hpp"
-
+#include "CheckUpdate.h"
+/*
 #include <wx/sstream.h>
 #include <wx/protocol/http.h>
 #include <wx/mstream.h>
-
 #include <wx/url.h>
+*/
 
 #include <vector>
 
@@ -148,7 +148,7 @@ wxBEGIN_EVENT_TABLE (AppFrame, wxFrame)
 	EVT_MENU_RANGE(ID_CHANGETHEME1, ID_CHANGETHEMELAST, AppFrame::OnChangeTheme)
 	EVT_UPDATE_UI_RANGE(ID_CHANGETHEME1, ID_CHANGETHEMELAST, AppFrame::OnUpdateChangeTheme)
 	
-	EVT_MENU(ID_DOWNLOADUPDATE, AppFrame::OnDownloadUpdate)
+	EVT_MENU(ID_CHECKUPDATE, AppFrame::OnCheckUpdate)
 	EVT_MENU(ID_SHOWWELCOME, AppFrame::OnShowWelcome)
 	EVT_MENU(ID_SHOWDIRPANE, AppFrame::OnShowDirPane)
 	EVT_UPDATE_UI(ID_SHOWDIRPANE, AppFrame::OnUpdateUIShowDirPane)
@@ -228,11 +228,23 @@ AppFrame::AppFrame (const wxString &title)
 
 	SetDropTarget(new DropFileOpen(this));
 
+	//Post message to check update
+	/*
+	wxCommandEvent event(FILE_MODIFYED_EVENT, GetId());
+	event.SetEventObject(this);
+	ProcessWindowEvent(event);
+	*/
+	wxCommandEvent *ev = new wxCommandEvent(wxEVT_MENU, ID_CHECKUPDATE);
+	ev->SetEventObject(this);
+	//ev->SetClientObject(this);
+	wxQueueEvent(this, ev);
+
 #ifdef DOWX_LOGGING
 		//Open a log window, don't show it though
 	wxLogWindow *m_LogWin = new wxLogWindow(this, "YAMotion Gcode Editor", true, false);
 	wxLog::SetActiveTarget(m_LogWin);
 #endif
+
 }
 
 AppFrame::~AppFrame () 
@@ -444,91 +456,18 @@ void AppFrame::OnClose (wxCloseEvent &event)
     Destroy();
 }
 
-static wxString SubstructXmlValue(const wxString &text, const wxString &tag )
+
+void AppFrame::OnCheckUpdate(wxCommandEvent &event) 
 {
-	wxString tagfull = wxString::Format("<%s>", tag);
-	int start = text.Find(tagfull);
-	int end = text.Find(wxString::Format("</%s>", tag));
-	if (start < end)
+	bool bsilence = (event.GetEventObject() == dynamic_cast<wxObject *>(this) );
+	if (bsilence)
 	{
-		return text.SubString(start + tagfull.Length(), end-1);
+		wxString desc;
+		wxString verName;
+		if (!DoCheckUpdate(desc, verName, 0))
+			return;
 	}
-	else
-		return wxEmptyString;
-}
-
-
-bool AppFrame::CheckVersion(const wxString &version)
-{
-// return true if current version older then argument
-// formt: "%d.%d%s", APP_VERSION_MAJOR, APP_VERSION_MINOR, APP_VERSION_EXTSTR
-	wxString major = version.BeforeFirst('.');
-	wxString minor = version.AfterFirst('.');
-	minor = minor.BeforeFirst('.');
-	long imajor = 0;
-	major.ToLong(&imajor);
-	long iminor = 0;
-	minor.ToLong(&iminor);
-	if (imajor > APP_VERSION_MAJOR)
-		return true;
-	if (iminor > APP_VERSION_MINOR)
-		return true;
-	return false;
-}
-
-void AppFrame::OnDownloadUpdate(wxCommandEvent &WXUNUSED(event)) 
-{
-	
-	wxHTTP get;
-	wxString url(APP_WEBSITE);
-	wxString url_stream("/version");
-	get.SetHeader(_T("Content-type"), _T("xml"));
-	get.SetTimeout(10); // 10 seconds of timeout instead of 10 minutes ...
-	
-	// this will wait until the user connects to the internet. It is important in case of dialup (or ADSL) connections
-	int n = 0;
-	while (!get.Connect(url) && n < 3)  // only the server, no pages here yet ...
-	{
-		wxSleep(1);
-		n++;
-	}
-
-	wxApp::IsMainLoopRunning(); // should return true
-	wxInputStream *httpStream = get.GetInputStream(url_stream);
-	if (get.GetError() == wxPROTO_NOERR)
-	{
-		wxString res;
-		wxStringOutputStream out_stream(&res);
-		httpStream->Read(out_stream);
-		wxString ver = SubstructXmlValue(res, "version");
-		wxString desc = SubstructXmlValue(res, wxString("description") + StandartPaths::Get()->GetLanguageCatalog());
-		if (desc.IsEmpty() )
-			desc = SubstructXmlValue(res, wxString("description"));
-		
-		if (!ver.IsEmpty())
-		{
-			if (CheckVersion(ver)) // there is new vesion
-			{
-				wxMessageBox(wxString::Format(_T("Version: %s is avalable\n %s"), ver, desc));
-			}
-			else
-			{
-				wxMessageBox(wxString::Format(_("You have the latest version of the application"), ver, desc));
-			}
-		}
-		else
-		{
-			wxMessageBox(_T("Somthing goes wrong :( Version Info not found"));
-		}
-	}
-	else
-	{
-		wxMessageBox(_T("Unable to connect!"));
-	}
-
-	wxDELETE(httpStream);
-	get.Close();
-
+	CheckUpdateDlg dlg(this);
 }
 
 void AppFrame::OnWriteFeedback( wxCommandEvent &WXUNUSED(event) )
@@ -537,8 +476,6 @@ void AppFrame::OnWriteFeedback( wxCommandEvent &WXUNUSED(event) )
 	sendTo += L"?subject=";
 	sendTo += wxString::Format(L"%s%%20%s", wxString(APP_NAME), wxString(APP_VERSION));	
 	ShellExecute(NULL, L"open", sendTo.c_str(), L"", L"", 0);
-	
-
 }
 
 void AppFrame::OnHelp(wxCommandEvent &event)
@@ -1336,7 +1273,7 @@ wxMenuBar *AppFrame::CreateMenu ()
 	menuHelp->Append(ID_HELPGCMC, _("GCMC documentation"));
 	menuHelp->Append(ID_HELPNC, _("GCodes reference"));
 	menuHelp->AppendSeparator();
-	menuHelp->Append(ID_DOWNLOADUPDATE, _("&Check Updates"));
+	menuHelp->Append(ID_CHECKUPDATE, _("&Check Updates"));
 	menuHelp->AppendSeparator();
 	menuHelp->Append (wxID_ABOUT, _("&About..."));
 

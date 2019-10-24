@@ -37,6 +37,7 @@
     <ClCompile Include="..\wxJson\jsonwriter.cpp" />
     <ClCompile Include="about.cpp" />
     <ClCompile Include="app.cpp" />
+    <ClCompile Include="CheckUpdate.cpp" />
     <ClCompile Include="codedescription.cpp" />
     <ClCompile Include="configdata.cpp" />
     <ClCompile Include="dirtree.cpp" />
@@ -90,6 +91,7 @@
     <ClInclude Include="app.h" />
     <ClInclude Include="appdefs.h" />
     <ClInclude Include="appframe.h" />
+    <ClInclude Include="CheckUpdate.h" />
     <ClInclude Include="codedescription.h" />
     <ClInclude Include="configdata.h" />
     <ClInclude Include="defsext.h" />

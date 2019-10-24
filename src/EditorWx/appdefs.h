@@ -33,3 +33,4 @@
 #define HELP_GCMC L"/gcmchelp"
 #define HELP_GCODE L"/gcodehelp"
 #define HELP_EDITOR L"/editorhelp"
+#define HELP_DOWNLOAD L""//L"/download"

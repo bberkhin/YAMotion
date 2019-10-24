@@ -128,7 +128,7 @@ void WelcomeWnd::UpdateThemeColor()
 			break;
 		//footer cmd
 		case ID_GLOBALPREFS:
-		case ID_DOWNLOADUPDATE:
+		case ID_CHECKUPDATE:
 			wxASSERT(ph);
 			ph->SetForegroundColour(m_fgColor);
 			ph->SetColour(FlatButton::BackgroundColour, m_bgColor);
@@ -206,7 +206,7 @@ void WelcomeWnd::AddCommand(wxBoxSizer *pane, const wxString &text, int cmd, boo
 		case ID_NEWNC:
 		case ID_NEWGCMC:		idArt = wxART_NEW; break;
 		case ID_GLOBALPREFS:	idArt = ART_PREFERENCES; break;
-		case ID_DOWNLOADUPDATE:	idArt = ART_UPDATE; break;
+		case ID_CHECKUPDATE:	idArt = ART_UPDATE; break;
 	}
 
 	wxBitmap bmp = wxArtProvider::GetBitmap(idArt, wxART_MENU);
@@ -348,7 +348,7 @@ wxBoxSizer *WelcomeWnd::CreateFooter()
 	AddCommand(paneCmd, _("Preference"), ID_GLOBALPREFS, true);
 
 	paneCmd->AddSpacer(WELCOME_MARGIN);
-	AddCommand(paneCmd, _("Check for Update"), ID_DOWNLOADUPDATE, true);
+	AddCommand(paneCmd, _("Check for Update"), ID_CHECKUPDATE, true);
 	pane->Add( paneCmd, 0, wxALIGN_BOTTOM);
 	pane->AddStretchSpacer();
 	wxBoxSizer *pane1 = new wxBoxSizer(wxVERTICAL);
