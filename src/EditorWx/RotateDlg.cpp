@@ -2,6 +2,7 @@
 #include <wx/textctrl.h>
 #include <wx/statline.h>
 #include "RotateDlg.h"
+#include "flatstaticline.h"
 
 wxString DoubleToString(const double &val);
 
@@ -24,6 +25,18 @@ using namespace Interpreter;
 #define MARGIN_HOR	4
 #define MARGIN_COLUMN	10
 
+#define ADD_GRIPPER(margin1,margin2) clientarea->AddSpacer(margin1);\
+					pGripper = new FlatStaticLine(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxLI_HORIZONTAL); \
+					clientarea->Add(pGripper, 0, wxGROW | wxLEFT | wxRIGHT, 0);\
+					clientarea->AddSpacer(margin2);
+
+#define ADD_STATICTEXT_TO_GRID(text, pmax) pt = new wxStaticText(this, wxID_ANY, text); \
+									if ( pmax ) { *pmax = std::max(*pmax, pt->GetSize().x); } \
+									gd->Add(pt, 0, wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL);
+
+#define ADD_EDITTEXT_TO_GRID(id,text) pedit = new wxTextCtrl(this,id, text); \
+									gd->Add(pedit, 0, wxEXPAND | wxALIGN_CENTER_VERTICAL);
+
 RotateDlg::RotateDlg(DoMathRotate *dm, wxWindow *parent, bool hasselection)
 	: m_domath(dm), wxDialog(parent, wxID_ANY, wxEmptyString,
 		wxDefaultPosition, wxDefaultSize,
@@ -32,67 +45,84 @@ RotateDlg::RotateDlg(DoMathRotate *dm, wxWindow *parent, bool hasselection)
 	// sets the application title
 	SetTitle(_("Rotate"));
 
+	wxBoxSizer *clientarea = new wxBoxSizer(wxVERTICAL);
+	FlatStaticLine *pGripper;
+	ADD_GRIPPER(Y_MARGIN, Y_MARGIN);
+	// Add Parameters
+	wxStaticText *pt;
+	wxTextCtrl *pedit;
+	wxBoxSizer *inputpane;
+	int max_width = 0;
+	int *pmax_width = &max_width;
+
+	
 	// create 2 column flex grid sizer with growable 2nd column
-	wxFlexGridSizer *sizer = new wxFlexGridSizer(2, MARGIN_VERT, MARGIN_HOR);
-	sizer->AddGrowableCol(0);
-	sizer->Add(new wxStaticText(this, wxID_ANY, _("Angle (degree):")), 0, wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL);
-	wxTextCtrl *pedit = new wxTextCtrl(this, ID_ANGLE, DoubleToString(m_domath->GetAngle()));
-	sizer->Add(pedit, 0, wxEXPAND);
-
-	sizer->Add(new wxStaticText(this, wxID_ANY, _("Center X:")), 0, wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL);
-	pedit = new wxTextCtrl(this, ID_CENTER_X, DoubleToString(m_domath->GetCenter().x));
-	sizer->Add(pedit, 0, wxEXPAND);
-	sizer->Add(new wxStaticText(this, wxID_ANY, _("Center Y:")), 0, wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL);
-	pedit = new wxTextCtrl(this, ID_CENTER_Y, DoubleToString(m_domath->GetCenter().y));
-	sizer->Add(pedit, 0, wxEXPAND);
-	sizer->Add(new wxStaticText(this, wxID_ANY, _("Center Z:")), 0, wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL);
-	pedit = new wxTextCtrl(this, ID_CENTER_Z, DoubleToString(m_domath->GetCenter().z));
-	sizer->Add(pedit, 0, wxEXPAND);
-
-	sizer->Add(new wxStaticText(this, wxID_ANY, _("Plane:")), 0, wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL);
+	wxFlexGridSizer *gd = new wxFlexGridSizer(6, wxSize(10, 5));
+	//sizer->AddGrowableCol(0);
+	ADD_STATICTEXT_TO_GRID(_("Angle (degree): "), pmax_width);
+	ADD_EDITTEXT_TO_GRID(ID_ANGLE, DoubleToString(m_domath->GetAngle()));
+	ADD_STATICTEXT_TO_GRID(_("Plane: "), pmax_width);
 	int select = 0, i = 0;
 	wxChoice *plist = new wxChoice(this, ID_PLANE_CHOISE);
 	plist->Append(L"XY");
 	plist->Append(L"YZ");
 	plist->Append(L"XZ");
 	plist->SetSelection(m_domath->GetPlane() - 1);
-	sizer->Add(plist, 0, wxEXPAND);
+	gd->Add(plist, 0, wxEXPAND);
+	gd->AddSpacer(1); 
+	gd->AddSpacer(1);
 
-	
-	wxBoxSizer *inputpane = new wxBoxSizer(wxVERTICAL);
-	
+	ADD_STATICTEXT_TO_GRID(_("Center X: "), pmax_width);
+	ADD_EDITTEXT_TO_GRID(ID_CENTER_X, DoubleToString(m_domath->GetCenter().x));
+	ADD_STATICTEXT_TO_GRID(_("Center Y: "), pmax_width);
+	ADD_EDITTEXT_TO_GRID(ID_CENTER_Y, DoubleToString(m_domath->GetCenter().y));
+	ADD_STATICTEXT_TO_GRID(_("Center Z: "), pmax_width);
+	ADD_EDITTEXT_TO_GRID(ID_CENTER_Z, DoubleToString(m_domath->GetCenter().z));
+
+
+	inputpane = new wxBoxSizer(wxHORIZONTAL);
+	inputpane->AddSpacer(X_MARGIN);
+	inputpane->Add(gd, 0, wxEXPAND);
+	inputpane->AddSpacer(X_MARGIN);
+	clientarea->Add(inputpane, wxEXPAND, wxEXPAND);
+
+	ADD_GRIPPER(Y_MARGIN, Y_MARGIN);
+	// Add min max
+	gd = new wxFlexGridSizer(4, wxSize(10, 0));
 	double minv, maxv;
 	m_domath->GetMinMax(&minv, &maxv);
-	inputpane->Add(new wxStaticText(this, wxID_ANY, _("Min value:")));
-	inputpane->Add(new wxTextCtrl(this, ID_MINVALUE, DoubleToString(minv)));
-	inputpane->Add(new wxStaticText(this, wxID_ANY, _("Max value:")));
-	inputpane->Add(new wxTextCtrl(this, ID_MAXVALUE, DoubleToString(maxv)));
-
-	inputpane->Add(10, 10);
-	inputpane->Add(new wxStaticLine(this), wxSizerFlags().Expand());
+	pmax_width = 0;
+	ADD_STATICTEXT_TO_GRID(_("Min value: "), pmax_width);
+	ADD_EDITTEXT_TO_GRID(ID_MINVALUE, DoubleToString(minv));
+	ADD_STATICTEXT_TO_GRID(_("Max value: "), pmax_width);
+	ADD_EDITTEXT_TO_GRID(ID_MAXVALUE, DoubleToString(maxv));
+	
+	inputpane = new wxBoxSizer(wxHORIZONTAL);
+	inputpane->AddSpacer(X_MARGIN);
+	inputpane->Add(gd, 0, wxEXPAND);
+	inputpane->AddSpacer(X_MARGIN);
+	clientarea->Add(inputpane, 0, wxEXPAND);
+	
+	ADD_GRIPPER(Y_MARGIN, Y_MARGIN);
+	
+	inputpane = new wxBoxSizer(wxHORIZONTAL);
+	inputpane->AddSpacer(X_MARGIN);
+	wxCheckBox *pinnefile = new wxCheckBox(this, ID_INNEWFILE, _("Create new file"));
+	pinnefile->SetValue(m_domath->InNewFile());
+	inputpane->Add(pinnefile);
+	inputpane->AddSpacer(X_MARGIN * 2);
 	wxCheckBox *pinsel = new wxCheckBox(this, ID_INSELECTED, _("In selected"));
 	pinsel->SetValue(hasselection ? dm->InSelected() : false);
 	pinsel->Enable(hasselection);
 	inputpane->Add(pinsel);
-
-	wxBoxSizer *clientarea = new wxBoxSizer(wxHORIZONTAL);
-
-	clientarea->Add(sizer,0, wxEXPAND);
-	clientarea->AddSpacer(MARGIN_COLUMN);
-	clientarea->Add(inputpane);
+	inputpane->AddSpacer(X_MARGIN);
+	clientarea->Add(inputpane, 0, wxEXPAND);
 
 	// total pane
 	wxBoxSizer *totalpane = new wxBoxSizer(wxVERTICAL);
 	totalpane->Add(clientarea, 0, wxEXPAND | wxLEFT | wxRIGHT, 10);
-	totalpane->AddSpacer(10);
-	
-	wxCheckBox *pinnefile = new wxCheckBox(this, ID_INNEWFILE, _("Create new file"));
-	pinnefile->SetValue( dm->InNewFile() );
-	totalpane->Add(pinnefile, 0, wxEXPAND,10 );
-
-	totalpane->AddSpacer(10);
 	totalpane->Add(CreateStdDialogButtonSizer(wxOK | wxCANCEL), 0, wxALL | wxALIGN_RIGHT, 2);
-
+	
 	SetSizerAndFit(totalpane);
 }
 
