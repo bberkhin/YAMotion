@@ -99,7 +99,11 @@ CheckUpdateDlg::CheckUpdateDlg(wxWindow *parent)
 	if (ShowModal() == wxID_OK)
 	{
 		wxString url(APP_WEBSITEURL);
-		url += HELP_DOWNLOAD;
+		if (HELP_DOWNLOAD != 0 && wcslen(HELP_DOWNLOAD) > 0)
+		{
+			url += HELP_DOWNLOAD;
+			url += StandartPaths::Get()->GetLanguageCatalog().c_str();
+		}
 		wxLaunchDefaultApplication(url);
 	}
 }
