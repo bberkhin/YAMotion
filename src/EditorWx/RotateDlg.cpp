@@ -21,8 +21,8 @@ enum
 
 using namespace Interpreter;
 
-#define MARGIN_VERT 10
-#define MARGIN_HOR	4
+#define Y_MARGIN 10
+#define X_MARGIN	4
 #define MARGIN_COLUMN	10
 
 #define ADD_GRIPPER(margin1,margin2) clientarea->AddSpacer(margin1);\
