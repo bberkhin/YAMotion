@@ -5,7 +5,7 @@
 //============================================================================
 
 #define APP_NAME "Matilda"
-#define APP_DESCR "See http://www.matildacnc.org"
+#define APP_DESCR "See http://matildacnc.org"
 
 #define APP_MAINT "Boris Berkhin"
 #define APP_VENDOR "Matilda"
@@ -24,8 +24,9 @@
 #define APP_WEBSITE "matildacnc.com"
 #define APP_WEBSITETEXT "http://matildacnc.com"
 #define APP_WEBSITEURL "http://matildacnc.com"
-#define APP_EMAILURL "mailto:bberkhin@gmail.com"
-#define APP_EMAILTEXT  "bberkhin@gmail.com"
+//#define APP_EMAILURL "mailto:bberkhin@matildacnc.com"
+#define APP_EMAILTEXT  "bberkhin@matildacnc.com"
+#define APP_EMAILURL (wxString::Format(L"mailto:bberkhin@matildacnc.com?subject=%s%%20%s", wxString(APP_NAME), wxString(APP_VERSION)))
 
 #define NONAME _("<untitled>")
 #define WXSTRINGCOPYRIGHT wxString(wxString((wchar_t)0xA9) + APP_COPYRIGTH)

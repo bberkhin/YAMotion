@@ -685,7 +685,7 @@ GModalGroup CmdParser::get_gmodal_group(int num) const
 	case G_90: case G_91:
 		return ModalGroup_DISTANCE;
 	case G_90_1: case G_91_1:
-		return ModalGroup_DISTANCE;
+		return ModalGroup_IJK_DISTANCE;
 	case G_93: case G_94: case G_95:
 		return ModalGroup_FEEDMODE;
 	case G_20: case G_21:

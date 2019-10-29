@@ -240,7 +240,8 @@ bool Preferences::DoRead(const wxString& fileName, bool errifnoexist )
 	/*
 	{
 		"id": "BLACK",
-		"name" : "Black theme for real man",
+		"name" : "Black theme",
+		"nameru" : "Темная тема",
 		"window_colors" : "them_black.json",
 		"GCODE" : "nc_syntax_black.json",
 		}
@@ -256,7 +257,10 @@ bool Preferences::DoRead(const wxString& fileName, bool errifnoexist )
 			ThemeInfo &ti = m_themes.back();
 			wxJSONValue &val = themes.Item(i);
 			ti.id = val["id"].AsString();
-			ti.name = val["name"].AsString();
+			wxString nameid = wxString("name") + StandartPaths::Get()->GetLanguageCatalog();
+			ti.name = val[nameid].AsString();
+			if ( ti.name.IsEmpty() )
+				ti.name = val["name"].AsString();
 			ti.wndcolorsfn = val["window_colors"].AsString();
 
 			//m_colors->SetFileName(wndcolor);

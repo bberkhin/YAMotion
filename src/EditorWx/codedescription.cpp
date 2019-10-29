@@ -65,6 +65,9 @@ GCodeDescription::GCodeDescription() : parser( wxGetApp().GetEnvironment() )
 	wchar_t *c = 0;
 	wchar_t line[512];
 	int n;
+	// Create a locale object representing the default C locale
+	_locale_t locale = _create_locale(LC_NUMERIC, "C");
+
 	while (true)
 	{
 		if( fgetws(line, 512, file) == NULL )
@@ -96,7 +99,7 @@ GCodeDescription::GCodeDescription() : parser( wxGetApp().GetEnvironment() )
 		{
 		case L'G':
 		case L'g':
-			d = _wtof(line + 1);
+			d = _wtof_l(line + 1, locale);
 			index = static_cast<int>(d * 10);
 			commands[index] = c + 1;
 			break;
@@ -110,8 +113,8 @@ GCodeDescription::GCodeDescription() : parser( wxGetApp().GetEnvironment() )
 		case L'F': commands[2003] = c + 1; break;
 		}
 	}
-	fclose(file);	
-	
+	_free_locale(locale);
+	fclose(file);
 }
 
 

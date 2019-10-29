@@ -473,8 +473,8 @@ void AppFrame::OnCheckUpdate(wxCommandEvent &event)
 void AppFrame::OnWriteFeedback( wxCommandEvent &WXUNUSED(event) )
 {
 	wxString sendTo = APP_EMAILURL;
-	sendTo += L"?subject=";
-	sendTo += wxString::Format(L"%s%%20%s", wxString(APP_NAME), wxString(APP_VERSION));	
+	//sendTo += L"?subject=";
+	//sendTo += wxString::Format(L"%s%%20%s", wxString(APP_NAME), wxString(APP_VERSION));	
 	ShellExecute(NULL, L"open", sendTo.c_str(), L"", L"", 0);
 }
 

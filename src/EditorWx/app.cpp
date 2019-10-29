@@ -45,9 +45,8 @@ wxEND_EVENT_TABLE()
 // language data
 const wxLanguage g_langIds[] =  
 {	
-	wxLANGUAGE_DEFAULT,	
-	wxLANGUAGE_RUSSIAN,	
-	wxLANGUAGE_FRENCH,
+	wxLANGUAGE_DEFAULT,
+	wxLANGUAGE_RUSSIAN
 /*
 	wxLANGUAGE_ITALIAN,
 	wxLANGUAGE_GERMAN,
@@ -73,9 +72,8 @@ const wxLanguage g_langIds[] =
 // shown before we set the locale anyhow
 const wxString g_langNames[] = 
 {	
-	"English",	
-	"Russian",	
-	"French",
+	"English",
+	"Russian",
 /*
 	"Italian",
 	"German",	

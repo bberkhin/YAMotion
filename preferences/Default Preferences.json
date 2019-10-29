@@ -22,7 +22,8 @@
   "themes": [
     {
       "id": "BLACK",
-      "name": "Black theme для настоящих чуваков",
+      "name": "Black theme",
+      "nameru": "Темная тема",
       "window_colors": "them_black.json",
       "GCODE": "nc_syntax_black.json",
       "GCMC": "gcmc_syntax_black.json",
@@ -30,20 +31,13 @@
     },
     {
       "id": "WHITE",
-      "name": "White theme classic для лузеров",
+      "name": "White theme",
+      "nameru": "Светлая тема",
       "window_colors": "them_white.json",
       "GCODE": "nc_syntax_white.json",
       "GCMC": "gcmc_syntax_white.json",
       "JSON": "json_syntax_white.json"
-    },
-     {
-      "id": "BLUE",
-      "name": "For nobody",
-      "window_colors": "them_black.json",
-      "GCODE": "nc_syntax_white.json",
-      "GCMC": "gcmc_syntax_white.json",
-      "JSON": "json_syntax_white.json"
-    }
+    }   
   ],
    "files":
     [
