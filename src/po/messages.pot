@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-04-01 21:46+0700\n"
+"POT-Creation-Date: 2019-10-30 16:58+0700\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,17 +17,36 @@ msgstr ""
 "Content-Type: text/plain; charset=CHARSET\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: edit.cpp:952 edit.cpp:1001
+#. 1
+#. 2
+#. 3
+#. 4
+#. 5
+#. 6
+#. 7
+#. 8
+#. 9
+#. 10
+#. 11
+#: mathsimpledlg.cpp:91
+msgid " "
+msgstr ""
+
+#: editorpanel.cpp:484
+msgid " AXIS "
+msgstr ""
+
+#: logwindow.cpp:73
+msgid " Error! "
+msgstr ""
+
+#: logwindow.cpp:74
+msgid " Warning! "
+msgstr ""
+
+#: edit.cpp:1077 edit.cpp:1126
 #, c-format
 msgid "\"%s\" Not found"
-msgstr ""
-
-#: logwindow.cpp:35
-msgid "#000088>Warning! "
-msgstr ""
-
-#: logwindow.cpp:31
-msgid "#880000> Error! "
 msgstr ""
 
 #: gcodeerrors.h:99
@@ -35,203 +54,186 @@ msgstr ""
 msgid "%c word given for arc in %s plane"
 msgstr ""
 
-#: gcodeerrors.h:100
+#: gcodeerrors.cpp:87
+#, c-format
+msgid "%c word given for arc in xz plane"
+msgstr ""
+
+#: gcodeerrors.h:100 gcodeerrors.cpp:88
 #, c-format
 msgid "%c word missing in absolute center arc"
 msgstr ""
 
-#: appframe.cpp:750
-msgid "&3DView"
+#: prefs.cpp:542
+#, c-format
+msgid "%s Files (%s)|%s"
 msgstr ""
 
-#: appframe.cpp:702
-msgid "&ANSI (Windows)"
+#: appframe.cpp:1278
+msgid "&About..."
 msgstr ""
 
-#: appframe.cpp:743
-msgid "&About ..\tCtrl+D"
+#: appframe.cpp:1276
+msgid "&Check updates"
 msgstr ""
 
-#: appframe.cpp:735
-msgid "&Back"
-msgstr ""
-
-#: appframe.cpp:731
-msgid "&Bottom"
-msgstr ""
-
-#: appframe.cpp:720
-msgid "&Check"
-msgstr ""
-
-#: appframe.cpp:631
-msgid "&Close\tCtrl+W"
-msgstr ""
-
-#: appframe.cpp:722
-msgid "&Convert Gcmc"
-msgstr ""
-
-#: appframe.cpp:674
+#: appframe.cpp:1221
 msgid "&Copy\tCtrl+C"
 msgstr ""
 
-#: appframe.cpp:676
+#: dirtree.cpp:636
+msgid "&Delete"
+msgstr ""
+
+#: appframe.cpp:1223
 msgid "&Delete\tDel"
 msgstr ""
 
-#: appframe.cpp:747
+#: appframe.cpp:1282
 msgid "&Edit"
 msgstr ""
 
 #. construct menu
-#: appframe.cpp:746
+#: appframe.cpp:1281
 msgid "&File"
 msgstr ""
 
-#: appframe.cpp:678
+#: appframe.cpp:1225
 msgid "&Find\tCtrl+F"
 msgstr ""
 
-#: appframe.cpp:734
-msgid "&Front"
-msgstr ""
-
-#: appframe.cpp:749
-msgid "&GCode"
-msgstr ""
-
-#: appframe.cpp:751
+#: appframe.cpp:1286
 msgid "&Help"
 msgstr ""
 
-#: appframe.cpp:707
-msgid "&Highlight language .."
+#: appframe.cpp:1230
+msgid "&Indent increase\tTab"
 msgstr ""
 
-#: appframe.cpp:729
-msgid "&Isometric"
+#: appframe.cpp:1284
+msgid "&Insert"
 msgstr ""
 
-#: appframe.cpp:650
-msgid "&Last Files"
+#: appframe.cpp:1214
+msgid "&Lower case\tCtrl+U"
 msgstr ""
 
-#: appframe.cpp:732
-msgid "&Left"
+#: dirtree.cpp:641
+msgid "&New G-Code"
 msgstr ""
 
-#: appframe.cpp:660
-msgid "&Lower case"
+#: dirtree.cpp:634
+msgid "&Open"
 msgstr ""
 
-#: appframe.cpp:703
-msgid "&MAC (Macintosh)"
-msgstr ""
-
-#: appframe.cpp:627
-msgid "&New ..\tCtrl+O"
-msgstr ""
-
-#: appframe.cpp:628
-msgid "&Open ..\tCtrl+O"
-msgstr ""
-
-#: appframe.cpp:675
+#: appframe.cpp:1222
 msgid "&Paste\tCtrl+V"
 msgstr ""
 
-#: appframe.cpp:637
-msgid "&Print ..\tCtrl+P"
-msgstr ""
-
-#: appframe.cpp:653
+#: appframe.cpp:1207
 msgid "&Quit\tCtrl+Q"
 msgstr ""
 
-#: appframe.cpp:689
-msgid "&Readonly mode"
-msgstr ""
-
-#: appframe.cpp:671
+#: appframe.cpp:1218
 msgid "&Redo\tCtrl+Shift+Z"
 msgstr ""
 
-#: appframe.cpp:680
+#: dirtree.cpp:635
+msgid "&Rename"
+msgstr ""
+
+#: appframe.cpp:1227
 msgid "&Replace\tCtrl+H"
 msgstr ""
 
-#: appframe.cpp:733
-msgid "&Right"
+#: appframe.cpp:1283
+msgid "&Tools"
 msgstr ""
 
-#: appframe.cpp:629
-msgid "&Save\tCtrl+S"
-msgstr ""
-
-#: appframe.cpp:683
-msgid "&Select all\tCtrl+A"
-msgstr ""
-
-#: appframe.cpp:721
-msgid "&Simulate"
-msgstr ""
-
-#: appframe.cpp:737
-msgid "&Start Simulate"
-msgstr ""
-
-#: appframe.cpp:730
-msgid "&Top"
-msgstr ""
-
-#: appframe.cpp:670
+#: appframe.cpp:1217
 msgid "&Undo\tCtrl+Z"
 msgstr ""
 
-#: appframe.cpp:659
-msgid "&Upper case"
+#: appframe.cpp:1213
+msgid "&Upper case\tCtrl+Shift+U"
 msgstr ""
 
-#: appframe.cpp:748
-msgid "&View"
+#: editorpanel.cpp:463
+msgid "..."
 msgstr ""
 
-#: appdefs.h:21
+#: editorpanel.cpp:450
+msgid "3D View:"
+msgstr ""
+
+#: editorpanel.cpp:171
+msgid "3D view"
+msgstr ""
+
+#: appdefs.h:31
 msgid "<untitled>"
 msgstr ""
 
+#: gcodeerrors.cpp:19
+msgid "A file is already open"
+msgstr ""
+
 #. sets the application title
-#: about.cpp:30
+#: about.cpp:61
 msgid "About .."
 msgstr ""
 
-#: gcodeerrors.h:72
+#: mathsimpledlg.cpp:118
+msgid "Action: "
+msgstr ""
+
+#: appframe.cpp:281
+msgid "Add file path to pane"
+msgstr ""
+
+#: dirtree.cpp:1122
+msgid "Add folders"
+msgstr ""
+
+#: editorpanel.cpp:1341
+msgid "All Files|*.*"
+msgstr ""
+
+#: appframe.cpp:1300
+msgid "All Macroses..."
+msgstr ""
+
+#: gcodeerrors.h:72 gcodeerrors.cpp:20
 msgid "All axes missing with g52 or g92"
 msgstr ""
 
-#: gcodeerrors.h:73
+#: gcodeerrors.h:73 gcodeerrors.cpp:21
 msgid "All axes missing with motion code"
 msgstr ""
 
-#: appframe.cpp:441
-msgid "Any file (*)|*"
+#: gcodeerrors.cpp:205
+msgid "Analog input selected out of bounds"
 msgstr ""
 
-#: gcodeerrors.h:18 gcodeerrors.h:104
+#. sizer->AddGrowableCol(0);
+#: RotateDlg.cpp:62
+msgid "Angle (degree): "
+msgstr ""
+
+#: gcodeerrors.h:18 gcodeerrors.h:104 gcodeerrors.cpp:94
 msgid ""
 "Arc move in concave corner cannot be reached by the tool without gouging"
 msgstr ""
 
-#: gcodeerrors.h:74
+#: gcodeerrors.h:74 gcodeerrors.cpp:22
 msgid "Arc radius too small to reach end point"
 msgstr ""
 
-#: gcodeerrors.h:105
+#: gcodeerrors.h:105 gcodeerrors.cpp:95
 msgid "Arc to arc motion is invalid because the arcs have the same center"
 msgstr ""
 
-#: gcodeerrors.h:106
+#: gcodeerrors.h:106 gcodeerrors.cpp:96
 msgid ""
 "Arc to arc motion makes a corner the compensated tool can't fit in without "
 "gouging"
@@ -243,73 +245,148 @@ msgid ""
 "without gouging"
 msgstr ""
 
-#: gcodeerrors.h:75
+#: gcodeerrors.h:75 gcodeerrors.cpp:23
 msgid "Argument to acos out of range"
 msgstr ""
 
-#: gcodeerrors.h:76
+#: gcodeerrors.h:76 gcodeerrors.cpp:24
 msgid "Argument to asin out of range"
 msgstr ""
 
-#: gcodeerrors.h:77
+#: gcodeerrors.h:77 gcodeerrors.cpp:25
 msgid "Attempt to divide by zero"
 msgstr ""
 
-#: gcodeerrors.h:78
+#: gcodeerrors.h:78 gcodeerrors.cpp:26
 msgid "Attempt to raise negative to non integer power"
 msgstr ""
 
-#: gcodeerrors.h:79
+#. aboutinfo->Add(new wxStaticText(this, wxID_ANY, _(" ")), 0, wxALIGN_RIGHT);
+#. aboutinfo->Add(new wxStaticText(this, wxID_ANY, _(" ")), 1, wxEXPAND | wxALIGN_LEFT);
+#: about.cpp:92
+msgid "Author "
+msgstr ""
+
+#. 2, 0, 0);
+#: mathsimpledlg.cpp:66
+msgid "Axis: "
+msgstr ""
+
+#: editorpanel.cpp:462
+msgid "BACK"
+msgstr ""
+
+#: editorpanel.cpp:460
+msgid "BOTTOM"
+msgstr ""
+
+#: editorpanel.cpp:488
+msgid "BOX"
+msgstr ""
+
+#: gcodeerrors.h:79 gcodeerrors.cpp:27
 msgid "Bad format integer"
 msgstr ""
 
-#: gcodeerrors.h:16
+#: gcodeerrors.cpp:28
+msgid "Bad number format"
+msgstr ""
+
+#: gcodeerrors.h:16 gcodeerrors.cpp:16
 #, c-format
 msgid "Bad number format parsing '%s'"
 msgstr ""
 
-#: gcodeerrors.h:80
+#: gcodeerrors.cpp:29
+msgid "Bug bad g code modal group 0"
+msgstr ""
+
+#: gcodeerrors.h:80 gcodeerrors.cpp:30
 msgid "Bug code not g0 or g1"
 msgstr ""
 
-#: gcodeerrors.h:81
+#: gcodeerrors.cpp:31
+msgid "Bug code not g17 g18 or g19"
+msgstr ""
+
+#: gcodeerrors.h:81 gcodeerrors.cpp:34
 msgid "Bug code not g2 or g3"
 msgstr ""
 
-#: gcodeerrors.h:82
+#: gcodeerrors.cpp:32
+msgid "Bug code not g20 or g21"
+msgstr ""
+
+#: gcodeerrors.cpp:33
+msgid "Bug code not g28 or g30"
+msgstr ""
+
+#: gcodeerrors.cpp:35
+msgid "Bug code not g4 g10 g28 g30 g52 g53 or g92 series"
+msgstr ""
+
+#: gcodeerrors.cpp:36
+msgid "Bug code not g61 g61.1 or g64"
+msgstr ""
+
+#: gcodeerrors.cpp:37
+msgid "Bug code not g90 or g91"
+msgstr ""
+
+#: gcodeerrors.cpp:38
+msgid "Bug code not g98 or g99"
+msgstr ""
+
+#: gcodeerrors.cpp:39
+msgid "Bug code not in g52 or g92 series"
+msgstr ""
+
+#: gcodeerrors.cpp:40
+msgid "Bug code not in range g54 to g593"
+msgstr ""
+
+#: gcodeerrors.cpp:41
+msgid "Bug code not m0 m1 m2 m30 m60 m99"
+msgstr ""
+
+#: gcodeerrors.cpp:42
+msgid "Bug distance mode not g90 or g91"
+msgstr ""
+
+#: gcodeerrors.cpp:43
+msgid "Bug function should not have been called"
+msgstr ""
+
+#: gcodeerrors.h:82 gcodeerrors.cpp:44
 msgid "Bug in tool radius comp"
 msgstr ""
 
-#: gcodeerrors.h:83
+#: gcodeerrors.h:83 gcodeerrors.cpp:45
 msgid "Bug plane not xy yz or xz"
 msgstr ""
 
-#: gcodeerrors.h:87
+#: gcodeerrors.cpp:46
+msgid "Bug side not right or left"
+msgstr ""
+
+#: gcodeerrors.cpp:47
+msgid "Bug unknown motion code"
+msgstr ""
+
+#: gcodeerrors.h:87 gcodeerrors.cpp:48
 msgid "Bug unknown operation"
 msgstr ""
 
-#: appframe.cpp:664
-msgid "CR (&Linux)"
+#: gcodeerrors.cpp:180
+msgid "Bug: call stack underrun"
 msgstr ""
 
-#: appframe.cpp:665
-msgid "CR+LF (&Windows)"
-msgstr ""
-
-#: appframe.cpp:725
-msgid "Calc by Expression"
-msgstr ""
-
-#: gcodeerrors.h:15
+#: gcodeerrors.h:15 gcodeerrors.cpp:15
 msgid "Calculation resulted is 'infinity'"
 msgstr ""
 
-#: gcodeerrors.h:14
+#: gcodeerrors.h:14 gcodeerrors.cpp:14
 msgid "Calculation resulted is 'not a number'"
-msgstr ""
-
-#: appframe.cpp:724
-msgid "Calculator"
 msgstr ""
 
 #: gcodeerrors.h:28
@@ -317,14 +394,47 @@ msgstr ""
 msgid "Can not find subroutinue: %s"
 msgstr ""
 
-#: gcodeerrors.h:26
+#: macrosparamdlg.cpp:211
+msgid "Can not insert G-Code to GCMC file!"
+msgstr ""
+
+#: macrosparamdlg.cpp:206
+msgid "Can not insert GCMC code to G-Code file!"
+msgstr ""
+
+#: prefs.cpp:704
+#, c-format
+msgid "Can not open create file %s"
+msgstr ""
+
+#: gcodeerrors.h:26 prefs.cpp:178 prefs.cpp:451 prefs.cpp:623 them.cpp:358
 #, c-format
 msgid "Can not open file %s"
 msgstr ""
 
-#: appframe.cpp:868 appframe.cpp:906
+#: appframe.cpp:685
 #, c-format
-msgid "Can not open file: %s"
+msgid "Can not open file %s in catalogs:\n"
+msgstr ""
+
+#: appframe.cpp:1353
+#, c-format
+msgid "Can not open file %s!"
+msgstr ""
+
+#: workingthreads.cpp:58 workingthreads.cpp:133
+#, c-format
+msgid "Can not open file: %s ..."
+msgstr ""
+
+#: dirtree.cpp:785
+#, c-format
+msgid "Can not remove %s"
+msgstr ""
+
+#: dirtree.cpp:575
+#, c-format
+msgid "Can not rename %s"
 msgstr ""
 
 #: gcodeerrors.h:27
@@ -332,11 +442,20 @@ msgstr ""
 msgid "Can not seek to position %ld of file"
 msgstr ""
 
-#: appframe.cpp:1193
+#: prefs.cpp:711
+#, c-format
+msgid "Can not write to the file %s"
+msgstr ""
+
+#: workingthreads.cpp:473
 msgid "Can't create the thread to run simulate"
 msgstr ""
 
-#: gcodeerrors.h:88
+#: gcodeerrors.cpp:199
+msgid "Can't select analog input with wait type != immediate return"
+msgstr ""
+
+#: gcodeerrors.h:88 gcodeerrors.cpp:49
 msgid "Cannot change axis offsets with cutter radius comp"
 msgstr ""
 
@@ -344,7 +463,19 @@ msgstr ""
 msgid "Cannot change coordinate systems with cutter radius compensation on"
 msgstr ""
 
-#: gcodeerrors.h:86
+#: gcodeerrors.cpp:189
+msgid "Cannot change planes with cutter radius compensation on"
+msgstr ""
+
+#: gcodeerrors.cpp:50
+msgid "Cannot create backup file"
+msgstr ""
+
+#: gcodeerrors.cpp:51
+msgid "Cannot do g1 with zero feed rate"
+msgstr ""
+
+#: gcodeerrors.h:86 gcodeerrors.cpp:52
 msgid "Cannot do zero repeats of cycle"
 msgstr ""
 
@@ -356,15 +487,51 @@ msgstr ""
 msgid "Cannot feed with zero spindle speed in feed per rev mode"
 msgstr ""
 
-#: gcodeerrors.h:89
+#: gcodeerrors.cpp:53
+msgid "Cannot make arc with zero feed rate"
+msgstr ""
+
+#: gcodeerrors.cpp:193
+msgid "Cannot move rotary axes with G76"
+msgstr ""
+
+#: gcodeerrors.cpp:54
+msgid "Cannot open backup file"
+msgstr ""
+
+#: gcodeerrors.cpp:55
+msgid "Cannot open variable file"
+msgstr ""
+
+#: gcodeerrors.cpp:56
+msgid "Cannot probe with cutter radius comp on"
+msgstr ""
+
+#: gcodeerrors.cpp:57
+msgid "Cannot probe with zero feed rate"
+msgstr ""
+
+#: gcodeerrors.cpp:58
+msgid "Cannot put a b in canned cycle"
+msgstr ""
+
+#: gcodeerrors.cpp:59
+msgid "Cannot put a c in canned cycle"
+msgstr ""
+
+#: gcodeerrors.cpp:60
+msgid "Cannot put an a in canned cycle"
+msgstr ""
+
+#: gcodeerrors.h:89 gcodeerrors.cpp:61
 msgid "Cannot turn cutter radius comp on when on"
 msgstr ""
 
-#: gcodeerrors.h:90
+#: gcodeerrors.h:90 gcodeerrors.cpp:62
 msgid "Cannot use axis values with g80"
 msgstr ""
 
-#: gcodeerrors.h:91
+#: gcodeerrors.h:91 gcodeerrors.cpp:63
 msgid "Cannot use axis values without a g code that uses them"
 msgstr ""
 
@@ -372,35 +539,90 @@ msgstr ""
 msgid "Cannot use canned cycles with cutter compensation on"
 msgstr ""
 
-#: gcodeerrors.h:92
+#: gcodeerrors.cpp:64
+msgid "Cannot use g28 or g30 with cutter radius comp"
+msgstr ""
+
+#: gcodeerrors.cpp:65
+msgid "Cannot use g53 incremental"
+msgstr ""
+
+#: gcodeerrors.h:92 gcodeerrors.cpp:66
 msgid "Cannot use g53 with cutter radius comp"
 msgstr ""
 
-#: gcodeerrors.h:93
+#: gcodeerrors.h:93 gcodeerrors.cpp:67
 msgid "Cannot use two g codes that both use axis values"
 msgstr ""
 
-#: appframe.cpp:686
+#: RotateDlg.cpp:75
+msgid "Center X: "
+msgstr ""
+
+#: RotateDlg.cpp:77
+msgid "Center Y: "
+msgstr ""
+
+#: RotateDlg.cpp:79
+msgid "Center Z: "
+msgstr ""
+
+#: appframe.cpp:1233
 msgid "Change &case to .."
 msgstr ""
 
-#: appframe.cpp:771
+#: editorpanel.cpp:166
 msgid "Check"
 msgstr ""
 
-#: appframe.cpp:929
-msgid "Checking completed"
+#: welcomewnd.cpp:351
+msgid "Check for Update"
 msgstr ""
 
-#: macroses.cpp:76 appframe.cpp:407
+#: workingthreads.cpp:491
+msgid "Checking aborted"
+msgstr ""
+
+#: workingthreads.cpp:495
+#, c-format
+msgid "Checking completed with %d error(s)"
+msgstr ""
+
+#: workingthreads.cpp:738
+msgid "Checking completed with errors"
+msgstr ""
+
+#: workingthreads.cpp:493 workingthreads.cpp:736
+msgid "Checking completed with no error"
+msgstr ""
+
+#: CheckUpdate.cpp:23
+msgid "Checking for update"
+msgstr ""
+
+#: appframe.cpp:274 appframe.cpp:1202
+msgid "Close"
+msgstr ""
+
+#: editorpanel.cpp:1354 macroses.cpp:93
 msgid "Close abort"
 msgstr ""
 
-#: gcodeerrors.h:9
+#. Close
+#: appframe.cpp:275
+msgid "Close all"
+msgstr ""
+
+#. Close All but this
+#: appframe.cpp:276
+msgid "Close all but this"
+msgstr ""
+
+#: gcodeerrors.h:9 gcodeerrors.cpp:9
 msgid "CmdParser::read_set_parameter can not called here"
 msgstr ""
 
-#: gcodeerrors.h:94
+#: gcodeerrors.h:94 gcodeerrors.cpp:68
 msgid "Command too long"
 msgstr ""
 
@@ -408,64 +630,135 @@ msgstr ""
 msgid "Compensation type not left and no right"
 msgstr ""
 
-#: gcodeerrors.h:8
+#: gcodeerrors.h:8 gcodeerrors.cpp:8
 #, c-format
 msgid "Conflict M%d modal group"
 msgstr ""
 
-#: appframe.cpp:773
+#: editorpanel.cpp:169
 msgid "Convert"
 msgstr ""
 
-#: appframe.cpp:687
-msgid "Convert line &endings to .."
+#: workingthreads.cpp:745
+msgid "Converting completed with errors"
 msgstr ""
 
-#: appframe.cpp:768
+#: workingthreads.cpp:743
+msgid "Converting completed with no error"
+msgstr ""
+
+#: edit.cpp:1191
 msgid "Copy"
 msgstr ""
 
-#: about.cpp:46
-msgid "Copyright: "
-msgstr ""
-
-#: app.cpp:181
+#: app.cpp:192
 #, c-format
 msgid "Couldn't find/load the 'messages' catalog for locale '%s'."
 msgstr ""
 
-#: appframe.cpp:673
+#: mathsimpledlg.cpp:161 RotateDlg.cpp:110
+msgid "Create new file"
+msgstr ""
+
+#: macrosparamdlg.cpp:91
+msgid "Create new window"
+msgstr ""
+
+#: appframe.cpp:1220
 msgid "Cu&t\tCtrl+X"
 msgstr ""
 
-#: gcodeerrors.h:95
+#: gcodeerrors.h:95 gcodeerrors.cpp:69
 msgid "Current point same as end point of arc"
 msgstr ""
 
-#: appframe.cpp:764 appframe.cpp:765
+#: edit.cpp:1190
 msgid "Cut"
 msgstr ""
 
 #: gcodeerrors.h:17
 #, c-format
 msgid ""
-"Cutter compensation has generated an invalid arc with mismatched radii r1 %f "
-"r2 %f"
+"Cutter compensation has generated an invalid arc with mismatched radiuses r1 "
+"%f r2 %f"
 msgstr ""
 
-#: gcodeerrors.h:71
+#: gcodeerrors.h:71 gcodeerrors.cpp:190
 msgid "Cutter radius compensation allowed only in XY, XZ planes"
 msgstr ""
 
-#: gcodeerrors.h:96
+#: appframe.cpp:1260
+msgid "Default preferences"
+msgstr ""
+
+#: gcodeerrors.cpp:204
+msgid "Digital input selected out of bounds"
+msgstr ""
+
+#: dirtree.cpp:763
+#, c-format
+msgid "Do you really want to remove file  %s"
+msgstr ""
+
+#: workingthreads.cpp:519
+msgid "Drawing aborted"
+msgstr ""
+
+#: workingthreads.cpp:522
+msgid "Drawing completed"
+msgstr ""
+
+#: gcodeerrors.cpp:70
+msgid "Dwell time missing with g4"
+msgstr ""
+
+#: gcodeerrors.h:96 gcodeerrors.cpp:71
 msgid "Dwell time p word missing with g82"
 msgstr ""
 
-#: gcodeerrors.h:97
+#: gcodeerrors.cpp:72
+msgid "Dwell time p word missing with g86"
+msgstr ""
+
+#: gcodeerrors.cpp:73
+msgid "Dwell time p word missing with g88"
+msgstr ""
+
+#: gcodeerrors.cpp:74
+msgid "Dwell time p word missing with g89"
+msgstr ""
+
+#: about.cpp:98
+msgid "E-mail "
+msgstr ""
+
+#: codedescription.cpp:267
+msgid "ERROR"
+msgstr ""
+
+#: gcodeerrors.h:97 gcodeerrors.cpp:75
 msgid "Equal sign missing in parameter setting"
 msgstr ""
 
-#: appframe.cpp:574
+#: appframe.cpp:692 appframe.cpp:730 appframe.cpp:1353 prefs.cpp:179
+#: prefs.cpp:452 prefs.cpp:624 prefs.cpp:705 them.cpp:359
+msgid "Error opening file"
+msgstr ""
+
+#: prefs.cpp:198 prefs.cpp:469 them.cpp:377
+msgid "Error parsing file"
+msgstr ""
+
+#: prefs.cpp:192 prefs.cpp:463 them.cpp:371
+#, c-format
+msgid "Error parsing file %s\n"
+msgstr ""
+
+#: prefs.cpp:712
+msgid "Error writing file"
+msgstr ""
+
+#: appframe.cpp:1008
 #, c-format
 msgid "Error%s pos: %d"
 msgstr ""
@@ -478,36 +771,98 @@ msgstr ""
 msgid "Expected ] reading bracketed parameter"
 msgstr ""
 
-#: appframe.cpp:873
+#: appframe.cpp:1009
+msgid "Expression error"
+msgstr ""
+
+#: gcodeerrors.cpp:76
+msgid "F word missing with inverse time arc move"
+msgstr ""
+
+#: gcodeerrors.cpp:77
+msgid "F word missing with inverse time g1 move"
+msgstr ""
+
+#: gcodeerrors.cpp:173
+msgid "F word used with a g33/g33.1"
+msgstr ""
+
+#: welcomewnd.cpp:365
+msgid "FEEDBACK"
+msgstr ""
+
+#: editorpanel.cpp:458
+msgid "FRONT"
+msgstr ""
+
+#: appframe.cpp:69
 #, c-format
-msgid "Feed Lenght: %f"
+msgid ""
+"File %s is not a regular file of the file system\n"
+"Would you like to add it to folders pane?"
+msgstr ""
+
+#: editorpanel.cpp:1325
+#, c-format
+msgid ""
+"File %s is not saved!\n"
+"Save file before closing?"
+msgstr ""
+
+#: appframe.cpp:1339
+#, c-format
+msgid "File %s is very lage for the editor"
+msgstr ""
+
+#: gcodeerrors.cpp:78
+msgid "File ended with no percent sign"
+msgstr ""
+
+#: gcodeerrors.cpp:79
+msgid "File ended with no percent sign or program end"
 msgstr ""
 
 #: gcodeerrors.h:25
 msgid "File name not specified"
 msgstr ""
 
-#: macrosparamdlg.cpp:23
+#: gcodeerrors.cpp:80
+msgid "File name too long"
+msgstr ""
+
+#: gcodeerrors.cpp:186
+msgid "File not open"
+msgstr ""
+
+#: welcomewnd.cpp:243
+msgid "Files"
+msgstr ""
+
+#: macrosparamdlg.cpp:66
 msgid "Fill parameters:"
 msgstr ""
 
-#: edit.cpp:874
+#: edit.cpp:995
 msgid "Find"
 msgstr ""
 
-#: appframe.cpp:679
+#: appframe.cpp:1226
 msgid "Find &next\tF3"
 msgstr ""
 
-#: edit.cpp:860
+#: edit.cpp:981
 msgid "Find and replace"
 msgstr ""
 
-#: edit.cpp:952 edit.cpp:1001
+#: edit.cpp:1077 edit.cpp:1126
 msgid "Find result"
 msgstr ""
 
-#: gcodeerrors.h:98
+#: dirtree.cpp:1089
+msgid "Folders"
+msgstr ""
+
+#: gcodeerrors.h:98 gcodeerrors.cpp:81
 msgid "G code out of range"
 msgstr ""
 
@@ -519,6 +874,32 @@ msgstr ""
 #: gcodeerrors.h:47
 #, c-format
 msgid "G%d.1 with no D word"
+msgstr ""
+
+#: editorpanel.cpp:149
+msgid "G-Code"
+msgstr ""
+
+#: about.cpp:104
+msgid "G-Code Meta Compiler "
+msgstr ""
+
+#. sets the application title
+#: mathexpressiondlg.cpp:26
+msgid "G-Code expression calculator"
+msgstr ""
+
+#: appframe.cpp:1274 welcomewnd.cpp:270
+msgid "G-Code reference"
+msgstr ""
+
+#. sets the application title
+#: mathsimpledlg.cpp:56
+msgid "G-Code transformation"
+msgstr ""
+
+#: editorpanel.cpp:493
+msgid "G0"
 msgstr ""
 
 #: gcodeerrors.h:56
@@ -549,21 +930,58 @@ msgstr ""
 msgid "G95 - is Units per Revolution Mode not supported"
 msgstr ""
 
-#: appframe.cpp:393
-msgid "GCode Files (*.ngc)|*.ngc"
+#: editorpanel.cpp:150
+msgid "GCMC"
 msgstr ""
 
-#. sets the application title
-#: mathsimpledlg.cpp:40
-msgid "GCode calculator"
+#. menuHelp->Append(ID_HELPEDITOR, _("Matilda Web site"));
+#. AddHelpLink(pane, _("Editor documentation"), ID_HELPEDITOR);
+#: appframe.cpp:1273 welcomewnd.cpp:269
+msgid "GCMC documentation"
 msgstr ""
 
-#. sets the application title
-#: mathexpressiondlg.cpp:26
-msgid "GCode expression calculator"
+#: workingthreads.cpp:807
+msgid "GCMC is running very long time/ Would you like to kill the process?"
 msgstr ""
 
-#: mathsimpledlg.cpp:85
+#: welcomewnd.cpp:266
+msgid "Help"
+msgstr ""
+
+#.
+#. pTxt = new wxStaticText(this, ID_STATICTEXTFG, _("Help us become better"));
+#. pTxt->SetFont(wxFontInfo(10).Bold());
+#. pane1->Add(pTxt, 0, wxALIGN_CENTER_HORIZONTAL);
+#.
+#: welcomewnd.cpp:361
+msgid "Help me to make the app better"
+msgstr ""
+
+#: appframe.cpp:514
+msgid "Hide Folders Pane"
+msgstr ""
+
+#: about.cpp:95
+msgid "Home Page "
+msgstr ""
+
+#: gcodeerrors.cpp:192
+msgid "I J or K words missing with G76"
+msgstr ""
+
+#: gcodeerrors.cpp:83
+msgid "I word missing with g87"
+msgstr ""
+
+#: appframe.cpp:1231
+msgid "I&ndent reduce\tShift+Tab"
+msgstr ""
+
+#: editorpanel.cpp:457
+msgid "ISOMETRIC"
+msgstr ""
+
+#: mathsimpledlg.cpp:166 RotateDlg.cpp:114
 msgid "In selected"
 msgstr ""
 
@@ -571,31 +989,59 @@ msgstr ""
 msgid "Incorrect feed value"
 msgstr ""
 
-#: mathsimpledlg.cpp:70
-msgid "Input value:"
+#: appframe.cpp:1460
+msgid "Insert"
+msgstr ""
+
+#: macrosparamdlg.cpp:101
+msgid "Insert as GCMC"
 msgstr ""
 
 #: gcodeerrors.h:55
 msgid "Invalid plane for cutter compensation"
 msgstr ""
 
+#: gcodeerrors.cpp:201
+msgid "Invalid to select both a digital and an analog input with M66"
+msgstr ""
+
 #: gcodeerrors.h:42
 msgid "Invalid tool id used"
 msgstr ""
 
-#: appframe.cpp:666
-msgid "LF (&Macintosh)"
+#: gcodeerrors.cpp:84
+msgid "J word missing with g87"
 msgstr ""
 
-#: app.cpp:152
-msgid "Language"
+#: editorpanel.cpp:151
+msgid "JSON"
 msgstr ""
 
-#: gcodeerrors.h:107
+#: gcodeerrors.cpp:172
+msgid "K word missing with g33/g33.1"
+msgstr ""
+
+#: gcodeerrors.cpp:85
+msgid "K word missing with g87"
+msgstr ""
+
+#: editorpanel.cpp:459
+msgid "LEFT"
+msgstr ""
+
+#: appframe.cpp:1266
+msgid "Language ..."
+msgstr ""
+
+#: app.cpp:163 appframe.cpp:834
+msgid "Languages"
+msgstr ""
+
+#: gcodeerrors.h:107 gcodeerrors.cpp:98
 msgid "Left bracket missing after slash with atan"
 msgstr ""
 
-#: gcodeerrors.h:108
+#: gcodeerrors.h:108 gcodeerrors.cpp:99
 msgid "Left bracket missing after unary operation name"
 msgstr ""
 
@@ -604,31 +1050,27 @@ msgid ""
 "Length of cutter compensation entry move is not greater than the tool radius"
 msgstr ""
 
-#: gcodeerrors.h:11
+#: gcodeerrors.h:11 gcodeerrors.cpp:11
 msgid "Letter $ - multishpindle not supported"
 msgstr ""
 
-#: about.cpp:42
-msgid "Licence type: "
+#: about.cpp:101
+msgid "Licence type "
 msgstr ""
 
-#: logwindow.cpp:39
+#: logwindow.cpp:69
 #, c-format
 msgid "Line %d: "
 msgstr ""
 
-#: gcodeerrors.h:109
+#: executorview.cpp:59
+#, c-format
+msgid "Line %d: Error feedrate value %g"
+msgstr ""
+
+#: gcodeerrors.h:109 gcodeerrors.cpp:100
 #, c-format
 msgid "M code greater than 199: M%d"
-msgstr ""
-
-#. sets the application title
-#: macrosparamdlg.cpp:16
-msgid "Macros Parameter"
-msgstr ""
-
-#: appframe.cpp:767
-msgid "Macroses"
 msgstr ""
 
 #. sets the application title
@@ -636,146 +1078,330 @@ msgstr ""
 msgid "Macroses List"
 msgstr ""
 
-#: mathsimpledlg.cpp:80
-msgid "Max value:"
+#: appframe.cpp:1271 welcomewnd.cpp:267
+msgid "Matilda website"
 msgstr ""
 
-#: mathsimpledlg.cpp:78
-msgid "Min value:"
+#: mathsimpledlg.cpp:153 RotateDlg.cpp:97
+msgid "Max value: "
 msgstr ""
 
-#: gcodeerrors.h:110
+#: mathsimpledlg.cpp:149 RotateDlg.cpp:95
+msgid "Min value: "
+msgstr ""
+
+#: gcodeerrors.h:110 gcodeerrors.cpp:101
 msgid "Mixed radius ijk format for arc"
 msgstr ""
 
-#: executorlog.cpp:26
+#: GCodeInterpreter.cpp:143
+#, c-format
+msgid "More than %d errors. Executing is stopped!"
+msgstr ""
+
+#: executorlog.cpp:30
 msgid "More then 100 outputs"
 msgstr ""
 
-#: gcodeerrors.h:13
+#: gcodeerrors.cpp:194
+msgid "Multiple e words on one line"
+msgstr ""
+
+#: gcodeerrors.cpp:102
+msgid "Multiple spindle choice ($) words on one line"
+msgstr ""
+
+#: gcodeerrors.h:13 gcodeerrors.cpp:13
 #, c-format
 msgid "Multiply word %c is defened"
 msgstr ""
 
-#: gcodeerrors.h:10 gcodeerrors.h:49
+#: gcodeerrors.cpp:103
+msgid "Must use g0 or g1 with g53"
+msgstr ""
+
+#: gcodeerrors.h:10 gcodeerrors.h:49 gcodeerrors.cpp:10
 msgid "Named parameter does not support yet"
 msgstr ""
 
-#: gcodeerrors.h:111
+#: gcodeerrors.cpp:195
+msgid "Named parameter not terminated"
+msgstr ""
+
+#: gcodeerrors.cpp:202
+msgid "Need to have either a valid P or a valid E word with M66"
+msgstr ""
+
+#: gcodeerrors.cpp:188
+msgid "Need tool prepared -Txx- for toolchange"
+msgstr ""
+
+#: gcodeerrors.cpp:104
+msgid "Negative argument to sqrt"
+msgstr ""
+
+#: gcodeerrors.h:111 gcodeerrors.cpp:105
 msgid "Negative d word tool radius index used"
 msgstr ""
 
-#: gcodeerrors.h:112
+#: gcodeerrors.cpp:106
+msgid "Negative f word used"
+msgstr ""
+
+#: gcodeerrors.h:112 gcodeerrors.cpp:107
 msgid "Negative g code used"
 msgstr ""
 
-#: gcodeerrors.h:113
+#: gcodeerrors.cpp:108
+msgid "Negative h word used"
+msgstr ""
+
+#: gcodeerrors.cpp:109
+msgid "Negative l word used"
+msgstr ""
+
+#: gcodeerrors.h:113 gcodeerrors.cpp:110
 msgid "Negative m code used"
 msgstr ""
 
-#: gcodeerrors.h:114
+#: gcodeerrors.h:114 gcodeerrors.cpp:111
 msgid "Negative or zero q value used"
 msgstr ""
 
-#: appframe.cpp:760
-msgid "New"
+#: gcodeerrors.cpp:112
+msgid "Negative p word used"
 msgstr ""
 
-#: gcodeerrors.h:115
+#: gcodeerrors.cpp:113
+msgid "Negative spindle speed used"
+msgstr ""
+
+#: gcodeerrors.cpp:114
+msgid "Negative tool id used"
+msgstr ""
+
+#: gcodeerrors.cpp:115
+msgid "Nested comment found"
+msgstr ""
+
+#: gcodeerrors.cpp:184
+msgid "Nested subroutine definition"
+msgstr ""
+
+#: appframe.cpp:285 welcomewnd.cpp:246
+msgid "New G-Code"
+msgstr ""
+
+#. New
+#: appframe.cpp:1189
+msgid "New G-Code\tCtrl+N"
+msgstr ""
+
+#: appframe.cpp:286 dirtree.cpp:642 welcomewnd.cpp:247
+msgid "New GCMC"
+msgstr ""
+
+#: appframe.cpp:1191
+msgid "New GCMC\tCtrl+Shift+N"
+msgstr ""
+
+#: gcodeerrors.h:115 gcodeerrors.cpp:116
 msgid "No characters found in reading real value"
 msgstr ""
 
-#: gcodeerrors.h:116
+#: CheckUpdate.cpp:39
+msgid "No description"
+msgstr ""
+
+#: gcodeerrors.h:116 gcodeerrors.cpp:117
 msgid "Non integer value for integer"
 msgstr ""
 
-#: about.cpp:69
-msgid "OK"
+#: gcodeerrors.cpp:185
+msgid "Not in subroutine definition"
 msgstr ""
 
-#: appframe.cpp:761
+#: gcodeerrors.cpp:118
+msgid "Null missing after newline"
+msgstr ""
+
+#: welcomewnd.cpp:244
 msgid "Open"
 msgstr ""
 
-#: appframe.cpp:441
+#. Open
+#: appframe.cpp:1180
+msgid "Open ..\tCtrl+O"
+msgstr ""
+
+#: CheckUpdate.cpp:94
+msgid "Open download page..."
+msgstr ""
+
+#. wildCard = _("Any file(*.*)|*.*|GCMC and NC files (*.gcmc;*.nc;*.ngc)|*.gcmc;*.nc;*.ngc|GCMC files (*.gcmc)|*.gcmc|NC files (*.nc;*.ngc)|*.nc;*.ngc");
+#: appframe.cpp:645
 msgid "Open file"
+msgstr ""
+
+#: appframe.cpp:287
+msgid "Open file..."
+msgstr ""
+
+#: edit.cpp:1184
+#, c-format
+msgid "Open file: \"%s\""
+msgstr ""
+
+#: dirtree.cpp:644
+msgid "Open folder"
+msgstr ""
+
+#: appframe.cpp:1186
+msgid "Open recent"
+msgstr ""
+
+#: gcodeerrors.cpp:196
+msgid "Out of memory"
+msgstr ""
+
+#: editorpanel.cpp:855
+msgid "Output"
+msgstr ""
+
+#: gcodeerrors.cpp:191
+msgid "P word missing with G76"
 msgstr ""
 
 #: gcodeerrors.h:29
 msgid "P word missing with M98"
 msgstr ""
 
-#: gcodeerrors.h:123
+#: gcodeerrors.cpp:119
+msgid "Parameter file out of order"
+msgstr ""
+
+#: gcodeerrors.h:123 gcodeerrors.cpp:121
 msgid "Parameter is readonly"
 msgstr ""
 
-#: gcodeerrors.h:122
+#: gcodeerrors.h:122 gcodeerrors.cpp:120
 msgid "Parameter number out of range"
 msgstr ""
 
-#: appframe.cpp:769
+#. 1
+#. 2
+#. 3
+#. 4
+#. 5
+#. 6
+#. 7
+#. 8
+#. 9
+#. 10
+#. 11
+#: mathsimpledlg.cpp:78
+msgid "Parameters: "
+msgstr ""
+
+#. if (stop_parsing() )
+#: GCodeInterpreter.cpp:115
+msgid "Parsing cancelled"
+msgstr ""
+
+#: edit.cpp:1192
 msgid "Paste"
 msgstr ""
 
-#: appframe.cpp:739
-msgid "Pause"
+#: editorpanel.cpp:565
+msgid "Path: "
 msgstr ""
 
-#: app.cpp:151
-msgid "Please choose language:"
+#: RotateDlg.cpp:64
+msgid "Plane: "
 msgstr ""
 
-#: mathsimpledlg.cpp:157
+#: mathsimpledlg.cpp:257
 msgid "Please, select at least one parameter"
 msgstr ""
 
-#: appframe.cpp:636
-msgid "Print Pre&view\tCtrl+Shift+P"
+#: gcodeerrors.cpp:138
+msgid "Pocket max too large"
 msgstr ""
 
-#: appframe.cpp:635
-msgid "Print Set&up .."
+#: welcomewnd.cpp:348
+msgid "Preference"
 msgstr ""
 
-#: appframe.cpp:1137
-#, c-format
-msgid "Process terminated with exit code %d"
+#: appframe.cpp:1285
+msgid "Preferences"
 msgstr ""
 
-#: appframe.cpp:633
-msgid "Proper&ties ..\tCtrl+I"
+#: propertiesdlg.cpp:69
+msgid "Properties changed"
 msgstr ""
 
-#: gcodeerrors.h:67
+#: gcodeerrors.h:67 gcodeerrors.cpp:203
 msgid "Q word missing with g73"
 msgstr ""
 
-#: gcodeerrors.h:124
+#: gcodeerrors.h:124 gcodeerrors.cpp:122
 msgid "Q word missing with g83"
 msgstr ""
 
-#: gcodeerrors.h:117
+#: gcodeerrors.cpp:198
+msgid "Queue is not empty after external input"
+msgstr ""
+
+#: gcodeerrors.cpp:123
+msgid "Queue is not empty after probing"
+msgstr ""
+
+#: gcodeerrors.cpp:124
+msgid "R clearance plane unspecified in cycle"
+msgstr ""
+
+#: gcodeerrors.h:117 gcodeerrors.cpp:125
 msgid "R i j k words all missing for arc"
 msgstr ""
 
-#: gcodeerrors.h:118
+#: gcodeerrors.cpp:210
+msgid "R less than U in cycle in VW plane"
+msgstr ""
+
+#: gcodeerrors.cpp:211
+msgid "R less than V in cycle in UW plane"
+msgstr ""
+
+#: gcodeerrors.cpp:209
+msgid "R less than W in cycle in UV plane"
+msgstr ""
+
+#: gcodeerrors.h:118 gcodeerrors.cpp:126
 msgid "R less than x in cycle in yz plane"
 msgstr ""
 
-#: gcodeerrors.h:119
+#: gcodeerrors.h:119 gcodeerrors.cpp:127
 msgid "R less than y in cycle in xz plane"
 msgstr ""
 
-#: gcodeerrors.h:120
+#: gcodeerrors.h:120 gcodeerrors.cpp:128
 msgid "R less than z in cycle in xy plane"
 msgstr ""
 
-#: gcodeerrors.h:103
+#: gcodeerrors.cpp:129
+msgid "R word with no g code that uses it"
+msgstr ""
+
+#: editorpanel.cpp:461
+msgid "RIGHT"
+msgstr ""
+
+#: gcodeerrors.h:103 gcodeerrors.cpp:93
 msgid ""
 "Radius of cutter compensation entry arc is not greater than the tool radius"
 msgstr ""
 
-#: gcodeerrors.h:102
+#: gcodeerrors.h:102 gcodeerrors.cpp:91
 #, c-format
 msgid ""
 "Radius to end of arc differs from radius to start: start=(%c%.4f,%c%.4f) "
@@ -783,72 +1409,152 @@ msgid ""
 "rel_err=%.4f%%"
 msgstr ""
 
-#: appframe.cpp:681
+#: edit.cpp:899
+#, c-format
+msgid "Read error on file '%s'"
+msgstr ""
+
+#: welcomewnd.cpp:323
+msgid "Recent Files"
+msgstr ""
+
+#: dirtree.cpp:646
+msgid "Remove folder from pane"
+msgstr ""
+
+#: dirtree.cpp:763 dirtree.cpp:785
+msgid "Removing file(s)"
+msgstr ""
+
+#: dirtree.cpp:643
+msgid "Rename"
+msgstr ""
+
+#: dirtree.cpp:575
+msgid "Renaming file"
+msgstr ""
+
+#: appframe.cpp:1228
 msgid "Replace &again\tShift+F4"
 msgstr ""
 
-#: appframe.cpp:723
-msgid "Run Macros"
+#. sets the application title
+#: RotateDlg.cpp:46
+msgid "Rotate"
 msgstr ""
 
-#: appframe.cpp:762
-msgid "Save"
+#: appframe.cpp:1239
+msgid "Rotate..."
 msgstr ""
 
-#: appframe.cpp:630
-msgid "Save &as ..\tCtrl+Shift+S"
+#: gcodeerrors.cpp:197
+msgid "S word missing with G96"
 msgstr ""
 
-#: appframe.cpp:381
+#. Save
+#: appframe.cpp:1198
+msgid "Save\tCtrl+S"
+msgstr ""
+
+#: appframe.cpp:1200
+msgid "Save  as ..\tCtrl+Shift+S"
+msgstr ""
+
+#: appframe.cpp:270 edit.cpp:1177
+#, c-format
+msgid "Save %s"
+msgstr ""
+
+#: editorpanel.cpp:1326
 msgid "Save file"
 msgstr ""
 
-#: appframe.cpp:393
+#: editorpanel.cpp:1342
 msgid "Save file As"
 msgstr ""
 
-#: appframe.cpp:684
-msgid "Select &line\tCtrl+L"
+#: dirtree.cpp:1176
+msgid "Select directory"
 msgstr ""
 
-#: macrosesdlg.cpp:21
-msgid "Select from the list:"
+#: app.cpp:162 appframe.cpp:833
+msgid "Select language:"
 msgstr ""
 
-#: appframe.cpp:710
-msgid "Show &indent guides"
+#: macrosesdlg.cpp:28
+msgid "Select the macros:"
 msgstr ""
 
-#: appframe.cpp:709
-msgid "Show line &endings"
+#: appframe.cpp:514
+msgid "Show Folders Pane"
 msgstr ""
 
-#: appframe.cpp:711
-msgid "Show line &numbers"
+#: appframe.cpp:1194
+msgid "Show folders pane\tCtrl+P"
 msgstr ""
 
-#: appframe.cpp:712
-msgid "Show white&space"
-msgstr ""
-
-#: appframe.cpp:772
-msgid "Simulate"
-msgstr ""
-
-#: gcodeerrors.h:121
+#: gcodeerrors.h:121 gcodeerrors.cpp:130
 msgid "Slash missing after first atan argument"
+msgstr ""
+
+#: editorpanel.cpp:476
+#, c-format
+msgid "Speed: x%d"
+msgstr ""
+
+#: gcodeerrors.cpp:131
+msgid "Spindle not turning clockwise in g84"
+msgstr ""
+
+#: gcodeerrors.cpp:132
+msgid "Spindle not turning in g86"
+msgstr ""
+
+#: gcodeerrors.cpp:133
+msgid "Spindle not turning in g87"
+msgstr ""
+
+#: gcodeerrors.cpp:134
+msgid "Spindle not turning in g88"
 msgstr ""
 
 #: gcodeerrors.h:41
 msgid "Spindle speed  is incorrect"
 msgstr ""
 
-#: appframe.cpp:1123
+#: gcodeerrors.cpp:135
+msgid "Sscanf failed"
+msgstr ""
+
+#: workingthreads.cpp:136
+#, c-format
+msgid "Start checking & drawing: %s"
+msgstr ""
+
+#: workingthreads.cpp:691
+msgid "Start checking..."
+msgstr ""
+
+#: workingthreads.cpp:61
+#, c-format
+msgid "Start checking: %s"
+msgstr ""
+
+#: workingthreads.cpp:693
 msgid "Start converting..."
 msgstr ""
 
-#: appframe.cpp:738
-msgid "Sto&p Simulate"
+#: gcodeerrors.cpp:136
+msgid "Start point too close to probe point"
+msgstr ""
+
+#: workingthreads.cpp:1029
+#, c-format
+msgid "Start transforming: %d lines..."
+msgstr ""
+
+#: editorpanel.cpp:887
+msgid "Stop"
 msgstr ""
 
 #: gcodeerrors.h:21
@@ -862,50 +1568,126 @@ msgid ""
 "gouging"
 msgstr ""
 
-#: gcodeerrors.h:12
+#: gcodeerrors.h:12 gcodeerrors.cpp:12
 msgid "Subritine name does not supported"
 msgstr ""
 
-#: appframe.cpp:407
+#: editorpanel.cpp:456
+msgid "TOP"
+msgstr ""
+
+#: editorpanel.cpp:1354
 msgid "Text could not be saved!"
 msgstr ""
 
-#: appframe.cpp:381
-msgid "Text is not saved, save before closing?"
+#: propertiesdlg.cpp:68
+msgid ""
+"The changes you did, will applay after restarting the program. Would you "
+"like to restart?"
 msgstr ""
 
-#: app.cpp:166
+#: appframe.cpp:1265
+msgid "Themes"
+msgstr ""
+
+#: workingthreads.cpp:534
+#, c-format
+msgid "There are %d error(s)."
+msgstr ""
+
+#: app.cpp:233
+msgid "There is new version of YAMotion. A lot of new features! Be in tuch"
+msgstr ""
+
+#: app.cpp:178
 msgid "This language is not supported by the system."
+msgstr ""
+
+#: gcodeerrors.cpp:137
+msgid "Too many m codes on line"
+msgstr ""
+
+#: gcodeerrors.cpp:182
+msgid "Too many oword labels"
 msgstr ""
 
 #: gcodeerrors.h:33
 msgid "Too many parameters for dwell G4"
 msgstr ""
 
-#: gcodeerrors.h:125
+#: gcodeerrors.cpp:179
+msgid "Too many subroutine levels"
+msgstr ""
+
+#: gcodeerrors.cpp:178
+msgid "Too many subroutine parameters"
+msgstr ""
+
+#: gcodeerrors.h:125 gcodeerrors.cpp:139
 msgid "Tool radius not less than arc radius with comp"
 msgstr ""
 
-#: appframe.cpp:874
-#, c-format
-msgid "Traverce Lenght: %f"
+#: appframe.cpp:1237
+msgid "Transform..."
 msgstr ""
 
-#: gcodeerrors.h:126
+#: workingthreads.cpp:1034
+msgid "Transforming aborted"
+msgstr ""
+
+#: workingthreads.cpp:1070
+msgid "Transforming completed."
+msgstr ""
+
+#: editorpanel.cpp:563
+msgid "Traverce: "
+msgstr ""
+
+#: gcodeerrors.h:126 gcodeerrors.cpp:140
 #, c-format
 msgid "Two g codes used from same modal group: G%d"
 msgstr ""
 
-#: gcodeerrors.h:127
+#: gcodeerrors.cpp:141
+msgid "Two m codes used from same modal group"
+msgstr ""
+
+#: gcodeerrors.cpp:207
+msgid "U value unspecified in VW plane canned cycle"
+msgstr ""
+
+#: gcodeerrors.cpp:142
+#, c-format
+msgid "Unable to open file <%s>"
+msgstr ""
+
+#: gcodeerrors.cpp:143
+msgid "Unclosed comment found"
+msgstr ""
+
+#: gcodeerrors.h:127 gcodeerrors.cpp:144
 msgid "Unclosed expression"
 msgstr ""
 
-#: gcodeerrors.h:128
+#: edit.cpp:1188
+msgid "Undo"
+msgstr ""
+
+#: gcodeerrors.cpp:181
+msgid "Unknown control command in o word"
+msgstr ""
+
+#: gcodeerrors.h:128 gcodeerrors.cpp:145
 #, c-format
 msgid "Unknown g code used: G%d"
 msgstr ""
 
-#: gcodeerrors.h:61
+#: gcodeerrors.cpp:146
+#, c-format
+msgid "Unknown m code used: M%d"
+msgstr ""
+
+#: gcodeerrors.h:61 gcodeerrors.cpp:147
 msgid "Unknown operation"
 msgstr ""
 
@@ -914,12 +1696,80 @@ msgstr ""
 msgid "Unknown operation name starting with %c"
 msgstr ""
 
+#: gcodeerrors.cpp:148
+msgid "Unknown operation name starting with a"
+msgstr ""
+
+#: gcodeerrors.cpp:174
+msgid "Unknown operation name starting with e"
+msgstr ""
+
+#: gcodeerrors.cpp:176
+msgid "Unknown operation name starting with g"
+msgstr ""
+
+#: gcodeerrors.cpp:177
+msgid "Unknown operation name starting with l"
+msgstr ""
+
+#: gcodeerrors.cpp:149
+msgid "Unknown operation name starting with m"
+msgstr ""
+
+#: gcodeerrors.cpp:175
+msgid "Unknown operation name starting with n"
+msgstr ""
+
+#: gcodeerrors.cpp:150
+msgid "Unknown operation name starting with o"
+msgstr ""
+
+#: gcodeerrors.cpp:151
+msgid "Unknown operation name starting with x"
+msgstr ""
+
+#: gcodeerrors.cpp:183
+msgid "Unknown oword number"
+msgstr ""
+
 #: gcodeerrors.h:50
 #, c-format
 msgid "Unknown word starting with %c"
 msgstr ""
 
-#: gcodeerrors.h:62
+#: gcodeerrors.cpp:152
+msgid "Unknown word starting with a"
+msgstr ""
+
+#: gcodeerrors.cpp:153
+msgid "Unknown word starting with c"
+msgstr ""
+
+#: gcodeerrors.cpp:154
+msgid "Unknown word starting with e"
+msgstr ""
+
+#: gcodeerrors.cpp:155
+msgid "Unknown word starting with f"
+msgstr ""
+
+#: gcodeerrors.cpp:156
+msgid "Unknown word starting with l"
+msgstr ""
+
+#: gcodeerrors.cpp:157
+msgid "Unknown word starting with r"
+msgstr ""
+
+#: gcodeerrors.cpp:158
+msgid "Unknown word starting with s"
+msgstr ""
+
+#: gcodeerrors.cpp:159
+msgid "Unknown word starting with t"
+msgstr ""
+
+#: gcodeerrors.h:62 gcodeerrors.cpp:160
 msgid "Unknown word where unary operation could be"
 msgstr ""
 
@@ -927,20 +1777,41 @@ msgstr ""
 msgid "Unsupported plane in cutter compensation"
 msgstr ""
 
-#: appframe.cpp:714
-msgid "Use &code page of .."
-msgstr ""
-
-#: appframe.cpp:579
+#: appframe.cpp:1013
 msgid "Uups some erorr"
 msgstr ""
 
-#: appframe.cpp:516
+#: workingthreads.cpp:1001
 msgid "Uups there is no any selection"
 msgstr ""
 
-#: about.cpp:38
-msgid "Version: "
+#: gcodeerrors.cpp:208
+msgid "V value unspecified in UW plane canned cycle"
+msgstr ""
+
+#: mathsimpledlg.cpp:111
+msgid "Value: "
+msgstr ""
+
+#: CheckUpdate.cpp:43
+#, c-format
+msgid "Version avalible: %s  (Current: %s)"
+msgstr ""
+
+#: gcodeerrors.cpp:206
+msgid "W value unspecified in UV plane canned cycle"
+msgstr ""
+
+#: appframe.cpp:380
+msgid "Welcome"
+msgstr ""
+
+#: appframe.cpp:381
+msgid "Welcome screen"
+msgstr ""
+
+#: appframe.cpp:1195
+msgid "Welcome window\tCtrl+W"
 msgstr ""
 
 #: gcodeerrors.h:34
@@ -967,33 +1838,39 @@ msgstr ""
 msgid "Word 'S' must be defined for G96 (CSS mode)"
 msgstr ""
 
-#: about.cpp:34
-msgid "Written by: "
+#. Ask to remove from
+#: appframe.cpp:730
+#, c-format
+msgid "Would you like to remove file %s from history list?"
 msgstr ""
 
-#: appframe.cpp:48 gcodeerrors.h:6
+#: gcodeerrors.h:6 gcodeerrors.cpp:6
 msgid "Wrong N value"
 msgstr ""
 
-#: gcodeerrors.h:7
+#: gcodeerrors.h:7 gcodeerrors.cpp:7
 #, c-format
 msgid "Wrong letter: %c"
 msgstr ""
 
-#: appframe.cpp:875
-#, c-format
-msgid "X Min: %f X Max %f"
+#: editorpanel.cpp:553
+msgid "X Max: "
 msgstr ""
 
-#: gcodeerrors.h:63
+#. 2, 0, 0);
+#: editorpanel.cpp:551
+msgid "X Min: "
+msgstr ""
+
+#: gcodeerrors.h:63 gcodeerrors.cpp:162
 msgid "X and y words missing for arc in xy plane"
 msgstr ""
 
-#: gcodeerrors.h:64
+#: gcodeerrors.h:64 gcodeerrors.cpp:163
 msgid "X and z words missing for arc in xz plane"
 msgstr ""
 
-#: gcodeerrors.h:66
+#: gcodeerrors.h:66 gcodeerrors.cpp:166
 msgid "X value unspecified in yz plane canned cycle"
 msgstr ""
 
@@ -1001,16 +1878,19 @@ msgstr ""
 msgid "X="
 msgstr ""
 
-#: appframe.cpp:876
-#, c-format
-msgid "Y Min: %f Y Max %f"
+#: editorpanel.cpp:557
+msgid "Y Max: "
 msgstr ""
 
-#: gcodeerrors.h:65
+#: editorpanel.cpp:555
+msgid "Y Min: "
+msgstr ""
+
+#: gcodeerrors.h:65 gcodeerrors.cpp:164
 msgid "Y and z words missing for arc in yz plane"
 msgstr ""
 
-#: gcodeerrors.h:68
+#: gcodeerrors.h:68 gcodeerrors.cpp:168
 msgid "Y value unspecified in xz plane canned cycle"
 msgstr ""
 
@@ -1018,12 +1898,20 @@ msgstr ""
 msgid "Y="
 msgstr ""
 
-#: appframe.cpp:877
-#, c-format
-msgid "Z Min: %f Z Max %f"
+#. have last version
+#: CheckUpdate.cpp:27
+msgid "You have the latest version of the application"
 msgstr ""
 
-#: gcodeerrors.h:69
+#: editorpanel.cpp:561
+msgid "Z Max: "
+msgstr ""
+
+#: editorpanel.cpp:559
+msgid "Z Min: "
+msgstr ""
+
+#: gcodeerrors.h:69 gcodeerrors.cpp:169
 msgid "Z value unspecified in xy plane canned cycle"
 msgstr ""
 
@@ -1035,11 +1923,19 @@ msgstr ""
 msgid "Zero degree inside corner is invalid for cutter compensation"
 msgstr ""
 
-#: gcodeerrors.h:70
+#: gcodeerrors.h:70 gcodeerrors.cpp:170
 msgid "Zero or negative argument to ln"
 msgstr ""
 
-#: gcodeerrors.h:101
+#: gcodeerrors.cpp:171
+msgid "Zero radius arc"
+msgstr ""
+
+#: gcodeerrors.cpp:200
+msgid "Zero timeout with wait type != immediate return"
+msgstr ""
+
+#: gcodeerrors.h:101 gcodeerrors.cpp:90
 #, c-format
 msgid ""
 "Zero-radius arc: start=(%c%.4f,%c%.4f) center=(%c%.4f,%c%.4f) end=(%c%.4f,%c"
@@ -1050,22 +1946,25 @@ msgstr ""
 msgid "[G85;G88] not supported yet"
 msgstr ""
 
-#: appframe.cpp:1120
+#: gcodeerrors.cpp:187
+#, c-format
+msgid "cannot reopen file %s - removed or renamed? (%s)"
+msgstr ""
+
+#: workingthreads.cpp:686
 msgid "gcmc_vc.exe already running"
 msgstr ""
 
-#: appframe.cpp:776
-msgid "pause"
-msgstr ""
-
-#: appframe.cpp:775
-msgid "simulate"
-msgstr ""
-
-#: appframe.cpp:777
-msgid "stop"
-msgstr ""
-
-#: app.cpp:182
+#: app.cpp:193
 msgid "unknown"
+msgstr ""
+
+#: appframe.cpp:613
+#, c-format
+msgid "unnamed%d.%s"
+msgstr ""
+
+#: appframe.cpp:606
+#, c-format
+msgid "unnamed.%s"
 msgstr ""

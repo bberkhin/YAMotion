@@ -140,8 +140,8 @@ namespace Interpreter
 
 		int type;           // SEG_LINEAR or SEG_ARC
 		Plane plane;  // used for arc CANON_PLANE_XY,CANON_PLANE_XZ,CANON_PLANE_YZ
-		int sequence_number;  // GCode sequence_number associated with this segment
-		int ID;             // GCode mechanism that generated this
+		int sequence_number;  // G-Code sequence_number associated with this segment
+		int ID;             // G-Code mechanism that generated this
 		double x0, y0, z0, a0, b0, c0, u0, v0; // starting point
 		double x1, y1, z1, a1, b1, c1, u1, v1; // ending point
 		double xc, yc;		// center (if arc)

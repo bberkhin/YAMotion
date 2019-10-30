@@ -88,7 +88,7 @@ MathSimpleDlg::MathSimpleDlg(DoMathSimple *dm, wxWindow *parent, bool hasselecti
 	ADD_PARAM_TO_GRID(L"S", PARAM_S);  //10
 	ADD_PARAM_TO_GRID(L"L", PARAM_L);  //11
 	
-	ADD_STATICTEXT_TO_GRID(_(" "));
+	ADD_STATICTEXT_TO_GRID(" ");
 	ADD_PARAM_TO_GRID(L"H", PARAM_H);  //1
 	ADD_PARAM_TO_GRID(L"T", PARAM_T);  //2
 	ADD_PARAM_TO_GRID(L"N", PARAM_N);  //3

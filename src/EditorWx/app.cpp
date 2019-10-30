@@ -140,7 +140,7 @@ bool App::OnInit()
 
 
 
-	// GCode & Gcmc lexer
+	// G-Code & Gcmc lexer
 	LINK_LEXER(lmGcode)
 	LINK_LEXER(lmGcmc)
 		// create application frame

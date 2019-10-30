@@ -14,7 +14,7 @@ extern const char *gcode_gettext(const char *s);
 #define YA_CALC_RESULT_NOT_NUMBER _("Calculation resulted is 'not a number'")
 #define YA_CALC_RESULT_INFINITY _("Calculation resulted is 'infinity'")
 #define YA_BAD_NUMBER_FORMAT1 _("Bad number format parsing '%s'")
-#define YA_CUTER_COMP_INVALID_ARC _("Cutter compensation has generated an invalid arc with mismatched radii r1 %f r2 %f")
+#define YA_CUTER_COMP_INVALID_ARC _("Cutter compensation has generated an invalid arc with mismatched radiuses r1 %f r2 %f")
 #define YA_CUTER_COMP_ARC_MOVE _("Arc move in concave corner cannot be reached by the tool without gouging")
 #define YA_CUTER_COMP_UNSUPPORTED_PLANE _("Unsupported plane in cutter compensation")
 #define YA_CUTER_COMP_STRAIGHT_TRAVERSE _("Straight traverse in concave corner cannot be reached by the tool without gouging")

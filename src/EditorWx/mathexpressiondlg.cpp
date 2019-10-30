@@ -23,7 +23,7 @@ MathExpressionDlg::MathExpressionDlg(DoMathExpression *pmth, wxWindow *parent, b
 		wxDEFAULT_DIALOG_STYLE)//| wxRESIZE_BORDER) 
 {
 	// sets the application title
-	SetTitle(_("GCode expression calculator"));
+	SetTitle(_("G-Code expression calculator"));
 
 	wxBoxSizer *inputpane = new wxBoxSizer(wxVERTICAL);
 	

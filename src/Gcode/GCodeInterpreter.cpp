@@ -788,7 +788,7 @@ bool GCodeInterpreter::run_modal_0(CmdParser &parser)
 	case G_92_3:
 		IF_F_RET_F(convert_axis_offsets(gc, parser));
 		break;
-	default: RET_F_SETSTATE(INTERNAL_ERROR, "run_modal_0 with no GCode");
+	default: RET_F_SETSTATE(INTERNAL_ERROR, "run_modal_0 with no G-Code");
 	}
 	return true;
 }
@@ -892,7 +892,7 @@ bool GCodeInterpreter::run_set_coord_sys(const CmdParser &parser)
 	case G_59_2: origin = 8; break;
 	case G_59_3: origin = 9; break;
 		break;
-	default: RET_F_SETSTATE(INTERNAL_ERROR, "ModalGroup_COORD_SYSTEM with no GCode");
+	default: RET_F_SETSTATE(INTERNAL_ERROR, "ModalGroup_COORD_SYSTEM with no G-Code");
 	}
 	if (runner.coordinate_index == origin) // the same as now
 		return true;

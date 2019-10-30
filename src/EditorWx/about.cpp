@@ -104,7 +104,7 @@ AppAbout::AppAbout(wxWindow *parent,
 	aboutinfo->Add(new wxStaticText(this, ID_DIABLEANY, _("G-Code Meta Compiler ")),0, wxALIGN_RIGHT);
 	aboutinfo->Add(new wxStaticText(this, wxID_ANY, APP_GCMCAUTHOR),1, wxEXPAND | wxALIGN_LEFT);
 
-	aboutinfo->Add(new wxStaticText(this, ID_DIABLEANY, _("")), 0, wxALIGN_RIGHT);
+	aboutinfo->Add(new wxStaticText(this, ID_DIABLEANY, ""), 0, wxALIGN_RIGHT);
 	aboutinfo->Add(new NoFocusLink(this, wxID_ANY, APP_GCMCHOMEPAGE, APP_GCMCHOMEPAGEURL), 1, wxEXPAND | wxALIGN_LEFT);
 	aboutinfo->AddSpacer(1);
 	aboutinfo->AddSpacer(1);

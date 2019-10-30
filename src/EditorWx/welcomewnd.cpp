@@ -243,7 +243,7 @@ wxBoxSizer *WelcomeWnd::CreateCommand()
 	AddColumnHeader(pane, _("Files"));
 	AddCommand(pane, _("Open"), ID_OPENFILE);
 	pane->AddSpacer(WELCOME_MARGIN/2);
-	AddCommand(pane, _("New GCODE"), ID_NEWNC );
+	AddCommand(pane, _("New G-Code"), ID_NEWNC );
 	AddCommand(pane, _("New GCMC"), ID_NEWGCMC);
 	return pane;
 }
@@ -267,7 +267,7 @@ wxBoxSizer *WelcomeWnd::CreateDoc()
 	AddHelpLink(pane, _("Matilda website"), ID_WHATNEWS);
 	//AddHelpLink(pane, _("Editor documentation"), ID_HELPEDITOR);
 	AddHelpLink(pane, _("GCMC documentation"), ID_HELPGCMC);
-	AddHelpLink(pane, _("GCode reference"), ID_HELPNC);	
+	AddHelpLink(pane, _("G-Code reference"), ID_HELPNC);	
 	return pane;
 }
 
@@ -351,23 +351,25 @@ wxBoxSizer *WelcomeWnd::CreateFooter()
 	AddCommand(paneCmd, _("Check for Update"), ID_CHECKUPDATE, true);
 	pane->Add( paneCmd, 0, wxALIGN_BOTTOM);
 	pane->AddStretchSpacer();
+	
 	wxBoxSizer *pane1 = new wxBoxSizer(wxVERTICAL);
-
-	pTxt = new wxStaticText(this, ID_STATICTEXTFG, _("Help us become better."));
+	/*
+	pTxt = new wxStaticText(this, ID_STATICTEXTFG, _("Help us become better"));
 	pTxt->SetFont(wxFontInfo(10).Bold());
 	pane1->Add(pTxt, 0, wxALIGN_CENTER_HORIZONTAL);
-	
-	pTxt = new wxStaticText(this, ID_STATICTEXTFG, _(" Tell us what you liked or what you lack in our application"));
+	*/
+	pTxt = new wxStaticText(this, ID_STATICTEXTFG, _("Help me to make the app better"));
 	pTxt->SetFont(wxFontInfo(10));
 	pane1->Add(pTxt, 0, wxALIGN_CENTER_HORIZONTAL);
-
-	FlatButton *ph = new FlatButton(this, ID_WRITEFEEDBACK, _("WRITE TO US"), FB_LABEL_CENTER);
+	
+	FlatButton *ph = new FlatButton(this, ID_WRITEFEEDBACK, _("FEEDBACK"), FB_LABEL_CENTER);
 	ph->SetCommand(ID_WRITEFEEDBACK);
 	ph->SetFont(wxFontInfo(11).Bold() );
-	ph->SetMargins(-1, 8);
+	ph->SetMargins(15, 8);
 	wxBitmap bmp = wxArtProvider::GetBitmap(ART_MAIL, wxART_OTHER);
-	ph->SetBitmap(bmp, 2);
+	ph->SetBitmap(bmp, 8);
 	pane1->Add(ph, 0, wxEXPAND );
+
 	pane->Add(pane1, 0, wxRIGHT | wxALIGN_BOTTOM);
 	return pane;
 }

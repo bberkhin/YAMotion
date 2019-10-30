@@ -208,6 +208,6 @@ static const char * const gcodeWordLists[] = {
 			0,
 		};
 
-LexerModule lmGcode(SCLEX_GCODE, ColouriseGCodeDoc, "G Code", FoldGcodeDoc, gcodeWordLists);
+LexerModule lmGcode(SCLEX_GCODE, ColouriseGCodeDoc, "GCODE", FoldGcodeDoc, gcodeWordLists);
 
 

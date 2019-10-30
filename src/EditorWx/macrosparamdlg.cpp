@@ -203,12 +203,12 @@ bool MacrosParamDlg::GetAndValidateInput()
 
 	if (m_as_gcmc && !m_new_window && (m_curfiletype == FILETYPE_NC))
 	{
-		wxMessageBox(_("Can not insert GCMC code to GCODE file!"),wxMessageBoxCaptionStr, wxOK | wxICON_INFORMATION);
+		wxMessageBox(_("Can not insert GCMC code to G-Code file!"),wxMessageBoxCaptionStr, wxOK | wxICON_INFORMATION);
 		return false;
 	}
 	else if (!m_as_gcmc && !m_new_window && (m_curfiletype == FILETYPE_GCMC))
 	{
-		wxMessageBox(_("Can not insert GCODE to GCMC file!"), wxMessageBoxCaptionStr, wxOK | wxICON_INFORMATION);
+		wxMessageBox(_("Can not insert G-Code to GCMC file!"), wxMessageBoxCaptionStr, wxOK | wxICON_INFORMATION);
 		return false;
 	}
 	return true;

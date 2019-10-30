@@ -638,12 +638,12 @@ void DirTreeCtrl::OnItemMenu(wxTreeEvent& event)
 	}
 	else
 	{
-		menu.Append(ID_TREE_NEWNC, _("&New NC File"));
-		menu.Append(ID_TREE_NEWGCMC, _("New GCMC File"));
+		menu.Append(ID_TREE_NEWNC, _("&New G-Code"));
+		menu.Append(ID_TREE_NEWGCMC, _("New GCMC"));
 		menu.Append(ID_TREE_FILE_RENAME, _("Rename"));
-		menu.Append(ID_TREE_FOLDER_OPEN, _("Open Folder"));
+		menu.Append(ID_TREE_FOLDER_OPEN, _("Open folder"));
 		if(GetItemParent(itemId) == m_rootId)
-			menu.Append(ID_TREE_FOLDER_REMOVE, _("Remove Folder from Project"));
+			menu.Append(ID_TREE_FOLDER_REMOVE, _("Remove folder from pane"));
 	}
 	
 	SelectItem(itemId);

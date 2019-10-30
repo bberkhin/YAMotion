@@ -25,7 +25,7 @@ void FlatButton::Init()
 	m_marginY = 4;
 	m_status = statusNone;
 	m_captured = false;
-	m_spacer = 0; // spacer between bmp and text
+	m_spacer = 6; // spacer between bmp and text
 	m_colors.resize(ColourNum);
 	
 	UpdateThemeColor();
@@ -200,9 +200,11 @@ void FlatButton::DrawBackground(wxDC&  dc, const wxRect &rc)
 void FlatButton::CalcGeometry(const wxRect &rcIn, wxRect &rcLabel, wxPoint &ptButmap)
 {
 	rcLabel = rcIn;
+	rcLabel.Deflate(m_marginX, m_marginY);
+
 	if (m_bitmap.IsOk())
 	{
-		int move = (m_bitmap.GetWidth() + m_spacer + m_marginX);
+		int move = m_bitmap.GetWidth() + m_spacer;// +m_marginX;
 		if (m_style & FB_BITMAP_LEFT)
 		{
 			rcLabel.x += move;
@@ -218,32 +220,30 @@ void FlatButton::CalcGeometry(const wxRect &rcIn, wxRect &rcLabel, wxPoint &ptBu
 			rcLabel.width -= move;
 		}
 	}
-	rcLabel.Deflate(m_marginX, m_marginY);
-
-
+	
 	if (m_bitmap.IsOk())
 	{
 		if (m_style & FB_BITMAP_LEFT)
 			ptButmap.x = rcIn.GetLeft() + m_marginX;
 		else if (m_style & FB_BITMAP_RIGHT)
-			ptButmap.x = rcIn.GetLeft() + rcIn.GetWidth() - m_bitmap.GetWidth() - m_marginX;
+			ptButmap.x = rcIn.GetRight() - m_bitmap.GetWidth() - m_marginX;
 		else
 		{
-			// just after label			
+			// just after label
 			if (m_style & FB_LABEL_CENTER)
 			{
 				wxSize minSize = GetMinSize();
-				rcLabel.width = minSize.x - m_bitmap.GetWidth() - m_spacer - (3 * m_marginX);
+				rcLabel.width = minSize.x - m_bitmap.GetWidth() - m_spacer - (2 * m_marginX);
 				if (rcIn.width > minSize.x)
 				{
-					rcLabel.x = rcIn.x + (rcIn.width - minSize.x) / 2;
+					rcLabel.x = rcIn.x + (rcIn.width - minSize.x) / 2 + m_marginX;
 				}
 				else
 				{
-					rcLabel.x = rcIn.x;
+					rcLabel.x = rcIn.x;// +m_marginX;
 				}
 			}
-			ptButmap.x = rcLabel.x + rcLabel.width + m_spacer + m_marginX;
+			ptButmap.x = rcLabel.x + rcLabel.width + m_spacer;
 			
 		}		
 		ptButmap.y = rcIn.GetTop() + (rcIn.GetHeight() - m_bitmap.GetHeight()) / 2;
@@ -380,7 +380,7 @@ void FlatButton::SetBestClientSize()
 
 		if (!label.IsEmpty())
 		{
-			width += m_marginX;
+			//width += m_marginX;
 			width += m_spacer;
 		}
 		width += m_bitmap.GetWidth();

@@ -146,7 +146,7 @@ wxBoxSizer *EditorPanel::CreateHeaderPanel()
 	
 	switch (ftype)
 	{
-		case FILETYPE_NC:	label = _("GCODE"); break;
+		case FILETYPE_NC:	label = _("G-Code"); break;
 		case FILETYPE_GCMC:	label = _("GCMC"); break;
 		case FILETYPE_JSON: label = _("JSON"); break;
 	}

@@ -164,7 +164,7 @@ wxBEGIN_EVENT_TABLE (AppFrame, wxFrame)
 
 
   //  EVT_CONTEXT_MENU(                AppFrame::OnContextMenu)
-//GCode
+//G-Code
 	EVT_AUINOTEBOOK_PAGE_CLOSE(wxID_ANY, AppFrame::OnNotebookPageClose)
 	EVT_COMMAND(wxID_ANY, FILE_MODIFYED_EVENT, AppFrame::OnFileModified)
 	EVT_COMMAND(wxID_ANY, FILE_OPEN_EVENT, AppFrame::OnFileOpenEvent)
@@ -241,7 +241,7 @@ AppFrame::AppFrame (const wxString &title)
 
 #ifdef DOWX_LOGGING
 		//Open a log window, don't show it though
-	wxLogWindow *m_LogWin = new wxLogWindow(this, "YAMotion Gcode Editor", true, false);
+	wxLogWindow *m_LogWin = new wxLogWindow(this, "YAMotion G-Code Editor", true, false);
 	wxLog::SetActiveTarget(m_LogWin);
 #endif
 
@@ -272,17 +272,17 @@ void AppFrame::OnTabRightUp(wxAuiNotebookEvent& evt)
 	}
 
 	menu.Append(ID_CLOSEACTIVETAB, _("Close")); 	//Close
-	menu.Append(ID_CLOSEALL, _("Close All")); 	//Close All but this
-	wxMenuItem *item = menu.Append(ID_CLOSEALLBUTTHIS, _("Close All but this")); 	//Close All but this
+	menu.Append(ID_CLOSEALL, _("Close all")); 	//Close All but this
+	wxMenuItem *item = menu.Append(ID_CLOSEALLBUTTHIS, _("Close all but this")); 	//Close All but this
 	item->Enable(m_notebook->GetPageCount() > 1);
 
 	if (pFile)
 	{
-		menu.Append(ID_ADDFIILEDIRTOPANE, _("Add file path to Pane")); 	//Close All but this
+		menu.Append(ID_ADDFIILEDIRTOPANE, _("Add file path to pane")); 	//Close All but this
 	}
 
 	menu.AppendSeparator();
-	menu.Append(ID_NEWNC, _("New GCODE"));
+	menu.Append(ID_NEWNC, _("New G-Code"));
 	menu.Append(ID_NEWGCMC, _("New GCMC"));
 	menu.Append(ID_OPENFILE, _("Open file..."));
 
@@ -1186,12 +1186,12 @@ wxMenuBar *AppFrame::CreateMenu ()
 	menuFile->Append(ID_OPENRECENT, _("Open recent"), m_menuLastFiles);
 	menuFile->AppendSeparator();
 	//New
-	mi = menuFile->Append(ID_NEWNC, _("New GCODE\tCtrl+N"));
+	mi = menuFile->Append(ID_NEWNC, _("New G-Code\tCtrl+N"));
 	mi->SetBitmaps(wxArtProvider::GetBitmap(wxART_NEW, wxART_MENU));
 	mi = menuFile->Append(ID_NEWGCMC, _("New GCMC\tCtrl+Shift+N"));
 	mi->SetBitmaps(wxArtProvider::GetBitmap(wxART_NEW, wxART_MENU));
 	menuFile->AppendSeparator();
-	menuFile->Append(ID_SHOWDIRPANE, _("Show Folders Pane\tCtrl+P"));
+	menuFile->Append(ID_SHOWDIRPANE, _("Show folders pane\tCtrl+P"));
 	menuFile->Append(ID_SHOWWELCOME, _("Welcome window\tCtrl+W"));
 	menuFile->AppendSeparator();
 	//Save	
@@ -1257,7 +1257,7 @@ wxMenuBar *AppFrame::CreateMenu ()
 */
 	// Pregerences menu
 	wxMenu *menuPref = new wxMenu;
-	mi = menuPref->Append(ID_GLOBALPREFS, _("Default Preferences"));
+	mi = menuPref->Append(ID_GLOBALPREFS, _("Default preferences"));
 	mi->SetBitmaps(wxArtProvider::GetBitmap(ART_PREFERENCES, wxART_MENU));
 	//menuPref->Append(ID_USERPREFS, _("User Preferences"));
 	m_menuThemes = new wxMenu;
@@ -1271,9 +1271,9 @@ wxMenuBar *AppFrame::CreateMenu ()
 	menuHelp->Append(ID_WHATNEWS, _("Matilda website"));
 	//menuHelp->Append(ID_HELPEDITOR, _("Matilda Web site"));
 	menuHelp->Append(ID_HELPGCMC, _("GCMC documentation"));
-	menuHelp->Append(ID_HELPNC, _("GCodes reference"));
+	menuHelp->Append(ID_HELPNC, _("G-Code reference"));
 	menuHelp->AppendSeparator();
-	menuHelp->Append(ID_CHECKUPDATE, _("&Check Updates"));
+	menuHelp->Append(ID_CHECKUPDATE, _("&Check updates"));
 	menuHelp->AppendSeparator();
 	menuHelp->Append (wxID_ABOUT, _("&About..."));
 

@@ -10,7 +10,7 @@
 
 
 
-// GCode 
+// G-Code 
 const char* GCoddeWordlist = "abs acos asin atan cos exp fix fup ln round sin sqrt tan exists";
 const char* GcmcWordlist1 = "abs acos asin atan atan_xy atan_xz atan_yz ceil comment cos count delete error exp fixpos_restore fixpos_set fixpos_store floor head "
 "insert isangle isconst isdefined isdeg isdistance isdxf isfloat isgcode isinch isint ismm ismodemm isnone israd isrelative isscalar isstring issvg "
@@ -544,7 +544,7 @@ wxString LanguageInfo::CreateWildCard() const
 	if (pedit->GetFileType() == FILETYPE_GCMC)
 		wildCard = _("GCMC Files (*.gcmc)|*.gcmc");
 	else
-		wildCard = _("GCode Files (*.ngc;*.nc)|*.ngc;*.nc");
+		wildCard = _("G-Code Files (*.ngc;*.nc)|*.ngc;*.nc");
 	*/
 }
 
