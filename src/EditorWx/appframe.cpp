@@ -1005,7 +1005,7 @@ void AppFrame::OnMathExpression(wxCommandEvent &WXUNUSED(event))
 	catch (mu::Parser::exception_type &e)
 	{
 		wxString errMsg;
-		errMsg += wxString::Format(_("Error%s pos: %d"), e.GetMsg().c_str(), (int)e.GetPos());
+		errMsg += wxString::Format(_("Error %s pos: %d"), e.GetMsg().c_str(), (int)e.GetPos());
 		wxMessageBox(errMsg, _("Expression error") );
 	}
 	catch (...)
@@ -1197,7 +1197,7 @@ wxMenuBar *AppFrame::CreateMenu ()
 	//Save	
 	mi = menuFile->Append(wxID_SAVE, _("Save\tCtrl+S"));
 	mi->SetBitmaps(wxArtProvider::GetBitmap(ART_SAVE, wxART_MENU));
-	mi = menuFile->Append(wxID_SAVEAS, _("Save  as ..\tCtrl+Shift+S"));
+	mi = menuFile->Append(wxID_SAVEAS, _("Save as...\tCtrl+Shift+S"));
 	mi->SetBitmaps(wxArtProvider::GetBitmap(ART_SAVE, wxART_MENU));
 	mi = menuFile->Append(ID_CLOSEACTIVETAB, _("Close"));
 	menuFile->AppendSeparator();
@@ -1297,7 +1297,7 @@ void AppFrame::CreateMacrosesMenu(wxMenu *menuInsert)
 		menuInsert->Append(ID_MACROSFIRST + i, md.name.c_str());
 	}
 	menuInsert->AppendSeparator();
-	menuInsert->Append(ID_MACROSES, _("All Macroses..."));
+	menuInsert->Append(ID_MACROSES, _("All macroses..."));
 }
 
 void AppFrame::AddPath(const wxString &path)

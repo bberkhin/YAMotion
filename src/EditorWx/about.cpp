@@ -58,7 +58,7 @@ AppAbout::AppAbout(wxWindow *parent,
 	}
 
 	// sets the application title
-	SetTitle(_("About .."));
+	SetTitle(_("About"));
 	
 	// about icontitle//info
 	wxBoxSizer *aboutpane = new wxBoxSizer(wxVERTICAL);

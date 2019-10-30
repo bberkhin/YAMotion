@@ -1074,7 +1074,7 @@ void Edit::DoFind(wxEventType type, int flag, const wxString &strfind)
 	}
 	else
 	{
-		wxMessageBox(wxString::Format(_("\"%s\" Not found"), strfind), _("Find result"), wxOK | wxICON_INFORMATION, this);
+		wxMessageBox(wxString::Format(_("\"%s\" Not found"), strfind), _("Find results"), wxOK | wxICON_INFORMATION, this);
 	}
 }
 
@@ -1123,7 +1123,7 @@ void Edit::DoReplace(wxEventType type, int flag, const wxString &strfind, const 
 	
 	if ( !done )
 	{
-		wxMessageBox(wxString::Format(_("\"%s\" Not found"), strfind), _("Find result"), wxOK | wxICON_INFORMATION, this);
+		wxMessageBox(wxString::Format(_("\"%s\" Not found"), strfind), _("Find results"), wxOK | wxICON_INFORMATION, this);
 	}
 	else if (type == wxEVT_FIND_REPLACE_ALL)
 	{

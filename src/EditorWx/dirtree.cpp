@@ -760,7 +760,7 @@ void DirTreeCtrl::OnFileDelete(wxCommandEvent &WXUNUSED(event))
 	{
 		wxString path = item->GetPath();
 		bool bOk = false;
-		if (wxYES != wxMessageBox(wxString::Format(_("Do you really want to remove file  %s"), item->GetPath()), _("Removing file(s)"), wxYES | wxNO | wxNO_DEFAULT | wxICON_QUESTION))
+		if (wxYES != wxMessageBox(wxString::Format(_("Do you really want to remove file %s"), item->GetPath()), _("Removing file(s)"), wxYES | wxNO | wxNO_DEFAULT | wxICON_QUESTION))
 			return;
 		if( item->isFile() )
 			bOk = std::filesystem::remove( item->GetPath().wc_str());

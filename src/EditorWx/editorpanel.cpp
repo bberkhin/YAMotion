@@ -1339,7 +1339,7 @@ bool FilePage::DoFileSave(bool askToSave, bool bSaveAs)
 			wildCard = plang->CreateWildCard();
 		else
 			wildCard = _("All Files|*.*");		
-		wxFileDialog dlg(this, _("Save file As"), wxEmptyString, filename, wildCard, wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
+		wxFileDialog dlg(this, _("Save file as"), wxEmptyString, filename, wildCard, wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
 		if (dlg.ShowModal() != wxID_OK)
 			return false;
 		filename = dlg.GetPath();
