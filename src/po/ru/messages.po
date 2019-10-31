@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-10-30 18:43+0700\n"
-"PO-Revision-Date: 2019-04-01 21:47+0700\n"
+"POT-Creation-Date: 2019-10-31 17:19+0700\n"
+"PO-Revision-Date: 2019-10-31 17:20+0700\n"
 "Last-Translator: Boris Berkhin <bberkhin@gmail.com>\n"
 "Language-Team: Russian\n"
 "Language: ru\n"
@@ -18,35 +18,34 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n"
 "%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
-"X-Poedit-Basepath: ../../Gcode\n"
+"X-Poedit-Basepath: ../..\n"
 "X-Generator: Poedit 2.2.1\n"
-"X-Poedit-SearchPath-0: .\n"
+"X-Poedit-SearchPath-0: Gcode\n"
+"X-Poedit-SearchPath-1: EditorWx\n"
 
 #: editorpanel.cpp:484
 msgid " AXIS "
-msgstr ""
+msgstr " ОСИ "
 
 #: logwindow.cpp:73
-#, fuzzy
 msgid " Error! "
 msgstr " Ошибка! "
 
 #: logwindow.cpp:74
-#, fuzzy
 msgid " Warning! "
 msgstr " Предупреждение! "
 
 #: edit.cpp:1077 edit.cpp:1126
 #, c-format
 msgid "\"%s\" Not found"
-msgstr ""
+msgstr "\"%s\" Не найден"
 
 #: gcodeerrors.h:99
 #, c-format
 msgid "%c word given for arc in %s plane"
 msgstr "Параметр %c не должен быть определен для плоскости обработки %s"
 
-#: gcodeerrors.h:100 
+#: gcodeerrors.h:100
 #, c-format
 msgid "%c word missing in absolute center arc"
 msgstr "Не задан параметр %c определяющий центр дуги"
@@ -61,7 +60,6 @@ msgid "&About..."
 msgstr "О программе..."
 
 #: appframe.cpp:1276
-#, fuzzy
 msgid "&Check updates"
 msgstr "Проверить обновления"
 
@@ -91,7 +89,6 @@ msgid "&Find\tCtrl+F"
 msgstr "Найти\tCtrl+F"
 
 #: appframe.cpp:1286
-#, fuzzy
 msgid "&Help"
 msgstr "Помощь"
 
@@ -108,12 +105,10 @@ msgid "&Lower case\tCtrl+U"
 msgstr "Строчные"
 
 #: dirtree.cpp:641
-#, fuzzy
 msgid "&New G-Code"
 msgstr "Новый G-Code файл"
 
 #: dirtree.cpp:634
-#, fuzzy
 msgid "&Open"
 msgstr "Открыть"
 
@@ -149,13 +144,9 @@ msgstr "Отменить\tCtrl+Z"
 msgid "&Upper case\tCtrl+Shift+U"
 msgstr "Прописные\tCtrl+Shift+U"
 
-#: editorpanel.cpp:463
-msgid "..."
-msgstr "..."
-
 #: editorpanel.cpp:450
 msgid "3D View:"
-msgstr "3D Вид"
+msgstr "3D Вид:"
 
 #: editorpanel.cpp:171
 msgid "3D view"
@@ -180,67 +171,73 @@ msgstr "Добавить путь на панель"
 
 #: dirtree.cpp:1122
 msgid "Add folders"
-msgstr "Добавить папки"
+msgstr "Добавить каталоги"
 
 #: editorpanel.cpp:1341
 msgid "All Files|*.*"
 msgstr "Все файлы|*.*"
 
-#: appframe.cpp:1300
-msgid "All macroses..."
-msgstr "Все макросы..."
-
 #: gcodeerrors.h:72
-msgid "All axes missing with g52 or g92"
-msgstr "Не указана ни одна ось для g52 или g92"
+msgid "All axes missing with G52 or G92"
+msgstr "Не указана ни одна ось для G52 или G92"
 
 #: gcodeerrors.h:73
 msgid "All axes missing with motion code"
 msgstr "Не указана ни одна ось для кода перемещения"
 
+#: appframe.cpp:1300
+msgid "All macroses..."
+msgstr "Все макросы..."
+
 #. sizer->AddGrowableCol(0);
 #: RotateDlg.cpp:62
 msgid "Angle (degree): "
-msgstr "Угол (градусы):"
+msgstr "Угол (градусы): "
 
-#: gcodeerrors.h:18 gcodeerrors.h:104 
+#: gcodeerrors.h:18 gcodeerrors.h:104
 msgid ""
 "Arc move in concave corner cannot be reached by the tool without gouging"
 msgstr ""
+"Перемещение по дуги в вогнутом углу не может быть достигнуто инструментом "
+"без обработки"
 
-#: gcodeerrors.h:74 
+#: gcodeerrors.h:74
 msgid "Arc radius too small to reach end point"
 msgstr "Радиус дуги слишком мал для достижения конечной точки"
 
-#: gcodeerrors.h:105 
+#: gcodeerrors.h:105
 msgid "Arc to arc motion is invalid because the arcs have the same center"
 msgstr "Переход из дуги в дугу невозможен так как они имеют одинаковы центр"
 
-#: gcodeerrors.h:106 
+#: gcodeerrors.h:106
 msgid ""
 "Arc to arc motion makes a corner the compensated tool can't fit in without "
 "gouging"
 msgstr ""
+"Перемещение от дуги к дуге создает угол который не может быть реализован в "
+"режиме компенсации инструмента"
 
 #: gcodeerrors.h:60
 msgid ""
 "Arc to straight motion makes a corner the compensated tool can't fit in "
 "without gouging"
 msgstr ""
+"Перемещение от дуги к прямой создает угол который не может быть реализован в "
+"режиме компенсации инструмента"
 
-#: gcodeerrors.h:75 
+#: gcodeerrors.h:75
 msgid "Argument to acos out of range"
 msgstr "Аргумент арккосинуса вне области определния"
 
-#: gcodeerrors.h:76 
+#: gcodeerrors.h:76
 msgid "Argument to asin out of range"
 msgstr "Аргумент арксинуса вне области определния"
 
-#: gcodeerrors.h:77 
+#: gcodeerrors.h:77
 msgid "Attempt to divide by zero"
 msgstr "Попытка деления на ноль"
 
-#: gcodeerrors.h:78 
+#: gcodeerrors.h:78
 msgid "Attempt to raise negative to non integer power"
 msgstr "Попытка возвести отрицательное число в нецелую степень"
 
@@ -256,9 +253,8 @@ msgid "Axis: "
 msgstr "Оси: "
 
 #: editorpanel.cpp:462
-#, fuzzy
 msgid "BACK"
-msgstr "НАПИСАТЬ"
+msgstr "СЗАДИ"
 
 #: editorpanel.cpp:460
 msgid "BOTTOM"
@@ -268,7 +264,7 @@ msgstr "СНИЗУ"
 msgid "BOX"
 msgstr "ГРАНИЦЫ"
 
-#: gcodeerrors.h:79 
+#: gcodeerrors.h:79
 msgid "Bad format integer"
 msgstr "Неверный формат целого"
 
@@ -277,33 +273,11 @@ msgstr "Неверный формат целого"
 msgid "Bad number format parsing '%s'"
 msgstr "Неверный формат числа при разборе '%s'"
 
-
-#: gcodeerrors.h:80
-msgid "Bug code not g0 or g1"
-msgstr ""
-
-#: gcodeerrors.h:81 
-msgid "Bug code not g2 or g3"
-msgstr ""
-
-
-#: gcodeerrors.h:82
-msgid "Bug in tool radius comp"
-msgstr ""
-
-#: gcodeerrors.h:83
-msgid "Bug plane not xy yz or xz"
-msgstr ""
-
-#: gcodeerrors.h:87
-msgid "Bug unknown operation"
-msgstr ""
-
-#: gcodeerrors.h:15 
+#: gcodeerrors.h:15
 msgid "Calculation resulted is 'infinity'"
 msgstr "Результат расчета неопределен"
 
-#: gcodeerrors.h:14 
+#: gcodeerrors.h:14
 msgid "Calculation resulted is 'not a number'"
 msgstr "Результат расчета не является числом"
 
@@ -314,7 +288,7 @@ msgstr "Подпрограмма %s не найдена"
 
 #: macrosparamdlg.cpp:211
 msgid "Can not insert G-Code to GCMC file!"
-msgstr "Невозможно вставить G-Code в GCMC файл! "
+msgstr "Невозможно вставить G-Code в GCMC файл!"
 
 #: macrosparamdlg.cpp:206
 msgid "Can not insert GCMC code to G-Code file!"
@@ -331,14 +305,14 @@ msgid "Can not open file %s"
 msgstr "Ошибка открытия файла %s"
 
 #: appframe.cpp:685
-#, fuzzy, c-format
+#, c-format
 msgid "Can not open file %s in catalogs:\n"
-msgstr "Ошибка открытия файла %s"
+msgstr "Не могу найти\\открыть файл %s в каталогах:\n"
 
 #: appframe.cpp:1353
-#, fuzzy, c-format
+#, c-format
 msgid "Can not open file %s!"
-msgstr "Ошибка открытия файла %s"
+msgstr "Ошибка открытия файла %s!"
 
 #: workingthreads.cpp:58 workingthreads.cpp:133
 #, c-format
@@ -346,14 +320,14 @@ msgid "Can not open file: %s ..."
 msgstr "Ошибка открытия файла: %s ..."
 
 #: dirtree.cpp:785
-#, fuzzy, c-format
+#, c-format
 msgid "Can not remove %s"
-msgstr "Ошибка открытия файла %s"
+msgstr "Не могу удалить файл %s"
 
 #: dirtree.cpp:575
-#, fuzzy, c-format
+#, c-format
 msgid "Can not rename %s"
-msgstr "Ошибка открытия файла %s"
+msgstr "Ошибка перименования файла %s"
 
 #: gcodeerrors.h:27
 #, c-format
@@ -369,7 +343,7 @@ msgstr "Ошибка записи файла %s"
 msgid "Can't create the thread to run simulate"
 msgstr "Ошибка при создании потока для запуска симуляции"
 
-#: gcodeerrors.h:88 
+#: gcodeerrors.h:88
 msgid "Cannot change axis offsets with cutter radius comp"
 msgstr ""
 "Невозможно изменить смещение оси при включенном режиме компенсации на радиус "
@@ -393,33 +367,32 @@ msgstr "Невозможно задать скорость обработки р
 msgid "Cannot feed with zero spindle speed in feed per rev mode"
 msgstr "Невозможно задать скорость вращения шпинделя равной 0"
 
-
 #: gcodeerrors.h:89
 msgid "Cannot turn cutter radius comp on when on"
 msgstr "Режиме компенсации на радиус инструмента уже включен"
 
+#: gcodeerrors.h:92
+msgid "Cannot use G53 with cutter radius comp"
+msgstr ""
+"Нельзя использовать G53 при включенном режиме компенсации (на радиус) "
+"инструмента"
+
 #: gcodeerrors.h:90
-msgid "Cannot use axis values with g80"
-msgstr "Нельзя задавать значения осей для g80"
+msgid "Cannot use axis values with G80"
+msgstr "Нельзя задавать значения осей для G80"
 
 #: gcodeerrors.h:91
-msgid "Cannot use axis values without a g code that uses them"
+msgid "Cannot use axis values without a G code that uses them"
 msgstr "Нельзя задавать значения осей без установленного для них G кода"
 
 #: gcodeerrors.h:22
 msgid "Cannot use canned cycles with cutter compensation on"
 msgstr ""
-"Нельзя использовать циклы сверления при включенном режиме компенсации на "
-"радиус инструмента"
+"Нельзя использовать циклы сверления при включенном режиме компенсации (на "
+"радиус) инструмента"
 
-#: gcodeerrors.h:92
-msgid "Cannot use g53 with cutter radius comp"
-msgstr ""
-"Нельзя использовать g53 при включенном режиме компенсации на радиус "
-"инструмента"
-
-#: gcodeerrors.h:93 
-msgid "Cannot use two g codes that both use axis values"
+#: gcodeerrors.h:93
+msgid "Cannot use two G codes that both use axis values"
 msgstr ""
 "Нельзя использовать два G кода каждый из которых использует значения осей"
 
@@ -436,8 +409,8 @@ msgid "Center Z: "
 msgstr "Центр Z: "
 
 #: appframe.cpp:1233
-msgid "Change &case to .."
-msgstr "Изменить буквы на.."
+msgid "Change case to"
+msgstr "Изменить буквы на"
 
 #: editorpanel.cpp:166
 msgid "Check"
@@ -448,32 +421,27 @@ msgid "Check for Update"
 msgstr "Проверить обновления"
 
 #: workingthreads.cpp:491
-#, fuzzy
 msgid "Checking aborted"
 msgstr "Проверка отменена"
 
 #: workingthreads.cpp:495
-#, fuzzy, c-format
+#, c-format
 msgid "Checking completed with %d error(s)"
 msgstr "Проверка завершена. %d ошибок"
 
 #: workingthreads.cpp:738
-#, fuzzy
 msgid "Checking completed with errors"
 msgstr "Проверка завершена с ошибками"
 
 #: workingthreads.cpp:493 workingthreads.cpp:736
-#, fuzzy
 msgid "Checking completed with no error"
 msgstr "Проверка завершена успешно"
 
 #: CheckUpdate.cpp:23
-#, fuzzy
 msgid "Checking for update"
 msgstr "Проверить обновления"
 
 #: appframe.cpp:274 appframe.cpp:1202
-#, fuzzy
 msgid "Close"
 msgstr "Закрыть"
 
@@ -483,19 +451,13 @@ msgstr "Закрыть"
 
 #. Close
 #: appframe.cpp:275
-#, fuzzy
 msgid "Close all"
-msgstr "Закрыть"
+msgstr "Закрыть все"
 
 #. Close All but this
 #: appframe.cpp:276
-#, fuzzy
 msgid "Close all but this"
-msgstr "Закрыть"
-
-#: gcodeerrors.h:9
-msgid "CmdParser::read_set_parameter can not called here"
-msgstr ""
+msgstr "Закрыть все кроме этого"
 
 #: gcodeerrors.h:94
 msgid "Command too long"
@@ -515,7 +477,6 @@ msgid "Convert"
 msgstr "Конвертировать"
 
 #: workingthreads.cpp:745
-#, fuzzy
 msgid "Converting completed with errors"
 msgstr "Конвертация завершена с ошибками"
 
@@ -558,6 +519,8 @@ msgid ""
 "Cutter compensation has generated an invalid arc with mismatched radiuses r1 "
 "%f r2 %f"
 msgstr ""
+"В режиме компенсации инструмента генерируются некорректные дуги с "
+"небьющимися радиусами r1 %f r2 %f"
 
 #: gcodeerrors.h:71
 msgid "Cutter radius compensation allowed only in XY, XZ planes"
@@ -566,9 +529,8 @@ msgstr ""
 "плоскостей обработки"
 
 #: appframe.cpp:1260
-#, fuzzy
 msgid "Default preferences"
-msgstr "Справочник G кодов"
+msgstr "Настройки по умолчанию"
 
 #: dirtree.cpp:763
 #, c-format
@@ -580,12 +542,11 @@ msgid "Drawing aborted"
 msgstr "Отрисовка отменена"
 
 #: workingthreads.cpp:522
-#, fuzzy
 msgid "Drawing completed"
 msgstr "Отрисовка завершена"
 
-#: gcodeerrors.h:96 
-msgid "Dwell time p word missing with g82"
+#: gcodeerrors.h:96
+msgid "Dwell time P word missing with G82"
 msgstr "Для G82 не указано время остановки (параметр P)"
 
 #: about.cpp:98
@@ -596,9 +557,14 @@ msgstr "E-mail "
 msgid "ERROR"
 msgstr "ОШИБКА"
 
-#: gcodeerrors.h:97 
+#: gcodeerrors.h:97
 msgid "Equal sign missing in parameter setting"
 msgstr "Отсутствует знак равенства в настройке параметров"
+
+#: appframe.cpp:1008
+#, c-format
+msgid "Error %s pos: %d"
+msgstr "Ошибка %s позиция: %d"
 
 #: appframe.cpp:692 appframe.cpp:730 appframe.cpp:1353 prefs.cpp:179
 #: prefs.cpp:452 prefs.cpp:624 prefs.cpp:705 them.cpp:359
@@ -617,11 +583,6 @@ msgstr "Ошибка анализа файла %s\n"
 #: prefs.cpp:712
 msgid "Error writing file"
 msgstr "Ошибка записи файла"
-
-#: appframe.cpp:1008
-#, c-format
-msgid "Error %s pos: %d"
-msgstr "Ошибка %s позиция: %d"
 
 #: gcodeerrors.h:51
 msgid "Expected # reading parameter"
@@ -649,6 +610,8 @@ msgid ""
 "File %s is not a regular file of the file system\n"
 "Would you like to add it to folders pane?"
 msgstr ""
+"Файл %s не является простым файлом в файловой системе\n"
+"Вы действительно хотите добавить его в панель каталогов?"
 
 #: editorpanel.cpp:1325
 #, c-format
@@ -669,7 +632,6 @@ msgid "File name not specified"
 msgstr "Не определено имя файла"
 
 #: welcomewnd.cpp:243
-#, fuzzy
 msgid "Files"
 msgstr "Файлы"
 
@@ -691,15 +653,15 @@ msgstr "Найти и заменить"
 
 #: edit.cpp:1077 edit.cpp:1126
 msgid "Find results"
-msgstr ""
+msgstr "Результаты поиска"
 
 #: dirtree.cpp:1089
 msgid "Folders"
-msgstr "Папки"
+msgstr "Каталоги"
 
 #: gcodeerrors.h:98
 msgid "G code out of range"
-msgstr ""
+msgstr "Недопустимое значение G кода"
 
 #: gcodeerrors.h:48
 #, c-format
@@ -709,20 +671,18 @@ msgstr "G%d.1 с L параметром, но плоскость обработ�
 #: gcodeerrors.h:47
 #, c-format
 msgid "G%d.1 with no D word"
-msgstr ""
+msgstr "G%d.1 с незаданным параметром D"
 
 #: editorpanel.cpp:149
-#, fuzzy
 msgid "G-Code"
-msgstr "Новый G-Code файл"
+msgstr "G-Code"
 
 #: about.cpp:104
 msgid "G-Code Meta Compiler "
-msgstr ""
+msgstr "G-Code Meta Compiler "
 
 #. sets the application title
 #: mathexpressiondlg.cpp:26
-#, fuzzy
 msgid "G-Code expression calculator"
 msgstr "Калькулятор выражений"
 
@@ -737,38 +697,37 @@ msgstr "G-Code калькулятор"
 
 #: editorpanel.cpp:493
 msgid "G0"
-msgstr ""
+msgstr "G0"
 
 #: gcodeerrors.h:56
 msgid "G33 not supported"
-msgstr ""
+msgstr "G33 пока не поддерживается"
 
 #: gcodeerrors.h:44
 msgid "G7 and G8 does not support yet"
-msgstr ""
+msgstr "G7 и G8 пока не поддерживается"
 
 #: gcodeerrors.h:24
 msgid "G74 & G84 not supported yet"
-msgstr ""
+msgstr "G74 и G84 пока не поддерживается"
 
 #: gcodeerrors.h:57
 msgid "G76 not supported"
-msgstr ""
+msgstr "G76 пока не поддерживается"
 
 #: gcodeerrors.h:45
 msgid "G92.1 and G92.2 not implemented yet"
-msgstr ""
+msgstr "G92.1 и G92.2 пока не поддерживаются"
 
 #: gcodeerrors.h:30
 msgid "G93 Inverse Time Mode not supported"
-msgstr ""
+msgstr "G93 (Inverse Time Mode) пока не поддерживается"
 
 #: gcodeerrors.h:31
 msgid "G95 - is Units per Revolution Mode not supported"
-msgstr ""
+msgstr "G93 (Units per Revolution Mode) пока не поддерживается"
 
 #: editorpanel.cpp:150
-#, fuzzy
 msgid "GCMC"
 msgstr "GCMC"
 
@@ -785,7 +744,6 @@ msgstr ""
 "Остановить процесс?"
 
 #: welcomewnd.cpp:266
-#, fuzzy
 msgid "Help"
 msgstr "Помощь"
 
@@ -799,12 +757,12 @@ msgid "Help me to make the app better"
 msgstr "Критика и пожелания приветсвуются"
 
 #: appframe.cpp:514
-msgid "Hide Folders Pane"
-msgstr "Скрыть панель с папками"
+msgid "Hide folders pane\tCtrl+P"
+msgstr "Скрыть панель каталогов\tCtrl+P"
 
 #: about.cpp:95
-msgid "Home Page "
-msgstr "Домашняя Страница"
+msgid "Home page "
+msgstr "Домашняя страница "
 
 #: appframe.cpp:1231
 msgid "I&ndent reduce\tShift+Tab"
@@ -823,7 +781,6 @@ msgid "Incorrect feed value"
 msgstr "Недопустимое значение скорости обработки"
 
 #: appframe.cpp:1460
-#, fuzzy
 msgid "Insert"
 msgstr "Вставить"
 
@@ -855,26 +812,27 @@ msgstr "Язык..."
 msgid "Languages"
 msgstr "Языки"
 
-#: gcodeerrors.h:107 
+#: gcodeerrors.h:107
 msgid "Left bracket missing after slash with atan"
-msgstr ""
+msgstr "Пропущена '['  после '/' для функции atan"
 
-#: gcodeerrors.h:108 
+#: gcodeerrors.h:108
 msgid "Left bracket missing after unary operation name"
-msgstr ""
+msgstr "Пропущена '['  после имени функции"
 
 #: gcodeerrors.h:58
 msgid ""
 "Length of cutter compensation entry move is not greater than the tool radius"
 msgstr ""
+"Перемещение в режиме компенсации инструмента меньше чем радиус инструмента"
 
 #: gcodeerrors.h:11
 msgid "Letter $ - multishpindle not supported"
-msgstr ""
+msgstr "Символ $  (поддержка  нескольких шпинделей) пока не поддерживается"
 
 #: about.cpp:101
 msgid "Licence type "
-msgstr "Тип лицензии"
+msgstr "Тип лицензии "
 
 #: logwindow.cpp:69
 #, c-format
@@ -901,18 +859,16 @@ msgid "Matilda website"
 msgstr "Matilda вебсайт"
 
 #: mathsimpledlg.cpp:153 RotateDlg.cpp:97
-#, fuzzy
 msgid "Max value: "
-msgstr "Максимальное значение:"
+msgstr "Максимальное значение: "
 
 #: mathsimpledlg.cpp:149 RotateDlg.cpp:95
-#, fuzzy
 msgid "Min value: "
-msgstr "Минимальное значение:"
+msgstr "Минимальное значение: "
 
 #: gcodeerrors.h:110
-msgid "Mixed radius ijk format for arc"
-msgstr ""
+msgid "Mixed radius IJK format for arc"
+msgstr "Одновременное использование IJK формата и  R (радиуса) для дуг"
 
 #: GCodeInterpreter.cpp:143
 #, c-format
@@ -923,40 +879,37 @@ msgstr "Больше чем %d ошибок. Проверка остановле
 msgid "More then 100 outputs"
 msgstr "Больше 100 сообщений"
 
-
 #: gcodeerrors.h:13
 #, c-format
 msgid "Multiply word %c is defened"
-msgstr "Множественно использоване параметра %с"
+msgstr "Множественно использование параметра %c"
 
-#: gcodeerrors.h:10 gcodeerrors.h:49 
+#: gcodeerrors.h:10 gcodeerrors.h:49
 msgid "Named parameter does not support yet"
-msgstr ""
+msgstr "Именованные параметры пока не поддерживаются"
 
-#: gcodeerrors.h:111 
-msgid "Negative d word tool radius index used"
-msgstr ""
+#: gcodeerrors.h:111
+msgid "Negative D word tool radius index used"
+msgstr "Отрицательное значение параметра D для задание радиуса инструмента"
 
-#: gcodeerrors.h:112 
-msgid "Negative g code used"
-msgstr ""
+#: gcodeerrors.h:112
+msgid "Negative G code used"
+msgstr "G кода не может быть отрицательным"
 
-#: gcodeerrors.h:113 
-msgid "Negative m code used"
-msgstr ""
+#: gcodeerrors.h:113
+msgid "Negative M code used"
+msgstr "M код не может быть отрицательным"
 
-#: gcodeerrors.h:114 
-msgid "Negative or zero q value used"
-msgstr ""
+#: gcodeerrors.h:114
+msgid "Negative or zero Q value used"
+msgstr "Q параметр не может быть отрицательным или равным нулю"
 
 #: appframe.cpp:285 welcomewnd.cpp:246
-#, fuzzy
 msgid "New G-Code"
 msgstr "Новый G-Code файл"
 
 #. New
 #: appframe.cpp:1189
-#, fuzzy
 msgid "New G-Code\tCtrl+N"
 msgstr "Новый G-Code файл\tCtrl+N"
 
@@ -968,17 +921,17 @@ msgstr "Новый GCMC файл"
 msgid "New GCMC\tCtrl+Shift+N"
 msgstr "Новый GCMC\tCtrl+Shift+N"
 
-#: gcodeerrors.h:115 
+#: gcodeerrors.h:115
 msgid "No characters found in reading real value"
-msgstr ""
+msgstr "Не задано действительное число"
 
 #: CheckUpdate.cpp:39
 msgid "No description"
 msgstr "Нет описания"
 
-#: gcodeerrors.h:116 
+#: gcodeerrors.h:116
 msgid "Non integer value for integer"
-msgstr ""
+msgstr "Не целое значение хотя ожидается целое"
 
 #: welcomewnd.cpp:244
 msgid "Open"
@@ -995,18 +948,17 @@ msgstr "Открыть страницу загрузки..."
 
 #. wildCard = _("Any file(*.*)|*.*|GCMC and NC files (*.gcmc;*.nc;*.ngc)|*.gcmc;*.nc;*.ngc|GCMC files (*.gcmc)|*.gcmc|NC files (*.nc;*.ngc)|*.nc;*.ngc");
 #: appframe.cpp:645
-#, fuzzy
 msgid "Open file"
-msgstr "Открыть"
+msgstr "Открыть файл"
 
 #: appframe.cpp:287
 msgid "Open file..."
 msgstr "Открыть файл..."
 
 #: edit.cpp:1184
-#, fuzzy, c-format
+#, c-format
 msgid "Open file: \"%s\""
-msgstr "Ошибка открытия файла %s"
+msgstr "Открыть файл: %s"
 
 #: dirtree.cpp:644
 msgid "Open folder"
@@ -1022,15 +974,15 @@ msgstr "Вывод"
 
 #: gcodeerrors.h:29
 msgid "P word missing with M98"
-msgstr ""
+msgstr "Не задан параметр P для M98"
 
-#: gcodeerrors.h:123 
+#: gcodeerrors.h:123
 msgid "Parameter is readonly"
-msgstr ""
+msgstr "Parameter только для чтения"
 
-#: gcodeerrors.h:122 
+#: gcodeerrors.h:122
 msgid "Parameter number out of range"
-msgstr ""
+msgstr "Номер параметра вне допустимых пределов"
 
 #. 1
 #. 2
@@ -1044,9 +996,8 @@ msgstr ""
 #. 10
 #. 11
 #: mathsimpledlg.cpp:78
-#, fuzzy
 msgid "Parameters: "
-msgstr "Параметры:"
+msgstr "Параметры: "
 
 #. if (stop_parsing() )
 #: GCodeInterpreter.cpp:115
@@ -1069,12 +1020,7 @@ msgstr "Плоскость: "
 msgid "Please, select at least one parameter"
 msgstr "Выберите хотя бы один параметр"
 
-#: welcomewnd.cpp:348
-msgid "Preference"
-msgstr "Настройки"
-
-#: appframe.cpp:1285
-#, fuzzy
+#: appframe.cpp:1285 welcomewnd.cpp:348
 msgid "Preferences"
 msgstr "Настройки"
 
@@ -1082,54 +1028,56 @@ msgstr "Настройки"
 msgid "Properties changed"
 msgstr "Настройки изменены"
 
-#: gcodeerrors.h:67 
+#: gcodeerrors.h:124
+msgid "Q word missing with G83"
+msgstr "Не задан параметр Q для G83"
+
+#: gcodeerrors.h:67
 msgid "Q word missing with g73"
-msgstr ""
+msgstr "Не задан параметр Q для G73"
 
-#: gcodeerrors.h:124 
-msgid "Q word missing with g83"
-msgstr ""
+#: gcodeerrors.h:117
+msgid "R I J K words all missing for arc"
+msgstr "Не один из параметров R I J K не задан для дуги"
 
-#: gcodeerrors.h:117 
-msgid "R i j k words all missing for arc"
-msgstr ""
+#: gcodeerrors.h:118
+msgid "R less than X in cycle in YZ plane"
+msgstr "R меньше чем X для окружности в плоскости  YZ"
 
-#: gcodeerrors.h:118 
-msgid "R less than x in cycle in yz plane"
-msgstr ""
+#: gcodeerrors.h:119
+msgid "R less than Y in cycle in XZ plane"
+msgstr "R меньше чем Y для окружности в плоскости  XZ"
 
-#: gcodeerrors.h:119 
-msgid "R less than y in cycle in xz plane"
-msgstr ""
-
-#: gcodeerrors.h:120 
-msgid "R less than z in cycle in xy plane"
-msgstr ""
+#: gcodeerrors.h:120
+msgid "R less than Z in cycle in XY plane"
+msgstr "R меньше чем Z для окружности в плоскости  XY"
 
 #: editorpanel.cpp:461
 msgid "RIGHT"
 msgstr "СПРАВА"
 
-#: gcodeerrors.h:103 
+#: gcodeerrors.h:103
 msgid ""
 "Radius of cutter compensation entry arc is not greater than the tool radius"
-msgstr ""
+msgstr "Радиус инструмента больше или равен радиусу дуги в режиме компенсации"
 
-#: gcodeerrors.h:102 
+#: gcodeerrors.h:102
 #, c-format
 msgid ""
 "Radius to end of arc differs from radius to start: start=(%c%.4f,%c%.4f) "
 "center=(%c%.4f,%c%.4f) end=(%c%.4f,%c%.4f) r1=%.4f r2=%.4f abs_err=%.4g "
 "rel_err=%.4f%%"
 msgstr ""
+"Радиус конечной точки дуги не равен радиусу начальной точки дуги: start=(%c"
+"%.4f,%c%.4f) center=(%c%.4f,%c%.4f) end=(%c%.4f,%c%.4f) r1=%.4f r2=%.4f "
+"abs_err=%.4g rel_err=%.4f%%"
 
 #: edit.cpp:899
-#, fuzzy, c-format
+#, c-format
 msgid "Read error on file '%s'"
-msgstr "Ошибка открытия файла %s"
+msgstr "Ошибка чтения файла %s"
 
 #: welcomewnd.cpp:323
-#, fuzzy
 msgid "Recent Files"
 msgstr "Последние файлы"
 
@@ -1146,7 +1094,6 @@ msgid "Rename"
 msgstr "Переименовать"
 
 #: dirtree.cpp:575
-#, fuzzy
 msgid "Renaming file"
 msgstr "Переименование файла"
 
@@ -1160,7 +1107,6 @@ msgid "Rotate"
 msgstr "Вращение"
 
 #: appframe.cpp:1239
-#, fuzzy
 msgid "Rotate..."
 msgstr "Вращение..."
 
@@ -1169,14 +1115,14 @@ msgstr "Вращение..."
 msgid "Save\tCtrl+S"
 msgstr "Сохранить\tCtrl+S"
 
-#: appframe.cpp:1200
-msgid "Save as...\tCtrl+Shift+S"
-msgstr "Срохранить как...\tCtrl+Shift+S"
-
 #: appframe.cpp:270 edit.cpp:1177
 #, c-format
 msgid "Save %s"
 msgstr "Сохранить %s"
+
+#: appframe.cpp:1200
+msgid "Save as...\tCtrl+Shift+S"
+msgstr "Срохранить как...\tCtrl+Shift+S"
 
 #: editorpanel.cpp:1326
 msgid "Save file"
@@ -1199,25 +1145,21 @@ msgid "Select the macros:"
 msgstr "Выберите макрос:"
 
 #: appframe.cpp:514
-msgid "Show Folders Pane"
-msgstr "Паказать панель с папками"
-
-#: appframe.cpp:1194
 msgid "Show folders pane\tCtrl+P"
-msgstr "Паказать панель с папками\tCtrl+P"
+msgstr "Показать панель каталогов\tCtrl+P"
 
-#: gcodeerrors.h:121 
+#: gcodeerrors.h:121
 msgid "Slash missing after first atan argument"
-msgstr ""
+msgstr "Пропущена '/' после первого аргумента функции atan"
 
 #: editorpanel.cpp:476
 #, c-format
 msgid "Speed: x%d"
-msgstr ""
+msgstr "Скорость: x%d"
 
 #: gcodeerrors.h:41
 msgid "Spindle speed  is incorrect"
-msgstr ""
+msgstr "Не допустимая скорость шпинделя"
 
 #: workingthreads.cpp:136
 #, c-format
@@ -1237,7 +1179,6 @@ msgstr "Запущена проверка: %s"
 msgid "Start converting..."
 msgstr "Запущена конверация..."
 
-
 #: workingthreads.cpp:1029
 #, c-format
 msgid "Start transforming: %d lines..."
@@ -1250,15 +1191,16 @@ msgstr "Остановить"
 #: gcodeerrors.h:21
 msgid ""
 "Straight feed in concave corner cannot be reached by the tool without gouging"
-msgstr ""
+msgstr "Прямая подача в вогнутом углу не может быть достигнута инструментом"
 
 #: gcodeerrors.h:20
 msgid ""
 "Straight traverse in concave corner cannot be reached by the tool without "
 "gouging"
 msgstr ""
+"Прямое перемещение в вогнутом углу не может быть достигнута инструментом"
 
-#: gcodeerrors.h:12 
+#: gcodeerrors.h:12
 msgid "Subritine name does not supported"
 msgstr "Имена подпрограмм не поддерживаются"
 
@@ -1268,7 +1210,7 @@ msgstr "СВЕРХУ"
 
 #: editorpanel.cpp:1354
 msgid "Text could not be saved!"
-msgstr "Текст не может быть сохранен"
+msgstr "Текст не может быть сохранен!"
 
 #: propertiesdlg.cpp:68
 msgid ""
@@ -1287,14 +1229,14 @@ msgstr "Найдено %d ошибок."
 
 #: app.cpp:178
 msgid "This language is not supported by the system."
-msgstr ""
+msgstr "Язык не поддерживается системой."
 
 #: gcodeerrors.h:33
 msgid "Too many parameters for dwell G4"
 msgstr "Слишком много параметров для команды G4 (пауза выполнения программы)"
 
-#: gcodeerrors.h:125 
-msgid "Tool radius not less than arc radius with comp"
+#: gcodeerrors.h:125
+msgid "Tool radius must be less than arc radius with comp"
 msgstr "Радиус инструмента больше или равен радиусу дуги в режиме компенсации"
 
 #: appframe.cpp:1237
@@ -1306,20 +1248,19 @@ msgid "Transforming aborted"
 msgstr "Расчет отменен"
 
 #: workingthreads.cpp:1070
-#, fuzzy
 msgid "Transforming completed."
-msgstr "Расчет завершен"
+msgstr "Расчет завершен."
 
 #: editorpanel.cpp:563
 msgid "Traverce: "
-msgstr "Холостой ход:"
+msgstr "Холостой ход: "
 
-#: gcodeerrors.h:126 
+#: gcodeerrors.h:126
 #, c-format
-msgid "Two g codes used from same modal group: G%d"
-msgstr "Несовместимые G-коды (G%d) в одном фрэйме исполнения"
+msgid "Two G codes used from same modal group: G%d and G%d"
+msgstr "Несовместимые G-коды (G%d и G%d) в одном фрэйме исполнения"
 
-#: gcodeerrors.h:127 
+#: gcodeerrors.h:127
 msgid "Unclosed expression"
 msgstr "Незаконченное выражение"
 
@@ -1327,12 +1268,12 @@ msgstr "Незаконченное выражение"
 msgid "Undo"
 msgstr "Отменить"
 
-#: gcodeerrors.h:128 
+#: gcodeerrors.h:128
 #, c-format
-msgid "Unknown g code used: G%d"
+msgid "Unknown G code used: G%d"
 msgstr "Неизвестный G-код: G%d"
 
-#: gcodeerrors.h:61 
+#: gcodeerrors.h:61
 msgid "Unknown operation"
 msgstr "Неизвестная функция"
 
@@ -1358,11 +1299,11 @@ msgstr ""
 
 #: appframe.cpp:1013
 msgid "Uups some erorr"
-msgstr "Уппс что-то пошло не так"
+msgstr "Уппс, что-то пошло не так"
 
 #: workingthreads.cpp:1001
 msgid "Uups there is no any selection"
-msgstr "В тексе нет выделения"
+msgstr "Уппс, в тексе нет выделения"
 
 #: mathsimpledlg.cpp:111
 msgid "Value: "
@@ -1373,6 +1314,11 @@ msgstr "Значение: "
 msgid "Version avalible: %s  (Current: %s)"
 msgstr "Доступная версия: %s  (Текущая: %s)"
 
+#: about.cpp:84
+#, c-format
+msgid "Version: %s"
+msgstr "Версия: %s"
+
 #: appframe.cpp:380
 msgid "Welcome"
 msgstr "Начальная страница"
@@ -1381,45 +1327,46 @@ msgstr "Начальная страница"
 msgid "Welcome screen"
 msgstr "Начальная страница"
 
+#. right text and translation will be om update UI events
 #: appframe.cpp:1195
 msgid "Welcome window\tCtrl+W"
 msgstr "Начальная страница\tCtrl+W"
 
 #: gcodeerrors.h:34
 msgid "Word 'D' must be defined for G96 (CSS mode)"
-msgstr ""
+msgstr "Для  G96 (CSS) должен быть определен параметр 'D'"
 
 #: gcodeerrors.h:40
 msgid "Word 'H' must be defined for G43 and G44"
-msgstr ""
+msgstr "Для  G43 и G44 должен быть определен параметр 'H'"
 
 #: gcodeerrors.h:37
 msgid "Word 'L' must be defined for G10"
-msgstr ""
+msgstr "Для  G10 должен быть определен параметр 'L'"
 
 #: gcodeerrors.h:39
 msgid "Word 'P' is out of range"
-msgstr ""
+msgstr "Недопустимое значение параметра 'P'"
 
 #: gcodeerrors.h:36
 msgid "Word 'P' must be defined for G10"
-msgstr ""
+msgstr "Для  G10 должен быть определен параметр 'P'"
 
 #: gcodeerrors.h:35
 msgid "Word 'S' must be defined for G96 (CSS mode)"
-msgstr ""
+msgstr "Для  G96 (CSS) должен быть определен параметр 'S'"
 
 #. Ask to remove from
 #: appframe.cpp:730
 #, c-format
 msgid "Would you like to remove file %s from history list?"
-msgstr "Удалить файл %s из списпка последних открытых файлов"
+msgstr "Удалить файл %s из списка последних открытых файлов?"
 
-#: gcodeerrors.h:6 
+#: gcodeerrors.h:6
 msgid "Wrong N value"
 msgstr "Неправильное значение N"
 
-#: gcodeerrors.h:7 
+#: gcodeerrors.h:7
 #, c-format
 msgid "Wrong letter: %c"
 msgstr "Неизвестный символ: %c"
@@ -1433,17 +1380,17 @@ msgstr "X Max: "
 msgid "X Min: "
 msgstr "X Min: "
 
-#: gcodeerrors.h:63 
-msgid "X and y words missing for arc in xy plane"
-msgstr ""
+#: gcodeerrors.h:63
+msgid "X and Y words missing for arc in XY plane"
+msgstr "Не заданы значения X and Y для дуги на плоскости XY"
 
-#: gcodeerrors.h:64 
-msgid "X and z words missing for arc in xz plane"
-msgstr ""
+#: gcodeerrors.h:64
+msgid "X and Z words missing for arc in XZ plane"
+msgstr "Не заданы значения X and Z для дуги на плоскости XZ"
 
-#: gcodeerrors.h:66 
-msgid "X value unspecified in yz plane canned cycle"
-msgstr ""
+#: gcodeerrors.h:66
+msgid "X value unspecified in YZ plane canned cycle"
+msgstr "Не задано значение X на плоскости YZ для цикла сверления"
 
 #: mathexpressiondlg.cpp:31
 msgid "X="
@@ -1457,13 +1404,13 @@ msgstr "Y Max: "
 msgid "Y Min: "
 msgstr "Y Min: "
 
-#: gcodeerrors.h:65 
-msgid "Y and z words missing for arc in yz plane"
-msgstr "Не заданы значения Y and Z для дуги на плоскости YZ"
+#: gcodeerrors.h:65
+msgid "Y and Z words missing for arc in YZ plane"
+msgstr "Не заданы значения Y и Z для дуги на плоскости YZ"
 
-#: gcodeerrors.h:68 
-msgid "Y value unspecified in xz plane canned cycle"
-msgstr ""
+#: gcodeerrors.h:68
+msgid "Y value unspecified in XZ plane canned cycle"
+msgstr "Не задано значение Y на плоскости XZ для цикла сверления"
 
 #: mathexpressiondlg.cpp:40
 msgid "Y="
@@ -1482,9 +1429,9 @@ msgstr "Z Max: "
 msgid "Z Min: "
 msgstr "Z Min: "
 
-#: gcodeerrors.h:69 
-msgid "Z value unspecified in xy plane canned cycle"
-msgstr ""
+#: gcodeerrors.h:69
+msgid "Z value unspecified in XY plane canned cycle"
+msgstr "Не задано значение Z на плоскости XY для цикла сверления"
 
 #: mathexpressiondlg.cpp:49
 msgid "Z="
@@ -1493,21 +1440,25 @@ msgstr "Z="
 #: gcodeerrors.h:59
 msgid "Zero degree inside corner is invalid for cutter compensation"
 msgstr ""
+"Не допустимое ( равное нулю) значение внутреннего угла в ражиме компенсации "
+"инструмента"
 
-#: gcodeerrors.h:70 
+#: gcodeerrors.h:70
 msgid "Zero or negative argument to ln"
-msgstr ""
+msgstr "Аргумент логарифма меньше или равен нулю"
 
-#: gcodeerrors.h:101 
+#: gcodeerrors.h:101
 #, c-format
 msgid ""
 "Zero-radius arc: start=(%c%.4f,%c%.4f) center=(%c%.4f,%c%.4f) end=(%c%.4f,%c"
 "%.4f) r1=%.4f r2=%.4f"
 msgstr ""
+"Дуга с нулевым радиусом: start=(%c%.4f,%c%.4f) center=(%c%.4f,%c%.4f) end=(%c"
+"%.4f,%c%.4f) r1=%.4f r2=%.4f"
 
 #: gcodeerrors.h:23
 msgid "[G85;G88] not supported yet"
-msgstr ""
+msgstr "[G85;G88] пока не поддерживаются"
 
 #: workingthreads.cpp:686
 msgid "gcmc_vc.exe already running"
@@ -1526,3 +1477,15 @@ msgstr "безымянный%d.%s"
 #, c-format
 msgid "unnamed.%s"
 msgstr "безымянный.%s"
+
+#~ msgid "..."
+#~ msgstr "..."
+
+#~ msgid "Hide Folders Pane"
+#~ msgstr "Скрыть панель каталогов"
+
+#~ msgid "Show Folders Pane"
+#~ msgstr "Паказать панель каталогов"
+
+#~ msgid "Preference"
+#~ msgstr "Настройки"

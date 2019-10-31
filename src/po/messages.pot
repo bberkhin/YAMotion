@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-10-31 13:37+0700\n"
+"POT-Creation-Date: 2019-10-31 17:19+0700\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -138,10 +138,6 @@ msgstr ""
 msgid "&Upper case\tCtrl+Shift+U"
 msgstr ""
 
-#: editorpanel.cpp:463
-msgid "..."
-msgstr ""
-
 #: editorpanel.cpp:450
 msgid "3D View:"
 msgstr ""
@@ -176,7 +172,7 @@ msgid "All Files|*.*"
 msgstr ""
 
 #: gcodeerrors.h:72
-msgid "All axes missing with g52 or g92"
+msgid "All axes missing with G52 or G92"
 msgstr ""
 
 #: gcodeerrors.h:73
@@ -263,26 +259,6 @@ msgstr ""
 #: gcodeerrors.h:16
 #, c-format
 msgid "Bad number format parsing '%s'"
-msgstr ""
-
-#: gcodeerrors.h:80
-msgid "Bug code not g0 or g1"
-msgstr ""
-
-#: gcodeerrors.h:81
-msgid "Bug code not g2 or g3"
-msgstr ""
-
-#: gcodeerrors.h:82
-msgid "Bug in tool radius comp"
-msgstr ""
-
-#: gcodeerrors.h:83
-msgid "Bug plane not xy yz or xz"
-msgstr ""
-
-#: gcodeerrors.h:87
-msgid "Bug unknown operation"
 msgstr ""
 
 #: gcodeerrors.h:15
@@ -379,24 +355,24 @@ msgstr ""
 msgid "Cannot turn cutter radius comp on when on"
 msgstr ""
 
+#: gcodeerrors.h:92
+msgid "Cannot use G53 with cutter radius comp"
+msgstr ""
+
 #: gcodeerrors.h:90
-msgid "Cannot use axis values with g80"
+msgid "Cannot use axis values with G80"
 msgstr ""
 
 #: gcodeerrors.h:91
-msgid "Cannot use axis values without a g code that uses them"
+msgid "Cannot use axis values without a G code that uses them"
 msgstr ""
 
 #: gcodeerrors.h:22
 msgid "Cannot use canned cycles with cutter compensation on"
 msgstr ""
 
-#: gcodeerrors.h:92
-msgid "Cannot use g53 with cutter radius comp"
-msgstr ""
-
 #: gcodeerrors.h:93
-msgid "Cannot use two g codes that both use axis values"
+msgid "Cannot use two G codes that both use axis values"
 msgstr ""
 
 #: RotateDlg.cpp:75
@@ -412,7 +388,7 @@ msgid "Center Z: "
 msgstr ""
 
 #: appframe.cpp:1233
-msgid "Change &case to .."
+msgid "Change case to"
 msgstr ""
 
 #: editorpanel.cpp:166
@@ -460,10 +436,6 @@ msgstr ""
 #. Close All but this
 #: appframe.cpp:276
 msgid "Close all but this"
-msgstr ""
-
-#: gcodeerrors.h:9
-msgid "CmdParser::read_set_parameter can not called here"
 msgstr ""
 
 #: gcodeerrors.h:94
@@ -549,7 +521,7 @@ msgid "Drawing completed"
 msgstr ""
 
 #: gcodeerrors.h:96
-msgid "Dwell time p word missing with g82"
+msgid "Dwell time P word missing with G82"
 msgstr ""
 
 #: about.cpp:98
@@ -754,11 +726,11 @@ msgid "Help me to make the app better"
 msgstr ""
 
 #: appframe.cpp:514
-msgid "Hide Folders Pane"
+msgid "Hide folders pane\tCtrl+P"
 msgstr ""
 
 #: about.cpp:95
-msgid "Home Page "
+msgid "Home page "
 msgstr ""
 
 #: appframe.cpp:1231
@@ -863,7 +835,7 @@ msgid "Min value: "
 msgstr ""
 
 #: gcodeerrors.h:110
-msgid "Mixed radius ijk format for arc"
+msgid "Mixed radius IJK format for arc"
 msgstr ""
 
 #: GCodeInterpreter.cpp:143
@@ -885,19 +857,19 @@ msgid "Named parameter does not support yet"
 msgstr ""
 
 #: gcodeerrors.h:111
-msgid "Negative d word tool radius index used"
+msgid "Negative D word tool radius index used"
 msgstr ""
 
 #: gcodeerrors.h:112
-msgid "Negative g code used"
+msgid "Negative G code used"
 msgstr ""
 
 #: gcodeerrors.h:113
-msgid "Negative m code used"
+msgid "Negative M code used"
 msgstr ""
 
 #: gcodeerrors.h:114
-msgid "Negative or zero q value used"
+msgid "Negative or zero Q value used"
 msgstr ""
 
 #: appframe.cpp:285 welcomewnd.cpp:246
@@ -1016,11 +988,7 @@ msgstr ""
 msgid "Please, select at least one parameter"
 msgstr ""
 
-#: welcomewnd.cpp:348
-msgid "Preference"
-msgstr ""
-
-#: appframe.cpp:1285
+#: appframe.cpp:1285 welcomewnd.cpp:348
 msgid "Preferences"
 msgstr ""
 
@@ -1028,28 +996,28 @@ msgstr ""
 msgid "Properties changed"
 msgstr ""
 
+#: gcodeerrors.h:124
+msgid "Q word missing with G83"
+msgstr ""
+
 #: gcodeerrors.h:67
 msgid "Q word missing with g73"
 msgstr ""
 
-#: gcodeerrors.h:124
-msgid "Q word missing with g83"
-msgstr ""
-
 #: gcodeerrors.h:117
-msgid "R i j k words all missing for arc"
+msgid "R I J K words all missing for arc"
 msgstr ""
 
 #: gcodeerrors.h:118
-msgid "R less than x in cycle in yz plane"
+msgid "R less than X in cycle in YZ plane"
 msgstr ""
 
 #: gcodeerrors.h:119
-msgid "R less than y in cycle in xz plane"
+msgid "R less than Y in cycle in XZ plane"
 msgstr ""
 
 #: gcodeerrors.h:120
-msgid "R less than z in cycle in xy plane"
+msgid "R less than Z in cycle in XY plane"
 msgstr ""
 
 #: editorpanel.cpp:461
@@ -1142,10 +1110,6 @@ msgid "Select the macros:"
 msgstr ""
 
 #: appframe.cpp:514
-msgid "Show Folders Pane"
-msgstr ""
-
-#: appframe.cpp:1194
 msgid "Show folders pane\tCtrl+P"
 msgstr ""
 
@@ -1236,7 +1200,7 @@ msgid "Too many parameters for dwell G4"
 msgstr ""
 
 #: gcodeerrors.h:125
-msgid "Tool radius not less than arc radius with comp"
+msgid "Tool radius must be less than arc radius with comp"
 msgstr ""
 
 #: appframe.cpp:1237
@@ -1257,7 +1221,7 @@ msgstr ""
 
 #: gcodeerrors.h:126
 #, c-format
-msgid "Two g codes used from same modal group: G%d"
+msgid "Two G codes used from same modal group: G%d and G%d"
 msgstr ""
 
 #: gcodeerrors.h:127
@@ -1270,7 +1234,7 @@ msgstr ""
 
 #: gcodeerrors.h:128
 #, c-format
-msgid "Unknown g code used: G%d"
+msgid "Unknown G code used: G%d"
 msgstr ""
 
 #: gcodeerrors.h:61
@@ -1312,6 +1276,11 @@ msgstr ""
 msgid "Version avalible: %s  (Current: %s)"
 msgstr ""
 
+#: about.cpp:84
+#, c-format
+msgid "Version: %s"
+msgstr ""
+
 #: appframe.cpp:380
 msgid "Welcome"
 msgstr ""
@@ -1320,6 +1289,7 @@ msgstr ""
 msgid "Welcome screen"
 msgstr ""
 
+#. right text and translation will be om update UI events
 #: appframe.cpp:1195
 msgid "Welcome window\tCtrl+W"
 msgstr ""
@@ -1373,15 +1343,15 @@ msgid "X Min: "
 msgstr ""
 
 #: gcodeerrors.h:63
-msgid "X and y words missing for arc in xy plane"
+msgid "X and Y words missing for arc in XY plane"
 msgstr ""
 
 #: gcodeerrors.h:64
-msgid "X and z words missing for arc in xz plane"
+msgid "X and Z words missing for arc in XZ plane"
 msgstr ""
 
 #: gcodeerrors.h:66
-msgid "X value unspecified in yz plane canned cycle"
+msgid "X value unspecified in YZ plane canned cycle"
 msgstr ""
 
 #: mathexpressiondlg.cpp:31
@@ -1397,11 +1367,11 @@ msgid "Y Min: "
 msgstr ""
 
 #: gcodeerrors.h:65
-msgid "Y and z words missing for arc in yz plane"
+msgid "Y and Z words missing for arc in YZ plane"
 msgstr ""
 
 #: gcodeerrors.h:68
-msgid "Y value unspecified in xz plane canned cycle"
+msgid "Y value unspecified in XZ plane canned cycle"
 msgstr ""
 
 #: mathexpressiondlg.cpp:40
@@ -1422,7 +1392,7 @@ msgid "Z Min: "
 msgstr ""
 
 #: gcodeerrors.h:69
-msgid "Z value unspecified in xy plane canned cycle"
+msgid "Z value unspecified in XY plane canned cycle"
 msgstr ""
 
 #: mathexpressiondlg.cpp:49

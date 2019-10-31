@@ -460,7 +460,7 @@ wxBoxSizer *View3DPanel::CreateHeaderPanel()
 	APPEND_BUTTOM(ID_BTN_BOTTOM, _("BOTTOM"),3, false);
 	APPEND_BUTTOM(ID_BTN_RIGHT, _("RIGHT"),2, false);
 	APPEND_BUTTOM(ID_BTN_BACK, _("BACK"),1, false);
-	APPEND_BUTTOM(ID_BTN_OTHER, _("..."), MAX_BTN_PRIORITY, true);
+	APPEND_BUTTOM(ID_BTN_OTHER, "...", MAX_BTN_PRIORITY, true);
 	header->AddStretchSpacer();
 
 	FlatButton *pClose = new FlatButton(this, ID_CLOSE3DVIEW, wxEmptyString, FB_TRANSPARENT, ART_CLOSE);

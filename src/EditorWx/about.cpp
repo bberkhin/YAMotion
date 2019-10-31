@@ -81,7 +81,7 @@ AppAbout::AppAbout(wxWindow *parent,
 
 	// about info
 	wxGridSizer *aboutinfo = new wxGridSizer(2, 10, 10);
-	aboutinfo->Add(new wxStaticText(this, ID_DIABLEANY, wxString::Format(_T("Version: %s"), APP_VERSION)), 0, wxALIGN_RIGHT);
+	aboutinfo->Add(new wxStaticText(this, ID_DIABLEANY, wxString::Format(_("Version: %s"), APP_VERSION)), 0, wxALIGN_RIGHT);
 	aboutinfo->Add(new wxStaticText(this, wxID_ANY, APP_BUILD), 1, wxEXPAND | wxALIGN_LEFT);
 
 	aboutinfo->AddSpacer(1);
@@ -92,7 +92,7 @@ AppAbout::AppAbout(wxWindow *parent,
 	aboutinfo->Add(new wxStaticText(this, ID_DIABLEANY, _("Author ")), 0, wxALIGN_RIGHT);
 	aboutinfo->Add(new wxStaticText(this, wxID_ANY, APP_MAINT), 1, wxEXPAND | wxALIGN_LEFT);
 
-	aboutinfo->Add(new wxStaticText(this, ID_DIABLEANY, _("Home Page ")), 0, wxALIGN_RIGHT);
+	aboutinfo->Add(new wxStaticText(this, ID_DIABLEANY, _("Home page ")), 0, wxALIGN_RIGHT);
 	aboutinfo->Add(new NoFocusLink(this, wxID_ANY, APP_WEBSITETEXT, APP_WEBSITEURL), 1, wxEXPAND | wxALIGN_LEFT);
 	
 	aboutinfo->Add(new wxStaticText(this, ID_DIABLEANY, _("E-mail ")), 0, wxALIGN_RIGHT);

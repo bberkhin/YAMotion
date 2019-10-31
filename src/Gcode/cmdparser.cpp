@@ -522,7 +522,7 @@ bool CmdParser::read_g()
 	IF_F_RET_F_SETSTATE(acsept_gcode(value), WRONG_VALUE, YA_UNKNOWN_G_CODE_USED, static_cast<int>(value/10));
 
 	GModalGroup grp = get_gmodal_group( value );
-	IF_T_RET_F_SETSTATE( hasGCode(grp) , DOUBLE_DEFINITION, YA_TWO_G_CODES_USED_FROM_SAME_MODAL_GROUP, static_cast<int>(value / 10) );
+	IF_T_RET_F_SETSTATE( hasGCode(grp) , DOUBLE_DEFINITION, YA_TWO_G_CODES_USED_FROM_SAME_MODAL_GROUP, static_cast<int>(g_mode[grp] / 10), static_cast<int>(value / 10) );
 	g_mode[grp] = value;
 	return true;
 }

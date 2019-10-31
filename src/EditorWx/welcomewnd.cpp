@@ -345,7 +345,7 @@ wxBoxSizer *WelcomeWnd::CreateFooter()
 	paneCmd->Add(pTxt, 0, wxALIGN_CENTER_VERTICAL);
 	paneCmd->AddSpacer(WELCOME_MARGIN);
 	
-	AddCommand(paneCmd, _("Preference"), ID_GLOBALPREFS, true);
+	AddCommand(paneCmd, _("Preferences"), ID_GLOBALPREFS, true);
 
 	paneCmd->AddSpacer(WELCOME_MARGIN);
 	AddCommand(paneCmd, _("Check for Update"), ID_CHECKUPDATE, true);

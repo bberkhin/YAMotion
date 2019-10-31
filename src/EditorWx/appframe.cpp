@@ -511,7 +511,7 @@ void AppFrame::OnShowWelcome(wxCommandEvent &WXUNUSED(event))
 void AppFrame::OnUpdateUIShowDirPane(wxUpdateUIEvent& event)
 {
 	if ( m_dirtree)
-		event.SetText(m_dirtree->IsShown() ? _("Hide Folders Pane") : _("Show Folders Pane") );
+		event.SetText(m_dirtree->IsShown() ? _("Hide folders pane\tCtrl+P") : _("Show folders pane\tCtrl+P") );
 }
 
 void AppFrame::ShowHideDirPane(bool allwaysshow)
@@ -1191,7 +1191,7 @@ wxMenuBar *AppFrame::CreateMenu ()
 	mi = menuFile->Append(ID_NEWGCMC, _("New GCMC\tCtrl+Shift+N"));
 	mi->SetBitmaps(wxArtProvider::GetBitmap(wxART_NEW, wxART_MENU));
 	menuFile->AppendSeparator();
-	menuFile->Append(ID_SHOWDIRPANE, _("Show folders pane\tCtrl+P"));
+	menuFile->Append(ID_SHOWDIRPANE, "Show folders pane\tCtrl+P"); // right text and translation will be om update UI events
 	menuFile->Append(ID_SHOWWELCOME, _("Welcome window\tCtrl+W"));
 	menuFile->AppendSeparator();
 	//Save	
@@ -1230,7 +1230,7 @@ wxMenuBar *AppFrame::CreateMenu ()
 	menuEdit->Append(ID_INDENTINC, _("&Indent increase\tTab"));
 	menuEdit->Append(ID_INDENTRED, _("I&ndent reduce\tShift+Tab"));
 	menuEdit->AppendSeparator();
-	menuEdit->Append(ID_CHANGECASE, _("Change &case to .."), menuChangeCase);
+	menuEdit->Append(ID_CHANGECASE, _("Change case to"), menuChangeCase);
 
 	// Tools
 	wxMenu *menuTools = new wxMenu;
