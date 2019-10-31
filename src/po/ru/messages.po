@@ -83,13 +83,12 @@ msgstr "Правка"
 
 #. construct menu
 #: appframe.cpp:1281
-#, fuzzy
 msgid "&File"
 msgstr "Файл"
 
 #: appframe.cpp:1225
 msgid "&Find\tCtrl+F"
-msgstr "Найти\tCtrl+F""
+msgstr "Найти\tCtrl+F"
 
 #: appframe.cpp:1286
 #, fuzzy
@@ -189,7 +188,7 @@ msgstr "Все файлы|*.*"
 
 #: appframe.cpp:1300
 msgid "All macroses..."
-msgstr "Все mакросы..."
+msgstr "Все макросы..."
 
 #: gcodeerrors.h:72
 msgid "All axes missing with g52 or g92"
@@ -1132,7 +1131,7 @@ msgstr "Ошибка открытия файла %s"
 #: welcomewnd.cpp:323
 #, fuzzy
 msgid "Recent Files"
-msgstr "Последние открытые файлы"
+msgstr "Последние файлы"
 
 #: dirtree.cpp:646
 msgid "Remove folder from pane"
@@ -1153,7 +1152,7 @@ msgstr "Переименование файла"
 
 #: appframe.cpp:1228
 msgid "Replace &again\tShift+F4"
-msgstr "Заменить еще раз\tShift+F4"
+msgstr "Заменить снова\tShift+F4"
 
 #. sets the application title
 #: RotateDlg.cpp:46
@@ -1246,7 +1245,7 @@ msgstr "Расчет запущен: Строка %d ..."
 
 #: editorpanel.cpp:887
 msgid "Stop"
-msgstr ""
+msgstr "Остановить"
 
 #: gcodeerrors.h:21
 msgid ""
@@ -1261,34 +1260,30 @@ msgstr ""
 
 #: gcodeerrors.h:12 
 msgid "Subritine name does not supported"
-msgstr ""
+msgstr "Имена подпрограмм не поддерживаются"
 
 #: editorpanel.cpp:456
 msgid "TOP"
-msgstr ""
+msgstr "СВЕРХУ"
 
 #: editorpanel.cpp:1354
 msgid "Text could not be saved!"
-msgstr ""
+msgstr "Текст не может быть сохранен"
 
 #: propertiesdlg.cpp:68
 msgid ""
 "The changes you did, will applay after restarting the program. Would you "
 "like to restart?"
-msgstr ""
+msgstr "Изменения вступят в силу после перезапуска программы. Перезапустить?"
 
 #: appframe.cpp:1265
 msgid "Themes"
-msgstr ""
+msgstr "Темы"
 
 #: workingthreads.cpp:534
 #, c-format
 msgid "There are %d error(s)."
 msgstr "Найдено %d ошибок."
-
-#: app.cpp:233
-msgid "There is new version of YAMotion. A lot of new features! Be in tuch"
-msgstr ""
 
 #: app.cpp:178
 msgid "This language is not supported by the system."
@@ -1304,7 +1299,7 @@ msgstr "Радиус инструмента больше или равен ра�
 
 #: appframe.cpp:1237
 msgid "Transform..."
-msgstr ""
+msgstr "Преобразовать..."
 
 #: workingthreads.cpp:1034
 msgid "Transforming aborted"
@@ -1317,7 +1312,7 @@ msgstr "Расчет завершен"
 
 #: editorpanel.cpp:563
 msgid "Traverce: "
-msgstr ""
+msgstr "Холостой ход:"
 
 #: gcodeerrors.h:126 
 #, c-format
@@ -1330,7 +1325,7 @@ msgstr "Незаконченное выражение"
 
 #: edit.cpp:1188
 msgid "Undo"
-msgstr ""
+msgstr "Отменить"
 
 #: gcodeerrors.h:128 
 #, c-format
@@ -1363,7 +1358,7 @@ msgstr ""
 
 #: appframe.cpp:1013
 msgid "Uups some erorr"
-msgstr ""
+msgstr "Уппс что-то пошло не так"
 
 #: workingthreads.cpp:1001
 msgid "Uups there is no any selection"
@@ -1376,19 +1371,19 @@ msgstr "Значение: "
 #: CheckUpdate.cpp:43
 #, c-format
 msgid "Version avalible: %s  (Current: %s)"
-msgstr ""
+msgstr "Доступная версия: %s  (Текущая: %s)"
 
 #: appframe.cpp:380
 msgid "Welcome"
-msgstr ""
+msgstr "Начальная страница"
 
 #: appframe.cpp:381
 msgid "Welcome screen"
-msgstr ""
+msgstr "Начальная страница"
 
 #: appframe.cpp:1195
 msgid "Welcome window\tCtrl+W"
-msgstr ""
+msgstr "Начальная страница\tCtrl+W"
 
 #: gcodeerrors.h:34
 msgid "Word 'D' must be defined for G96 (CSS mode)"
@@ -1418,7 +1413,7 @@ msgstr ""
 #: appframe.cpp:730
 #, c-format
 msgid "Would you like to remove file %s from history list?"
-msgstr ""
+msgstr "Удалить файл %s из списпка последних открытых файлов"
 
 #: gcodeerrors.h:6 
 msgid "Wrong N value"
@@ -1427,16 +1422,16 @@ msgstr "Неправильное значение N"
 #: gcodeerrors.h:7 
 #, c-format
 msgid "Wrong letter: %c"
-msgstr ""
+msgstr "Неизвестный символ: %c"
 
 #: editorpanel.cpp:553
 msgid "X Max: "
-msgstr ""
+msgstr "X Max: "
 
 #. 2, 0, 0);
 #: editorpanel.cpp:551
 msgid "X Min: "
-msgstr ""
+msgstr "X Min: "
 
 #: gcodeerrors.h:63 
 msgid "X and y words missing for arc in xy plane"
@@ -1456,11 +1451,11 @@ msgstr "X="
 
 #: editorpanel.cpp:557
 msgid "Y Max: "
-msgstr ""
+msgstr "Y Max: "
 
 #: editorpanel.cpp:555
 msgid "Y Min: "
-msgstr ""
+msgstr "Y Min: "
 
 #: gcodeerrors.h:65 
 msgid "Y and z words missing for arc in yz plane"
@@ -1477,15 +1472,15 @@ msgstr "Y="
 #. have last version
 #: CheckUpdate.cpp:27
 msgid "You have the latest version of the application"
-msgstr ""
+msgstr "У вас установленна последняя версия программы"
 
 #: editorpanel.cpp:561
 msgid "Z Max: "
-msgstr ""
+msgstr "Z Max: "
 
 #: editorpanel.cpp:559
 msgid "Z Min: "
-msgstr ""
+msgstr "Z Min: "
 
 #: gcodeerrors.h:69 
 msgid "Z value unspecified in xy plane canned cycle"
@@ -1520,14 +1515,14 @@ msgstr "gcmc_vc.exe уже запущена"
 
 #: app.cpp:193
 msgid "unknown"
-msgstr ""
+msgstr "неизвестный язык"
 
 #: appframe.cpp:613
 #, c-format
 msgid "unnamed%d.%s"
-msgstr ""
+msgstr "безымянный%d.%s"
 
 #: appframe.cpp:606
 #, c-format
 msgid "unnamed.%s"
-msgstr ""
+msgstr "безымянный.%s"

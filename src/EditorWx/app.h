@@ -22,7 +22,6 @@ public:
 	//! application exit function
 	virtual int OnExit() wxOVERRIDE;
 	void Restart();
-	bool GetUptadeInfo(wxString &out);
 	IEnvironment *GetEnvironment() { return env.get(); }
 	virtual void OnEventLoopEnter(wxEventLoopBase* WXUNUSED(loop)) wxOVERRIDE;
 	AppFrame  *GetFrame() { return m_frame; }
