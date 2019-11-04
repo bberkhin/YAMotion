@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-10-31 17:19+0700\n"
+"POT-Creation-Date: 2019-11-01 17:46+0700\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -16,6 +16,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=CHARSET\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\n"
 
 #: editorpanel.cpp:484
 msgid " AXIS "
@@ -43,6 +44,13 @@ msgstr ""
 #, c-format
 msgid "%c word missing in absolute center arc"
 msgstr ""
+
+#: workingthreads.cpp:497
+#, c-format
+msgid "%d error."
+msgid_plural "%d errors."
+msgstr[0] ""
+msgstr[1] ""
 
 #: prefs.cpp:542
 #, c-format
@@ -136,6 +144,10 @@ msgstr ""
 
 #: appframe.cpp:1213
 msgid "&Upper case\tCtrl+Shift+U"
+msgstr ""
+
+#: GCodeInterpreter.cpp:1176
+msgid "'(' inside comment"
 msgstr ""
 
 #: editorpanel.cpp:450
@@ -403,16 +415,15 @@ msgstr ""
 msgid "Checking aborted"
 msgstr ""
 
-#: workingthreads.cpp:495
-#, c-format
-msgid "Checking completed with %d error(s)"
+#: workingthreads.cpp:497
+msgid "Checking completed with "
 msgstr ""
 
-#: workingthreads.cpp:738
+#: workingthreads.cpp:740
 msgid "Checking completed with errors"
 msgstr ""
 
-#: workingthreads.cpp:493 workingthreads.cpp:736
+#: workingthreads.cpp:493 workingthreads.cpp:738
 msgid "Checking completed with no error"
 msgstr ""
 
@@ -455,11 +466,11 @@ msgstr ""
 msgid "Convert"
 msgstr ""
 
-#: workingthreads.cpp:745
+#: workingthreads.cpp:747
 msgid "Converting completed with errors"
 msgstr ""
 
-#: workingthreads.cpp:743
+#: workingthreads.cpp:745
 msgid "Converting completed with no error"
 msgstr ""
 
@@ -512,11 +523,11 @@ msgstr ""
 msgid "Do you really want to remove file %s"
 msgstr ""
 
-#: workingthreads.cpp:519
+#: workingthreads.cpp:522
 msgid "Drawing aborted"
 msgstr ""
 
-#: workingthreads.cpp:522
+#: workingthreads.cpp:525
 msgid "Drawing completed"
 msgstr ""
 
@@ -708,7 +719,7 @@ msgstr ""
 msgid "GCMC documentation"
 msgstr ""
 
-#: workingthreads.cpp:807
+#: workingthreads.cpp:809
 msgid "GCMC is running very long time/ Would you like to kill the process?"
 msgstr ""
 
@@ -812,6 +823,10 @@ msgstr ""
 msgid "Line %d: Error feedrate value %g"
 msgstr ""
 
+#: GCodeInterpreter.cpp:1155
+msgid "Line is too long"
+msgstr ""
+
 #: gcodeerrors.h:109
 #, c-format
 msgid "M code greater than 199: M%d"
@@ -895,6 +910,10 @@ msgstr ""
 
 #: CheckUpdate.cpp:39
 msgid "No description"
+msgstr ""
+
+#: GCodeInterpreter.cpp:91
+msgid "No end of programm command"
 msgstr ""
 
 #: gcodeerrors.h:116
@@ -1131,7 +1150,7 @@ msgstr ""
 msgid "Start checking & drawing: %s"
 msgstr ""
 
-#: workingthreads.cpp:691
+#: workingthreads.cpp:693
 msgid "Start checking..."
 msgstr ""
 
@@ -1140,11 +1159,11 @@ msgstr ""
 msgid "Start checking: %s"
 msgstr ""
 
-#: workingthreads.cpp:693
+#: workingthreads.cpp:695
 msgid "Start converting..."
 msgstr ""
 
-#: workingthreads.cpp:1029
+#: workingthreads.cpp:1031
 #, c-format
 msgid "Start transforming: %d lines..."
 msgstr ""
@@ -1182,14 +1201,20 @@ msgid ""
 "like to restart?"
 msgstr ""
 
+#: GCodeInterpreter.cpp:96
+msgid "The programm end being in subrotinue"
+msgstr ""
+
 #: appframe.cpp:1265
 msgid "Themes"
 msgstr ""
 
-#: workingthreads.cpp:534
+#: workingthreads.cpp:538
 #, c-format
-msgid "There are %d error(s)."
-msgstr ""
+msgid "There is %d error."
+msgid_plural "There are %d errors."
+msgstr[0] ""
+msgstr[1] ""
 
 #: app.cpp:178
 msgid "This language is not supported by the system."
@@ -1207,11 +1232,11 @@ msgstr ""
 msgid "Transform..."
 msgstr ""
 
-#: workingthreads.cpp:1034
+#: workingthreads.cpp:1036
 msgid "Transforming aborted"
 msgstr ""
 
-#: workingthreads.cpp:1070
+#: workingthreads.cpp:1072
 msgid "Transforming completed."
 msgstr ""
 
@@ -1222,6 +1247,10 @@ msgstr ""
 #: gcodeerrors.h:126
 #, c-format
 msgid "Two G codes used from same modal group: G%d and G%d"
+msgstr ""
+
+#: GCodeInterpreter.cpp:1196
+msgid "Unclosed comment"
 msgstr ""
 
 #: gcodeerrors.h:127
@@ -1263,7 +1292,7 @@ msgstr ""
 msgid "Uups some erorr"
 msgstr ""
 
-#: workingthreads.cpp:1001
+#: workingthreads.cpp:1003
 msgid "Uups there is no any selection"
 msgstr ""
 
@@ -1418,7 +1447,7 @@ msgstr ""
 msgid "[G85;G88] not supported yet"
 msgstr ""
 
-#: workingthreads.cpp:686
+#: workingthreads.cpp:688
 msgid "gcmc_vc.exe already running"
 msgstr ""
 

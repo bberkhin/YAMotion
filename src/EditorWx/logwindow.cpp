@@ -73,7 +73,9 @@ void LogWindow::Append(MsgStatusLevel lvl, const wchar_t *str, int linen, bool u
 		case MSLError: label += _(" Error! "); break;
 		case MSLWarning: label += _(" Warning! "); break;
 	}
-	label += str;	
+	label += str;
+	if (lvl == MSLErrorNoLabel)
+		lvl = MSLError;
 	LogClientData *data = new LogClientData(linen, lvl);
 	BaseLogClass::Append(label,data);
 	if (update)

@@ -116,7 +116,8 @@ enum MsgStatusLevel
 	MSLWarning = LOG_WARNING,
 	MSLError = LOG_ERROR,
 	MSLInfo = LOG_INFORMATION,
-	MSLFileStatus = LOG_INFORMATIONSUM
+	MSLFileStatus = LOG_INFORMATIONSUM,
+	MSLErrorNoLabel
 
 };
 

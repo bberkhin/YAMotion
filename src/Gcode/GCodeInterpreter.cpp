@@ -88,12 +88,12 @@ void GCodeInterpreter::execute_file()
 	
 	if (state.code != PRAGRAMM_END && state.code != PRAGRAMM_ENDCLEAR )
 	{
-		logger->log(LOG_WARNING, nline, "No end of programm command ");
+		logger->log(LOG_WARNING, nline, _("No end of programm command"));
 		executor->set_end_programm();
 	}
 	if (substack.size() != 1)
 	{
-		logger->log(LOG_WARNING, nline, "The programm end being in subrotinue" );
+		logger->log(LOG_WARNING, nline, _("The programm end being in subrotinue") );
 	}
 
 	// clear stack
@@ -1152,7 +1152,7 @@ const char *GCodeInterpreter::cpy_close_and_downcase(char *line, const char *src
 		item = src[m];
 		if (n >= MAX_GCODE_LINELEN - 1)
 		{
-			logger->log(LOG_WARNING, lineNumber, "Line is very long");
+			logger->log(LOG_WARNING, lineNumber, _("Line is too long"));
 			break;
 		}
 
@@ -1173,7 +1173,7 @@ const char *GCodeInterpreter::cpy_close_and_downcase(char *line, const char *src
 			}
 			else if (item == '(')
 			{
-				logger->log(LOG_WARNING, lineNumber, "'(' inside comment");
+				logger->log(LOG_WARNING, lineNumber, + _("'(' inside comment"));
 			}
 		}
 		else if ((item == ' ') || (item == '\t') || (item == '\r')) /* don't copy blank or tab or CR */
@@ -1193,7 +1193,7 @@ const char *GCodeInterpreter::cpy_close_and_downcase(char *line, const char *src
 		}
 	}
 	if (comment)
-		logger->log(LOG_WARNING, lineNumber, "Unclosed comment");
+		logger->log(LOG_WARNING, lineNumber, _("Unclosed comment"));
 
 	line[n] = 0;
 

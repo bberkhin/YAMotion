@@ -492,7 +492,10 @@ void Worker::OnCheckGCodeCompletion(GCMCConversionEvent &ev)
 	else if ( ev.GetCIData().num_errors == 0)
 		GetLogWnd()->Append(MSLInfo, _("Checking completed with no error"));
 	else
-		GetLogWnd()->Append(MSLError, wxString::Format(_("Checking completed with %d error(s)"), ev.GetCIData().num_errors));
+	{
+		int n = ev.GetCIData().num_errors;
+		GetLogWnd()->Append(MSLErrorNoLabel, _("Checking completed with ") + wxString::Format(wxPLURAL("%d error.", "%d errors.", n), n));
+	}
 	
 	m_fp->UpdateStatistics(ev.GetCIData());
 
@@ -531,7 +534,8 @@ void Worker::OnDraw3DCompletion(GCMCConversionEvent &ev)
 	}
 	else
 	{
-		GetLogWnd()->Append(MSLError, wxString::Format(_("There are %d error(s)."), ev.GetCIData().num_errors));
+		int n = ev.GetCIData().num_errors;
+		GetLogWnd()->Append(MSLErrorNoLabel, wxString::Format(wxPLURAL("There is %d error.", "There are %d errors.", n) ,n ));
 	}
 }
 
@@ -542,9 +546,7 @@ bool Worker::CheckFileExist(const wchar_t *fname)
 {
 	if (StandartPaths::Get()->CheckFileExist(fname))
 		return true;
-
-	wxString inf = wxString::Format("File %s not found.", fname);
-	GetLogWnd()->Append(MSLError, inf);
+	GetLogWnd()->Append(MSLError, wxString::Format("File %s not found.", fname));
 	return false;
 
 }
@@ -745,7 +747,7 @@ void Worker::GcmcProcessTerminated(int status, const wchar_t *dst_fname, DoAfter
 				inf = _("Converting completed with errors");
 		}
 		
-		GetLogWnd()->Append(status == 0 ? MSLInfo : MSLError, inf);
+		GetLogWnd()->Append(status == 0 ? MSLInfo : MSLErrorNoLabel, inf);
 		Edit *pedit;
 		if (status == 0)
 		{

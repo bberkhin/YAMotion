@@ -45,7 +45,7 @@ public:
 private:
 	void parse_file(const wchar_t *path);
 	void read_raw_data(const wchar_t *path, std::vector<char> &data);
-	void read_arguments(xml_nodew *node, MacrosDesc &mdesc);
+	void read_arguments(xml_nodew *node, MacrosDesc &mdesc, const std::string &catalog);
 private:
 	std::vector<MacrosDesc> m_mcrs;
 };

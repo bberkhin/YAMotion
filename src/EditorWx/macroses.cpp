@@ -17,9 +17,11 @@ static bool toWstring(const char *s, std::wstring & out)
 {
 	int n = MultiByteToWideChar(CP_UTF8, 0, s, -1, 0, 0);
 	out.resize(n-1);
-	if ( n <= 1 ) // empty string
+	if (n <= 1) // empty string
+	{
+		out.clear();
 		return true;
-
+	}
 	if (MultiByteToWideChar(CP_UTF8, 0, s, -1, &(out.front()), n) != n)
 		return false;
 	return true;
@@ -30,7 +32,10 @@ static bool toMBstring(const wchar_t *s, std::string & out)
 	int n = WideCharToMultiByte(CP_OEMCP, 0, s, -1, 0, 0, 0, 0);
 	out.resize(n-1);
 	if (n <= 1) // empty string
+	{
+		out.clear();
 		return true;
+	}
 	if (WideCharToMultiByte(CP_OEMCP, 0, s, -1, &(out.front()), n, 0, 0) != n)
 		return false;
 	return true;
@@ -70,11 +75,13 @@ void Macroses::Init()
 	{
 		std::filesystem::path dirpath = StandartPaths::Get()->GetMacrosPath();
 		scan_xml_files(dirpath, namesList);
+		/*
 		std::filesystem::path dirpathLan = StandartPaths::Get()->GetMacrosPath(0, true);
 		if ((dirpathLan != dirpath) && std::filesystem::exists(dirpathLan) )
 		{
 			scan_xml_files(dirpathLan, namesList); // rewrite def xml by language specific xml
 		}
+		*/
 		// read macroses from files
 		for (const auto & entry : namesList )
 		{
@@ -131,6 +138,19 @@ void Macroses::parse_file(const wchar_t *path)
 		throw std::exception("Empty macros file");
 	rapidxml::xml_document<char> doc;
 	doc.parse<0>(&data.front());
+	
+	std::string catalog;
+	toMBstring(StandartPaths::Get()->GetLanguageCatalog().c_str(), catalog);
+	std::string nameid("name");
+	std::string descid("desc");
+	if (!catalog.empty())
+	{
+		catalog = "_"+ catalog;
+		nameid += catalog;
+		descid += catalog;
+	}
+
+
 	xml_nodew *root = doc.first_node("macroses");
 	for (xml_nodew *node = root->first_node(); node != 0; node = node->next_sibling())
 	{
@@ -144,7 +164,15 @@ void Macroses::parse_file(const wchar_t *path)
 				{
 					toWstring(cn->value(), mdesc.name);
 				}
+				else if(!catalog.empty() && (strcmp(cn->name(), nameid.c_str() ) == 0) )
+				{
+					toWstring(cn->value(), mdesc.name);
+				}
 				else if (strcmp(cn->name(), "desc") == 0)
+				{
+					toWstring(cn->value(), mdesc.desc);
+				}
+				else if (!catalog.empty() && (strcmp(cn->name(), descid.c_str()) == 0))
 				{
 					toWstring(cn->value(), mdesc.desc);
 				}
@@ -158,7 +186,7 @@ void Macroses::parse_file(const wchar_t *path)
 				}		
 				else if (strcmp(cn->name(), "arguments") == 0)
 				{
-					read_arguments(cn, mdesc);
+					read_arguments(cn, mdesc, catalog);
 				}
 				else if(strcmp(cn->name(), "include") == 0)
 				{
@@ -177,8 +205,16 @@ void Macroses::parse_file(const wchar_t *path)
 
 
 
-void Macroses::read_arguments(xml_nodew *node, MacrosDesc &mdesc)
+void Macroses::read_arguments(xml_nodew *node, MacrosDesc &mdesc, const std::string &catalog)
 {
+	std::string nameid("name");
+	std::string descid("desc");
+	if (!catalog.empty())
+	{
+		nameid += catalog;
+		descid += catalog;
+	}
+
 	for (xml_nodew *cn = node->first_node(); cn != 0; cn = cn->next_sibling())
 	{
 		if (strcmp(cn->name(), "argument") == 0)
@@ -201,13 +237,20 @@ void Macroses::read_arguments(xml_nodew *node, MacrosDesc &mdesc)
 				{
 					toWstring(cna->value(), atr.name);
 				}
+				else if (!catalog.empty() && (strcmp(cna->name(), nameid.c_str()) == 0))
+				{
+					toWstring(cna->value(), atr.name);
+				}
 				else if (strcmp(cna->name(), "desc") == 0)
+				{
+					toWstring(cna->value(), atr.desc);
+				}
+				else if (!catalog.empty() && (strcmp(cna->name(), descid.c_str()) == 0))
 				{
 					toWstring(cna->value(), atr.desc);
 				}
 				else if (strcmp(cna->name(), "list") == 0)
 				{
-					
 					std::string val;
 					std::wstring name;
 					for (rapidxml::xml_attribute<char> *pattr = cna->first_attribute(); pattr != 0; pattr = pattr->next_attribute())
@@ -215,8 +258,10 @@ void Macroses::read_arguments(xml_nodew *node, MacrosDesc &mdesc)
 						if (strcmp(pattr->name(), "value") == 0)
 							val = pattr->value();
 						else if (strcmp(pattr->name(), "name") == 0)
-							toWstring(pattr->value(), name);							
-					}					
+							toWstring(pattr->value(), name);
+						else if( !catalog.empty() && (strcmp(pattr->name(), nameid.c_str()) == 0) )
+							toWstring(pattr->value(), name);
+					}
 					atr.vars.push_back(std::make_pair(val,name));
 				}
 

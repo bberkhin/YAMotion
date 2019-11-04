@@ -34,6 +34,8 @@ MacrosParamDlg::MacrosParamDlg(MacrosDesc *pm, wxWindow *parent, int curfiletype
 	for (auto it = mdesc->args.begin(); it != mdesc->args.end(); ++it)
 	{
 		wxStaticText *prompt = new wxStaticText(this, wxID_ANY, it->name);
+		if (!it->desc.empty() )
+			prompt->SetToolTip( it->desc);
 		sizer->Add(prompt, 0, wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL);
 		//	textinfos->Add(0, 6);	
 		if (it->type == "list")
@@ -52,6 +54,8 @@ MacrosParamDlg::MacrosParamDlg(MacrosDesc *pm, wxWindow *parent, int curfiletype
 		else
 		{
 			wxTextCtrl *pedit = new wxTextCtrl(this, id_input, it->defval);
+			if ( !it->desc.empty() )
+				pedit->SetToolTip( it->desc );
 			sizer->Add(pedit, 0, wxEXPAND);
 		}
 		id_input++;
@@ -59,16 +63,20 @@ MacrosParamDlg::MacrosParamDlg(MacrosDesc *pm, wxWindow *parent, int curfiletype
 	}
 
 	wxBoxSizer *leftColumn = new wxBoxSizer(wxVERTICAL);
-	leftColumn->Add(new wxStaticText(this, wxID_ANY, pm->desc), 0, wxEXPAND);
-	leftColumn->AddSpacer(MARGIN_VERT);
-	leftColumn->Add(new FlatStaticLine(this, wxLI_HORIZONTAL), 0, wxGROW | wxLEFT | wxRIGHT);
-	leftColumn->AddSpacer(MARGIN_VERT);
+	if (!pm->desc.empty())
+	{
+		leftColumn->Add(new wxStaticText(this, wxID_ANY, pm->desc), 0, wxEXPAND);
+		leftColumn->AddSpacer(MARGIN_VERT);
+		leftColumn->Add(new FlatStaticLine(this, wxLI_HORIZONTAL), 0, wxGROW | wxLEFT | wxRIGHT);
+		leftColumn->AddSpacer(MARGIN_VERT);
+	}
 	leftColumn->Add(new wxStaticText(this, wxID_ANY, _("Fill parameters:")), 0, wxEXPAND);
+	leftColumn->AddSpacer(MARGIN_VERT);
 	leftColumn->Add(sizer, 0, wxALL | wxEXPAND);
 	//
-	leftColumn->AddStretchSpacer();
+	//leftColumn->AddStretchSpacer();
 	leftColumn->AddSpacer(MARGIN_VERT);
-	leftColumn->Add(new FlatStaticLine(this, wxLI_HORIZONTAL), 0, wxGROW | wxLEFT | wxRIGHT);
+	//leftColumn->Add(new FlatStaticLine(this, wxLI_HORIZONTAL), 0, wxGROW | wxLEFT | wxRIGHT);
 
 
 	wxBoxSizer *rightColumn = new wxBoxSizer(wxVERTICAL);

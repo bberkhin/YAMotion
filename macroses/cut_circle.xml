@@ -2,7 +2,9 @@
 <macroses>
   <macros>
     <name>Cutting circle</name>
-    <desc>Cut circle via center point and circle radius</desc>
+    <name_ru>Вырезание по окружности</name_ru>
+    <desc>Cut circle via center point and radius</desc>
+    <desc_ru>Окружность задается центром и радиусом</desc_ru>
     <image1>cut_circle.jpg</image1>
     <image>cutting-circle.png</image>
     <gcmc>cut_circle.gcmc</gcmc>
@@ -11,48 +13,54 @@
     <arguments>
         <argument defvalue ="0" type="scalar" ref="xCenter">
         <name>Center X:</name>
-        <desc>Specify center of the circle in mm</desc>
+        <name_ru>Центр X:</name_ru>
+        <desc>Specify X cooordinate of the center of the circle in mm</desc>
+        <desc_ru>Задайте X координату центра окружности в мм</desc_ru>
       </argument>
       <argument defvalue ="0" type="scalar" ref="yCenter">
         <name>Center Y:</name>
-        <desc>Specify center of the circle in mm</desc>
+        <name_ru>Центр Y:</name_ru>
       </argument>
       <argument defvalue ="20" type="scalar" ref="r">
-        <name>Radius</name>
-        <desc>Specify radius of the circle in mm</desc>
+        <name>Radius:</name>
+        <name_ru>Радиус:</name_ru>
       </argument>
       <argument defvalue ="4" type="scalar" ref="zFull">
         <name>Thikness:</name>
-      </argument>
+        <name_ru>Толщина:</name_ru>
+    </argument>
       <argument defvalue ="1" type="scalar" ref="zDelta">
         <name>Step Z:</name>
+        <name_ru>Шаг по Z:</name_ru>
       </argument>
       <argument defvalue ="2" type="scalar" ref="zSave">
         <name>Save Z:</name>
+        <name_ru>Безопасная Z:</name_ru>
       </argument>
       <argument defvalue ="6" type="scalar" ref="d">
         <name>Mill diameter</name>
+        <name_ru>Диаметр фрезы</name_ru>
       </argument>
       <argument defvalue ="200" type="scalar" ref="rate">
-        <name>Feed rate:</name>
-        <desc>Specify feed rate of cutting</desc>
+        <name>Feedrate:</name>
+        <name_ru>Feedrate:</name_ru>
       </argument>
       <argument defvalue ="50" type="scalar" ref="zRate">
-        <name>Z feed rate:</name>
-        <desc>Specify Z feed rate of cutting</desc>
+        <name>Z feedrate:</name>
+        <name_ru>Z feedrate:</name_ru>
       </argument>
       <argument defvalue ="1" type="list" ref="trc">
         <name>Thraektory:</name>
-        <desc>Tool correction:  1 - by contur, 2 inside, 3 ouside</desc>
-        <list value ="1" name="By contour"/>
-        <list value ="2" name="Inside"/>
-        <list value ="3" name="Outside"/>
+        <name_ru>Траектория</name_ru>
+        <list value ="1" name="By contour" name_ru="По контуру"/>
+        <list value ="2" name="Inside" name_ru="Внутри"/>
+        <list value ="3" name="Outside" name_ru="Снаружи"/>
       </argument>
       <argument defvalue ="0" type="list" ref="ccw">
         <name>Direction:</name>
-        <desc>Direction: 0 - clockwise, 2- counter clockwise</desc>
-        <list value ="0" name="Clockwise"/>
-        <list value ="1" name="Counter Clockwise"/>
+        <name_ru>Направление</name_ru>
+        <list value ="0" name="Clockwise" name_ru="По часовой" />
+        <list value ="1" name="Counter Clockwise" name_ru="Против часовой"/>
       </argument>
     </arguments>
   </macros>

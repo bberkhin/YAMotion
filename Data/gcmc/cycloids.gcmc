@@ -56,7 +56,8 @@ function hypotrochoid_point(phi, R, r, d)
  * r	- Rolling circle radius
  * d	- Tracking point distance from rolling circle center
  */
-function epitrochoid_point(phi, R, r, d)
+functio
+n epitrochoid_point(phi, R, r, d)
 {
 	return (R+r) * [cos(phi), sin(phi)] - d * [cos(phi*((R+r)/r)), sin(phi*((R+r)/r))];
 }
@@ -69,7 +70,7 @@ function epitrochoid_point(phi, R, r, d)
  * d	- Tracking point distance from rolling circle center
  * astep- Angular step
  */
-function hypotrochoid(R, r, d, astep)
+ function hypotrochoid(R, r, d, astep)
 {
 	local path = {};
 	local a;

@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-10-31 17:19+0700\n"
-"PO-Revision-Date: 2019-10-31 17:20+0700\n"
+"POT-Creation-Date: 2019-11-01 17:46+0700\n"
+"PO-Revision-Date: 2019-11-01 17:48+0700\n"
 "Last-Translator: Boris Berkhin <bberkhin@gmail.com>\n"
 "Language-Team: Russian\n"
 "Language: ru\n"
@@ -19,7 +19,7 @@ msgstr ""
 "Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n"
 "%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
 "X-Poedit-Basepath: ../..\n"
-"X-Generator: Poedit 2.2.1\n"
+"X-Generator: Poedit 2.2.4\n"
 "X-Poedit-SearchPath-0: Gcode\n"
 "X-Poedit-SearchPath-1: EditorWx\n"
 
@@ -49,6 +49,14 @@ msgstr "Параметр %c не должен быть определен для
 #, c-format
 msgid "%c word missing in absolute center arc"
 msgstr "Не задан параметр %c определяющий центр дуги"
+
+#: workingthreads.cpp:497
+#, c-format
+msgid "%d error."
+msgid_plural "%d errors."
+msgstr[0] "%d ошибкой."
+msgstr[1] "%d ошибками."
+msgstr[2] "%d ошибками."
 
 #: prefs.cpp:542
 #, c-format
@@ -143,6 +151,10 @@ msgstr "Отменить\tCtrl+Z"
 #: appframe.cpp:1213
 msgid "&Upper case\tCtrl+Shift+U"
 msgstr "Прописные\tCtrl+Shift+U"
+
+#: GCodeInterpreter.cpp:1176
+msgid "'(' inside comment"
+msgstr "'(' внутри комментария"
 
 #: editorpanel.cpp:450
 msgid "3D View:"
@@ -424,16 +436,15 @@ msgstr "Проверить обновления"
 msgid "Checking aborted"
 msgstr "Проверка отменена"
 
-#: workingthreads.cpp:495
-#, c-format
-msgid "Checking completed with %d error(s)"
-msgstr "Проверка завершена. %d ошибок"
+#: workingthreads.cpp:497
+msgid "Checking completed with "
+msgstr "Проверка завершена с "
 
-#: workingthreads.cpp:738
+#: workingthreads.cpp:740
 msgid "Checking completed with errors"
 msgstr "Проверка завершена с ошибками"
 
-#: workingthreads.cpp:493 workingthreads.cpp:736
+#: workingthreads.cpp:493 workingthreads.cpp:738
 msgid "Checking completed with no error"
 msgstr "Проверка завершена успешно"
 
@@ -476,11 +487,11 @@ msgstr "Конфликт M%d модальных групп"
 msgid "Convert"
 msgstr "Конвертировать"
 
-#: workingthreads.cpp:745
+#: workingthreads.cpp:747
 msgid "Converting completed with errors"
 msgstr "Конвертация завершена с ошибками"
 
-#: workingthreads.cpp:743
+#: workingthreads.cpp:745
 msgid "Converting completed with no error"
 msgstr "Конвертация завершена успешно"
 
@@ -537,11 +548,11 @@ msgstr "Настройки по умолчанию"
 msgid "Do you really want to remove file %s"
 msgstr "Вы действительно хотите удалить файл %s"
 
-#: workingthreads.cpp:519
+#: workingthreads.cpp:522
 msgid "Drawing aborted"
 msgstr "Отрисовка отменена"
 
-#: workingthreads.cpp:522
+#: workingthreads.cpp:525
 msgid "Drawing completed"
 msgstr "Отрисовка завершена"
 
@@ -737,7 +748,7 @@ msgstr "GCMC"
 msgid "GCMC documentation"
 msgstr "Документация по GCMC"
 
-#: workingthreads.cpp:807
+#: workingthreads.cpp:809
 msgid "GCMC is running very long time/ Would you like to kill the process?"
 msgstr ""
 "Конвертация GCMC работает уже очень долгоб возможно что-то пошло не так. "
@@ -844,6 +855,10 @@ msgstr "Строка %d: "
 msgid "Line %d: Error feedrate value %g"
 msgstr "Строка %d: Недопустимое значение скорости обработки %g"
 
+#: GCodeInterpreter.cpp:1155
+msgid "Line is too long"
+msgstr "Очень длинная команда"
+
 #: gcodeerrors.h:109
 #, c-format
 msgid "M code greater than 199: M%d"
@@ -928,6 +943,10 @@ msgstr "Не задано действительное число"
 #: CheckUpdate.cpp:39
 msgid "No description"
 msgstr "Нет описания"
+
+#: GCodeInterpreter.cpp:91
+msgid "No end of programm command"
+msgstr "Отсутствует команда конца программы"
 
 #: gcodeerrors.h:116
 msgid "Non integer value for integer"
@@ -1166,7 +1185,7 @@ msgstr "Не допустимая скорость шпинделя"
 msgid "Start checking & drawing: %s"
 msgstr "Запущена проверка & отрисовка: %s"
 
-#: workingthreads.cpp:691
+#: workingthreads.cpp:693
 msgid "Start checking..."
 msgstr "Запущена проверка..."
 
@@ -1175,11 +1194,11 @@ msgstr "Запущена проверка..."
 msgid "Start checking: %s"
 msgstr "Запущена проверка: %s"
 
-#: workingthreads.cpp:693
+#: workingthreads.cpp:695
 msgid "Start converting..."
 msgstr "Запущена конверация..."
 
-#: workingthreads.cpp:1029
+#: workingthreads.cpp:1031
 #, c-format
 msgid "Start transforming: %d lines..."
 msgstr "Расчет запущен: Строка %d ..."
@@ -1218,14 +1237,21 @@ msgid ""
 "like to restart?"
 msgstr "Изменения вступят в силу после перезапуска программы. Перезапустить?"
 
+#: GCodeInterpreter.cpp:96
+msgid "The programm end being in subrotinue"
+msgstr "Команда завершения программы не должна вызываться из подпрограммы"
+
 #: appframe.cpp:1265
 msgid "Themes"
 msgstr "Темы"
 
-#: workingthreads.cpp:534
+#: workingthreads.cpp:538
 #, c-format
-msgid "There are %d error(s)."
-msgstr "Найдено %d ошибок."
+msgid "There is %d error."
+msgid_plural "There are %d errors."
+msgstr[0] "Найдено %d ошибка."
+msgstr[1] "Найдено %d ошибки."
+msgstr[2] "Найдено %d ошибок."
 
 #: app.cpp:178
 msgid "This language is not supported by the system."
@@ -1243,11 +1269,11 @@ msgstr "Радиус инструмента больше или равен ра�
 msgid "Transform..."
 msgstr "Преобразовать..."
 
-#: workingthreads.cpp:1034
+#: workingthreads.cpp:1036
 msgid "Transforming aborted"
 msgstr "Расчет отменен"
 
-#: workingthreads.cpp:1070
+#: workingthreads.cpp:1072
 msgid "Transforming completed."
 msgstr "Расчет завершен."
 
@@ -1259,6 +1285,10 @@ msgstr "Холостой ход: "
 #, c-format
 msgid "Two G codes used from same modal group: G%d and G%d"
 msgstr "Несовместимые G-коды (G%d и G%d) в одном фрэйме исполнения"
+
+#: GCodeInterpreter.cpp:1196
+msgid "Unclosed comment"
+msgstr "Незакрытый комментарий"
 
 #: gcodeerrors.h:127
 msgid "Unclosed expression"
@@ -1301,7 +1331,7 @@ msgstr ""
 msgid "Uups some erorr"
 msgstr "Уппс, что-то пошло не так"
 
-#: workingthreads.cpp:1001
+#: workingthreads.cpp:1003
 msgid "Uups there is no any selection"
 msgstr "Уппс, в тексе нет выделения"
 
@@ -1460,7 +1490,7 @@ msgstr ""
 msgid "[G85;G88] not supported yet"
 msgstr "[G85;G88] пока не поддерживаются"
 
-#: workingthreads.cpp:686
+#: workingthreads.cpp:688
 msgid "gcmc_vc.exe already running"
 msgstr "gcmc_vc.exe уже запущена"
 
@@ -1477,6 +1507,9 @@ msgstr "безымянный%d.%s"
 #, c-format
 msgid "unnamed.%s"
 msgstr "безымянный.%s"
+
+#~ msgid "Checking completed with %d error(s)"
+#~ msgstr "Проверка завершена. %d ошибок"
 
 #~ msgid "..."
 #~ msgstr "..."
