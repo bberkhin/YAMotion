@@ -38,7 +38,7 @@
         <name_ru>Безопасная Z:</name_ru>
       </argument>
       <argument defvalue ="6" type="scalar" ref="d">
-        <name>Mill diameter</name>
+        <name>Mill diameter:</name>
         <name_ru>Диаметр фрезы</name_ru>
       </argument>
       <argument defvalue ="200" type="scalar" ref="rate">
@@ -50,15 +50,15 @@
         <name_ru>Z feedrate:</name_ru>
       </argument>
       <argument defvalue ="1" type="list" ref="trc">
-        <name>Thraektory:</name>
-        <name_ru>Траектория</name_ru>
+        <name>Trajectory:</name>
+        <name_ru>Траектория:</name_ru>
         <list value ="1" name="By contour" name_ru="По контуру"/>
         <list value ="2" name="Inside" name_ru="Внутри"/>
         <list value ="3" name="Outside" name_ru="Снаружи"/>
       </argument>
       <argument defvalue ="0" type="list" ref="ccw">
         <name>Direction:</name>
-        <name_ru>Направление</name_ru>
+        <name_ru>Направление:</name_ru>
         <list value ="0" name="Clockwise" name_ru="По часовой" />
         <list value ="1" name="Counter Clockwise" name_ru="Против часовой"/>
       </argument>

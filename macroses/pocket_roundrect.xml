@@ -2,7 +2,7 @@
 <macroses>
   <macros>
     <name>Round Rect Pocket</name>
-    <desc>Millng round rect pocket</desc>
+    <name_ru>Фрезерование прямоугольного кармана</name_ru>
     <image1>pocket_roundrect.jpg</image1>
     <image>rounded-rectangular-pocket.png</image>
     <gcmc>pocket_roundrect.gcmc</gcmc>
@@ -11,52 +11,54 @@
     <arguments>
       <argument defvalue ="0" type="scalar" ref="xMin">
         <name>X Min:</name>
-        <desc>X Min of the rect in mm</desc>
       </argument>
       <argument defvalue ="0" type="scalar" ref="yMin">
         <name>Y Min:</name>
-        <desc>Y Min of the rect in mm</desc>
       </argument>
       <argument defvalue ="200" type="scalar" ref="xD">
-        <name>Width (dX):</name>
-        <desc>Width of the rect in mm</desc>
+        <name>Width (DX):</name>
+        <name_ru>Ширина (DX):</name_ru>
       </argument>
       <argument defvalue ="100" type="scalar" ref="yD">
         <name>Height (dY):</name>
-        <desc>Height of the rect in mm</desc>
+        <name_ru>Длина (DY):</name_ru>
       </argument>
       <argument defvalue ="20" type="scalar" ref="radius">
         <name>Radius:</name>
+        <name_ru>Радиус скругления:</name_ru>
         <desc>Round rect radius in mm</desc>
       </argument>
       <argument defvalue ="1" type="scalar" ref="zFull">
         <name>Thikness:</name>
-      </argument>
-      <argument defvalue ="2" type="scalar" ref="zSave">
-        <name>Save Z:</name>
-      </argument>
-      <argument defvalue ="6" type="scalar" ref="d">
-        <name>Mill diameter</name>
+        <name_ru>Толщина:</name_ru>
       </argument>
       <argument defvalue ="1" type="scalar" ref="zDelta">
         <name>Step Z:</name>
+        <name_ru>Шаг по Z:</name_ru>
+      </argument>
+      <argument defvalue ="2" type="scalar" ref="zSave">
+        <name>Save Z:</name>
+        <name_ru>Безопасная Z:</name_ru>
+      </argument>
+      <argument defvalue ="6" type="scalar" ref="d">
+        <name>Mill diameter</name>
+        <name_ru>Диаметр фрезы:</name_ru>
       </argument>
       <argument defvalue ="30" type="scalar" ref="per_stepover">
         <name>Step over(%):</name>
+        <name_ru>Перекрытие(%):</name_ru>
       </argument>
       <argument defvalue ="200" type="scalar" ref="rate">
-        <name>Feed rate:</name>
-        <desc>Feed rate of cutting</desc>
+        <name>Feedrate:</name>
       </argument>
       <argument defvalue ="50" type="scalar" ref="zRate">
-        <name>Z feed rate:</name>
-        <desc>Z feed rate of cutting</desc>
+        <name>Z feedrate:</name>
       </argument>
       <argument defvalue ="1" type="list" ref="ccw">
         <name>Direction:</name>
-        <desc>Direction: 0 - clockwise, 2- counter clockwise</desc>
-        <list value ="0" name="Clockwise"/>
-        <list value ="1" name="Counter Clockwise"/>
+        <name_ru>Направление:</name_ru>
+        <list value ="0" name="Clockwise" name_ru="По часовой" />
+        <list value ="1" name="Counter Clockwise" name_ru="Против часовой"/>
       </argument>
     </arguments>
   </macros>

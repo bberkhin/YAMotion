@@ -2,7 +2,7 @@
 <macroses>
   <macros>
     <name>Cutting rect</name>
-    <desc></desc>
+    <name_ru>Вырезание прямоугольника</name_ru>
     <image1>cut_rect.jpg</image1>
     <image>cutting-rect.png</image>
     <gcmc>cut_rect.gcmc</gcmc>
@@ -11,51 +11,53 @@
       <arguments>
       <argument defvalue ="0" type="scalar" ref="xMin">
         <name>X min:</name>
-        <desc>Specify X min of the rect</desc>
       </argument>
       <argument defvalue ="0" type="scalar" ref="yMin">
         <name>Y min:</name>
-        <desc>Specify Y min of the rect</desc>
       </argument>
       <argument defvalue ="80" type="scalar" ref="xD">
-        <name>Width (delta X):</name>
+        <name>Width (DX):</name>
+        <name_ru>Ширина (DX):</name_ru>
       </argument>
       <argument defvalue ="100" type="scalar" ref="yD">
-        <name>Height (delta Y):</name>
+        <name>Height (DY):</name>
+        <name_ru>Длина (DY):</name_ru>
       </argument>
       <argument defvalue ="4" type="scalar" ref="zFull">
         <name>Thikness:</name>
+        <name_ru>Толщина:</name_ru>
       </argument>
       <argument defvalue ="1" type="scalar" ref="zDelta">
         <name>Step Z:</name>
+        <name_ru>Шаг по Z:</name_ru>
       </argument>
       <argument defvalue ="2" type="scalar" ref="zSave">
         <name>Save Z:</name>
+        <name_ru>Безопасная Z:</name_ru>
       </argument>
       <argument defvalue ="6" type="scalar" ref="d">
         <name>Mill diameter</name>
+        <name_ru>Диаметр фрезы:</name_ru>
       </argument>
       <argument defvalue ="200" type="scalar" ref="rate">
-        <name>Feed rate:</name>
-        <desc>Specify feed rate of cutting</desc>
+        <name>Feedrate:</name>
       </argument>
       <argument defvalue ="50" type="scalar" ref="zRate">
-        <name>Z feed rate:</name>
-        <desc>Specify Z feed rate of cutting</desc>
+        <name>Z feedrate:</name>
       </argument>    
 
       <argument defvalue ="1" type="list" ref="trc">
-        <name>Thraektory:</name>
-        <desc>Tool correction: 1 - by contur, 2 inside, 3 ouside</desc>
-        <list value ="1" name="By contour"/>
-        <list value ="2" name="Inside"/>
-        <list value ="3" name="Outside"/>
+        <name>Trajectory:</name>
+        <name_ru>Траектория:</name_ru>
+        <list value ="1" name="By contour" name_ru="По контуру"/>
+        <list value ="2" name="Inside" name_ru="Внутри"/>
+        <list value ="3" name="Outside" name_ru="Снаружи"/>
       </argument>
       <argument defvalue ="0" type="list" ref="ccw">
         <name>Direction:</name>
-        <desc>Direction: 0 - clockwise, 2- counter clockwise</desc>
-        <list value ="0" name="Clockwise"/>
-        <list value ="1" name="Counter Clockwise"/>
+        <name_ru>Направление:</name_ru>
+        <list value ="0" name="Clockwise" name_ru="По часовой" />
+        <list value ="1" name="Counter Clockwise" name_ru="Против часовой"/>
       </argument>
     </arguments>
   </macros>

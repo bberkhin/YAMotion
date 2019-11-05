@@ -130,14 +130,6 @@
     <ResourceCompile Include="EditorWx.rc" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\..\resources\intro_gocde.htm">
-      <DeploymentContent>true</DeploymentContent>
-    </None>
-    <None Include="..\..\resources\welcome.htm">
-      <DeploymentContent>true</DeploymentContent>
-    </None>
-  </ItemGroup>
-  <ItemGroup>
     <Image Include="bitmaps\loader_dark.gif" />
     <Image Include="bitmaps\logo-sign.png" />
     <Image Include="bitmaps\matildaapp.ico" />

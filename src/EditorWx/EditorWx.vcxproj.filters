@@ -336,10 +336,6 @@
     </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\..\resources\intro_gocde.htm" />
-    <None Include="..\..\resources\welcome.htm" />
-  </ItemGroup>
-  <ItemGroup>
     <Image Include="bitmaps\loader_dark.gif">
       <Filter>Файлы ресурсов</Filter>
     </Image>
