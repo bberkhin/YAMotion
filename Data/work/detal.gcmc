@@ -1,0 +1,41 @@
+include("pocket_circle.inc.gcmc");
+
+feedrateZ = 50;
+feedrateXY = 200;
+saveZ = 5mm;
+zDelta =  2;
+d=6; //Диаметр фрезы
+per_stepover=10; //Перекрытие(%):
+RampDist = 10;
+
+
+function DoDrill( pos, Zsave )
+{
+    goto([-,-,Zsave]);
+    goto([pos[0],pos[1],-]);
+    move([-,-,pos[2]],feedrateZ);
+    goto([-,-,Zsave]);
+}
+
+DoCirculePocket(-170,-65,13,8, saveZ, zDelta,d,per_stepover,RampDist,feedrateXY,feedrateZ,0);
+DoCirculePocket(-100,-0,13,8, saveZ, zDelta,d,per_stepover,RampDist,feedrateXY,feedrateZ,0);
+
+DoDrill([-20,-63,-10],saveZ);
+DoDrill([-20,-30,-10],saveZ);
+DoDrill([-20,3,-10],saveZ);
+ 
+for(  z = -2; z >= -10; z-= 2 )
+{
+    goto([-,-,saveZ]);
+    goto([0,-80]);
+    move([-,-,z],feedrateZ);
+    feedrate(feedrateXY);
+    move([0,20]);
+    move([-104.14,20]);
+    arc_ccw([-111.21,17.07],10);
+    move([-191.21,-62.93]);
+    arc_ccw([-184.14,-80],10);
+    move([0]);
+}
+
+

@@ -3,6 +3,7 @@
   <macros>
     <name>Milling rect serface</name>
     <name_ru>Фрезерование плосткости:</name_ru>
+    <image>rectangular-surface.png</image>
     <gcmc>mill_rect.gcmc</gcmc>
     <include1>mill_rect.inc.gcmc</include1>
     <function1>MillRect(xMin, yMin, xD, yD,  zFull, zSave, zDelta,  per_stepover, d, rate, zRate,ccw)</function1>

@@ -10,6 +10,8 @@
 #include "wx/wupdlock.h"
 #include "wx/event.h"
 #include <wx/dir.h>
+#include "app.h"
+#include "appframe.h"
 #include "them.h"
 #include "flatbuttom.h"
 #include "FlatScrollBar.h"
@@ -725,11 +727,15 @@ void DirTreeCtrl::OnFileNew(wxCommandEvent &ev)
 	else
 		defptah = item->GetPath();
 
-	wxCommandEvent event(FILE_NEW_EVENT, GetId());
-	event.SetInt((ev.GetId() == ID_TREE_NEWGCMC) ? FILETYPE_GCMC : FILETYPE_NC);
-	event.SetString(defptah);
-	event.SetEventObject(this);
-	ProcessWindowEvent(event);
+	FileNewEvent *event = new FileNewEvent(FILE_NEW_EVENT);
+	//wxCommandEvent event(FILE_NEW_EVENT, GetId());
+	event->SetInt((ev.GetId() == ID_TREE_NEWGCMC) ? FILETYPE_GCMC : FILETYPE_NC);
+	event->SetString(defptah);
+	event->SetEventObject(this);
+	//wxQueueEvent(GetParent(), event);
+	//ProcessWindowEvent(*event);
+	//wxQueueEvent(wxGetApp().GetFrame(), ev);
+	wxQueueEvent(wxGetApp().GetFrame(), event);
 
 }
 
