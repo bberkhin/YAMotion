@@ -17,8 +17,9 @@
 
 #define APP_VERSION_MAJOR  0
 #define APP_VERSION_MINOR  1
-#define APP_VERSION_EXTSTR  L" beta"
-#define APP_VERSION  wxString::Format(L"%d.%d%s",APP_VERSION_MAJOR,APP_VERSION_MINOR,APP_VERSION_EXTSTR)
+#define APP_VERSION_REVISION 256
+#define APP_VERSION_EXTSTR  L"beta"
+#define APP_VERSION  wxString::Format(L"%d.%d.%d %s",APP_VERSION_MAJOR,APP_VERSION_MINOR,APP_VERSION_REVISION,APP_VERSION_EXTSTR)
 #define APP_BUILD __DATE__
 
 #define APP_WEBSITE "matildacnc.com"
@@ -34,4 +35,4 @@
 #define HELP_GCMC L"/gcmchelp"
 #define HELP_GCODE L"/gcodehelp"
 #define HELP_EDITOR L"/editorhelp"
-#define HELP_DOWNLOAD L"/download"
+#define HELP_DOWNLOAD L"#download"

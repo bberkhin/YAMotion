@@ -161,7 +161,7 @@ function MakeRoundRule( xCenter, yCenter, Radius, AngleBase, AngleStart, AngleEn
     engrave(vl, 5mm, 1mm);
 }
 
-
+/*  ----------------------------- Main program ------------------------------- */
 feedrate(200);
 MakeRoundRule( 0mm, 0mm, 100mm, 90deg, -90deg, 90deg, 1deg, 9, 10mm );
 MakeRoundRule( 0mm, 0mm, 150mm, 60deg, -30deg, 30deg, 2deg, 4, 10mm );

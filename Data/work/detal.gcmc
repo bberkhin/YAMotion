@@ -4,11 +4,11 @@ feedrateZ = 50;
 feedrateXY = 200;
 saveZ = 5mm;
 zDelta =  2;
+RampDist = 10;
 d=6; //Диаметр фрезы
 per_stepover=10; //Перекрытие(%):
-RampDist = 10;
 
-
+// Drill subroutine
 function DoDrill( pos, Zsave )
 {
     goto([-,-,Zsave]);
@@ -16,15 +16,18 @@ function DoDrill( pos, Zsave )
     move([-,-,pos[2]],feedrateZ);
     goto([-,-,Zsave]);
 }
-
+/*---------------------- Main program---------------------------*/
+// Make Circule Pockets 
 DoCirculePocket(-170,-65,13,8, saveZ, zDelta,d,per_stepover,RampDist,feedrateXY,feedrateZ,0);
 DoCirculePocket(-100,-0,13,8, saveZ, zDelta,d,per_stepover,RampDist,feedrateXY,feedrateZ,0);
 
+// Make holes
 DoDrill([-20,-63,-10],saveZ);
 DoDrill([-20,-30,-10],saveZ);
 DoDrill([-20,3,-10],saveZ);
- 
-for(  z = -2; z >= -10; z-= 2 )
+
+// Cut detal,  Z Step = 2mm
+for(  z = -2mm; z >= -10mm; z-= 2mm )
 {
     goto([-,-,saveZ]);
     goto([0,-80]);

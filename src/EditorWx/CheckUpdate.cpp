@@ -102,7 +102,7 @@ CheckUpdateDlg::CheckUpdateDlg(wxWindow *parent)
 		if (HELP_DOWNLOAD != 0 && wcslen(HELP_DOWNLOAD) > 0)
 		{
 			url += HELP_DOWNLOAD;
-			url += StandartPaths::Get()->GetLanguageCatalog().c_str();
+			//url += StandartPaths::Get()->GetLanguageCatalog().c_str();
 		}
 		wxLaunchDefaultApplication(url);
 	}
@@ -121,18 +121,26 @@ wxEND_EVENT_TABLE()
 static bool IsNewVersion(const wxString &version)
 {
 	// return true if current version older then argument
-	// formt: "%d.%d%s", APP_VERSION_MAJOR, APP_VERSION_MINOR, APP_VERSION_EXTSTR
+	// formt: "%d.%d.%d %s",APP_VERSION_MAJOR,APP_VERSION_MINOR,APP_VERSION_REVISION,APP_VERSION_EXTSTR
 	wxString major = version.BeforeFirst('.');
 	wxString minor = version.AfterFirst('.');
+	wxString revision = minor.AfterFirst('.');;
+	revision = revision.BeforeFirst('.');
 	minor = minor.BeforeFirst('.');
 	long imajor = 0;
 	major.ToLong(&imajor);
 	long iminor = 0;
 	minor.ToLong(&iminor);
+	long irevision = 0;
+	revision.ToLong(&irevision);
+
 	if (imajor > APP_VERSION_MAJOR)
 		return true;
 	if (iminor > APP_VERSION_MINOR)
 		return true;
+	if (irevision > APP_VERSION_REVISION)
+		return true;
+	
 	return false;
 }
 
