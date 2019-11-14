@@ -5,7 +5,7 @@
 //============================================================================
 
 #define APP_NAME "Matilda"
-#define APP_DESCR "See http://matildacnc.org"
+#define APP_DESCR "Matilda CNC Editor"
 
 #define APP_MAINT "Boris Berkhin"
 #define APP_VENDOR "Matilda"
@@ -19,6 +19,7 @@
 #define APP_VERSION_MINOR  1
 #define APP_VERSION_REVISION 256
 #define APP_VERSION_EXTSTR  L"beta"
+#define APP_VERSION_RESSTRING "0.1.256"
 #define APP_VERSION  wxString::Format(L"%d.%d.%d %s",APP_VERSION_MAJOR,APP_VERSION_MINOR,APP_VERSION_REVISION,APP_VERSION_EXTSTR)
 #define APP_BUILD __DATE__
 

@@ -35,7 +35,7 @@ sf = 10.0mm;	/* Scaling factor */
  * Concatenation is easy as the last vector in the vectorlist is the position
  * of the would-be next glyph.
  */
-vl  = typeset("Борис ",     FONT_HSANS_1		 );
+vl  = typeset("Text ",     FONT_HSANS_1		 );
 vl += typeset("and ",      FONT_HSANS_2		 ) + vl[-1];
 vl += typeset("fonts ",    FONT_HSCRIPT_1	 ) + vl[-1];
 vl += typeset("going ",    FONT_HSCRIPT_2	 ) + vl[-1];
@@ -73,7 +73,7 @@ engrave(rotlst, 1.0mm, 0.0mm);
 /* Inset text too, with accents */
 sf = 8.0mm;	/* Scaling factor a bit less than above */
 
-vl  = typeset("Hello World", FONT_HSANS_1);
+vl  = typeset("Blá Blå Blà Blæ Blø", FONT_HSANS_1);
 
 /* Scale to real world coordinates */
 vl = scale(vl, [sf / pi(), sf]);

@@ -47,7 +47,7 @@ function shear_x(vl)
 /* - - - - - - - - - - - - - - - - - - - */
 feedrate(400.0mm);
 
-text = "Привет Hello 1 2 3 4 5 6 7 8 9 0 .";
+text = "All your Glyphs are belong to us.";
 sf = 2.5mm;	/* Scaling factor */
 
 /*
@@ -76,7 +76,6 @@ engrave(vl, 1.0mm, 0.0mm);
 
 
 /* As one-liners... */
-/*
 engrave(scale(typeset(text, FONT_HSANS_2		), [sf, sf])  + [0.0mm, 16.0 * sf], 1.0mm, 0.0mm);
 engrave(shear_x(scale(typeset(text, FONT_HSANS_1	), [sf, sf])) + [0.0mm, 14.0 * sf], 1.0mm, 0.0mm);
 engrave(shear_x(scale(typeset(text, FONT_HSANS_2	), [sf, sf])) + [0.0mm, 12.0 * sf], 1.0mm, 0.0mm);
@@ -86,4 +85,4 @@ engrave(scale(typeset(text, FONT_HTIMES			), [sf, sf])  + [0.0mm,  6.0 * sf], 1.
 engrave(scale(typeset(text, FONT_HTIMES_BOLD		), [sf, sf])  + [0.0mm,  4.0 * sf], 1.0mm, 0.0mm);
 engrave(scale(typeset(text, FONT_HTIMES_ITALIC		), [sf, sf])  + [0.0mm,  2.0 * sf], 1.0mm, 0.0mm);
 engrave(scale(typeset(text, FONT_HTIMES_ITALIC_BOLD	), [sf, sf])  + [0.0mm,  0.0 * sf], 1.0mm, 0.0mm);
-*/
+

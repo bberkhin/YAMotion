@@ -345,5 +345,8 @@
     <Image Include="bitmaps\logo-sign.png">
       <Filter>Файлы ресурсов</Filter>
     </Image>
+    <Image Include="bitmaps\loader_white.gif">
+      <Filter>Файлы ресурсов</Filter>
+    </Image>
   </ItemGroup>
 </Project>

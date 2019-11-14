@@ -69,7 +69,7 @@ function epitrochoid_point(phi, R, r, d)
  * d	- Tracking point distance from rolling circle center
  * astep- Angular step
  */
- function hypotrochoid(R, r, d, astep)
+function hypotrochoid(R, r, d, astep)
 {
 	local path = {};
 	local a;
@@ -132,10 +132,11 @@ parms = {
 	[17,  5, 3],
 	[ 7, 13, 5]
 };
+
 /*
  * Trace both hypo- and epi-trochoid for each parameter set
  */
-i = -2.5; 
+i = -2.5;
 foreach(parms; p) {
 	maxw = p[0] + p[1] + p[2];	// Estimate parametric size
 	// Calculate the paths

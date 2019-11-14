@@ -131,6 +131,7 @@
   </ItemGroup>
   <ItemGroup>
     <Image Include="bitmaps\loader_dark.gif" />
+    <Image Include="bitmaps\loader_white.gif" />
     <Image Include="bitmaps\logo-sign.png" />
     <Image Include="bitmaps\matildaapp.ico" />
   </ItemGroup>
@@ -188,15 +189,19 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <IncludePath>$(IncludePath)</IncludePath>
     <LibraryPath>C:\WxWidgets\lib\vc_lib;$(SolutionDir)..\..\muparser\build\vc2017\Debug;$(LibraryPath)</LibraryPath>
+    <TargetName>MatildaCNC</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LibraryPath>C:\WxWidgets\lib\vc_lib;$(SolutionDir)..\..\muparser\build\vc2017\Release;$(LibraryPath)</LibraryPath>
+    <TargetName>MatildaCNC</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LibraryPath>C:\wxWidgets\lib\vc_x64_lib;$(SolutionDir)..\..\muparser\build\vc2017\x64\Release;$(LibraryPath)</LibraryPath>
+    <TargetName>MatildaCNC</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LibraryPath>C:\wxWidgets\lib\vc_x64_lib;$(SolutionDir)..\..\muparser\build\vc2017\x64\Release;$(LibraryPath)</LibraryPath>
+    <TargetName>MatildaCNC</TargetName>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
