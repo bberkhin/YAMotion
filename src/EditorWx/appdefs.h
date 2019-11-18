@@ -17,15 +17,15 @@
 
 #define APP_VERSION_MAJOR  0
 #define APP_VERSION_MINOR  1
-#define APP_VERSION_REVISION 256
+#define APP_VERSION_REVISION 257
 #define APP_VERSION_EXTSTR  L"beta"
-#define APP_VERSION_RESSTRING "0.1.256"
+#define APP_VERSION_RESSTRING "0.1.257"
 #define APP_VERSION  wxString::Format(L"%d.%d.%d %s",APP_VERSION_MAJOR,APP_VERSION_MINOR,APP_VERSION_REVISION,APP_VERSION_EXTSTR)
 #define APP_BUILD __DATE__
 
 #define APP_WEBSITE "matildacnc.com"
-#define APP_WEBSITETEXT "http://matildacnc.com"
-#define APP_WEBSITEURL "http://matildacnc.com"
+#define APP_WEBSITETEXT "https://matildacnc.com"
+#define APP_WEBSITEURL "https://matildacnc.com"
 //#define APP_EMAILURL "mailto:bberkhin@matildacnc.com"
 #define APP_EMAILTEXT  "bberkhin@matildacnc.com"
 #define APP_EMAILURL (wxString::Format(L"mailto:bberkhin@matildacnc.com?subject=%s%%20%s", wxString(APP_NAME), wxString(APP_VERSION)))

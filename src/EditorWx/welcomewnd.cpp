@@ -334,8 +334,8 @@ wxBoxSizer *WelcomeWnd::CreateFooter()
 	wxBoxSizer *pane = new wxBoxSizer(wxHORIZONTAL);
 	pane->AddSpacer(WELCOME_MARGIN);
 	wxString ver = APP_VERSION;
-	ver += L" ";
-	ver += WXSTRINGCOPYRIGHT;
+	//ver += L" ";
+	//ver += WXSTRINGCOPYRIGHT; //be more modest
 
 	wxBoxSizer *paneCmd = new wxBoxSizer(wxHORIZONTAL);
 	wxStaticText *pTxt = new wxStaticText(this, ID_STATICTEXDISABLE, ver);
