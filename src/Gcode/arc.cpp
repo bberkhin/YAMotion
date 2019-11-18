@@ -103,16 +103,17 @@ bool GCodeInterpreter::arc_to(int motion, const Coords &position, const CmdParse
 
 	IF_T_RET_F_SETSTATE((parser.hasParam(PARAM_R) && (ijk_flag)), PARAMETER_ERROR, YA_MIXED_RADIUS_IJK_FORMAT_FOR_ARC);
 
-	//if (settings->feed_mode == UNITS_PER_MINUTE) {
-	//	CHKS((settings->feed_rate == 0.0),
-	//		NCE_CANNOT_MAKE_ARC_WITH_ZERO_FEED_RATE);
-	//}
-	//else if (settings->feed_mode == UNITS_PER_REVOLUTION) {
-	//	CHKS((settings->feed_rate == 0.0),
-	//		NCE_CANNOT_MAKE_ARC_WITH_ZERO_FEED_RATE);
+	if (runner.feed_mode == FeedMode_UnitPerMin)
+	{
+		IF_T_RET_F_SETSTATE((runner.feed == 0.0), PARAMETER_ERROR, YA_CANNOT_FEED_WITH_ZERO_FEED_RATE);
+	}
+	else if (runner.feed_mode == FeedMode_UnitPerRevolution)
+	{
+		IF_T_RET_F_SETSTATE((runner.feed == 0.0), PARAMETER_ERROR, YA_CANNOT_FEED_WITH_ZERO_FEED_RATE);
+		IF_T_RET_F_SETSTATE((runner.spindlespeed == 0.0), PARAMETER_ERROR, YA_CANNOT_FEED_WITH_ZERO_SPINDLE);
 	//	CHKS((settings->speed[settings->active_spindle] == 0.0),
 	//		_("Cannot feed with zero spindle speed in feed per rev mode"));
-	//}
+	}
 	//else if (settings->feed_mode == INVERSE_TIME) {
 	//	CHKS((!block->f_flag),
 	//		NCE_F_WORD_MISSING_WITH_INVERSE_TIME_ARC_MOVE);

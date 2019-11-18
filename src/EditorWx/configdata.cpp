@@ -8,7 +8,7 @@
 
 ConfigData::ConfigData() : wxFileConfig(APP_NAME)
 {
-	m_viewstyle = 0x0010 | 0x0020; //VSTYLE_SHOWFASTMOVE | VSTYLE_SHOWAXIS;
+	m_viewstyle = 0x001;
 	m_find_data = new wxFindReplaceData();
 	m_themeid = DEFAULT_THEME_ID;
 	DoLoadOptions();
