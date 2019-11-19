@@ -71,7 +71,8 @@ void ExecutorView::output(const std::string &str, const Coords &position)
 			 end2 + rd->tool_yoffset,
 			 center1 + rd->tool_xoffset,
 			 center2 + rd->tool_yoffset,
-			 (rotation == 1 ? 1 : 0),
+			 rotation,
+			 //(rotation == 1 ? 1 : 0),
 			 end3 + rd->tool_length_offset,
 			 a, b, c);
 	 }
@@ -145,13 +146,13 @@ void ExecutorView::output(const std::string &str, const Coords &position)
 
 	 if (fabs(d_theta) < THETA_SIGMA) d_theta = 0;  // force super small arcs to zero
 
-	 if (rotation)
+	 if (rotation > 0)
 	 {
-		 if (d_theta <= 0.0f) d_theta += TWO_PI; // CCW delta should be +  
+		 if (d_theta <= 0.0f) d_theta += rotation*TWO_PI; // CCW delta should be +  
 	 }
 	 else
 	 {
-		 if (d_theta >= 0.0f) d_theta -= TWO_PI;  // CW delta should be -
+		 if (d_theta >= 0.0f) d_theta -= abs(rotation) * TWO_PI;  // CW delta should be -
 	 }
 
 
