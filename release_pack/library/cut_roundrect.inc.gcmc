@@ -1,0 +1,90 @@
+/*
+ Cutting Round Rect function 
+ 
+ Input parameters 
+ l_xMin, l_yMin - start poiunt
+ l_xD, l_yD - width and height
+ l_radius - radius of round rect corners
+ l_depth - deep of cutting
+ l_zSave - save z
+ l_zDelta - z step
+ l_dMill - mill diameter 
+ l_xyRate - feed rate
+ l_zRate - feed rate by Z
+ l_trc- tool correction  1 - by contur, 2 inside, 3 ouside
+ l_ccw- clockwise  0 - clockwise, 2- counter clockwise 
+*/
+
+function DoCutRoundRect(l_xMin, l_yMin, l_xD, l_yD, l_radius, l_depth, l_zSave, l_zDelta,l_dMill,l_xyRate,l_zRate,l_trc,l_ccw)
+{
+
+if ( ((2*radius) > xD) || ((2*radius) > yD))
+{
+	error ( "Round radius  is very big." );
+	return 1;
+}
+
+comment("Cutting Round Rect");
+comment("Starting point: [",l_xMin,"," , l_yMin,",-] ; Width: ", l_xD , "; Height: ", l_yD, "; Radius: ", l_radius );
+comment("Mill dianetr: ",l_dMill, "; Z save: " ,l_zSave, "; Z Full : ", -1*l_depth, "; Z Step: ",  l_zDelta );
+
+
+local xMin_trc = l_xMin; 
+local yMin_trc = l_yMin; 
+local xMax_trc = l_xMin + l_xD; 
+local yMax_trc = l_yMin + l_yD; 
+local r = l_dMill/2;
+if( l_trc == 2 ) 
+{ 	
+	xMin_trc += r; 
+ 	yMin_trc += r; 
+	xMax_trc -= r;
+	yMax_trc -= r;
+}
+elif( l_trc == 3 ) 
+{ 	
+	xMin_trc -= r; 
+ 	yMin_trc -= r; 
+	xMax_trc += r;
+	yMax_trc += r;
+}
+
+
+goto([-,-,l_zSave]);
+goto([xMin_trc,yMin_trc+l_radius,-]);
+local zCur = 0;
+local zDepth = -1*l_depth;
+
+while(zDepth < zCur) 
+{
+ zCur = zCur - zDelta;
+ if ( zCur < zDepth){
+	zCur = zDepth;
+ } 
+ move([-,-,zCur ], l_zRate); 
+ if ( l_ccw )
+ {
+	feedrate(l_xyRate);
+	arc_ccw ( [xMin_trc + l_radius ,yMin_trc,-], l_radius );
+	move([xMax_trc-l_radius, -,-],rate);
+	arc_ccw ( [xMax_trc,yMin_trc+l_radius,-], l_radius );
+	move([-,yMax_trc-l_radius,-]);
+	arc_ccw ( [xMax_trc-l_radius,yMax_trc,-], l_radius );
+	move([xMin_trc+l_radius,-,-]);
+	arc_ccw ( [xMin_trc,yMax_trc-radius,-], l_radius );
+	move([-,yMin_trc+l_radius,-]);
+ }
+ else 
+ {
+ 	move([-,yMax_trc-l_radius,-],rate);
+	arc_cw ( [xMin_trc+l_radius,yMax_trc,-], l_radius );
+	move([xMax_trc-l_radius, -,-]);
+	arc_cw ( [xMax_trc,yMax_trc-radius,-], l_radius );
+	move([-,yMin_trc+l_radius,-]);
+	arc_cw ( [xMax_trc-radius,yMin_trc,-], l_radius );
+	move([xMin_trc+l_radius,-,-]);
+	arc_cw ( [xMin_trc,yMin_trc+radius,-], l_radius );
+ }
+}
+
+}

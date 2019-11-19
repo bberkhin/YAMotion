@@ -596,14 +596,18 @@ void View3DPanel::UpdateStatistics(const ConvertGCMCInfo &dt)
 	SetValue(ID_CTRL_TRAVERCE, dt.traverce_len, clear);
 
 	FlatSlider *slider = dynamic_cast<FlatSlider *>(FindWindowById(ID_SIMULATED_SLIDER, this));
-	if (slider)
+	if (slider && !clear)
 	{
 		int m_full_path = int(dt.feed_len + dt.traverce_len);
-		if (m_full_path > 0)
-		{
-			slider->SetRange(0, m_full_path);
-			slider->SetTickFreq(m_full_path / 10);
-		}
+		if (m_full_path >= 10) // TODO if less then 10mm ?
+			m_full_path = 10;
+		slider->SetRange(0, m_full_path);
+		slider->SetTickFreq(m_full_path / 10);
+	}
+	else if (slider && clear)
+	{
+		slider->SetRange(0, 10);
+		slider->SetTickFreq(1);
 	}
 
 	Layout();

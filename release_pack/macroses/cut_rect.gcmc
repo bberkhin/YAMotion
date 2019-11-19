@@ -1,0 +1,2 @@
+include ("cut_rect.inc.gcmc");
+DoCutRect(xMin, yMin, xD, yD,zFull, zSave, zDelta,d, rate,zRate,trc,ccw);

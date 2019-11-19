@@ -205,13 +205,13 @@ void View3D::OnPaint(wxPaintEvent& WXUNUSED(event))
 	if (m_viewstyle&VSTYLE_SHOWBOX)
 		draw_bounds();
 	
-	if (m_viewstyle&VSTYLE_SHOWGRID3D)
-		draw_3d_grid();
+	//if (m_viewstyle&VSTYLE_SHOWGRID3D)
+		//draw_3d_grid();
 	
 	draw_track();
 	
-	if (m_viewstyle&VSTYLE_SHOWTOOL)
-		tool.draw();
+//	if (m_viewstyle&VSTYLE_SHOWTOOL)
+//		tool.draw();
 
 	if (m_viewstyle&VSTYLE_SHOWAXIS)
 		draw_axis();
@@ -220,8 +220,8 @@ void View3D::OnPaint(wxPaintEvent& WXUNUSED(event))
 
 	camera.screen_matrix();
 
-	if (m_viewstyle&VSTYLE_SHOWGRID)
-		draw_grid();
+//	if (m_viewstyle&VSTYLE_SHOWGRID)
+//		draw_grid();
 
 	if (m_viewstyle&VSTYLE_SHOWAXIS)
 		draw_axis_letters();

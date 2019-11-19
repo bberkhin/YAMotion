@@ -1,0 +1,3 @@
+include ("pocket_circle.inc.gcmc");
+DoCirculePocket(xCenter,yCenter,r,zFull, zSave,zDelta,d,per_stepover,RampDist,rate,zRate,ccw);
+ 

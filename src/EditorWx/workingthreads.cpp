@@ -497,7 +497,7 @@ void Worker::OnCheckGCodeCompletion(GCMCConversionEvent &ev)
 		GetLogWnd()->Append(MSLErrorNoLabel, _("Checking completed with ") + wxString::Format(wxPLURAL("%d error.", "%d errors.", n), n));
 	}
 	
-	m_fp->UpdateStatistics(ev.GetCIData());
+	//m_fp->UpdateStatistics(ev.GetCIData());
 
 }
 

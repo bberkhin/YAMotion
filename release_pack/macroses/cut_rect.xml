@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<macroses>
+  <macros>
+    <name>Cutting rect</name>
+    <name_ru>Вырезание прямоугольника</name_ru>
+    <image1>cut_rect.jpg</image1>
+    <image>cutting-rect.png</image>
+    <gcmc>cut_rect.gcmc</gcmc>
+    <include>cut_rect.inc.gcmc</include>
+    <function>DoCutRect(xMin, yMin, xD, yD,zFull, zSave, zDelta,d, rate,zRate,trc,ccw)</function>
+      <arguments>
+      <argument defvalue ="0" type="scalar" ref="xMin">
+        <name>X min:</name>
+      </argument>
+      <argument defvalue ="0" type="scalar" ref="yMin">
+        <name>Y min:</name>
+      </argument>
+      <argument defvalue ="80" type="scalar" ref="xD">
+        <name>Width (DX):</name>
+        <name_ru>Ширина (DX):</name_ru>
+      </argument>
+      <argument defvalue ="100" type="scalar" ref="yD">
+        <name>Height (DY):</name>
+        <name_ru>Длина (DY):</name_ru>
+      </argument>
+      <argument defvalue ="4" type="scalar" ref="zFull">
+        <name>Thikness:</name>
+        <name_ru>Толщина:</name_ru>
+      </argument>
+      <argument defvalue ="1" type="scalar" ref="zDelta">
+        <name>Step Z:</name>
+        <name_ru>Шаг по Z:</name_ru>
+      </argument>
+      <argument defvalue ="2" type="scalar" ref="zSave">
+        <name>Save Z:</name>
+        <name_ru>Безопасная Z:</name_ru>
+      </argument>
+      <argument defvalue ="6" type="scalar" ref="d">
+        <name>Mill diameter</name>
+        <name_ru>Диаметр фрезы:</name_ru>
+      </argument>
+      <argument defvalue ="200" type="scalar" ref="rate">
+        <name>Feedrate:</name>
+      </argument>
+      <argument defvalue ="50" type="scalar" ref="zRate">
+        <name>Z feedrate:</name>
+      </argument>    
+
+      <argument defvalue ="1" type="list" ref="trc">
+        <name>Trajectory:</name>
+        <name_ru>Траектория:</name_ru>
+        <list value ="1" name="By contour" name_ru="По контуру"/>
+        <list value ="2" name="Inside" name_ru="Внутри"/>
+        <list value ="3" name="Outside" name_ru="Снаружи"/>
+      </argument>
+      <argument defvalue ="0" type="list" ref="ccw">
+        <name>Direction:</name>
+        <name_ru>Направление:</name_ru>
+        <list value ="0" name="Clockwise" name_ru="По часовой" />
+        <list value ="1" name="Counter Clockwise" name_ru="Против часовой"/>
+      </argument>
+    </arguments>
+  </macros>
+</macroses>

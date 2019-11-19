@@ -1,0 +1,155 @@
+/*
+ * G-code meta compiler
+ *
+ * Copyright (C) 2015  B. Stultiens
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ *---------------------------------------------------------------------
+ * Example of vectorized arcs
+ * - arc
+ * - circle
+ * - ellips
+ *
+ *---------------------------------------------------------------------
+ * @@@--svg-toolwidth 0.1 --svg-opacity 1.0@@@
+ */
+
+include("varcs.inc.gcmc");
+
+feedrate(600.0mm);
+
+/* - - - - - - - - - - simple arcs - - - - - - - - -  */
+
+function flush_it_at(v, vl)
+{
+	oldpos = goto(v);
+	move(vl + v);
+	goto(oldpos);
+}
+
+radius = 15.0mm;
+
+flush_it_at([-20.0mm, 100.0mm], varc_cw([10.0mm, 15.0mm], radius));
+flush_it_at([-20.0mm,  60.0mm], varc_cw([10.0mm, 15.0mm], -radius));
+flush_it_at([ 20.0mm, 100.0mm], varc_ccw([10.0mm, 15.0mm], radius));
+flush_it_at([ 20.0mm,  60.0mm], varc_ccw([10.0mm, 15.0mm], -radius));
+
+
+/* - - - - - - - - - - Make a spiral - - - - - - - - -  */
+
+radius = 20.0mm;
+center = [60.0mm, 100.0mm];
+zmove  = -20.0mm;
+turns  = 5;
+
+cp = normalize(center) * radius;	// Center point for calculation. The center point
+					// also sets the entry angle for the circle.
+cp.z = zmove;				// And put in the z-movement
+
+// Get the basic shape
+spiral = vcircle_cw(cp, turns, 1.0mm, 3.0deg);
+
+// The origin point in 'spiral' is [0, 0, 0] by definition
+// but it has not been included in the vectorlist
+
+// Offset the spiral to the correct location in space
+spiral += center - head(cp, 2);
+
+
+// Goto the starting point og the spiral
+goto(head(spiral[-1], 2));	// Only in XY
+goto([-, -, 0.0mm]);		// Reposition in Z
+move(spiral);			// And cut to each point
+
+
+goto([-, -, 0.0mm]);
+goto([0.0mm, 0.0mm]);
+
+
+/* - - - - - - - - - - Wavy arcs - - - - - - - - - - */
+
+wavelength = 10.0mm;
+rr = 4.0mm;
+
+// Get the up and down side of the period
+up = varc_cw([wavelength/2.0, 0.0mm, 0.0mm], rr);
+dn = varc_ccw([wavelength/2.0, 0.0mm, 0.0mm], rr);
+
+// Combine to one list at correct offset
+period = up + (dn + [wavelength/2.0, 0.0mm]);
+
+// Join several periods
+wave = period;
+repeat(4; i) {
+	wave += (period + i * [wavelength, 0.0mm]);
+}
+
+zwave = reverse(rotate_yz(wave, 90.0deg));
+
+// Ouput them at distinct angles
+repeat(12) {
+	move(wave);
+	move(zwave);
+	goto([0.0mm, 0.0mm]);
+	wave = rotate_xy(wave, 30.0deg);
+	zwave = rotate_xy(zwave, 30.0deg);
+}
+
+goto([-, -, 0.0mm]);
+
+
+/* - - - - - - - - - - Ellipse simple - - - - - - - - - - */
+
+major_radius = 25.0mm;
+minor_radius = 15.0mm;
+
+ell = vcircle_cw([major_radius, 0.0mm]);		// Create a circle
+ell = scale(ell, [1.0, minor_radius / major_radius]);	// Scale proportional to minor/major
+ell += [60.0mm, 50.0mm];				// Put somewhere in space
+
+// Output the ellipse
+goto(ell[-1]);
+move(ell);
+
+goto([0.0mm, 0.0mm]);
+goto([-, -, 0.0mm]);
+
+
+/* - - - - - - - - - - Ellipse angled - - - - - - - - - - */
+
+major_radius = 25.0mm;
+minor_radius = 15.0mm;
+angle = 30.0deg;
+
+// Center point angle must be transformed with the major/minor axes ratio so
+// that the entry/exit point of the ellipse is on the bounding box' left side:
+// - take a unit vector
+// - rotate to desired ellipse angle
+// - scale according to radii ratio
+// - find the resulting angle
+cpa = atan_xy(scale(rotate_xy([1.0, 0.0], angle), [1.0, minor_radius / major_radius]));
+
+center = rotate_xy([major_radius, 0.0mm], -cpa);	// Set centerpoint angled reverse
+ell = vcircle_cw(center);				// Create the circle
+ell = scale(ell, [1.0, minor_radius / major_radius]);	// Scale proportional to minor/major
+ell = rotate_xy(ell, angle);				// Rotate into proper angle
+ell += [60.0mm, 0.0mm];					// Put somewhere in space
+
+// Output the ellipse
+goto(ell[-1]);
+move(ell);
+
+goto([0.0mm, 0.0mm]);
+goto([-, -, 0.0mm]);

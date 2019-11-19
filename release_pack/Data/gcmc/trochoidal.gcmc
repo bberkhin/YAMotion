@@ -1,0 +1,122 @@
+/*
+ * G-code meta compiler
+ *
+ * Copyright (C) 2014  B. Stultiens
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+ * Trochoidal example
+ * ------------------
+ * Trochoidal movement for high-speed milling. A path is followed in a circular
+ * pattern with given radius and increment. Afterwards, a clean cut is
+ * performed to remove the residuals.
+ *
+ * NOTE: To take full advantage of trochoidal milling, you need to have a CNC
+ * program that can look ahead to keep the speed high. For LinuxCNC that means
+ * you will need the git version on branch circular-blend-arc-rc3 (or any later
+ * branch thereof, until it is merges into the master branch).
+ *
+ * @@@--svg-toolwidth 0.5 --svg-opacity 0.25@@@
+ */
+
+/*
+ * Trochoidal point calculation.
+ * See: https://en.wikipedia.org/wiki/Trochoid
+ */
+function trochoid_point(ang, a, b)
+{
+	ang = to_rad(ang);	// Trochoids are defined in radians
+	// The first part is the trochoid, the second part moves the first 180
+	// degree point at a relative "0, 0" location so we can scale in any
+	// way without having to do hard math
+	return [ a * to_none(ang) - b * sin(ang), b - b * cos(ang) ] - [a*pi(), 2.0*b];
+}
+
+/*
+ * Perform a move from startpoint to endpoint using a trochoidal path.
+ * - Cutting at depth cutz (returns to old Z)
+ * - Trochoid radius as specified
+ * - Increment for each turn as specified
+ */
+function trochoid_move(startpoint, endpoint, cutz, radius, increment)
+{
+	local i;
+	local a = increment/(2.0*pi());			// Trochoid step parameter
+	local ainc = log10(to_mm(radius)) * 5.0deg;	// Steps are logarithmic based on the radius to reduce small steps
+	local oldz = position()[2];
+	local vec = endpoint - startpoint;		// Vector denoting path to move
+
+	// Of we are not moving, it is an error
+	if(length(vec) <= 0.0mm) {
+		error("trochoid move is not going anywhere");
+		return;
+	}
+
+	comment("-- trochoid_move at ", cutz, " from ", startpoint, " to ", endpoint, " radius=", radius, " increment=", increment, " --");
+	// Calculate the number of *whole* rotations, rounded up, we need to make
+	local n = 2.0rad * pi() * to_none(ceil(length(vec) / increment));
+
+	// The path may be arbitrary angled, get the angle for rotating the trochoid
+	local rot = atan(vec[1], vec[0]);
+
+	// Go to the trochoid entry-point and move to cutting deph
+	goto(startpoint + rotate_xy(trochoid_point(0.0rad, a, radius), rot));
+	move([-, -, cutz]);
+
+	// Calculate each next point of the trochoid until we traversed the whole path to the endpoint
+	for(i = 0.0deg; i < n; i += ainc) {
+		move(startpoint + rotate_xy(trochoid_point(i, a, radius), rot));
+	}
+
+	// Return to old Z so we will not bump into stuff
+	goto([-, -, oldz]);
+	comment("-- trochoid_move end --");
+}
+
+/* -------------------- Main Program -------------------- */
+
+CUTZ = -1.0mm;
+SAFEZ = 5.0mm;
+HOME = [0.0mm, 0.0mm, SAFEZ];
+
+path = {
+	[0, 1],
+	[2, 2],
+	[0, 4],
+	[-1, 2]
+};
+
+feedrate(300.0mm);
+goto([-, -, SAFEZ]);
+move([-, -, SAFEZ]);
+goto(HOME);
+
+path *= 25.0mm;
+
+/* Trochoidal high-speed milling of the outline */
+feedrate(3000.0mm);	// *Really* high-speed milling
+repeat(count(path); i) {
+	trochoid_move(path[i-2], path[i-1], CUTZ, 5.0mm, 2.0mm);
+}
+
+/* Clean-cutting the object */
+feedrate(150.0mm);	// "Finishing the edge" speed
+pathmode(1);		// Exact path mode so we hit the corners exactly
+move([-, -, CUTZ]);	// We are at the "outside" of the path, reenter cutting depth
+move(path[-1]);		// The first corner
+move(path);		// Trace the object
+
+goto([-, -, SAFEZ]);
+goto(HOME);

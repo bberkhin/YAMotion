@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<macroses>
+  <macros>
+    <name>Circular pocket</name>
+    <name_ru>Фрезерование круглого кармана</name_ru>
+    <image>circular-pocket.png</image>
+    <gcmc>pocket_circle.gcmc</gcmc>
+    <include>pocket_circle.inc.gcmc</include>    
+    <function>DoCirculePocket(xCenter,yCenter,r,zFull, zSave,zDelta,d,per_stepover,RampDist,rate,zRate,ccw)</function>
+    <arguments>
+        <argument defvalue ="30" type="scalar" ref="xCenter">
+        <name>Center X:</name>
+        <desc>Center of the circle in mm</desc>
+      </argument>
+      <argument defvalue ="50" type="scalar" ref="yCenter">
+        <name>Center Y:</name>
+        <desc>Center of the circle in mm</desc>
+      </argument>
+      <argument defvalue ="20" type="scalar" ref="r">
+        <name>Radius:</name>
+        <name_ru>Радиус:</name_ru>
+      </argument>
+      <argument defvalue ="1" type="scalar" ref="zFull">
+        <name>Thikness:</name>
+        <name_ru>Толщина:</name_ru>
+      </argument>
+      <argument defvalue ="1" type="scalar" ref="zDelta">
+        <name>Step Z:</name>
+        <name_ru>Шаг по Z:</name_ru>
+      </argument>
+      <argument defvalue ="2" type="scalar" ref="zSave">
+        <name>Save Z:</name>
+        <name_ru>Безопасная Z:</name_ru>
+      </argument>
+      <argument defvalue ="6" type="scalar" ref="d">
+        <name>Mill diameter:</name>
+        <name_ru>Диаметр фрезы</name_ru>
+      </argument>
+      <argument defvalue ="70" type="scalar" ref="per_stepover">
+        <name>Step over(%):</name>
+        <name_ru>Перекрытие(%):</name_ru>
+      </argument>
+      <argument defvalue ="10" type="scalar" ref="RampDist">
+        <name>Ramp distance:</name>
+        <name_ru>Длина выхода:</name_ru>
+    </argument>
+      <argument defvalue ="200" type="scalar" ref="rate">
+        <name>Feedrate:</name>
+      </argument>
+      <argument defvalue ="50" type="scalar" ref="zRate">
+        <name>Z feedrate:</name>
+      </argument>
+      <argument defvalue ="0" type="list" ref="ccw">
+        <name>Direction:</name>
+        <name_ru>Направление:</name_ru>
+        <list value ="0" name="Clockwise" name_ru="По часовой" />
+        <list value ="1" name="Counter Clockwise" name_ru="Против часовой"/>
+      </argument>
+    </arguments>
+  </macros>
+</macroses>

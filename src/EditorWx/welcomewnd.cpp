@@ -347,17 +347,13 @@ wxBoxSizer *WelcomeWnd::CreateFooter()
 	
 	AddCommand(paneCmd, _("Preferences"), ID_GLOBALPREFS, true);
 
-	paneCmd->AddSpacer(WELCOME_MARGIN);
-	AddCommand(paneCmd, _("Check for Update"), ID_CHECKUPDATE, true);
-	pane->Add( paneCmd, 0, wxALIGN_BOTTOM);
+	// does not work now
+	//paneCmd->AddSpacer(WELCOME_MARGIN);
+	//AddCommand(paneCmd, _("Check for Update"), ID_CHECKUPDATE, true);
+	//pane->Add( paneCmd, 0, wxALIGN_BOTTOM);
 	pane->AddStretchSpacer();
 	
 	wxBoxSizer *pane1 = new wxBoxSizer(wxVERTICAL);
-	/*
-	pTxt = new wxStaticText(this, ID_STATICTEXTFG, _("Help us become better"));
-	pTxt->SetFont(wxFontInfo(10).Bold());
-	pane1->Add(pTxt, 0, wxALIGN_CENTER_HORIZONTAL);
-	*/
 	pTxt = new wxStaticText(this, ID_STATICTEXTFG, _("Help me to make the app better"));
 	pTxt->SetFont(wxFontInfo(10));
 	pane1->Add(pTxt, 0, wxALIGN_CENTER_HORIZONTAL);

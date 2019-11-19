@@ -1,0 +1,73 @@
+/*
+ * G-code meta compiler
+ *
+ * Copyright (C) 2014  B. Stultiens
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+ * Gear example
+ * ------------
+ * This example is by no means a complete or correct implementation of gears in
+ * any generic form. It is primarily for inspiration and to show what gcmc can
+ * do with relatively little coding. You may use this script as inspiration to
+ * create a better implementation if you like.
+ *
+ * Please note: The below parameters will shift the examples with an XY offset
+ * as indicated by the options. These are passed on the command-line when the
+ * examples are generated.
+ *
+ * @@@--svg-toolwidth 0.1 --svg-opacity 1 --svg-no-movelayer -x 110 -y 70@@@
+ */
+
+/* All the heavy work is done in the include file */
+include("involute-gear.inc.gcmc");
+
+feedrate(600mm);
+
+/* -------------------- Helper Functions -------------------- */
+
+/*
+ * Trace a path at given offset
+ */
+function trace(path, offset)
+{
+	goto(path[-1] + offset);
+	move(path + offset);
+}
+
+/*
+ * Make a hole at center point with given radius
+ */
+function hole(point, radius)
+{
+	goto(point - [radius]);
+	circle_cw_r([radius, 0]);
+}
+
+/* -------------------- Main Program -------------------- */
+
+HD = 6.0mm;	// Gear center-hole diameter
+N = 9;		// Number of teeth
+PA = 20.0deg;	// Pressure angle
+D = 100.0mm;	// Pitch diameter
+P = N/D;	// Diametral pitch
+
+// First gear
+hole([D/2.0, 0.0mm], HD/2.0);
+trace(gear_P(N, PA, P), [D/2.0, 0.0mm]);
+
+// Second gear
+hole([-D/2.0, 0.0mm], HD/2.0);
+trace(gear_P(N, PA, P), [-D/2, 0.0mm]);

@@ -1,0 +1,61 @@
+{
+// Use (true) syntax color coding
+  "syntax": true,
+// Use (true) folding (not implement yet)
+  "fold": true,
+  // Show (true) or hide end of line symbol
+  "displayEOL": false,
+   // Show (true) or hide blocks line ( does not support yet)
+  "indentGuide": true,
+  // Show (true) or hide line numer
+  "lineNumber": true,
+   // Show (true) or hide hidden symbols
+  "whiteSpace": false,
+  // Number of space for tab
+  "tabWidth": 4,
+  // Show (true) or hide (false) horixontal scroll for edit and pane window
+  "visibleHSB": true,
+  // Enable  ( true)  logging of movement during checking the syntaxis 
+  "enableLogExecution": false,
+  // Postprocessing filename
+  "postpocessing": "wincnc.con",
+  "themes": [
+    {
+      "id": "BLACK",
+      "name": "Black theme",
+      "nameru": "Темная тема",
+      "window_colors": "them_black.json",
+      "GCODE": "nc_syntax_black.json",
+      "GCMC": "gcmc_syntax_black.json",
+      "JSON": "json_syntax_black.json"
+    },
+    {
+      "id": "WHITE",
+      "name": "White theme",
+      "nameru": "Светлая тема",
+      "window_colors": "them_white.json",
+      "GCODE": "nc_syntax_white.json",
+      "GCMC": "gcmc_syntax_white.json",
+      "JSON": "json_syntax_white.json"
+    }   
+  ],
+   "files":
+    [
+      {
+        "name": "GCODE",
+        "extensions": "*.ngc;*.nc;*.cnc;*.tap"
+      },
+      {
+        "name": "GCMC",
+        "extensions": "*.gcmc"
+      },
+      {
+        "name": "JSON",
+        "extensions": "*.json",
+      },
+      {
+        "name": "ALL",
+        "extensions": "*.*"
+      }
+    ]
+    }

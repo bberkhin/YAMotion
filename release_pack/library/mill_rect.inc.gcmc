@@ -1,0 +1,105 @@
+/*
+ Mill Rect function 
+ 
+ Input parameters 
+ l_xMin, l_yMin - start poiunt
+ l_xD, l_yD - width and height
+ l_depth - deep of cutting
+ l_zSave - save z
+ l_zDelta - z step
+ l_dMill - mill diameter 
+ l_xyRate - feed l_xyRate
+ l_zRate - feed l_xyRate by Z
+ l_ccw- clockwise  0 - clockwise, 2- counter clockwise 
+*/
+
+
+
+function MillRect(l_xMin, l_yMin, l_xD, l_yD, l_depth, l_zSave, l_zDelta, l_stepover, l_dMill,l_xyRate,l_zRate,l_ccw)
+{
+    if( l_dMill <= 0 ) { error("Tool diametr can not be zero or negitive"); }
+    if( (per_stepover < 0) || (per_stepover >= 90) ) { error("Stepover is wrong"); }
+    if( l_xyRate <= 0 ) { error("Feed l_xyRate can not be zero or negitive"); }
+    if( l_zRate <= 0 ) { error("Plunge feed l_xyRate can not be zero or negitive"); }
+    if( zDelta == 0 ) { error("Step can not be zero"); }
+    if( l_xD <= 0 ) { error("Width (dX) can not be zero or negitive"); }
+    if( l_yD <= 0 ) { error("Height (dY) diametr can not be zero or negitive"); }
+
+    comment("Milling Rect");
+    comment("Starting point: [",l_xMin,"," , l_yMin,",-] ; Width: ", l_xD , "; Height: ", l_yD);
+    comment("Mill dianetr: ",l_dMill, "; Z save: " ,l_zSave, "; Z Full : ", -1*l_depth, "; Z Step: ",  l_zDelta );
+    comment("Step over: ",l_stepover);
+
+
+
+
+    local Stepover = l_dMill * (abs(100-l_stepover)/100.);
+
+    local rtool = l_dMill/2;
+    local xMax = l_xMin + l_xD; 
+    local yMax = l_yMin + l_yD; 
+
+    local xStart = l_xMin ;
+    local yStart = l_yMin + rtool ;
+    local xEnd = xMax ;
+    local yEnd = yMax  - rtool;
+    local dy = Stepover;
+    if ( l_ccw == 0 )
+    {
+      xStart = xMax;
+      yStart = yMax - rtool;
+      xEnd = l_xMin;
+      yEnd = l_yMin + rtool;
+    }
+
+
+    local zCur = 0;
+    local zDepth = -1*l_depth;
+    while(zDepth < zCur) 
+    {
+        zCur = zCur - zDelta; 
+        if ( zCur < zDepth)
+        {
+           zCur = zDepth;
+        } 
+        goto([-,-,l_zSave]);
+        goto([xStart,yStart,-]);
+        move([-,-,zCur ], l_zRate);  
+        if ( ccw == 0 )
+        {
+            for(y = yStart; y >= yEnd; )  
+            {
+                move([xEnd, -,-],l_xyRate);
+                if ( y <= yEnd ) // already mill
+                  {break;}
+                y-=dy;   
+                if ( y < yEnd ) { y = yEnd; }
+                arc_ccw( [-, y,-], abs(dy) );
+                move([xStart, -,-]);
+                if ( y <= yEnd ) // already mill
+                  { break; }    
+                y-=dy;
+                if ( y < yEnd ) { y = yEnd; }
+                arc_cw( [-, y,-], abs(dy) );
+            }
+        }
+        else //ccw
+        {
+            for(y = yStart; y <= yEnd; )  
+            {
+                move([xEnd, -,-],l_xyRate);
+                if ( y >= yEnd ) // already mill
+                  {break;}
+                y+=dy;   
+                if ( y > yEnd ) { y = yEnd; }
+                arc_ccw( [-, y,-], abs(dy) );
+                move([xStart, -,-]);
+                if ( y >= yEnd ) // already mill
+                  { break; }    
+                y+=dy;
+                if ( y > yEnd ) { y = yEnd; }
+                arc_cw( [-, y,-], abs(dy) );
+            }
+       } 
+    }
+}

@@ -1,0 +1,65 @@
+include("canned_drill.inc.gcmc");
+
+msg = "MSG,";		/* Set to empty string to suppress MDI messages */
+//msg = "";
+
+homepos = [0, 0, 0];
+initpos = [-1, -1, 10];	/* Somewhere to start */
+
+/* --- Start settable parameters --- */
+retract = 5.0;		/* R-plane level */
+incr = 2.2;		/* Peck increment */
+oldz = 1;		/* Return to initial Z in canned cycle (set to 0 for stay at R-plane)*/
+dwl = 0.2;		/* dwell time */
+
+/*
+ * Some holes...
+ * They may include full XYZ coordinates for each point, however, specifying
+ * only the coordinates that differ from the previous is enough, except for the
+ * first one, which must include a Z-coordinate.
+ */
+lst = {
+	[10, 0, -1],
+	[15],
+	[20],
+	[25],
+	[-, 5],
+	[20],
+	[15, -, -2],
+	[10]
+};
+/* --- End settable parameters --- */
+
+
+/* ------ Test program ------ */
+feedrate(400);
+
+goto(homepos);
+move(homepos);	/* Just to let LinuxCNC show a line in the preview */
+
+comment(msg, "Canned peck drill without return-to-Z");
+goto(initpos + [-, 0]);
+canned_drill_peck(lst + [-, 0], retract, incr, 0);
+
+comment(msg, "Canned peck drill with return-to-Z");
+goto(initpos + [-, 10]);
+canned_drill_peck(lst + [-, 10], retract, incr, 1);
+
+comment(msg, "Canned drill without return-to-Z");
+goto(initpos + [-, 20]);
+canned_drill(lst + [-, 20], retract, -1, 0);
+
+comment(msg, "Canned drill with return-to-Z");
+goto(initpos + [-, 30]);
+canned_drill(lst + [-, 30], retract, -1, 1);
+
+comment(msg, "Canned drill dwell without return-to-Z");
+goto(initpos + [-, 40]);
+canned_drill(lst + [-, 40], retract, 0.5, 0);
+
+comment(msg, "Canned drill dwell with return-to-Z");
+goto(initpos + [-, 50]);
+canned_drill(lst + [-, 50], retract, 0.5, 1);
+
+goto(head(homepos, 2));
+goto(homepos);
