@@ -599,7 +599,7 @@ void View3DPanel::UpdateStatistics(const ConvertGCMCInfo &dt)
 	if (slider && !clear)
 	{
 		int m_full_path = int(dt.feed_len + dt.traverce_len);
-		if (m_full_path >= 10) // TODO if less then 10mm ?
+		if (m_full_path <= 10) // TODO if less then 10mm ?
 			m_full_path = 10;
 		slider->SetRange(0, m_full_path);
 		slider->SetTickFreq(m_full_path / 10);

@@ -532,11 +532,18 @@ bool CmdParser::read_real_param(IndexParam param)
 {
 	ParamType value;
 	// first read to move position
+	char param_letter = line[position];
+	//make uppercase
+	if (param_letter >= 97 && param_letter < 122)   /* downcase letter to upper case */
+	{
+		param_letter -= 32;
+	}
+
 	position++;
 	IF_F_RET_F(read_real_value(&(value.dval)));
 
 	if (params[param])
-		RET_F_SETSTATE(MUITYPLIE_PARAM, YA_MULTIPLE_WORDS_ON_ONE_LINE, line[position]);
+		RET_F_SETSTATE(MUITYPLIE_PARAM, YA_MULTIPLE_WORDS_ON_ONE_LINE, param_letter );
 	params[param] = value;
 	return true;
 }
@@ -545,10 +552,17 @@ bool CmdParser::read_real_param(IndexParam param)
 bool CmdParser::read_int_param(IndexParam param)
 {
 	ParamType value;
+	char param_letter = line[position];
+	//make uppercase
+	if (param_letter >= 97 && param_letter < 122)   /* downcase letter to upper case */
+	{
+		param_letter -= 32;
+	}
+
 	position++;
 	IF_F_RET_F(read_int_value(&(value.ival)));
 	if (params[param])
-		RET_F_SETSTATE(MUITYPLIE_PARAM, YA_MULTIPLE_WORDS_ON_ONE_LINE, line[position]);
+		RET_F_SETSTATE(MUITYPLIE_PARAM, YA_MULTIPLE_WORDS_ON_ONE_LINE, param_letter);
 	params[param] = value;
 	return true;
 }

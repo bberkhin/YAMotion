@@ -84,7 +84,8 @@ void ExecutorView::output(const std::string &str, const Coords &position)
 			 end2 + rd->tool_xoffset,
 			 center1 + rd->tool_length_offset,
 			 center2 + rd->tool_xoffset,
-			 (rotation == 1 ? 1 : 0),
+			 rotation,
+			 //(rotation == 1 ? 1 : 0),
 			 end3 + rd->tool_yoffset,
 			 a, b, c);
 	 }
@@ -95,7 +96,8 @@ void ExecutorView::output(const std::string &str, const Coords &position)
 			 end2 + rd->tool_length_offset,
 			 center1 + rd->tool_yoffset,
 			 center2 + rd->tool_length_offset,
-			 (rotation == 1 ? 1 : 0),
+			 rotation,
+			 //(rotation == 1 ? 1 : 0),
 			 end3 + rd->tool_xoffset,
 			 a, b, c);
 	 }
