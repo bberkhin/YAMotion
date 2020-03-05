@@ -234,7 +234,7 @@ void FlatButton::CalcGeometry(const wxRect &rcIn, wxRect &rcLabel, wxPoint &ptBu
 			{
 				wxSize minSize = GetMinSize();
 				rcLabel.width = minSize.x - m_bitmap.GetWidth() - m_spacer - (2 * m_marginX);
-				if (rcIn.width > minSize.x)
+				if (rcIn.width >= minSize.x)
 				{
 					rcLabel.x = rcIn.x + (rcIn.width - minSize.x) / 2 + m_marginX;
 				}

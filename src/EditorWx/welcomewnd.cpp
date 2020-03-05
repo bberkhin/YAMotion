@@ -350,23 +350,24 @@ wxBoxSizer *WelcomeWnd::CreateFooter()
 	// does not work now
 	//paneCmd->AddSpacer(WELCOME_MARGIN);
 	//AddCommand(paneCmd, _("Check for Update"), ID_CHECKUPDATE, true);
-	//pane->Add( paneCmd, 0, wxALIGN_BOTTOM);
+	pane->Add( paneCmd, 0, wxALIGN_BOTTOM);
 	pane->AddStretchSpacer();
 	
-	wxBoxSizer *pane1 = new wxBoxSizer(wxVERTICAL);
-	pTxt = new wxStaticText(this, ID_STATICTEXTFG, _("Help me to make the app better"));
-	pTxt->SetFont(wxFontInfo(10));
-	pane1->Add(pTxt, 0, wxALIGN_CENTER_HORIZONTAL);
+	//wxBoxSizer *pane1 = new wxBoxSizer(wxVERTICAL);
+	//pTxt = new wxStaticText(this, ID_STATICTEXTFG, _("Help me to make the app better"));
+	//pTxt->SetFont(wxFontInfo(10));
+	//pane1->Add(pTxt, 0, wxALIGN_CENTER_HORIZONTAL);
 	
 	FlatButton *ph = new FlatButton(this, ID_WRITEFEEDBACK, _("FEEDBACK"), FB_LABEL_CENTER);
 	ph->SetCommand(ID_WRITEFEEDBACK);
 	ph->SetFont(wxFontInfo(11).Bold() );
-	ph->SetMargins(15, 8);
+	ph->SetMargins(25, 8);
 	wxBitmap bmp = wxArtProvider::GetBitmap(ART_MAIL, wxART_OTHER);
 	ph->SetBitmap(bmp, 8);
-	pane1->Add(ph, 0, wxEXPAND );
+	//pane1->Add(ph, 0, wxEXPAND );
 
-	pane->Add(pane1, 0, wxRIGHT | wxALIGN_BOTTOM);
+	//pane->Add(pane1, 0, wxRIGHT | wxALIGN_BOTTOM);
+	pane->Add(ph, 0, wxRIGHT | wxALIGN_BOTTOM);
 	return pane;
 }
 

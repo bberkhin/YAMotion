@@ -161,9 +161,16 @@ static wxString SubstructXmlValue(const wxString &text, const wxString &tag)
 bool DoCheckUpdate(wxString &desc, wxString &verName, int *err)
 {
 	wxHTTP get;
-	wxString url(APP_WEBSITE);
-	wxString url_stream("/version");
+//	wxString url(APP_WEBSITE);
+	//wxString url_stream("/version");
+	wxString url("onedrive.live.com");
+	wxString url_stream("/download?cid=9614716AD031A9C3&resid=9614716AD031A9C3%21117&authkey=AH7ITGsF99dXPfs");
+	
+//https://onedrive.live.com/download?cid=9614716AD031A9C3&resid=9614716AD031A9C3%21117&authkey=AH7ITGsF99dXPfs
+  https://onedrive.live.com/download?cid=9614716AD031A9C3&amp;resid=9614716AD031A9C3%21117&amp;authkey=AH7ITGsF99dXPfs
 	get.SetHeader(_T("Content-type"), _T("xml"));
+
+
 	get.SetTimeout(10); // 10 seconds of timeout instead of 10 minutes ...
 
 	// this will wait until the user connects to the internet. It is important in case of dialup (or ADSL) connections
