@@ -1,5 +1,6 @@
 # YAMotion
-lets try to do write GCode editir
+lets try to write GCode editor
 - multyplatforn support
-- hihlite code
-- checking code
+- highlight code
+- check code syntax
+- draw and simulte tool path
