@@ -37,10 +37,10 @@
 #include "checkarg.h"
 #include "fonts.h"
 
-static int g28_valid;
-static int g30_valid;
-static double g28_pos[MAXAXES];
-static double g30_pos[MAXAXES];
+GCMC_TLS static int g28_valid;
+GCMC_TLS static int g30_valid;
+GCMC_TLS static double g28_pos[MAXAXES];
+GCMC_TLS static double g30_pos[MAXAXES];
 
 #pragma warning(disable:4996)
 
@@ -2354,10 +2354,10 @@ static value_t *bi_sign(const node_t *ref, int argc)
  * Set the active layer on which to output feed movement. The layer ID is one
  * that must be declared with layerstack() first.
  */
-static const wchar_t **layers;
-int nlayers;
-static int nalayers;
-int currentlayer = -1;
+GCMC_TLS static const wchar_t **layers;
+GCMC_TLS int nlayers;
+GCMC_TLS static int nalayers;
+GCMC_TLS int currentlayer = -1;
 
 static int layer_find(const wchar_t *s)
 {

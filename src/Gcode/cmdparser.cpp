@@ -3,9 +3,11 @@
 #include <sstream>
 #include <stdio.h>
 #include <stdarg.h>
+#include <algorithm>
 #include "ienvironment.h"
 #include "gcodeerrors.h"
 #include "environmentsimple.h"
+
 
 
 namespace Interpreter

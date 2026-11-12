@@ -34,11 +34,11 @@ typedef struct __scope_t {
 	int navars;
 } scope_t;
 
-scope_t globalscope;
+GCMC_TLS scope_t globalscope;
 
-static scope_t *scopes;
-static int nscopes;
-static int nascopes;
+GCMC_TLS static scope_t *scopes;
+GCMC_TLS static int nscopes;
+GCMC_TLS static int nascopes;
 
 #define ls_vars(n)	(scopes[nscopes-(n)-1].vars)
 #define ls_nvars(n)	(scopes[nscopes-(n)-1].nvars)

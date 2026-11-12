@@ -1,7 +1,7 @@
 
 #pragma once
 #include "wx/treectrl.h"
-#include "generictreectlg.h"
+#include "wx/generic/treectlg.h"
 
 #define wxTreeCtrl wxGenericTreeCtrl
 //#define sm_classwxTreeCtrl sm_classwxGenericTreeCtrl
@@ -106,7 +106,7 @@ private:
     void CreateImageList();
     void AddPath(const wxString &path);
     void DoSortChildren(const wxTreeItemId& item, bool reverse = false)
-        { m_reverseSort = reverse; wxGenericTreeCtrl::SortChildren(item); }
+        { m_reverseSort = reverse; wxTreeCtrl::SortChildren(item); }
 
     void DoToggleIcon(const wxTreeItemId& item);
 	void UpdateThemeColor();

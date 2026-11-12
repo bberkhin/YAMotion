@@ -155,9 +155,9 @@ wchar_t *mysprintf(wchar_t **s, size_t *ns, const wchar_t *fmt, ...)
  * Convert UCS string into UTF-8
  * Returns a local buffer that will be reused.
  */
-static int lsn;
-static int lsna = 0;
-static char *ls = NULL;
+GCMC_TLS static int lsn;
+GCMC_TLS static int lsna = 0;
+GCMC_TLS static char *ls = NULL;
 
 const char *ucs32_to_utf8(const wchar_t *ucs, int len)
 {

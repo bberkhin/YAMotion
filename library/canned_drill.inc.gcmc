@@ -84,7 +84,7 @@ function canned_drill(holelist, retractz, dw, oldz)
 
 	comment("-- canned_drill R-plane=", retractz, " dewlling=", dw, " return-to-old-Z=", oldz, " --");
 
-	pathmode(1);			/* Set exact pathmode to reach each point */
+	//pathmode(1);			/* Set exact pathmode to reach each point */
 
 	/* Retract if below the R-plane */
 	if(prevz < retractz) {
@@ -191,7 +191,7 @@ function canned_drill_peck(holelist, retractz, delta, oldz)
 
 	comment("-- canned_drill_peck R-plane=", retractz, " peck-increment=", delta, " return-to-old-Z=", oldz, " --");
 
-	pathmode(1);			/* Set exact pathmode to reach each point */
+	//pathmode(1);			/* Set exact pathmode to reach each point */
 
 	/* Retract if below the R-plane */
 	if(prevz < retractz) {

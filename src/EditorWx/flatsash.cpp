@@ -74,9 +74,20 @@ wxRect FlatSashWindow::CalcDragRect(wxSashEdgePosition edge, int x, int y, wxSas
 {
 	wxRect dragRect;
 	int w, h;
-	GetSize(&w, &h);
 	int xp, yp;
-	GetPosition(&xp, &yp);
+	if (m_dragMode != wxSASH_DRAG_NONE)
+	{
+		// the window is resized while dragging: measure against the geometry at the drag start
+		w = m_dragStartRect.width;
+		h = m_dragStartRect.height;
+		xp = m_dragStartRect.x;
+		yp = m_dragStartRect.y;
+	}
+	else
+	{
+		GetSize(&w, &h);
+		GetPosition(&xp, &yp);
+	}
 
 
 	wxSashDragStatus status = wxSASH_STATUS_OK;
@@ -178,6 +189,26 @@ wxRect FlatSashWindow::CalcDragRect(wxSashEdgePosition edge, int x, int y, wxSas
 	return dragRect;
 }
 
+wxRect FlatSashWindow::CalcLiveDragRect(wxSashEdgePosition edge, wxSashDragStatus *pstatus)
+{
+	// the mouse position in the parent coordinates does not depend on how the sash window moves
+	wxWindow *parent = GetParent();
+	wxPoint pp = parent ? parent->ScreenToClient(::wxGetMousePosition()) : ::wxGetMousePosition();
+	return CalcDragRect(edge, pp.x - m_dragStartRect.x, pp.y - m_dragStartRect.y, pstatus);
+}
+
+void FlatSashWindow::SendDragEvent()
+{
+	wxSashDragStatus status;
+	wxRect dragRect = CalcLiveDragRect(m_draggingEdge, &status);
+
+	wxSashEvent eventSash(GetId(), m_draggingEdge);
+	eventSash.SetEventObject(this);
+	eventSash.SetDragStatus(status);
+	eventSash.SetDragRect(dragRect);
+	GetEventHandler()->ProcessEvent(eventSash);
+}
+
 void FlatSashWindow::OnMouseEvent(wxMouseEvent& event)
 {
     wxCoord x = 0, y = 0;
@@ -192,19 +223,7 @@ void FlatSashWindow::OnMouseEvent(wxMouseEvent& event)
 
         if ( sashHit != wxSASH_NONE )
         {
-            // Required for X to specify that
-            // that we wish to draw on top of all windows
-            // - and we optimise by specifying the area
-            // for creating the overlap window.
-            // Find the first frame or dialog and use this to specify
-            // the area to draw on.
-            wxWindow* parent = this;
-
-            while (parent && !wxDynamicCast(parent, wxDialog) &&
-                             !wxDynamicCast(parent, wxFrame))
-              parent = parent->GetParent();
-
-            wxScreenDC::StartDrawingOnTop(parent);
+            m_dragStartRect = GetRect();
 
             // We don't say we're dragging yet; we leave that
             // decision for the Dragging() branch, to ensure
@@ -239,29 +258,20 @@ void FlatSashWindow::OnMouseEvent(wxMouseEvent& event)
             ReleaseMouse();
         m_mouseCaptured = false;
 
-        wxScreenDC::EndDrawingOnTop();
         m_dragMode = wxSASH_DRAG_NONE;
         m_draggingEdge = wxSASH_NONE;
     }
     else if (event.LeftUp() && m_dragMode == wxSASH_DRAG_DRAGGING)
     {
         // We can stop dragging now and see what we've got.
+        wxSashEdgePosition edge = m_draggingEdge;
+        wxSashDragStatus status;
+        wxRect dragRect = CalcLiveDragRect(edge, &status);
         m_dragMode = wxSASH_DRAG_NONE;
         if (m_mouseCaptured)
             ReleaseMouse();
         m_mouseCaptured = false;
-
-        // Erase old tracker
-        DrawSashTracker(m_draggingEdge, m_oldX, m_oldY);
-
-        // End drawing on top (frees the window used for drawing
-        // over the screen)
-        wxScreenDC::EndDrawingOnTop();
-        wxSashEdgePosition edge = m_draggingEdge;
-		m_draggingEdge = wxSASH_NONE;
-		wxSashDragStatus status;
-        wxRect dragRect = CalcDragRect(edge, x, y, &status);
-		
+        m_draggingEdge = wxSASH_NONE;
 
         wxSashEvent eventSash(GetId(), edge);
         eventSash.SetEventObject(this);
@@ -327,17 +337,14 @@ void FlatSashWindow::OnMouseEvent(wxMouseEvent& event)
         if (m_dragMode == wxSASH_DRAG_LEFT_DOWN)
         {
             m_dragMode = wxSASH_DRAG_DRAGGING;
-            DrawSashTracker(m_draggingEdge, x, y);
+            SendDragEvent();
         }
         else
         {
             if ( m_dragMode == wxSASH_DRAG_DRAGGING )
             {
-                // Erase old tracker
-                DrawSashTracker(m_draggingEdge, m_oldX, m_oldY);
-
-                // Draw new one
-                DrawSashTracker(m_draggingEdge, x, y);
+                // the panes follow the mouse while dragging
+                SendDragEvent();
 /*
 				wxSashDragStatus status;
 				wxRect dragRect = CalcDragRect(m_draggingEdge, x, y, &status);
@@ -471,64 +478,10 @@ void FlatSashWindow::DrawSash(wxSashEdgePosition edge, wxDC& dc)
     dc.SetBrush(wxNullBrush);
 }
 
-// Draw the sash tracker (for whilst moving the sash)
-void FlatSashWindow::DrawSashTracker(wxSashEdgePosition edge, int x, int y)
+// The sash is dragged "live" (the panes are resized while the mouse moves),
+// so no tracker line is drawn over the screen any more.
+void FlatSashWindow::DrawSashTracker(wxSashEdgePosition WXUNUSED(edge), int WXUNUSED(x), int WXUNUSED(y))
 {
-
-    int w, h;
-    GetClientSize(&w, &h);
-
-    wxScreenDC screenDC;
-    int x1, y1;
-    int x2, y2;
-
-    if ( edge == wxSASH_LEFT || edge == wxSASH_RIGHT )
-    {
-        x1 = x; y1 = 2;
-        x2 = x; y2 = h-2;
-
-        if ( (edge == wxSASH_LEFT) && (x1 > w) )
-        {
-            x1 = w; x2 = w;
-        }
-        else if ( (edge == wxSASH_RIGHT) && (x1 < 0) )
-        {
-            x1 = 0; x2 = 0;
-        }
-    }
-    else
-    {
-        x1 = 2; y1 = y;
-        x2 = w-2; y2 = y;
-
-        if ( (edge == wxSASH_TOP) && (y1 > h) )
-        {
-            y1 = h;
-            y2 = h;
-        }
-        else if ( (edge == wxSASH_BOTTOM) && (y1 < 0) )
-        {
-            y1 = 0;
-            y2 = 0;
-        }
-    }
-
-    ClientToScreen(&x1, &y1);
-    ClientToScreen(&x2, &y2);
-
-    wxPen sashTrackerPen(*wxBLACK, 2, wxPENSTYLE_SOLID);
-
-    screenDC.SetLogicalFunction(wxINVERT);
-    screenDC.SetPen(sashTrackerPen);
-    screenDC.SetBrush(*wxTRANSPARENT_BRUSH);
-
-    screenDC.DrawLine(x1, y1, x2, y2);
-
-    screenDC.SetLogicalFunction(wxCOPY);
-
-    screenDC.SetPen(wxNullPen);
-    screenDC.SetBrush(wxNullBrush);
-	
 }
 
 // Position and size subwindows.

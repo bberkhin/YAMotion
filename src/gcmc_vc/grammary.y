@@ -20,6 +20,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
+#include "gcmc_alloc.h"
 
 #include "utils.h"
 #include "grammartypes.h"
@@ -33,9 +34,8 @@
 					yyfatal("Assertion failed:(%s:%d): %s", __FILE__, __LINE__, #x); \
 				} \
 			} while(0);
-int yylex(void);
 
-static wchar_t *funcname;
+GCMC_TLS static wchar_t *funcname;
 
 static node_t *newnode(int type);
 static node_t *alist_new(wchar_t *id, int isref, node_t *e);
@@ -69,9 +69,15 @@ static void check_useless(const node_t *n);
 static void check_const_expr(const node_t *n);
 static void check_boolean_expr(const node_t *n);
 
-node_t *scripthead;
+GCMC_TLS node_t *scripthead;
 
 %}
+
+%define api.pure full
+
+%code {
+int yylex(YYSTYPE *lvalp);
+}
 
 %union{
 	wchar_t		*str;
@@ -773,9 +779,9 @@ static node_t *expr_new_str(wchar_t *str)
 	return n;
 }
 
-static node_t **nodestack;
-static int nnodestack;
-static int nanodestack;
+GCMC_TLS static node_t **nodestack;
+GCMC_TLS static int nnodestack;
+GCMC_TLS static int nanodestack;
 
 static node_t *pushtag(node_t *n)
 {
@@ -963,9 +969,9 @@ void node_delete(node_t *head)
 	}
 }
 
-static const wchar_t **funcs;
-static int nfuncs;
-static int nafuncs;
+GCMC_TLS static const wchar_t **funcs;
+GCMC_TLS static int nfuncs;
+GCMC_TLS static int nafuncs;
 
 const builtins_t *find_builtin(const wchar_t *s);
 

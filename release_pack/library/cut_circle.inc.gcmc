@@ -41,11 +41,12 @@ while(zDepth < zCur)
 	zCur = zDepth;
  }
  move([-,-,zCur ], l_zRate);
+ feedrate(l_xyRate);
  if ( ccw ){
-	circle_ccw( [l_xCenter,l_yCenter,-], l_xyRate );
+	circle_ccw( [l_xCenter,l_yCenter,-]);
  }
  else {
-	circle_cw( [l_xCenter,l_yCenter,-], l_xyRate );
+	circle_cw( [l_xCenter,l_yCenter,-]);
  }
 }
 }

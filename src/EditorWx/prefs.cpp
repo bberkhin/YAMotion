@@ -2,7 +2,7 @@
 #include "LexGCode.h"// Preferences
 #include "prefs.h"
 #include "wx/stc/stc.h"  // styled text control
-#include "..\..\src\stc\scintilla\include\SciLexer.h"
+#include "SciLexer.h"
 #include "wx/jsonreader.h"
 #include "standartpaths.h"
 #include <wx/wfstream.h>

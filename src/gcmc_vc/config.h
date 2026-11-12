@@ -95,3 +95,14 @@
 #define __attribute__(A) /* do nothing */
 #endif
 #define _USE_MATH_DEFINES 
+
+/* Per-thread storage for all mutable global state, so every compiler run starts clean */
+#ifndef GCMC_TLS
+#ifdef _MSC_VER
+#define GCMC_TLS __declspec(thread)
+#else
+#define GCMC_TLS _Thread_local
+#endif
+#endif
+
+#include "gcmc_alloc.h"

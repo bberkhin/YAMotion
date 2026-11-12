@@ -8,6 +8,7 @@
 #include "codedescription.h"
 #include "configdata.h"
 #include "prefs.h"
+#include "LexGCode.h"
 #include "app.h"
 #include "appframe.h"
 
@@ -639,7 +640,12 @@ bool Edit::InitializePrefs (const LanguageInfo * language)
 	const CommonInfo &common_prefs = Preferences::Get()->Common();
 	m_language = language;
     // set lexer and language
-    SetLexer (m_language->Lexer());
+    if (m_language->Lexer() == SCLEX_GCODE)
+        SetILexer(CreateGcodeLexer());
+    else if (m_language->Lexer() == SCLEX_GCMC)
+        SetILexer(CreateGcmcLexer());
+    else
+        SetLexer (m_language->Lexer());
 	if (m_language->GetFileType() == FILETYPE_JSON)
 	{
 		SetProperty("lexer.json.allow.comments", "1");

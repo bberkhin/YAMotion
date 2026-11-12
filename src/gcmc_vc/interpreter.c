@@ -43,9 +43,9 @@ static void interpret_expr(node_t *n, int islvalue, int istoplevel);
 
 typedef value_t *(*opfunc_t)(const node_t *ref, value_t *lv, const value_t *rv);
 
-static node_t **functions;
-static int nfunctions;
-static int nafunctions;
+GCMC_TLS static node_t **functions;
+GCMC_TLS static int nfunctions;
+GCMC_TLS static int nafunctions;
 
 const char *nodetypename(node_et n)
 {
@@ -2212,6 +2212,7 @@ static value_t *interpret(node_t *n, node_t **brkref)
 
 	if(!n)
 		return NULL;
+	gcmc_check_cancel();	/* allows aborting a runaway script */
 
 	switch(n->type) {
 	case NT_EXPRLIST:	/* Only as call argument */

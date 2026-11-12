@@ -1,0 +1,49 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Build Release",
+			"type": "shell",
+			"command": "powershell",
+			"args": ["-NoProfile", "-ExecutionPolicy", "Bypass", "-File", "${workspaceFolder}\\build.ps1", "-Config", "Release"],
+			"group": { "kind": "build", "isDefault": true },
+			"problemMatcher": "$msCompile",
+			"presentation": { "reveal": "always", "panel": "shared", "clear": true }
+		},
+		{
+			"label": "Build Debug",
+			"type": "shell",
+			"command": "powershell",
+			"args": ["-NoProfile", "-ExecutionPolicy", "Bypass", "-File", "${workspaceFolder}\\build.ps1", "-Config", "Debug"],
+			"group": "build",
+			"problemMatcher": "$msCompile",
+			"presentation": { "reveal": "always", "panel": "shared", "clear": true }
+		},
+		{
+			"label": "Rebuild Release (clean)",
+			"type": "shell",
+			"command": "powershell",
+			"args": ["-NoProfile", "-ExecutionPolicy", "Bypass", "-File", "${workspaceFolder}\\build.ps1", "-Config", "Release", "-Clean"],
+			"group": "build",
+			"problemMatcher": "$msCompile",
+			"presentation": { "reveal": "always", "panel": "shared", "clear": true }
+		},
+		{
+			"label": "Build gcmc_vc only",
+			"type": "shell",
+			"command": "powershell",
+			"args": ["-NoProfile", "-ExecutionPolicy", "Bypass", "-File", "${workspaceFolder}\\build.ps1", "-Target", "gcmc"],
+			"group": "build",
+			"problemMatcher": "$msCompile",
+			"presentation": { "reveal": "always", "panel": "shared", "clear": true }
+		},
+		{
+			"label": "Run MatildaCNC (Release)",
+			"type": "shell",
+			"command": "${workspaceFolder}\\src\\x64\\Release\\MatildaCNC.exe",
+			"isBackground": true,
+			"problemMatcher": [],
+			"presentation": { "reveal": "never" }
+		}
+	]
+}

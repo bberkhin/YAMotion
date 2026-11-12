@@ -97,6 +97,10 @@ public:
     void InitColours();
 
 	wxRect CalcDragRect(wxSashEdgePosition edge, int x, int y, wxSashDragStatus *pstatus=0);
+	// drag rect for the current mouse position, measured against the geometry at drag start
+	wxRect CalcLiveDragRect(wxSashEdgePosition edge, wxSashDragStatus *pstatus = 0);
+	// tells the owner about the new size while the sash is being dragged
+	void SendDragEvent();
 
 private:
     void Init();
@@ -110,6 +114,7 @@ private:
     int         m_extraBorderSize;
     int         m_firstX;
     int         m_firstY;
+    wxRect      m_dragStartRect; // position/size in the parent when the drag started
     int         m_minimumPaneSizeX;
     int         m_minimumPaneSizeY;
     int         m_maximumPaneSizeX;

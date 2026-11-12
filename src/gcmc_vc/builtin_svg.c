@@ -50,23 +50,23 @@ typedef struct __path_t {
 	int	layer;
 } path_t;
 
-static path_t *gpaths;
-static int ngpaths;
-static int nagpaths;
+GCMC_TLS static path_t *gpaths;
+GCMC_TLS static int ngpaths;
+GCMC_TLS static int nagpaths;
 
-static path_t *mpaths;
-static int nmpaths;
-static int nampaths;
+GCMC_TLS static path_t *mpaths;
+GCMC_TLS static int nmpaths;
+GCMC_TLS static int nampaths;
 
-static int pathactive;
-static int npath = 1;
+GCMC_TLS static int pathactive;
+GCMC_TLS static int npath = 1;
 
-static double minx = HUGE_VAL;		/* To calculate the bounding box */
-static double maxx = -HUGE_VAL;
-static double miny = HUGE_VAL;
-static double maxy = -HUGE_VAL;
-static double minz = HUGE_VAL;
-static double maxz = -HUGE_VAL;
+GCMC_TLS static double minx = HUGE_VAL;		/* To calculate the bounding box */
+GCMC_TLS static double maxx = -HUGE_VAL;
+GCMC_TLS static double miny = HUGE_VAL;
+GCMC_TLS static double maxy = -HUGE_VAL;
+GCMC_TLS static double minz = HUGE_VAL;
+GCMC_TLS static double maxz = -HUGE_VAL;
 
 static inline double topxl(double d)
 {

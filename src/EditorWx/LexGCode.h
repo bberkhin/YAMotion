@@ -28,3 +28,7 @@
 #define SCLEX_GCODE 200
 #define SCLEX_GCMC 201
 
+
+
+void *CreateGcodeLexer();
+void *CreateGcmcLexer();

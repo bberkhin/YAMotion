@@ -13,13 +13,8 @@
 
 /// RUNCH
 
-#include "..\..\src\stc\scintilla\include\ILexer.h"
-#include "..\..\src\stc\scintilla\include\Scintilla.h"
-#include "..\..\src\stc\scintilla\include\SciLexer.h"
 
 
-#include "..\..\src\stc\scintilla\lexlib\LexerModule.h"
-#include "..\..\src\stc\scintilla\src\Catalogue.h"
 
 
 #include "wx/univ/theme.h"
@@ -39,7 +34,7 @@ wxEND_EVENT_TABLE()
 //----------------------------------------------------------------------------
 // App
 //----------------------------------------------------------------------------
-#define LINK_LEXER(lexer) extern LexerModule lexer; Catalogue::AddLexerModule(&lexer);
+#include "LexGCode.h"
 
 
 // language data
@@ -141,8 +136,6 @@ bool App::OnInit()
 
 
 	// G-Code & Gcmc lexer
-	LINK_LEXER(lmGcode)
-	LINK_LEXER(lmGcmc)
 		// create application frame
 
 	env.reset(new EnvironmentSimple());

@@ -11,6 +11,8 @@
 #include "app.h"
 #include "appframe.h"
 #include "wx/txtstrm.h"
+#include "wx/cmdline.h"
+#include "wx/tokenzr.h"
 //#include "wx/filename.h" // filename support
 #include "defsext.h"
 
@@ -273,54 +275,42 @@ SimulateCutting::~SimulateCutting()
 
 
 
-GcmcProcess::GcmcProcess(Worker *worker, const wchar_t *dstfn, DoAfterConvertGcmc todo)
-: m_worker(worker) ,dst_file(dstfn), what_to_do(todo), wxProcess( wxGetApp().GetFrame() )
+GcmcRunThread::GcmcRunThread(Worker *worker, const std::vector<std::string> &args, const wxString &workdir,
+	const wchar_t *dstfn, DoAfterConvertGcmc todo)
+	: wxThread(wxTHREAD_JOINABLE), m_worker(worker), m_args(args), m_workdir(workdir.mb_str(wxConvLocal)),
+	m_dstFile(dstfn), m_todo(todo), m_cancel(0)
 {
-	Redirect();
-	m_worker->m_fp->GetLogWnd()->StartPulse();
 }
 
-GcmcProcess::~GcmcProcess()
+void GcmcRunThread::LogCallback(const char *text, void *user)
 {
-
+	// called on the compiler thread while it works: pass the lines on to the GUI thread
+	GcmcRunThread *self = static_cast<GcmcRunThread *>(user);
+	wxThreadEvent *ev = new wxThreadEvent(wxEVT_THREAD, GCMC_RUN_OUTPUT);
+	ev->SetString(wxString(text, wxConvAuto()));
+	wxQueueEvent(self->m_worker, ev);
 }
 
-
-void GcmcProcess::OnTerminate(int pid, int status)
+wxThread::ExitCode GcmcRunThread::Entry()
 {
-	// show the rest of the output
-	while (HasInput())
-		;
+	std::vector<char *> argv;
+	for (std::string &a : m_args)
+		argv.push_back(&a[0]);
+	argv.push_back(NULL);
 
-	//this call will kill this GcmcProcess instance
-	m_worker->m_fp->GetLogWnd()->StopPulse();
-	m_worker->GcmcProcessTerminated(status, dst_file.c_str(), what_to_do);
-}
+	gcmc_params_t params;
+	memset(&params, 0, sizeof(params));
+	params.workdir = m_workdir.empty() ? NULL : m_workdir.c_str();
+	params.log = LogCallback;
+	params.log_user = this;
+	params.cancel = &m_cancel;
 
-bool GcmcProcess::HasInput()
-{
-	bool hasInput = false;
+	int rc = gcmc_run((int)m_args.size(), argv.data(), &params);
 
-	if (IsInputAvailable())
-	{
-		wxTextInputStream tis(*GetInputStream());
-		// this assumes that the output is always line buffered
-		wxString msg;
-		msg << tis.ReadLine();
-		m_worker->AppendGcmcError(msg);
-		hasInput = true;
-	}
-
-	if (IsErrorAvailable())
-	{
-		wxTextInputStream tis(*GetErrorStream());
-		// this assumes that the output is always line buffered
-		wxString msg;
-		msg << tis.ReadLine();
-		m_worker->AppendGcmcError(msg);
-		hasInput = true;
-	}
-	return hasInput;
+	wxThreadEvent *ev = new wxThreadEvent(wxEVT_THREAD, GCMC_RUN_FINISHED);
+	ev->SetInt(rc);
+	wxQueueEvent(m_worker, ev);
+	return (ExitCode)0;
 }
 
 
@@ -336,6 +326,8 @@ wxBEGIN_EVENT_TABLE(Worker, wxEvtHandler)
 	EVT_THREAD(DRAW_GCODE_UPDATE, Worker::OnDraw3DUpdate)
 	EVT_GCMC_CONVERSION(EVT_DRAW_GCODE_COMPLETE, Worker::OnDraw3DCompletion)
 	EVT_TIMER(wxID_ANY, Worker::OnTimer)
+	EVT_THREAD(GCMC_RUN_OUTPUT, Worker::OnGcmcOutput)
+	EVT_THREAD(GCMC_RUN_FINISHED, Worker::OnGcmcFinished)
 
 	EVT_SIMULATION(EVT_SIMULATE_UPDATE, Worker::OnSimulateUpdate)
 	EVT_SIMULATION(EVT_SIMULATE_COMPLETE, Worker::OnSimulateCompletion)
@@ -346,7 +338,7 @@ Worker::Worker(FilePage *fp) : m_timer(this), m_fp(fp)
 {
 	m_checkThread = NULL;
 	m_drawThread = NULL;
-	m_gcmcProcess = NULL;
+	m_gcmcThread = NULL;
 	m_simulateThread = NULL;
 	m_mathThread = NULL;
 	m_gcmc_running_in_sec = 0;
@@ -386,10 +378,8 @@ void Worker::StopAll()
 		{
 			m_mathThread->Delete(); //Kill();
 		}
-		if (m_gcmcProcess)
-		{
-			wxKill(m_gcmcProcess->GetPid(), wxSIGKILL, NULL, wxKILL_CHILDREN);
-		}
+		if (m_gcmcThread)
+			m_gcmcThread->Cancel();
 	}
 
 	while (1)
@@ -406,7 +396,12 @@ void Worker::StopAll()
 	m_drawThread = NULL;
 	m_simulateThread = NULL;
 	m_mathThread = NULL;
-	//m_gcmcProcess = NULL;
+	if (m_gcmcThread)
+	{
+		m_gcmcThread->Wait();
+		delete m_gcmcThread;
+		m_gcmcThread = NULL;
+	}
 }
 
 
@@ -617,75 +612,54 @@ int Worker::RunGcmc(const wchar_t *src_fname, const  wchar_t *dst_fname, const w
 	if (!CheckFileExist(src_fname))
 		return 1;
 
-	wxExecuteEnv env;
-
-	env.cwd = StandartPaths::Get()->GetDirFromFName(src_fname).c_str();
+	// the compiler is built into the program; relative names are resolved against the source file folder
+	wxString workdir = StandartPaths::Get()->GetDirFromFName(src_fname).c_str();
 	// get file name without path
 	std::filesystem::path src_fname_no_path = std::filesystem::path(src_fname).filename();
 	std::filesystem::path dst_fname_no_path;
 
-	if (StandartPaths::Get()->GetDirFromFName(dst_fname).compare(env.cwd) == 0)
+	if (StandartPaths::Get()->GetDirFromFName(dst_fname).compare(workdir.wc_str()) == 0)
 		dst_fname_no_path = std::filesystem::path(dst_fname).filename();
 	else
 		dst_fname_no_path = dst_fname;
 
+	std::vector<std::string> av;
+	wxString shown = L"gcmc";
+	auto add = [&](const wxString &s)
+	{
+		av.push_back(std::string(s.mb_str(wxConvLocal)));
+		shown += L" ";
+		shown += s;
+	};
 
-	wxString arg = StandartPaths::Get()->GetExecutablePath(L"gcmc_vc.exe").c_str();
-
-	if (!CheckFileExist(arg))
-		return 1;
-
-	arg += " -o ";
-	arg += dst_fname_no_path.c_str();
+	av.push_back("gcmc");
+	add(L"-o");
+	add(dst_fname_no_path.c_str());
 	if (args)
-		arg += args;
-	
-	arg += L" -q"; // do not use prologue\epilogue
-	arg += L" --include=\"";
-	arg += StandartPaths::Get()->GetLibraryPath().c_str();
-	arg += L"\"";
-	arg += wxString::Format(L" --precision=%d ", Preferences::Get()->PostPocessing().Precision());
-	
+	{
+		wxArrayString extra = wxCmdLineParser::ConvertStringToArgs(args, wxCMD_LINE_SPLIT_DOS);
+		for (size_t i = 0; i < extra.GetCount(); ++i)
+			add(extra[i]);
+	}
+	add(L"-q"); // do not use prologue\epilogue
+	add(wxString(L"--include=") + StandartPaths::Get()->GetLibraryPath().c_str());
+	add(wxString::Format(L"--precision=%d", Preferences::Get()->PostPocessing().Precision()));
+
 	if (addprologepilog) // if we paste in thr existing file do not add prologue and epilogue
 	{
 		const wxString &pro_fn = Preferences::Get()->PostPocessing().PrologFileName();
 		if (!pro_fn.IsEmpty())
-			arg += wxString::Format(L"--prologue=\"%s\" ", pro_fn);
+			add(wxString::Format(L"--prologue=%s", pro_fn));
 
 		const wxString &epi_fn = Preferences::Get()->PostPocessing().EpilogFileName();
 		if (!epi_fn.IsEmpty())
-			arg += wxString::Format(L"--epilogue=\"%s\" ", epi_fn);
+			add(wxString::Format(L"--epilogue=%s", epi_fn));
 	}
-	
+	add(src_fname_no_path.c_str());
 
-	arg += src_fname_no_path.c_str();
-
-	
-	
-
-
-	wxArrayString output;
-	wxArrayString errors;
-
-
-#if 0 
-	m_logwnd->Append(MSLInfo, L"Start converting...");
-	m_logwnd->Append(MSLInfo, arg.c_str());
-	int code = wxExecute(arg, output, errors, wxEXEC_SYNC | wxEXEC_HIDE_CONSOLE, &env);
-	for (size_t i = 0; i < errors.Count(); ++i)
+	if (m_gcmcThread)
 	{
-		AppendGcmcError(errors[i]);
-	}
-
-	wxString inf = wxString::Format("Process terminated with exit code %d", code);
-	m_logwnd->Append(code == 0 ? MSLInfo : MSLError, inf);
-
-	return code;
-#endif
-
-	if (m_gcmcProcess)
-	{
-		GetLogWnd()->Append(MSLInfo, _("gcmc_vc.exe already running"));
+		GetLogWnd()->Append(MSLInfo, _("gcmc already running"));
 		return 1;
 	}
 
@@ -693,8 +667,8 @@ int Worker::RunGcmc(const wchar_t *src_fname, const  wchar_t *dst_fname, const w
 		GetLogWnd()->Append(MSLInfo, _("Start checking..."));
 	else
 		GetLogWnd()->Append(MSLInfo, _("Start converting..."));
-		
-	GetLogWnd()->Append(MSLInfo, arg.c_str());
+
+	GetLogWnd()->Append(MSLInfo, shown.c_str());
 
 	if (m_timer.IsRunning())
 		m_timer.Stop();
@@ -702,9 +676,17 @@ int Worker::RunGcmc(const wchar_t *src_fname, const  wchar_t *dst_fname, const w
 	m_gcmc_running_in_sec = 0;
 	m_timer.Start(100);
 
-	m_gcmcProcess = new GcmcProcess(this, dst_fname, what_to_do);
-	int code = wxExecute(arg, wxEXEC_ASYNC | wxEXEC_HIDE_CONSOLE | wxEXEC_NODISABLE, m_gcmcProcess, &env);
-	return code;
+	GetLogWnd()->StartPulse();
+	m_gcmcThread = new GcmcRunThread(this, av, workdir, dst_fname, what_to_do);
+	if (m_gcmcThread->Create() != wxTHREAD_NO_ERROR || m_gcmcThread->Run() != wxTHREAD_NO_ERROR)
+	{
+		delete m_gcmcThread;
+		m_gcmcThread = NULL;
+		m_timer.Stop();
+		GetLogWnd()->StopPulse();
+		return 1;
+	}
+	return 0;
 
 }
 
@@ -721,16 +703,40 @@ void Worker::SendEvnToFrame(wxEventType  commandType, const wchar_t *str, int i)
 	wxGetApp().GetFrame()->ProcessWindowEvent(event);
 }
 
+void Worker::OnGcmcOutput(wxThreadEvent &ev)
+{
+	// the compiler output arrives while it is running
+	wxString text = ev.GetString();
+	wxStringTokenizer lines(text, L"\r\n", wxTOKEN_STRTOK);
+	while (lines.HasMoreTokens())
+	{
+		wxString msg = lines.GetNextToken();
+		AppendGcmcError(msg);
+	}
+}
+
+void Worker::OnGcmcFinished(wxThreadEvent &ev)
+{
+	if (!m_gcmcThread)
+		return;
+
+	GetLogWnd()->StopPulse();
+	std::wstring dst = m_gcmcThread->m_dstFile;
+	DoAfterConvertGcmc todo = m_gcmcThread->m_todo;
+	GcmcProcessTerminated(ev.GetInt(), dst.c_str(), todo);
+}
+
 void Worker::GcmcProcessTerminated(int status, const wchar_t *dst_fname, DoAfterConvertGcmc what_to_do)
 {
 
-	if (m_gcmcProcess)
+	if (m_gcmcThread)
 	{
-		wxString wxdstfile(dst_fname); // copy string befor kill the m_gcmcProcess
+		wxString wxdstfile(dst_fname); // copy string befor delete the thread
 		m_gcmc_running_in_sec = 0;
 		m_timer.Stop();
-		delete m_gcmcProcess;
-		m_gcmcProcess = NULL;
+		m_gcmcThread->Wait();
+		delete m_gcmcThread;
+		m_gcmcThread = NULL;
 		wxString inf;
 		if (what_to_do == ConvertGcmcNothing || what_to_do == ConvertGcmc3DDraw)
 		{
@@ -796,11 +802,8 @@ void Worker::OnTimer(wxTimerEvent &event)
 	m_gcmc_running_in_sec++;
 
 	//SetTitle(wxString::Format(L"Process gcmc %d sec.", m_gcmc_running_in_sec));
-	if (!m_gcmcProcess)
+	if (!m_gcmcThread)
 		return;
-
-	while (m_gcmcProcess->HasInput()) 
-		;
 
 	
 	if (m_gcmc_running_in_sec == 600 )
@@ -809,7 +812,7 @@ void Worker::OnTimer(wxTimerEvent &event)
 		int rez = wxMessageBox(_("GCMC is running very long time/ Would you like to kill the process?"), wxMessageBoxCaptionStr,
 			wxYES_NO | wxICON_QUESTION);
 		if (rez == wxYES)
-			wxKill(m_gcmcProcess->GetPid(), wxSIGKILL, NULL, wxKILL_CHILDREN);
+			m_gcmcThread->Cancel();
 	}
 	
 	

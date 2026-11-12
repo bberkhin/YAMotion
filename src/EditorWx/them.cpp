@@ -41,7 +41,15 @@ static const unsigned char list_bits[] = {
 
 
 
-wxBitmap wxAuiBitmapFromBits(const unsigned char bits[], int w, int h,	const wxColour& color);
+// wxAuiBitmapFromBits was an internal wxAUI helper removed in wxWidgets 3.3
+static wxBitmap wxAuiBitmapFromBits(const unsigned char bits[], int w, int h, const wxColour& color)
+{
+	wxImage img = wxBitmap((const char*)bits, w, h).ConvertToImage();
+	img.Replace(0, 0, 0, 123, 123, 123);
+	img.Replace(255, 255, 255, color.Red(), color.Green(), color.Blue());
+	img.SetMaskColour(123, 123, 123);
+	return wxBitmap(img);
+}
 
 
 const char* const *GetBitmapColor(const char* const* xpm_data, const wxColor &clr)

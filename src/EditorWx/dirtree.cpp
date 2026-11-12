@@ -131,11 +131,13 @@ bool DirTreeCtrl::Create(wxWindow *parent, wxWindowID id)
 	// If the tree display has no buttons, but does have
 	// connecting lines, we can use a narrower layout.
 	// It may not be a good idea to force this...
+
 	if (!HasButtons() && !HasFlag(wxTR_NO_LINES))
 	{
 		m_indent = 10;
 		m_spacing = 10;
 	}
+	
 
 	wxVisualAttributes attr = GetDefaultAttributes();
 	SetOwnForegroundColour(attr.colFg);
@@ -946,12 +948,12 @@ void DirTreeCtrl::UpdateThemeColor()
 {
 	ColourScheme *clrs = Preferences::Get()->GetColorScheme();
 	
-	if (m_hilightBrush) delete m_hilightBrush;
-	if (m_hilightUnfocusedBrush)delete m_hilightUnfocusedBrush;
+	//if (m_hilightBrush) delete m_hilightBrush;
+	//if (m_hilightUnfocusedBrush)delete m_hilightUnfocusedBrush;
 	wxColor clrSelected = clrs->Get(ColourScheme::WINDOW);
-	m_hilightBrush = new wxBrush(clrSelected, wxBRUSHSTYLE_SOLID);
-	m_hilightUnfocusedBrush = new wxBrush(clrSelected, wxBRUSHSTYLE_SOLID);
-	m_colorHlightText = clrs->Get(ColourScheme::WINDOW_TEXT_HOVER);
+	//_hilightBrush = new wxBrush(clrSelected, wxBRUSHSTYLE_SOLID);
+	//m_hilightUnfocusedBrush = new wxBrush(clrSelected, wxBRUSHSTYLE_SOLID);
+	//_colorHlightText = clrs->Get(ColourScheme::WINDOW_TEXT_HOVER);
 
 	CreateImageList();
 
@@ -981,7 +983,7 @@ void DirTreeCtrl::OnScroll(wxScrollEvent& evt)
 	event.SetPosition(evt.GetPosition());
 	event.SetOrientation(evt.GetOrientation());
 	event.SetEventObject(this);
-	HandleOnScroll(event);
+	//HandleOnScroll(event);
 	/*
 	wxScrollBar* sb = wxDynamicCast(evt.GetEventObject(), wxScrollBar);
 	if (sb) 

@@ -290,7 +290,8 @@ bool GCodeInterpreter::convert_arc2(int motion,       //!< either G_2 (cw arc) o
 	double rval;
 	int p_int = 1;
 	if (parser.getRParam(PARAM_P, &rval))
-		p_int = static_cast<int>(std::nearbyint(rval));
+		p_int = static_cast<int>(nearbyint(rval));
+		//p_int = static_cast<int>(std::nearbyint(rval));
 
 
 

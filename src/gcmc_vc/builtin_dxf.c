@@ -37,7 +37,7 @@ extern const char dxfhdr_lstart[];
 extern const char dxfhdr_leach[];
 extern const char dxfhdr_lend[];
 extern const char dxfftr[];
-static int dxfhdrdone = 0;
+GCMC_TLS static int dxfhdrdone = 0;
 
 typedef enum {
 	PATH_START,
@@ -52,14 +52,14 @@ typedef struct __path_t {
 	double	z;
 } path_t;
 
-static path_t *gpaths;
-static int ngpaths;
-static int nagpaths;
+GCMC_TLS static path_t *gpaths;
+GCMC_TLS static int ngpaths;
+GCMC_TLS static int nagpaths;
 
-static double tagpos[3];
+GCMC_TLS static double tagpos[3];
 
-static int pathactive;
-static int npath = 1;
+GCMC_TLS static int pathactive;
+GCMC_TLS static int npath = 1;
 
 static inline double topxl(double d)
 {
@@ -105,7 +105,7 @@ static const wchar_t *dxflayername(void)
 
 static void printheader(void)
 {
-	static int handle = 100;
+	GCMC_TLS static int handle = 100;
 	if(dxfhdrdone)
 		return;
 

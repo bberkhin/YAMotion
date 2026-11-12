@@ -31,20 +31,20 @@
 #pragma warning(disable:4996)
 
 /* Calculation stack */
-static value_t **valuestack = 0;
-static int nvaluestack = 0;
-static int navaluestack = 0;
+GCMC_TLS static value_t **valuestack = 0;
+GCMC_TLS static int nvaluestack = 0;
+GCMC_TLS static int navaluestack = 0;
 
 /* Free-list values to reduce malloc/free overhead */
-static value_t **flscalar = 0;
-static int nflscalar = 0;
-static int naflscalar = 0;
-static value_t **flvector = 0;
-static int nflvector = 0;
-static int naflvector = 0;
-static value_t **flvectorlist = 0;
-static int nflvectorlist = 0;
-static int naflvectorlist = 0;
+GCMC_TLS static value_t **flscalar = 0;
+GCMC_TLS static int nflscalar = 0;
+GCMC_TLS static int naflscalar = 0;
+GCMC_TLS static value_t **flvector = 0;
+GCMC_TLS static int nflvector = 0;
+GCMC_TLS static int naflvector = 0;
+GCMC_TLS static value_t **flvectorlist = 0;
+GCMC_TLS static int nflvectorlist = 0;
+GCMC_TLS static int naflvectorlist = 0;
 
 const char *valuetypename(val_et n)
 {

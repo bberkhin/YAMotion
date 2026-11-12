@@ -9,7 +9,7 @@
 
 #define USE_EXPMUPP 1
 #ifdef USE_EXPMUPP 
-#include <muParser.h>
+#include "muparser/muParser.h"
 //#import "muParser.lib"
 #endif
 

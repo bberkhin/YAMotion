@@ -19,6 +19,14 @@
 #ifndef __GCMC_GRAMMARTYPES_H
 #define __GCMC_GRAMMARTYPES_H
 
+#ifndef GCMC_TLS
+#ifdef _MSC_VER
+#define GCMC_TLS __declspec(thread)
+#else
+#define GCMC_TLS _Thread_local
+#endif
+#endif
+
 #include <stdio.h>
 #include <stdarg.h>
 #include <wchar.h>
@@ -212,17 +220,20 @@ typedef struct __node_t {
 void node_delete(node_t *n);
 void parser_cleanup(void);
 extern int yydebug;
-extern node_t *scripthead;
+GCMC_TLS extern node_t *scripthead;
 
 /* From grammerl.l */
 void handle_include(const wchar_t *wfname);
 void define_setup(char *buf, int bufsize, const char *name);
 void lexer_cleanup(void);
-extern FILE *yyin;
-extern int linenr;
-extern int charnr;
-extern int prevlinenr;
-extern int prevcharnr;
-extern const char *filename;
+extern GCMC_TLS void *gcmc_scanner;
+int yylex_init(void **scanner);
+void yyset_in(FILE *in, void *scanner);
+FILE *yyget_in(void *scanner);
+GCMC_TLS extern int linenr;
+GCMC_TLS extern int charnr;
+GCMC_TLS extern int prevlinenr;
+GCMC_TLS extern int prevcharnr;
+GCMC_TLS extern const char *filename;
 
 #endif

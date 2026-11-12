@@ -76,13 +76,13 @@ extern "C" {
 #define	REPLACE_GETOPT		/* use this getopt as the system getopt(3) */
 
 #ifdef REPLACE_GETOPT
-int	opterr = 1;		/* if error message should be printed */
-int	optind = 1;		/* index into parent argv vector */
-int	optopt = '?';		/* character checked for validity */
+GCMC_TLS int	opterr = 1;		/* if error message should be printed */
+GCMC_TLS int	optind = 1;		/* index into parent argv vector */
+GCMC_TLS int	optopt = '?';		/* character checked for validity */
 #undef	optreset		/* see getopt.h */
 #define	optreset		__mingw_optreset
-int	optreset;		/* reset getopt */
-char    *optarg;		/* argument associated with option */
+GCMC_TLS int	optreset;		/* reset getopt */
+GCMC_TLS char    *optarg;		/* argument associated with option */
 #endif
 
 //extern int optind;		/* index of first non-option in argv      */
@@ -122,11 +122,11 @@ static int parse_long_options(char * const *, const char *,
 static int gcd(int, int);
 static void permute_args(int, int, int, char * const *);
 
-static char *place = EMSG; /* option letter processing */
+GCMC_TLS static char *place = EMSG; /* option letter processing */
 
 /* XXX: set optreset to 1 rather than these two */
-static int nonopt_start = -1; /* first non option argument (for permute) */
-static int nonopt_end = -1;   /* first option after non options (for permute) */
+GCMC_TLS static int nonopt_start = -1; /* first non option argument (for permute) */
+GCMC_TLS static int nonopt_end = -1;   /* first option after non options (for permute) */
 
 /* Error messages */
 static const char recargchar[] = "option requires an argument -- %c";
@@ -419,7 +419,7 @@ getopt_internal(int nargc, char * const *nargv, const char *options,
 {
 	char *oli;				/* option letter list index */
 	int optchar, short_too;
-	static int posixly_correct = -1;
+	GCMC_TLS static int posixly_correct = -1;
 
 	if (options == NULL)
 		return (-1);

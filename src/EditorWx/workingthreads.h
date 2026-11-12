@@ -5,7 +5,9 @@
 #include "ExecutorView.h"
 #include "GCodeInterpreter.h"
 #include <wx/thread.h>
-#include <wx/process.h>
+#include <vector>
+#include <string>
+#include "gcmc_api.h"
 #include "wx/event.h"
 #include "wx/filename.h"
 #include "View3D.h"
@@ -153,18 +155,25 @@ enum DoAfterConvertGcmc
 };
 
 
-class GcmcProcess : public wxProcess
+class GcmcRunThread : public wxThread
 {
+	friend class Worker;
 public:
-	GcmcProcess(Worker *worker, const wchar_t *dstfn, DoAfterConvertGcmc todo);
-	~GcmcProcess();
-	virtual void OnTerminate(int pid, int status) wxOVERRIDE;
-	virtual bool HasInput();
+	GcmcRunThread(Worker *worker, const std::vector<std::string> &args, const wxString &workdir,
+		const wchar_t *dstfn, DoAfterConvertGcmc todo);
+	virtual ExitCode Entry() wxOVERRIDE;
+	// asks the compiler to stop; the run ends with exit code 2
+	void Cancel() { m_cancel = 1; }
 
 private:
-	DoAfterConvertGcmc what_to_do;
-	std::wstring dst_file;
+	static void LogCallback(const char *text, void *user);
+
 	Worker *m_worker;
+	std::vector<std::string> m_args;
+	std::string m_workdir;
+	std::wstring m_dstFile;
+	DoAfterConvertGcmc m_todo;
+	volatile long m_cancel;
 };
 
 
@@ -177,7 +186,7 @@ class Worker : public wxEvtHandler
 {
 	friend class CheckGCodeThread;
 	friend class Draw3DThread;
-	friend class GcmcProcess;
+	friend class GcmcRunThread;
 	friend class SimulateCutting;
 	friend class MathTransform;
 public:
@@ -211,6 +220,8 @@ protected:
 	void OnSimulateCompletion(SimulateThreadEvent &ev);
 
 	void OnTimer(wxTimerEvent &event);
+	void OnGcmcOutput(wxThreadEvent &ev);
+	void OnGcmcFinished(wxThreadEvent &ev);
 
 
 private:
@@ -228,7 +239,7 @@ private:
 	SimulateCutting *m_simulateThread;
 	MathTransform *m_mathThread;
 	wxTimer m_timer;
-	GcmcProcess *m_gcmcProcess;
+	GcmcRunThread *m_gcmcThread;
 	unsigned int m_gcmc_running_in_sec;
 	int m_speedk; // simuleation speed koefficient
 	

@@ -4,7 +4,8 @@
 #include <memory>
 #include "gcodedefs.h"
 #include <tchar.h>
-#include <muParser.h>
+//#include <muParser.h>
+#include "muparser/muParser.h"
 
 
 struct ORIGIN_PARAM

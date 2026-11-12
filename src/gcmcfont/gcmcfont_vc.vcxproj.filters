@@ -15,40 +15,40 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\src\fontparsel.c">
+    <ClCompile Include="fontparsel.c">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\fontparsey.c">
+    <ClCompile Include="fontparsey.c">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\gcmcfont.c">
+    <ClCompile Include="gcmcfont.c">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\utils.c">
+    <ClCompile Include="utils.c">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\src\fontparsey.h">
+    <ClInclude Include="config.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\gcmcfont.h">
+    <ClInclude Include="fontparsey.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\glyphdata.h">
+    <ClInclude Include="gcmcfont.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\utils.h">
+    <ClInclude Include="glyphdata.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\config.h">
+    <ClInclude Include="utils.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <Bison Include="..\src\fontparsey.y" />
+    <Bison Include="fontparsey.y" />
   </ItemGroup>
   <ItemGroup>
-    <Flex Include="..\src\fontparsel.l" />
+    <Flex Include="fontparsel.l" />
   </ItemGroup>
 </Project>

@@ -28,6 +28,20 @@ public:
 		{
 			root_path = GetExecutablePath();
 			root_path.remove_filename();
+			// development layout: the exe is in <repo>\src\x64\Release, the resources are in <repo>
+			// so look for the preferences folder in the parents of the exe folder as well
+			std::filesystem::path dir = GetExecutablePath().parent_path(); // no trailing separator
+			for (int level = 0; level < 5 && !std::filesystem::exists(GetPreferencesPath()) && dir.has_parent_path() && dir != dir.parent_path(); ++level)
+			{
+				dir = dir.parent_path();
+				std::filesystem::path candidate = dir;
+				candidate.append(PREFS_DIR);
+				if (std::filesystem::exists(candidate))
+				{
+					root_path = dir;
+					break;
+				}
+			}
 		}
 	}
 	~StandartPathsTm() { }

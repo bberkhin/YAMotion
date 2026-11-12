@@ -14,19 +14,25 @@
 
 #include "LexGCode.h"
 
-#include "..\..\src\stc\scintilla\include\ILexer.h"
-#include "..\..\src\stc\scintilla\include\Scintilla.h"
-#include "..\..\src\stc\scintilla\include\SciLexer.h"
+#include <string>
+#include <string_view>
+#include <vector>
+#include <map>
+#include <memory>
+#include <algorithm>
+#include "ILexer.h"
+#include "Scintilla.h"
+#include "SciLexer.h"
 
-#include "..\..\src\stc\scintilla\lexlib\WordList.h"
-#include "..\..\src\stc\scintilla\lexlib\LexAccessor.h"
-#include "..\..\src\stc\scintilla\lexlib\Accessor.h"
-#include "..\..\src\stc\scintilla\lexlib\StyleContext.h"
-#include "..\..\src\stc\scintilla\lexlib\CharacterSet.h"
-#include "..\..\src\stc\scintilla\lexlib\LexerModule.h"
+#include "WordList.h"
+#include "LexAccessor.h"
+#include "Accessor.h"
+#include "StyleContext.h"
+#include "CharacterSet.h"
+#include "LexerModule.h"
 
-#ifdef SCI_NAMESPACE
-using namespace Scintilla;
+#if 1
+using namespace Scintilla; using namespace Lexilla;
 #endif
 
 static int  get_letter_style(char ch )
@@ -211,3 +217,5 @@ static const char * const gcodeWordLists[] = {
 LexerModule lmGcode(SCLEX_GCODE, ColouriseGCodeDoc, "GCODE", FoldGcodeDoc, gcodeWordLists);
 
 
+
+void *CreateGcodeLexer() { return lmGcode.Create(); }

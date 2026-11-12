@@ -167,7 +167,7 @@ bool DoCheckUpdate(wxString &desc, wxString &verName, int *err)
 	wxString url_stream("/download?cid=9614716AD031A9C3&resid=9614716AD031A9C3%21117&authkey=AH7ITGsF99dXPfs");
 	
 //https://onedrive.live.com/download?cid=9614716AD031A9C3&resid=9614716AD031A9C3%21117&authkey=AH7ITGsF99dXPfs
-  https://onedrive.live.com/download?cid=9614716AD031A9C3&amp;resid=9614716AD031A9C3%21117&amp;authkey=AH7ITGsF99dXPfs
+// https://onedrive.live.com/download?cid=9614716AD031A9C3&amp;resid=9614716AD031A9C3%21117&amp;authkey=AH7ITGsF99dXPfs
 	get.SetHeader(_T("Content-type"), _T("xml"));
 
 

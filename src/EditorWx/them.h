@@ -64,7 +64,7 @@ public:
 	int GetBorderWidth(	wxWindow* wnd) wxOVERRIDE;
 //	int GetAdditionalBorderSpace(wxWindow* wnd) wxOVERRIDE;
 	wxSize GetTabSize( wxDC& dc, wxWindow* wnd, const wxString& caption, const wxBitmap& bitmap,
-		bool active, int closeButtonState, int* xExtent) wxOVERRIDE;
+		bool active, int closeButtonState, int* xExtent) ;
 //	int ShowDropDown( wxWindow* wnd, const wxAuiNotebookPageArray& items, int activeIdx) wxOVERRIDE;
 	int GetBestTabCtrlSize(wxWindow* wnd, const wxAuiNotebookPageArray& pages, const wxSize& requiredBmpSize) wxOVERRIDE;
 	virtual void UpdateColoursFromSystem() wxOVERRIDE;

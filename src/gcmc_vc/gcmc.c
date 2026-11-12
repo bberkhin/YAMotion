@@ -49,35 +49,35 @@
 #pragma warning(disable:4996)
 
 
-FILE *ofp;
-double *global_offs[MAXAXES];	/* Offset set at command-line */
-double relative_offs[MAXAXES];	/* Offset set with relocate() function */
-double *global_pos[MAXAXES];	/* Current turtle position */
-plane_et global_plane = PLANE_XY;
-int naxes = 6;			/* Default enable 6 axes */
-int cl_decimals = 8;		/* Number of significant decimals to print in output */
-int cl_relative = 0;		/* Use relative output code */
-int cl_inch = 0;			/* Set if output is to be in inch */
-format_et cl_format;		/* Set to output format to use */
-int cl_svg_movelayer = 1;	/* Set to output goto()s in separate SVG layer */
-int cl_svg_flip = 1;		/* Set to flip the output (mirror Y) */
-int cl_svg_grid = 1;		/* Set to show grid on SVG */
-double cl_svg_toolwidth = -1.0;	/* Line-width in SVG output */
-double cl_svg_opacity = 0.1;	/* Transparency in SVG ouput */
-int cl_nom2 = 0;		/* Use % when generating subs instead of ending in M2 */
-int cl_pedantic = 0;		/* Enable pendatic warnings when set */
-int runtimeerrors = 0;		/* Nr of calls to script's error() function */
-int runtimewarnings = 0;		/* Nr of calls to script's warning() function or internal rtwarning() */
+GCMC_TLS FILE *ofp;
+GCMC_TLS double *global_offs[MAXAXES];	/* Offset set at command-line */
+GCMC_TLS double relative_offs[MAXAXES];	/* Offset set with relocate() function */
+GCMC_TLS double *global_pos[MAXAXES];	/* Current turtle position */
+GCMC_TLS plane_et global_plane = PLANE_XY;
+GCMC_TLS int naxes = 6;			/* Default enable 6 axes */
+GCMC_TLS int cl_decimals = 8;		/* Number of significant decimals to print in output */
+GCMC_TLS int cl_relative = 0;		/* Use relative output code */
+GCMC_TLS int cl_inch = 0;			/* Set if output is to be in inch */
+GCMC_TLS format_et cl_format;		/* Set to output format to use */
+GCMC_TLS int cl_svg_movelayer = 1;	/* Set to output goto()s in separate SVG layer */
+GCMC_TLS int cl_svg_flip = 1;		/* Set to flip the output (mirror Y) */
+GCMC_TLS int cl_svg_grid = 1;		/* Set to show grid on SVG */
+GCMC_TLS double cl_svg_toolwidth = -1.0;	/* Line-width in SVG output */
+GCMC_TLS double cl_svg_opacity = 0.1;	/* Transparency in SVG ouput */
+GCMC_TLS int cl_nom2 = 0;		/* Use % when generating subs instead of ending in M2 */
+GCMC_TLS int cl_pedantic = 0;		/* Enable pendatic warnings when set */
+GCMC_TLS int runtimeerrors = 0;		/* Nr of calls to script's error() function */
+GCMC_TLS int runtimewarnings = 0;		/* Nr of calls to script's warning() function or internal rtwarning() */
 
-static char *definebuf = 0;		/* Holds command-line defined entries/code */
-static int ndefinebuf = 0;
-static int nadefinebuf = 0;
+GCMC_TLS static char *definebuf = 0;		/* Holds command-line defined entries/code */
+GCMC_TLS static int ndefinebuf = 0;
+GCMC_TLS static int nadefinebuf = 0;
 
-static const char **includepaths = 0;
-static int nincludepaths = 0;
-static int naincludepaths = 0;
+GCMC_TLS static const char **includepaths = 0;
+GCMC_TLS static int nincludepaths = 0;
+GCMC_TLS static int naincludepaths = 0;
 
-static int syntaxerrors = 0;
+GCMC_TLS static int syntaxerrors = 0;
 
 #define STRVAL(x)	#x
 #define STRINGIZE(x)	STRVAL(x)
@@ -477,24 +477,24 @@ static int get_offset(double *offs, const char *str, char ch, unit_et *unit)
 void skeep_UTF8BOM()
 {
 	char c;
-	if ((c = getc(yyin)) != '\xEF')
+	if ((c = getc(yyget_in(gcmc_scanner))) != '\xEF')
 	{
-		fseek(yyin, 0, SEEK_SET);
+		fseek(yyget_in(gcmc_scanner), 0, SEEK_SET);
 		return;
 	}
-	if ((c = getc(yyin)) != '\xBB')
+	if ((c = getc(yyget_in(gcmc_scanner))) != '\xBB')
 	{
-		fseek(yyin, 0, SEEK_SET);
+		fseek(yyget_in(gcmc_scanner), 0, SEEK_SET);
 		return;
 	}
-	if ((c = getc(yyin)) != '\xBF')
+	if ((c = getc(yyget_in(gcmc_scanner))) != '\xBF')
 	{
-		fseek(yyin, 0, SEEK_SET);
+		fseek(yyget_in(gcmc_scanner), 0, SEEK_SET);
 		return;
 	}
 }
 
-int main(int argc, char *argv[])
+int gcmc_main(int argc, char *argv[])
 {
 	int i;
 	int unit;
@@ -748,16 +748,21 @@ int main(int argc, char *argv[])
 	includepath_add(strdup(PKGDATADIR));
 	includepath_add(strdup("."));
 
+	yylex_init(&gcmc_scanner);
 	if (optind >= argc) {
-		yyin = stdin;
+		yyset_in(stdin, gcmc_scanner);
 		filename = strdup("--stdin--");
 	}
 	else {
 		
-		if (NULL == (yyin = fopen(argv[optind], "r"))) 
 		{
-			perror(argv[optind]);
-			exit(1);
+			FILE *fin = fopen(argv[optind], "r");
+			if (!fin)
+			{
+				perror(argv[optind]);
+				exit(1);
+			}
+			yyset_in(fin, gcmc_scanner);
 		}
 		filename = strdup(argv[optind]);
 		//skeep UTF-8 BOM

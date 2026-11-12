@@ -17,6 +17,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 %option stack
+%option reentrant bison-bridge
 %option noinput nounput noyy_top_state noyywrap
 %option 8bit never-interactive
 
@@ -54,11 +55,15 @@
 		clearerr(yyin); \
 	}
 
-int linenr = 1;
-int charnr = 1;
-int prevlinenr = 1;
-int prevcharnr = 1;
-const char *filename;
+#define YY_DECL int gcmc_lex(YYSTYPE *yylval_param, yyscan_t yyscanner)
+
+GCMC_TLS yyscan_t gcmc_scanner;
+
+GCMC_TLS int linenr = 1;
+GCMC_TLS int charnr = 1;
+GCMC_TLS int prevlinenr = 1;
+GCMC_TLS int prevcharnr = 1;
+GCMC_TLS const char *filename;
 
 typedef struct __incstack_t {
 	YY_BUFFER_STATE	bufferstate;	/* Previous flex context */
@@ -70,9 +75,9 @@ typedef struct __incstack_t {
 	const char	*filename;	/* Name of file we were handling */
 } incstack_t;
 
-static incstack_t	*incstack;
-static int		nincstack;
-static int		naincstack;
+GCMC_TLS static incstack_t	*incstack;
+GCMC_TLS static int		nincstack;
+GCMC_TLS static int		naincstack;
 
 static void str_init(void);
 static void str_addc(char c);
@@ -94,20 +99,20 @@ h	[0-9a-fA-F]
 
 %%
 
-<INITIAL>"/*"		yy_push_state(comment); /* Skip block comments */
+<INITIAL>"/*"		yy_push_state(comment, yyscanner); /* Skip block comments */
 <comment>[^*\n]+	; /* Skip junk */
 <comment>"*"+[^/\n]	; /* Skip * */
 <comment>\n		linenr++; charnr = 1;
-<comment>"*"+"/"	yy_pop_state();
+<comment>"*"+"/"	yy_pop_state(yyscanner);
 <comment>"*"		; /* Skip * */
 
 <INITIAL>"//".*		; /* Skip line comments */
 
-<INITIAL>\"		yy_push_state(string); str_init();
+<INITIAL>\"		yy_push_state(string, yyscanner); str_init();
 <string>\"{ws}+	|
 <string>\"		{
-				yy_pop_state();
-				yylval.str = str_get();
+				yy_pop_state(yyscanner);
+				yylval->str = str_get();
 				return STRING;
 			}
 <string>\\[0-7]{1,3}	{ /* octal escape sequence */
@@ -149,17 +154,17 @@ h	[0-9a-fA-F]
 <string>\n		yyerror("Unterminated string");
 
 <INITIAL>{n}+	{
-			yylval.i = strtol(yytext, NULL, 10);
+			yylval->i = strtol(yytext, NULL, 10);
 			return NUMBER;
 		}
 <INITIAL>0x{h}+	{
-			yylval.i = strtol(yytext, NULL, 16);
+			yylval->i = strtol(yytext, NULL, 16);
 			return NUMBER;
 		}
 <INITIAL>0x[^0-9a-fA-F\n]*	yyerror("Bad hexadecimal number '%s'", yytext);
 
 <INITIAL>(({n}+\.{n}*)|({n}*\.{n}+)|({n}+))([eE][+-]?{n}+)?	{
-			yylval.d = strtod(yytext, NULL);
+			yylval->d = strtod(yytext, NULL);
 			return FLOAT;
 		}
 <INITIAL>(({n}+\.{n}*)|({n}*\.{n}+)|({n}+))([eE][+-]?)?	{
@@ -188,7 +193,7 @@ h	[0-9a-fA-F]
 <INITIAL>while		return WHILE;
 
 <INITIAL>{cident}	{
-			yylval.str = utf8_to_ucs32(yytext, yyleng);
+			yylval->str = utf8_to_ucs32(yytext, yyleng);
 			return IDENT;
 		}
 
@@ -248,24 +253,25 @@ h	[0-9a-fA-F]
 					nincstack--;
 					if(yyin)
 						fclose(yyin);
-					yy_switch_to_buffer(incstack[nincstack].bufferstate);
+					yy_switch_to_buffer(incstack[nincstack].bufferstate, yyscanner);
 					linenr = incstack[nincstack].linenr;
 					charnr = incstack[nincstack].charnr;
 					prevlinenr = incstack[nincstack].prevlinenr;
 					prevcharnr = incstack[nincstack].prevcharnr;
 					filename = incstack[nincstack].filename;
-					yy_delete_buffer(bs);
+					yy_delete_buffer(bs, yyscanner);
 				} else {
 					fclose(yyin);
-					yylex_destroy();
+					yylex_destroy(yyscanner);
+					gcmc_scanner = NULL;
 					yyterminate();
 				}
 			}
 %%
 
-static char *str;
-static int nstr;
-static int nastr;
+GCMC_TLS static char *str;
+GCMC_TLS static int nstr;
+GCMC_TLS static int nastr;
 
 static void str_init(void)
 {
@@ -460,6 +466,7 @@ errout:
 
 void define_setup(char *buf, int bufsize, const char *name)
 {
+	struct yyguts_t *yyg = (struct yyguts_t *)gcmc_scanner;
 	if(!buf || !bufsize)
 		return;
 
@@ -467,7 +474,7 @@ void define_setup(char *buf, int bufsize, const char *name)
 	/* Push the current state onto the include stack */
 	/* We have to create the initial buffer because it does not exist yet. */
 	if(!(incstack[nincstack].bufferstate = YY_CURRENT_BUFFER))
-		incstack[nincstack].bufferstate = yy_create_buffer(yyin, YY_BUF_SIZE);
+		incstack[nincstack].bufferstate = yy_create_buffer(yyin, YY_BUF_SIZE, gcmc_scanner);
 	incstack[nincstack].fp = yyin;
 	incstack[nincstack].linenr = linenr;
 	incstack[nincstack].charnr = charnr;
@@ -482,11 +489,12 @@ void define_setup(char *buf, int bufsize, const char *name)
 	prevlinenr = 0;
 	prevcharnr = 0;
 	filename = _strdup(name);
-	yy_scan_bytes(buf, bufsize);
+	yy_scan_bytes(buf, bufsize, gcmc_scanner);
 }
 
 void handle_include(const wchar_t *wfname)
 {
+	struct yyguts_t *yyg = (struct yyguts_t *)gcmc_scanner;
 	int i;
 	char *fname = _strdup(ucs32_to_utf8(wfname, -1));
 
@@ -539,7 +547,7 @@ void handle_include(const wchar_t *wfname)
 	charnr = 1;
 	prevlinenr = 1;
 	prevcharnr = 1;
-	yy_switch_to_buffer(yy_create_buffer(yyin, YY_BUF_SIZE));
+	yy_switch_to_buffer(yy_create_buffer(yyin, YY_BUF_SIZE, gcmc_scanner), gcmc_scanner);
 }
 
 void lexer_cleanup(void)
@@ -550,4 +558,10 @@ void lexer_cleanup(void)
 		free(incstack);
 	incstack = 0;
 	nincstack = naincstack = 0;
+}
+
+/* yacc entry point: the scanner of the current thread */
+int yylex(YYSTYPE *lvalp)
+{
+	return gcmc_lex(lvalp, gcmc_scanner);
 }

@@ -1314,7 +1314,7 @@ void AppFrame::AddPath(const wxString &path)
 bool AppFrame::FileOpen (const wxString &fn,bool reloadifopen)
 {
     wxFileName w(fn); 
-	w.Normalize(); 
+	w.Normalize(wxPATH_NORM_ABSOLUTE);
 	wxString fname = w.GetFullPath();
 	
 	// first try  to find the file in the opened tabs

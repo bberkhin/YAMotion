@@ -38,8 +38,8 @@ value_t *bi_plane(const node_t *ref, int argc);
 value_t *bi_layer(const node_t *ref, int argc);
 value_t *bi_relocate(const node_t *ref, int argc);
 
-extern int currentlayer;
-extern int nlayers;
+GCMC_TLS extern int currentlayer;
+GCMC_TLS extern int nlayers;
 const wchar_t *layername(int l);
 
 #endif

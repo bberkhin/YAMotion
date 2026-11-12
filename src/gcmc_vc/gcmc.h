@@ -53,24 +53,24 @@ int rtdeprecated(const node_t *n, const char *fmt, ...) __attribute__((format (p
 int rtinternal(const node_t *n, const char *fmt, ...) __attribute__((format (printf, 2, 3)));
 const char *includepath_get(int idx);
 
-extern FILE *ofp;
-extern int cl_decimals;
-extern int cl_relative;
-extern int cl_inch;
-extern int cl_svg_movelayer;
-extern int cl_svg_grid;
-extern int cl_svg_flip;
-extern double cl_svg_toolwidth;
-extern double cl_svg_opacity;
-extern format_et cl_format;
-extern int cl_pedantic;
-extern int runtimeerrors;
-extern int runtimewarnings;
-extern int naxes;
+GCMC_TLS extern FILE *ofp;
+GCMC_TLS extern int cl_decimals;
+GCMC_TLS extern int cl_relative;
+GCMC_TLS extern int cl_inch;
+GCMC_TLS extern int cl_svg_movelayer;
+GCMC_TLS extern int cl_svg_grid;
+GCMC_TLS extern int cl_svg_flip;
+GCMC_TLS extern double cl_svg_toolwidth;
+GCMC_TLS extern double cl_svg_opacity;
+GCMC_TLS extern format_et cl_format;
+GCMC_TLS extern int cl_pedantic;
+GCMC_TLS extern int runtimeerrors;
+GCMC_TLS extern int runtimewarnings;
+GCMC_TLS extern int naxes;
 
-extern double *global_offs[MAXAXES];
-extern double relative_offs[MAXAXES];
-extern double *global_pos[MAXAXES];
-extern plane_et global_plane;
+GCMC_TLS extern double *global_offs[MAXAXES];
+GCMC_TLS extern double relative_offs[MAXAXES];
+GCMC_TLS extern double *global_pos[MAXAXES];
+GCMC_TLS extern plane_et global_plane;
 
 #endif
